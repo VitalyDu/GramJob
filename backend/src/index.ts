@@ -1,20 +1,26 @@
-// import type { Core } from '@strapi/strapi';
+import { apiRateLimit, authRateLimit } from './middlewares/rate-limit'
+import type { Core } from '@strapi/strapi'
 
 export default {
-  /**
-   * An asynchronous register function that runs before
-   * your application is initialized.
-   *
-   * This gives you an opportunity to extend code.
-   */
-  register(/* { strapi }: { strapi: Core.Strapi } */) {},
+  register({ strapi: _strapi }: { strapi: Core.Strapi }) {},
 
-  /**
-   * An asynchronous bootstrap function that runs before
-   * your application gets started.
-   *
-   * This gives you an opportunity to set up your data model,
-   * run jobs, or perform some special logic.
-   */
-  bootstrap(/* { strapi }: { strapi: Core.Strapi } */) {},
+  bootstrap({ strapi }: { strapi: Core.Strapi }) {
+    const app = strapi.server.app
+
+    // Stricter limit for auth endpoints
+    app.use(async (ctx, next) => {
+      if (ctx.path.startsWith('/api/auth/')) {
+        return authRateLimit(ctx, next)
+      }
+      return next()
+    })
+
+    // General limit for all API endpoints
+    app.use(async (ctx, next) => {
+      if (ctx.path.startsWith('/api/')) {
+        return apiRateLimit(ctx, next)
+      }
+      return next()
+    })
+  },
 }

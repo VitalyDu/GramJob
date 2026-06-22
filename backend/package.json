@@ -22,6 +22,7 @@
     "@strapi/plugin-users-permissions": "5.48.1",
     "@strapi/provider-upload-aws-s3": "^5.48.1",
     "@strapi/strapi": "5.48.1",
+    "koa-ratelimit": "^6.0.0",
     "pg": "8.20.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
+    "@types/koa-ratelimit": "^5.0.5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
