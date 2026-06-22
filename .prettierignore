@@ -1,0 +1,8 @@
+node_modules/
+.next/
+dist/
+build/
+.strapi/
+pnpm-lock.yaml
+*.min.js
+public/
