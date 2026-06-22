@@ -8,16 +8,14 @@ export async function createTestUser(
     .query('plugin::users-permissions.role')
     .findOne({ where: { type: 'authenticated' } })
 
-  const passwordHash = await strapi
+  // Use the plugin's add() service — it handles password hashing internally via Document Service
+  const user = await strapi
     .plugin('users-permissions')
     .service('user')
-    .hashPassword('Test1234!')
-
-  return strapi.db.query('plugin::users-permissions.user').create({
-    data: {
+    .add({
       email: `test_${Date.now()}@gramjob.com`,
       username: `testuser_${Date.now()}`,
-      password: passwordHash,
+      password: 'Test1234!',
       confirmed: true,
       blocked: false,
       role: role?.id,
@@ -26,8 +24,16 @@ export async function createTestUser(
       applyCredits: 0,
       language: 'ru',
       ...overrides,
-    },
-  })
+    })
+
+  // add() returns a Document Service result with documentId; resolve numeric id via db
+  if (!user.id) {
+    const dbUser = await strapi.db
+      .query('plugin::users-permissions.user')
+      .findOne({ where: { documentId: user.documentId } })
+    return { ...user, id: dbUser?.id }
+  }
+  return user
 }
 
 export function issueJwt(strapi: Core.Strapi, userId: number): string {
