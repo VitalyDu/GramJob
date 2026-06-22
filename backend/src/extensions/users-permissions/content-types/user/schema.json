@@ -1,0 +1,35 @@
+{
+  "attributes": {
+    "telegramId": {
+      "type": "string",
+      "unique": true
+    },
+    "firstName": {
+      "type": "string"
+    },
+    "lastName": {
+      "type": "string"
+    },
+    "subscriptionPlan": {
+      "type": "enumeration",
+      "enum": ["free", "pro", "max"],
+      "default": "free"
+    },
+    "subscriptionExpiresAt": {
+      "type": "datetime"
+    },
+    "vacancyCredits": {
+      "type": "integer",
+      "default": 0
+    },
+    "applyCredits": {
+      "type": "integer",
+      "default": 0
+    },
+    "language": {
+      "type": "enumeration",
+      "enum": ["ru", "en"],
+      "default": "ru"
+    }
+  }
+}
