@@ -4,8 +4,14 @@ const config: Core.Config.Middlewares = [
   'strapi::logger',
   'strapi::errors',
   'strapi::security',
-  'strapi::cors',
-  'strapi::poweredBy',
+  {
+    name: 'strapi::cors',
+    config: {
+      enabled: true,
+      headers: ['Authorization', 'Content-Type', 'X-Telegram-Init-Data'],
+      origin: [process.env.FRONTEND_URL ?? 'http://localhost:3000', 'https://web.telegram.org'],
+    },
+  },
   'strapi::query',
   'strapi::body',
   'strapi::session',
