@@ -5,6 +5,7 @@
 **GramJob** — международная биржа вакансий и резюме в экосистеме Telegram.
 
 Работает через три канала:
+
 - **Web Platform** — основной (Next.js 15, SSR+ISR, SEO)
 - **Telegram Mini App** — встроенное приложение в Telegram
 - **Telegram Bot** — уведомления и быстрые действия
@@ -16,28 +17,37 @@
 
 ## Текущее состояние проекта
 
-**Фаза: Проектирование.** Кода нет. Только документация.
+**Фаза: Разработка. Sprint 1 DevOps завершён.**
 
-Следующий шаг — реализация Strapi backend, затем Next.js frontend.
+Выполнено:
+
+- pnpm монорепо инициализировано (`backend/` + `frontend/`)
+- Docker Compose: PostgreSQL 16 + MinIO готовы (`docker compose up -d`)
+- `.env.example` созданы для backend и frontend
+- Pre-commit хуки: Husky + lint-staged + Prettier
+- GitHub Actions CI pipeline (lint + typecheck + test на PR)
+- Репозиторий: `git@github.com:VitalyDu/GramJob.git`
+
+Следующий шаг — Sprint 1 Backend: инициализировать Strapi 5 (`backend/`).
 
 ---
 
 ## Tech Stack
 
-| Слой | Технология |
-|------|-----------|
-| Frontend | Next.js 15, React 19, TypeScript |
-| State | MobX |
-| Стили | TailwindCSS 4, Telegram UI, Shadcn/UI |
-| Формы | React Hook Form + Zod |
-| i18n | i18next (RU, EN) |
-| Backend | Strapi 5 (headless CMS) |
-| БД | PostgreSQL |
-| Хранилище | S3-compatible |
-| Auth | Telegram Login + Email/Password |
-| API | REST |
-| Рендеринг | SSR + ISR |
-| Оплата | Telegram Stars |
+| Слой      | Технология                            |
+| --------- | ------------------------------------- |
+| Frontend  | Next.js 15, React 19, TypeScript      |
+| State     | MobX                                  |
+| Стили     | TailwindCSS 4, Telegram UI, Shadcn/UI |
+| Формы     | React Hook Form + Zod                 |
+| i18n      | i18next (RU, EN)                      |
+| Backend   | Strapi 5 (headless CMS)               |
+| БД        | PostgreSQL                            |
+| Хранилище | S3-compatible                         |
+| Auth      | Telegram Login + Email/Password       |
+| API       | REST                                  |
+| Рендеринг | SSR + ISR                             |
+| Оплата    | Telegram Stars                        |
 
 ---
 
@@ -59,12 +69,12 @@ Strapi 5 (Headless CMS)
 
 ### Планы подписки
 
-| План | Вакансий/мес | Активных | Буст/день | Откликов/день | Резюме | База резюме | Подсветка | Цена/мес |
-|------|-------------|----------|-----------|---------------|--------|-------------|-----------|----------|
-| Free | 3 | 3 | 3 | 3 | 1 | ✗ | — | Бесплатно |
-| Pro  | 10 | 10 | 10 | 10 | 5 | ✗ | Синяя | 299 Stars (~$6) |
-| Max  | 50 | 50 | 50 | 50 | 20 | ✓ | Золотая | 999 Stars (~$20) |
-| VIP  | как Max | как Max | как Max | как Max | как Max | ✓ | Золотая + бейдж | +499 Stars (~$10) |
+| План | Вакансий/мес | Активных | Буст/день | Откликов/день | Резюме  | База резюме | Подсветка       | Цена/мес          |
+| ---- | ------------ | -------- | --------- | ------------- | ------- | ----------- | --------------- | ----------------- |
+| Free | 3            | 3        | 3         | 3             | 1       | ✗           | —               | Бесплатно         |
+| Pro  | 10           | 10       | 10        | 10            | 5       | ✗           | Синяя           | 299 Stars (~$6)   |
+| Max  | 50           | 50       | 50        | 50            | 20      | ✓           | Золотая         | 999 Stars (~$20)  |
+| VIP  | как Max      | как Max  | как Max   | как Max       | как Max | ✓           | Золотая + бейдж | +499 Stars (~$10) |
 
 - Оплата: Telegram Stars
 - Сброс лимитов: ежемесячно
@@ -138,15 +148,15 @@ Industry → Specialization
 
 ## Основные модели (краткая справка)
 
-| Модель | Ключевые поля |
-|--------|---------------|
-| User | id, email, telegramId, subscriptionPlan, vacancyCredits, applyCredits |
-| Company | id, ownerId, name, slug, status |
-| Vacancy | id, companyId, title, industryId, sourceType, status, expiresAt |
-| Resume | id, userId, title, status |
-| Application | id, vacancyId, resumeId, userId, status |
-| Industry | id, name, slug |
-| Specialization | id, industryId, name, slug |
+| Модель         | Ключевые поля                                                         |
+| -------------- | --------------------------------------------------------------------- |
+| User           | id, email, telegramId, subscriptionPlan, vacancyCredits, applyCredits |
+| Company        | id, ownerId, name, slug, status                                       |
+| Vacancy        | id, companyId, title, industryId, sourceType, status, expiresAt       |
+| Resume         | id, userId, title, status                                             |
+| Application    | id, vacancyId, resumeId, userId, status                               |
+| Industry       | id, name, slug                                                        |
+| Specialization | id, industryId, name, slug                                            |
 
 Полная схема: `docs/database-schema.md`
 
@@ -178,38 +188,38 @@ JWT, Telegram Signature Validation, Rate Limiting, CSRF Protection, RBAC, Audit 
 
 ## Индекс документации
 
-| Файл | Содержание |
-|------|-----------|
-| `docs/business-logic.md` | Полная бизнес-логика, все сущности, правила |
-| `docs/technical-specification.md` | Tech stack, модели данных |
-| `docs/database-schema.md` | Схема БД: поля, типы, связи, индексы |
-| `docs/api-specification.md` | REST API: все эндпоинты, параметры, ответы |
-| `docs/subscription-system.md` | Подписки, кредиты, пакеты, платёжный флоу |
-| `docs/moderation-system.md` | Воркфлоу модерации, статусы, правила |
-| `docs/telegram-bot-specification.md` | Bot-команды, Mini App экраны, уведомления |
-| `docs/development-guide.md` | Setup, ENV, конвенции, тесты, деплой |
-| `docs/search-specification.md` | Full-text search, фильтры, SQL, GIN-индексы |
-| `docs/notification-system.md` | Архитектура уведомлений, retry, rate limits, шаблоны |
-| `docs/seed-data.md` | Начальные данные: industries, specializations, языки, страны |
-| `docs/sprint-plan.md` | План разработки по спринтам с чеклистами задач |
-| `docs/roadmap.md` | Планируемые фичи (backlog) |
+| Файл                                 | Содержание                                                   |
+| ------------------------------------ | ------------------------------------------------------------ |
+| `docs/business-logic.md`             | Полная бизнес-логика, все сущности, правила                  |
+| `docs/technical-specification.md`    | Tech stack, модели данных                                    |
+| `docs/database-schema.md`            | Схема БД: поля, типы, связи, индексы                         |
+| `docs/api-specification.md`          | REST API: все эндпоинты, параметры, ответы                   |
+| `docs/subscription-system.md`        | Подписки, кредиты, пакеты, платёжный флоу                    |
+| `docs/moderation-system.md`          | Воркфлоу модерации, статусы, правила                         |
+| `docs/telegram-bot-specification.md` | Bot-команды, Mini App экраны, уведомления                    |
+| `docs/development-guide.md`          | Setup, ENV, конвенции, тесты, деплой                         |
+| `docs/search-specification.md`       | Full-text search, фильтры, SQL, GIN-индексы                  |
+| `docs/notification-system.md`        | Архитектура уведомлений, retry, rate limits, шаблоны         |
+| `docs/seed-data.md`                  | Начальные данные: industries, specializations, языки, страны |
+| `docs/sprint-plan.md`                | План разработки по спринтам с чеклистами задач               |
+| `docs/roadmap.md`                    | Планируемые фичи (backlog)                                   |
 
 ---
 
 ## Агенты (.claude/agents/)
 
-| Агент | Использовать когда |
-|-------|-------------------|
-| `product-manager` | Вопросы по бизнес-логике, scope, приоритеты |
-| `system-architect` | Архитектурные решения, выбор подходов |
-| `frontend-architect` | Next.js, React, MobX, компоненты, routing |
-| `backend-architect` | Strapi, API, бизнес-логика бэкенда |
-| `database-architect` | Схема, миграции, запросы, индексы |
-| `telegram-miniapp-expert` | Telegram Mini App, Bot API, Stars оплата |
-| `strapi-expert` | Content types, плагины, хуки, middleware |
-| `qa-engineer` | Тест-стратегия, edge cases, quality |
-| `security-engineer` | Auth, RBAC, уязвимости, review |
-| `devops-engineer` | CI/CD, деплой, инфраструктура |
+| Агент                     | Использовать когда                          |
+| ------------------------- | ------------------------------------------- |
+| `product-manager`         | Вопросы по бизнес-логике, scope, приоритеты |
+| `system-architect`        | Архитектурные решения, выбор подходов       |
+| `frontend-architect`      | Next.js, React, MobX, компоненты, routing   |
+| `backend-architect`       | Strapi, API, бизнес-логика бэкенда          |
+| `database-architect`      | Схема, миграции, запросы, индексы           |
+| `telegram-miniapp-expert` | Telegram Mini App, Bot API, Stars оплата    |
+| `strapi-expert`           | Content types, плагины, хуки, middleware    |
+| `qa-engineer`             | Тест-стратегия, edge cases, quality         |
+| `security-engineer`       | Auth, RBAC, уязвимости, review              |
+| `devops-engineer`         | CI/CD, деплой, инфраструктура               |
 
 ---
 

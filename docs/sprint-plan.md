@@ -3,7 +3,7 @@
 ## Обозначения
 
 - `[ ]` — не начато
-- `[~]` — в процессе  
+- `[~]` — в процессе
 - `[x]` — выполнено
 
 **Длительность спринта:** 2 недели  
@@ -16,13 +16,15 @@
 Цель: рабочая инфраструктура, оба проекта запускаются локально, авторизация работает.
 
 ### DevOps
-- [ ] Инициализировать монорепо (backend/ + frontend/ в одном репозитории)
-- [ ] Docker Compose: PostgreSQL 16 + MinIO (S3-local)
-- [ ] `.env.example` для backend и frontend
-- [ ] Pre-commit hooks: ESLint + Prettier + TypeScript check
-- [ ] GitHub Actions: CI pipeline (lint + typecheck + test на каждый PR)
+
+- [x] Инициализировать монорепо (backend/ + frontend/ в одном репозитории)
+- [x] Docker Compose: PostgreSQL 16 + MinIO (S3-local)
+- [x] `.env.example` для backend и frontend
+- [x] Pre-commit hooks: ESLint + Prettier + TypeScript check
+- [x] GitHub Actions: CI pipeline (lint + typecheck + test на каждый PR)
 
 ### Backend (Strapi)
+
 - [ ] Инициализировать Strapi 5 проект (`pnpm create strapi@latest`)
 - [ ] Подключить PostgreSQL (config/database.ts)
 - [ ] Настроить S3-upload plugin (MinIO local, Cloudflare R2 prod)
@@ -35,6 +37,7 @@
 - [ ] Rate limiting middleware (koa-ratelimit)
 
 ### Frontend (Next.js)
+
 - [ ] Инициализировать Next.js 15 (`create-next-app`, App Router, TypeScript strict)
 - [ ] Настроить TailwindCSS 4
 - [ ] Установить Telegram UI + Shadcn/UI (базовые компоненты)
@@ -54,6 +57,7 @@
 Цель: работодатель может создать компанию и отправить на модерацию.
 
 ### Backend
+
 - [ ] Content type: Industry (`id, name{ru,en}, slug`)
 - [ ] Content type: Specialization (`id, industryId, name{ru,en}, slug`)
 - [ ] Seed: заполнить industries и specializations (список из `docs/seed-data.md`)
@@ -71,6 +75,7 @@
 - [ ] Policy: `is-company-owner`
 
 ### Frontend
+
 - [ ] CompanyStore: список, текущая компания, CRUD-методы
 - [ ] Страница: `/companies` — список с поиском и фильтром по стране
 - [ ] Компонент: CompanyCard (лого, название, статус, размер, страна)
@@ -86,6 +91,7 @@
 Цель: публикация вакансии с учётом лимитов, поиск и фильтрация работают.
 
 ### Backend
+
 - [ ] Content type: Vacancy (все поля)
 - [ ] Content type: VacancySource (для external-вакансий)
 - [ ] `POST /vacancies` — создать (статус draft)
@@ -101,6 +107,7 @@
 - [ ] Cron (ежечасно): Vacancy: expiresAt < now → status expired + уведомление
 
 ### Frontend
+
 - [ ] VacancyStore: список/фильтры, текущая, CRUD
 - [ ] Страница: `/vacancies` — поиск (панель фильтров + список + infinite scroll)
 - [ ] Компонент: VacancyCard (все варианты: highlighted, urgent, top, external)
@@ -118,6 +125,7 @@
 Цель: кандидат откликается на вакансию, работодатель управляет откликами, контакты скрыты до одобрения.
 
 ### Backend
+
 - [ ] Content type: Resume + Strapi Components: WorkExperience, Education
 - [ ] `POST /resumes` — создать
 - [ ] `POST /resumes/:id/publish` — draft → moderation
@@ -136,6 +144,7 @@
 - [ ] Policy: `requires-max-plan` для GET /resumes
 
 ### Frontend
+
 - [ ] ResumeStore + ApplicationStore
 - [ ] Страница: `/resumes` — база резюме (только для Max, поиск + фильтры)
 - [ ] Страница: `/resumes/:id` — карточка резюме (контакты скрыты/открыты)
@@ -154,6 +163,7 @@
 Цель: пользователь может сохранять избранное, подписываться на поисковые запросы, жаловаться и блокировать.
 
 ### Backend
+
 - [ ] Content type: Favorite (уникальный constraint на user+type+targetId)
 - [ ] `GET/POST/DELETE /favorites` — CRUD
 - [ ] Content type: SavedSearch
@@ -166,6 +176,7 @@
 - [ ] `POST /reports` — создать жалобу
 
 ### Frontend
+
 - [ ] Кнопка ♥ «В избранное» на VacancyCard, ResumeCard, CompanyCard
 - [ ] Страница: `/dashboard/favorites` — три вкладки (вакансии / резюме / компании)
 - [ ] Кнопка «Сохранить поиск» в панели фильтров (с именем)
@@ -181,6 +192,7 @@
 Цель: полный платёжный цикл через Telegram Stars работает end-to-end.
 
 ### Backend
+
 - [ ] Content type: SubscriptionPlan — seed (Free, Pro 299★, Max 999★, VIP +499★)
 - [ ] Content type: VacancyPackage — seed (10/20/50/100 вакансий)
 - [ ] Content type: ApplyPackage — seed (50/100/500 откликов)
@@ -199,6 +211,7 @@
 - [ ] VIP Employer: флаг `User.isVip`, автопроставление `Vacancy.highlighted` для VIP-работодателей
 
 ### Frontend
+
 - [ ] SubscriptionStore
 - [ ] Страница: `/subscription` — сравнение планов (таблица) + кнопки купить
 - [ ] Страница: `/subscription/packages` — пакеты вакансий + откликов
@@ -214,6 +227,7 @@
 Цель: все Telegram-уведомления отправляются, аналитика собирается и отображается.
 
 ### Backend
+
 - [ ] Content type: Notification
 - [ ] Сервис: `sendNotification(userId, type, data)` — создать запись в БД + sendMessage в Telegram
 - [ ] Telegram Bot: команды `/start`, `/help`, `/profile`, `/notifications`
@@ -228,6 +242,7 @@
 - [ ] `GET /analytics/resumes/:id` — аналитика резюме
 
 ### Frontend
+
 - [ ] NotificationStore
 - [ ] Страница: `/dashboard/notifications` — список + mark read
 - [ ] Компонент: NotificationBadge — счётчик непрочитанных в навигации
@@ -241,6 +256,7 @@
 Цель: модераторы могут обрабатывать очередь в Strapi Admin, пользователи видят результат.
 
 ### Backend (Strapi Admin)
+
 - [ ] Кастомный список «На модерации»: фильтр `status=moderation` для Vacancy/Resume/Company
 - [ ] Кастомные actions в Admin: «Одобрить» (→ published + set expiresAt для вакансий)
 - [ ] Кастомные actions в Admin: «Отклонить» (select причины → rejected + Notification)
@@ -250,6 +266,7 @@
 - [ ] Страница модератора: статистика (сколько в очереди, среднее время обработки)
 
 ### Frontend
+
 - [ ] Индикатор статуса модерации на карточках (pending / rejected + причина)
 - [ ] Страница: «Мои публикации» — статус с объяснением что делать при отклонении
 - [ ] Кнопка «Исправить и отправить повторно» (переводит в draft → edit → submit)
@@ -262,11 +279,13 @@
 Цель: приложение полноценно работает внутри Telegram с нативным UX.
 
 ### Backend
+
 - [ ] Все существующие endpoints принимают initData auth (не только JWT)
 - [ ] Deep link routing: `startapp=vacancy_123` → `/vacancies/123`
 - [ ] Deep link routing: `startapp=application_456` → `/dashboard/applications/456`
 
 ### Frontend
+
 - [ ] Контекст-детектор: `isTelegramMiniApp()` — разный layout и поведение
 - [ ] Адаптация layout: убрать браузерный header, добавить Mini App toolbar
 - [ ] `tg.MainButton` на всех экранах с основным действием
@@ -285,16 +304,18 @@
 Цель: производительность ≥ 90 Lighthouse, всё развёрнуто в production.
 
 ### SEO & Performance
+
 - [ ] Metadata API: динамические title/description/OG для vacancy, company, resume страниц
 - [ ] ISR: `revalidate = 3600` для списков вакансий, `revalidate = 300` для карточек
 - [ ] `sitemap.xml`: динамический (published vacancies + companies)
-- [ ] `robots.txt`: закрыть dashboard/*, открыть /vacancies, /companies
+- [ ] `robots.txt`: закрыть dashboard/\*, открыть /vacancies, /companies
 - [ ] Lighthouse audit: добиться ≥ 90 по всем метрикам
 - [ ] `next/image` на всех изображениях (лого компаний, аватары)
 - [ ] Bundle analysis (`@next/bundle-analyzer`): устранить тяжёлые зависимости
 - [ ] Preload критических шрифтов (`next/font`)
 
 ### DevOps & Launch
+
 - [ ] Strapi: деплой на VPS (Hetzner CX21), PM2, systemd
 - [ ] Nginx: reverse proxy для api.gramjob.com + SSL (certbot)
 - [ ] Next.js: деплой на Vercel, production ENV variables
