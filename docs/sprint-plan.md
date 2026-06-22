@@ -25,16 +25,16 @@
 
 ### Backend (Strapi)
 
-- [ ] Инициализировать Strapi 5 проект (`pnpm create strapi@latest`)
-- [ ] Подключить PostgreSQL (config/database.ts)
-- [ ] Настроить S3-upload plugin (MinIO local, Cloudflare R2 prod)
-- [ ] Middleware: Telegram initData validation (`src/middlewares/telegram-auth.ts`)
-- [ ] Endpoint: `POST /auth/telegram` — создать/найти пользователя по telegramId
-- [ ] Email/Password auth через Strapi users-permissions (out of box)
-- [ ] Content type: User — добавить кастомные поля (subscriptionPlan, vacancyCredits, applyCredits, telegramId, language)
-- [ ] Endpoint: `GET /users/me`
-- [ ] Endpoint: `PUT /users/me`
-- [ ] Rate limiting middleware (koa-ratelimit)
+- [x] Инициализировать Strapi 5 проект (`pnpm create strapi@latest`)
+- [x] Подключить PostgreSQL (config/database.ts)
+- [x] Настроить S3-upload plugin (MinIO local, Cloudflare R2 prod)
+- [x] Middleware: Telegram initData validation (`src/middlewares/telegram-auth.ts`)
+- [x] Endpoint: `POST /auth/telegram` — создать/найти пользователя по telegramId
+- [x] Email/Password auth через Strapi users-permissions (out of box)
+- [x] Content type: User — добавить кастомные поля (subscriptionPlan, vacancyCredits, applyCredits, telegramId, language)
+- [x] Endpoint: `GET /users/me`
+- [x] Endpoint: `PUT /users/me`
+- [x] Rate limiting middleware (koa-ratelimit)
 
 ### Frontend (Next.js)
 
