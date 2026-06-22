@@ -12,12 +12,14 @@ node_modules/
 
 # Build outputs
 dist/
+*.tsbuildinfo
 build/
 .next/
 out/
 
 # Strapi
 .strapi/
+.strapi-updater.json
 .tmp/
 .cache/
 
