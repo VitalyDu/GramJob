@@ -9,8 +9,9 @@ export async function setupStrapi(): Promise<Core.Strapi> {
     process.env.DATABASE_NAME = 'gramjob_test'
     process.env.NODE_ENV = 'test'
     const appDir = path.resolve(__dirname, '../..')
+    const distDir = path.resolve(appDir, 'dist')
     await compileStrapi({ appDir })
-    instance = await createStrapi({ appDir }).load()
+    instance = await createStrapi({ appDir, distDir }).load()
     await instance.server.mount()
   }
   return instance
