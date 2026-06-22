@@ -26,7 +26,11 @@ export function validateInitData(
   const secretKey = crypto.createHmac('sha256', 'WebAppData').update(botToken).digest()
   const computedHash = crypto.createHmac('sha256', secretKey).update(sortedString).digest('hex')
 
-  if (!crypto.timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(hash, 'hex'))) {
+  try {
+    if (!crypto.timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(hash, 'hex'))) {
+      return null
+    }
+  } catch {
     return null
   }
 
