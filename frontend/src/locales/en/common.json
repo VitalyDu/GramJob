@@ -1,0 +1,34 @@
+{
+  "nav": {
+    "vacancies": "Vacancies",
+    "favorites": "Favorites",
+    "applications": "Applications",
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "login": "Sign In"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "login": "Sign In",
+    "register": "Sign Up",
+    "telegramLogin": "Sign in with Telegram",
+    "noAccount": "No account?",
+    "hasAccount": "Already have an account?",
+    "orDivider": "or"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back"
+  },
+  "home": {
+    "tagline": "International job board in Telegram",
+    "cta": "Get Started"
+  }
+}

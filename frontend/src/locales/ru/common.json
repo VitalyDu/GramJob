@@ -1,0 +1,34 @@
+{
+  "nav": {
+    "vacancies": "Вакансии",
+    "favorites": "Избранное",
+    "applications": "Отклики",
+    "profile": "Профиль",
+    "dashboard": "Кабинет",
+    "login": "Войти"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Пароль",
+    "confirmPassword": "Подтвердите пароль",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "login": "Войти",
+    "register": "Зарегистрироваться",
+    "telegramLogin": "Войти через Telegram",
+    "noAccount": "Нет аккаунта?",
+    "hasAccount": "Уже есть аккаунт?",
+    "orDivider": "или"
+  },
+  "common": {
+    "loading": "Загрузка...",
+    "error": "Произошла ошибка",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "back": "Назад"
+  },
+  "home": {
+    "tagline": "Международная биржа вакансий в Telegram",
+    "cta": "Начать"
+  }
+}
