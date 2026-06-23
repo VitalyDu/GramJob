@@ -18,7 +18,8 @@
     "telegramLogin": "Войти через Telegram",
     "noAccount": "Нет аккаунта?",
     "hasAccount": "Уже есть аккаунт?",
-    "orDivider": "или"
+    "orDivider": "или",
+    "logout": "Выйти"
   },
   "common": {
     "loading": "Загрузка...",

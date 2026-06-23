@@ -18,7 +18,8 @@
     "telegramLogin": "Sign in with Telegram",
     "noAccount": "No account?",
     "hasAccount": "Already have an account?",
-    "orDivider": "or"
+    "orDivider": "or",
+    "logout": "Sign Out"
   },
   "common": {
     "loading": "Loading...",

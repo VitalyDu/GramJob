@@ -34,7 +34,7 @@ export const WebHeader = observer(function WebHeader() {
                 {t('nav.dashboard')}
               </Link>
               <Button variant="ghost" size="sm" onClick={() => auth.logout()}>
-                Выйти
+                {t('auth.logout')}
               </Button>
             </div>
           ) : (
