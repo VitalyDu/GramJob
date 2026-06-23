@@ -15,7 +15,8 @@
     "upgrade:dry": "npx @strapi/upgrade latest --dry",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "test:integration": "jest --config jest.integration.config.ts"
   },
   "dependencies": {
     "@strapi/plugin-cloud": "5.48.1",

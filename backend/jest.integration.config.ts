@@ -5,8 +5,8 @@ const config: Config = {
   transform: {
     '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
   },
-  testMatch: ['**/tests/unit/**/*.test.ts'],
-  testTimeout: 30000,
+  testMatch: ['**/tests/integration/**/*.test.ts'],
+  testTimeout: 120000,
 }
 
 export default config

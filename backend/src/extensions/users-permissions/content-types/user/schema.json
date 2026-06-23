@@ -68,7 +68,7 @@
     },
     "subscriptionPlan": {
       "type": "enumeration",
-      "enum": ["free", "pro", "max"],
+      "enum": ["free", "pro", "max", "vip"],
       "default": "free"
     },
     "subscriptionExpiresAt": {

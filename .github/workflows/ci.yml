@@ -79,8 +79,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run tests (all workspaces)
+      - name: Run unit tests (all workspaces)
         run: pnpm -r --if-present run test
+
+      - name: Run integration tests (backend, requires postgres)
+        run: pnpm --filter backend run test:integration
         env:
           DATABASE_CLIENT: postgres
           DATABASE_HOST: localhost

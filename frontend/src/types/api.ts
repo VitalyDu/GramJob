@@ -4,7 +4,7 @@ export interface User {
   telegramId: string | null
   firstName: string
   lastName: string
-  avatar: { url: string } | null
+  avatar: string | null
   language: 'ru' | 'en'
   subscriptionPlan: 'free' | 'pro' | 'max' | 'vip'
   subscriptionExpiresAt: string | null

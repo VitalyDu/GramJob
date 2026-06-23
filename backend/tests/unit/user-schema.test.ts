@@ -11,7 +11,7 @@ describe('User schema extension', () => {
   it('contains subscriptionPlan field with correct enum', () => {
     expect(schema.attributes.subscriptionPlan).toMatchObject({
       type: 'enumeration',
-      enum: ['free', 'pro', 'max'],
+      enum: ['free', 'pro', 'max', 'vip'],
       default: 'free',
     })
   })
