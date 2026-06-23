@@ -38,17 +38,17 @@
 
 ### Frontend (Next.js)
 
-- [ ] Инициализировать Next.js 15 (`create-next-app`, App Router, TypeScript strict)
-- [ ] Настроить TailwindCSS 4
-- [ ] Установить Telegram UI + Shadcn/UI (базовые компоненты)
-- [ ] Настроить MobX: RootStore + StoreProvider
-- [ ] Настроить i18next (RU/EN, `useTranslation`, переводы в `locales/`)
-- [ ] API-клиент: типизированный fetch-wrapper с JWT в header
-- [ ] AuthStore: login, logout, refresh, persist
-- [ ] Страница: Telegram Login Widget (Web)
-- [ ] Страница: Email Login/Register форма (React Hook Form + Zod)
-- [ ] Telegram Mini App init: `tg.ready()`, `tg.expand()`, определение контекста
-- [ ] Layout: базовый shell (header/nav для Web, bottom-nav для Mini App)
+- [x] Инициализировать Next.js 15 (`create-next-app`, App Router, TypeScript strict)
+- [x] Настроить TailwindCSS 4
+- [x] Установить Telegram UI + Shadcn/UI (базовые компоненты)
+- [x] Настроить MobX: RootStore + StoreProvider
+- [x] Настроить i18next (RU/EN, `useTranslation`, переводы в `locales/`)
+- [x] API-клиент: типизированный fetch-wrapper с JWT в header
+- [x] AuthStore: login, logout, refresh, persist
+- [x] Страница: Telegram Login Widget (Web)
+- [x] Страница: Email Login/Register форма (React Hook Form + Zod)
+- [x] Telegram Mini App init: `tg.ready()`, `tg.expand()`, определение контекста
+- [x] Layout: базовый shell (header/nav для Web, bottom-nav для Mini App)
 
 ---
 

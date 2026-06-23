@@ -17,7 +17,7 @@
 
 ## Текущее состояние проекта
 
-**Фаза: Разработка. Sprint 1 DevOps завершён.**
+**Фаза: Разработка. Sprint 1 полностью завершён.**
 
 Выполнено:
 
@@ -27,8 +27,16 @@
 - Pre-commit хуки: Husky + lint-staged + Prettier
 - GitHub Actions CI pipeline (lint + typecheck + test на PR)
 - Репозиторий: `git@github.com:VitalyDu/GramJob.git`
+- Strapi 5 инициализирован, PostgreSQL подключён, S3/MinIO настроен
+- Telegram initData auth middleware, POST /auth/telegram, GET/PUT /users/me, rate limiting
+- Next.js 15 (App Router, TypeScript strict + `noUncheckedIndexedAccess`)
+- TailwindCSS 4 + Shadcn/UI (Button, Input, Label) + `@telegram-apps/telegram-ui`
+- MobX: RootStore, AuthStore (JWT persist в localStorage), StoreProvider
+- i18next RU/EN, типизированный API-клиент, Telegram Login Widget
+- Email Login/Register (React Hook Form + Zod), Telegram Mini App init
+- Layout shell: WebHeader (web) + MiniAppBottomNav (mini app)
 
-Следующий шаг — Sprint 1 Backend: инициализировать Strapi 5 (`backend/`).
+Следующий шаг — Sprint 2: Categories & Companies (Industry, Specialization, Company CRUD).
 
 ---
 
