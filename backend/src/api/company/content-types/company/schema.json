@@ -1,0 +1,73 @@
+{
+  "kind": "collectionType",
+  "collectionName": "companies",
+  "info": {
+    "singularName": "company",
+    "pluralName": "companies",
+    "displayName": "Company",
+    "description": "Employer company profile"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "owner": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "string",
+      "unique": true,
+      "required": true
+    },
+    "logo": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "cover": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "description": {
+      "type": "richtext",
+      "required": true
+    },
+    "website": {
+      "type": "string"
+    },
+    "telegram": {
+      "type": "string"
+    },
+    "linkedin": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string",
+      "required": true
+    },
+    "city": {
+      "type": "string"
+    },
+    "companySize": {
+      "type": "enumeration",
+      "enum": ["size_1_10", "size_11_50", "size_51_200", "size_201_500", "size_500_plus"],
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["draft", "moderation", "published", "rejected"],
+      "default": "draft",
+      "required": true
+    }
+  }
+}
