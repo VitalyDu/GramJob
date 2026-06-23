@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { TelegramLoginWidget } from '@/components/auth/TelegramLoginWidget'
+import { EmailLoginForm } from '@/components/auth/EmailLoginForm'
 
 export default function LoginPage() {
   return (
@@ -19,10 +20,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* EmailLoginForm будет добавлена в Task 13 */}
-      <div className="text-center text-sm text-muted-foreground">
-        Форма входа по email появится скоро
-      </div>
+      <EmailLoginForm />
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Нет аккаунта?{' '}
