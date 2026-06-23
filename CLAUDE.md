@@ -17,9 +17,9 @@
 
 ## Текущее состояние проекта
 
-**Фаза: Разработка. Sprint 1 полностью завершён.**
+**Фаза: Разработка. Sprint 1 завершён, Sprint 2 Backend в процессе.**
 
-Выполнено:
+Выполнено (Sprint 1):
 
 - pnpm монорепо инициализировано (`backend/` + `frontend/`)
 - Docker Compose: PostgreSQL 16 + MinIO готовы (`docker compose up -d`)
@@ -36,7 +36,18 @@
 - Email Login/Register (React Hook Form + Zod), Telegram Mini App init
 - Layout shell: WebHeader (web) + MiniAppBottomNav (mini app)
 
-Следующий шаг — Sprint 2: Categories & Companies (Industry, Specialization, Company CRUD).
+Выполнено (Sprint 2 Backend, в процессе):
+
+- Content type: Industry (`name: json{ru,en}`, `slug`, oneToMany → Specialization)
+- Content type: Specialization (`industry: manyToOne`, `name: json{ru,en}`, `slug`)
+- Seed: 12 отраслей, 87 специализаций — idempotent bootstrap (`src/scripts/seed-industries.ts`)
+- GET /industries — возвращает все отрасли с populate specializations
+- Content type: Company (все поля: owner, name, slug, logo, cover, description, website, telegram, linkedin, country, city, companySize, status)
+- Утилиты: `toSlug`, `canSubmit`, `canDelete` с unit-тестами (37 тестов)
+- Примечание: `companySize` хранится как `size_1_10` и т.д. (ограничение Strapi 5 enum naming)
+
+Текущий шаг — Sprint 2 Backend: реализация Company CRUD endpoints (Tasks 7–17).
+План: `docs/superpowers/plans/2026-06-24-sprint2-backend.md`
 
 ---
 

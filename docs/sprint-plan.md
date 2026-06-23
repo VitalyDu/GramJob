@@ -58,11 +58,11 @@
 
 ### Backend
 
-- [ ] Content type: Industry (`id, name{ru,en}, slug`)
-- [ ] Content type: Specialization (`id, industryId, name{ru,en}, slug`)
-- [ ] Seed: заполнить industries и specializations (список из `docs/seed-data.md`)
-- [ ] `GET /industries` — с populate specializations
-- [ ] Content type: Company (все поля по схеме)
+- [x] Content type: Industry (`id, name{ru,en}, slug`)
+- [x] Content type: Specialization (`id, industryId, name{ru,en}, slug`)
+- [x] Seed: заполнить industries и specializations (список из `docs/seed-data.md`)
+- [x] `GET /industries` — с populate specializations
+- [x] Content type: Company (все поля по схеме)
 - [ ] `POST /companies` — создать (статус draft)
 - [ ] `POST /companies/:id/submit` — draft → moderation
 - [ ] `GET /companies` — список published (search + country фильтр + пагинация)
