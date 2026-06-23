@@ -10,22 +10,23 @@
 
 Единая модель пользователя. Один пользователь может быть одновременно кандидатом и работодателем.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| email | string, unique, nullable | Null для Telegram-only пользователей |
-| telegramId | string, unique, nullable | Telegram User ID |
-| firstName | string | |
-| lastName | string, nullable | |
-| avatar | media, nullable | Загружается в S3 |
-| language | enum(ru, en) | Default: ru |
-| subscriptionPlan | enum(free, pro, max) | Default: free |
-| subscriptionExpiresAt | datetime, nullable | Null = бессрочный Free |
-| vacancyCredits | int | Default: 0, из пакетов |
-| applyCredits | int | Default: 0, из пакетов |
-| createdAt | datetime, auto | |
+| Поле                  | Тип                      | Описание                             |
+| --------------------- | ------------------------ | ------------------------------------ |
+| id                    | int, PK, auto            |                                      |
+| email                 | string, unique, nullable | Null для Telegram-only пользователей |
+| telegramId            | string, unique, nullable | Telegram User ID                     |
+| firstName             | string                   |                                      |
+| lastName              | string, nullable         |                                      |
+| avatar                | media, nullable          | Загружается в S3                     |
+| language              | enum(ru, en)             | Default: ru                          |
+| subscriptionPlan      | enum(free, pro, max)     | Default: free                        |
+| subscriptionExpiresAt | datetime, nullable       | Null = бессрочный Free               |
+| vacancyCredits        | int                      | Default: 0, из пакетов               |
+| applyCredits          | int                      | Default: 0, из пакетов               |
+| createdAt             | datetime, auto           |                                      |
 
 **Связи:**
+
 - has many Company (через Company.ownerId)
 - has many Resume
 - has many Application
@@ -40,25 +41,26 @@
 
 ### Company
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| owner | relation → User | many-to-one |
-| name | string | |
-| slug | string, unique | URL-friendly идентификатор |
-| logo | media, nullable | |
-| cover | media, nullable | |
-| description | richtext | |
-| website | string, nullable | |
-| telegram | string, nullable | @username или t.me/... |
-| linkedin | string, nullable | |
-| country | string | |
-| city | string, nullable | |
-| companySize | enum(1-10, 11-50, 51-200, 201-500, 500+) | |
-| status | enum(draft, moderation, published, rejected) | Default: draft |
-| createdAt | datetime, auto | |
+| Поле        | Тип                                                                   | Описание                                                        |
+| ----------- | --------------------------------------------------------------------- | --------------------------------------------------------------- |
+| id          | int, PK, auto                                                         |                                                                 |
+| owner       | relation → User                                                       | many-to-one                                                     |
+| name        | string                                                                |                                                                 |
+| slug        | string, unique                                                        | URL-friendly идентификатор                                      |
+| logo        | media, nullable                                                       |                                                                 |
+| cover       | media, nullable                                                       |                                                                 |
+| description | richtext                                                              |                                                                 |
+| website     | string, nullable                                                      |                                                                 |
+| telegram    | string, nullable                                                      | @username или t.me/...                                          |
+| linkedin    | string, nullable                                                      |                                                                 |
+| country     | string                                                                |                                                                 |
+| city        | string, nullable                                                      |                                                                 |
+| companySize | enum(size_1_10, size_11_50, size_51_200, size_201_500, size_500_plus) | Strapi enum; display labels: 1–10, 11–50, 51–200, 201–500, 500+ |
+| status      | enum(draft, moderation, published, rejected)                          | Default: draft                                                  |
+| createdAt   | datetime, auto                                                        |                                                                 |
 
 **Связи:**
+
 - belongs to User (owner)
 - has many Vacancy
 
@@ -68,43 +70,44 @@
 
 ### Vacancy
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| company | relation → Company, nullable | Null если физлицо |
-| postedBy | relation → User | Кто опубликовал |
-| title | string | |
-| industry | relation → Industry | many-to-one |
-| specialization | relation → Specialization | many-to-one |
-| employmentType | enum(full-time, part-time, contract, internship, freelance) | |
-| workFormat | enum(office, remote, hybrid) | |
-| seniority | enum(intern, junior, middle, senior, lead, principal) | |
-| country | string | |
-| city | string, nullable | |
-| salaryFrom | int, nullable | |
-| salaryTo | int, nullable | |
-| salaryCurrency | enum(USD, EUR, RUB, GBP), nullable | |
-| description | richtext | |
-| responsibilities | richtext | |
-| requirements | richtext | |
-| conditions | richtext, nullable | |
-| skills | json array | Список строк |
-| languages | json array | [{lang, level}] |
-| experienceYears | int, nullable | |
-| sourceType | enum(internal, external) | Default: internal |
-| sourceName | string, nullable | Для external: название источника |
-| sourceUrl | string, nullable | Для external: URL |
-| highlighted | boolean | Default: false (Pro/Max подсветка) |
-| urgent | boolean | Default: false (🔥 маркер) |
-| topPlacement | boolean | Default: false (TOP закрепление) |
-| views | int | Default: 0 |
-| uniqueViews | int | Default: 0 |
-| applicationsCount | int | Default: 0 |
-| status | enum(draft, moderation, published, rejected, expired, archived) | Default: draft |
-| expiresAt | datetime, nullable | Устанавливается при публикации +60 дней |
-| createdAt | datetime, auto | |
+| Поле              | Тип                                                             | Описание                                |
+| ----------------- | --------------------------------------------------------------- | --------------------------------------- |
+| id                | int, PK, auto                                                   |                                         |
+| company           | relation → Company, nullable                                    | Null если физлицо                       |
+| postedBy          | relation → User                                                 | Кто опубликовал                         |
+| title             | string                                                          |                                         |
+| industry          | relation → Industry                                             | many-to-one                             |
+| specialization    | relation → Specialization                                       | many-to-one                             |
+| employmentType    | enum(full-time, part-time, contract, internship, freelance)     |                                         |
+| workFormat        | enum(office, remote, hybrid)                                    |                                         |
+| seniority         | enum(intern, junior, middle, senior, lead, principal)           |                                         |
+| country           | string                                                          |                                         |
+| city              | string, nullable                                                |                                         |
+| salaryFrom        | int, nullable                                                   |                                         |
+| salaryTo          | int, nullable                                                   |                                         |
+| salaryCurrency    | enum(USD, EUR, RUB, GBP), nullable                              |                                         |
+| description       | richtext                                                        |                                         |
+| responsibilities  | richtext                                                        |                                         |
+| requirements      | richtext                                                        |                                         |
+| conditions        | richtext, nullable                                              |                                         |
+| skills            | json array                                                      | Список строк                            |
+| languages         | json array                                                      | [{lang, level}]                         |
+| experienceYears   | int, nullable                                                   |                                         |
+| sourceType        | enum(internal, external)                                        | Default: internal                       |
+| sourceName        | string, nullable                                                | Для external: название источника        |
+| sourceUrl         | string, nullable                                                | Для external: URL                       |
+| highlighted       | boolean                                                         | Default: false (Pro/Max подсветка)      |
+| urgent            | boolean                                                         | Default: false (🔥 маркер)              |
+| topPlacement      | boolean                                                         | Default: false (TOP закрепление)        |
+| views             | int                                                             | Default: 0                              |
+| uniqueViews       | int                                                             | Default: 0                              |
+| applicationsCount | int                                                             | Default: 0                              |
+| status            | enum(draft, moderation, published, rejected, expired, archived) | Default: draft                          |
+| expiresAt         | datetime, nullable                                              | Устанавливается при публикации +60 дней |
+| createdAt         | datetime, auto                                                  |                                         |
 
 **Связи:**
+
 - belongs to Company (nullable)
 - belongs to User (postedBy)
 - belongs to Industry
@@ -119,35 +122,36 @@
 
 ### Resume
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| user | relation → User | many-to-one |
-| title | string | Желаемая должность |
-| firstName | string | |
-| lastName | string | |
-| avatar | media, nullable | |
-| country | string | |
-| city | string, nullable | |
-| desiredSalary | int, nullable | |
-| currency | enum(USD, EUR, RUB, GBP), nullable | |
-| workFormat | enum(office, remote, hybrid, any) | |
-| employmentType | enum(full-time, part-time, contract, internship, freelance) | |
-| experienceYears | int, nullable | |
-| about | richtext, nullable | |
-| skills | json array | Список строк |
-| languages | json array | [{lang, level}] |
-| contacts | json | {phone?, email?, telegram?, linkedin?} |
-| workExperience | component[], repeatable | Записи о работе |
-| education | component[], repeatable | Образование |
-| views | int | Default: 0 |
-| invitations | int | Default: 0 |
-| status | enum(draft, moderation, published, rejected, archived) | Default: draft |
-| createdAt | datetime, auto | |
+| Поле            | Тип                                                         | Описание                               |
+| --------------- | ----------------------------------------------------------- | -------------------------------------- |
+| id              | int, PK, auto                                               |                                        |
+| user            | relation → User                                             | many-to-one                            |
+| title           | string                                                      | Желаемая должность                     |
+| firstName       | string                                                      |                                        |
+| lastName        | string                                                      |                                        |
+| avatar          | media, nullable                                             |                                        |
+| country         | string                                                      |                                        |
+| city            | string, nullable                                            |                                        |
+| desiredSalary   | int, nullable                                               |                                        |
+| currency        | enum(USD, EUR, RUB, GBP), nullable                          |                                        |
+| workFormat      | enum(office, remote, hybrid, any)                           |                                        |
+| employmentType  | enum(full-time, part-time, contract, internship, freelance) |                                        |
+| experienceYears | int, nullable                                               |                                        |
+| about           | richtext, nullable                                          |                                        |
+| skills          | json array                                                  | Список строк                           |
+| languages       | json array                                                  | [{lang, level}]                        |
+| contacts        | json                                                        | {phone?, email?, telegram?, linkedin?} |
+| workExperience  | component[], repeatable                                     | Записи о работе                        |
+| education       | component[], repeatable                                     | Образование                            |
+| views           | int                                                         | Default: 0                             |
+| invitations     | int                                                         | Default: 0                             |
+| status          | enum(draft, moderation, published, rejected, archived)      | Default: draft                         |
+| createdAt       | datetime, auto                                              |                                        |
 
 **Компоненты Resume:**
 
 WorkExperience:
+
 - company (string)
 - position (string)
 - startDate (date)
@@ -156,6 +160,7 @@ WorkExperience:
 - description (text, nullable)
 
 Education:
+
 - institution (string)
 - degree (string)
 - field (string)
@@ -164,6 +169,7 @@ Education:
 - current (boolean)
 
 **Связи:**
+
 - belongs to User
 - has many Application
 - has many ResumeAnalytics
@@ -174,15 +180,15 @@ Education:
 
 ### Application
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| vacancy | relation → Vacancy | many-to-one |
-| resume | relation → Resume | many-to-one |
-| user | relation → User | many-to-one (для быстрого доступа) |
-| status | enum(applied, viewed, in-review, interview, test-task, offer, hired, rejected) | Default: applied |
-| coverLetter | text, nullable | |
-| createdAt | datetime, auto | |
+| Поле        | Тип                                                                            | Описание                           |
+| ----------- | ------------------------------------------------------------------------------ | ---------------------------------- |
+| id          | int, PK, auto                                                                  |                                    |
+| vacancy     | relation → Vacancy                                                             | many-to-one                        |
+| resume      | relation → Resume                                                              | many-to-one                        |
+| user        | relation → User                                                                | many-to-one (для быстрого доступа) |
+| status      | enum(applied, viewed, in-review, interview, test-task, offer, hired, rejected) | Default: applied                   |
+| coverLetter | text, nullable                                                                 |                                    |
+| createdAt   | datetime, auto                                                                 |                                    |
 
 **Ограничение:** один пользователь не может подать два отклика на одну вакансию.
 
@@ -192,25 +198,26 @@ Education:
 
 ### Industry
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| name | json | {ru, en} |
-| slug | string, unique | |
+| Поле | Тип            | Описание |
+| ---- | -------------- | -------- |
+| id   | int, PK, auto  |          |
+| name | json           | {ru, en} |
+| slug | string, unique |          |
 
 **Связи:**
+
 - has many Specialization
 
 ---
 
 ### Specialization
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
+| Поле     | Тип                 | Описание    |
+| -------- | ------------------- | ----------- |
+| id       | int, PK, auto       |             |
 | industry | relation → Industry | many-to-one |
-| name | json | {ru, en} |
-| slug | string, unique | |
+| name     | json                | {ru, en}    |
+| slug     | string, unique      |             |
 
 ---
 
@@ -218,15 +225,15 @@ Education:
 
 Для внешних вакансий (sourceType = external).
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| vacancy | relation → Vacancy | one-to-one |
-| provider | string | Название источника (hh.ru, linkedin, etc.) |
-| externalId | string | ID на источнике |
-| originalUrl | string | |
-| parsedAt | datetime | |
-| updatedAt | datetime | |
+| Поле        | Тип                | Описание                                   |
+| ----------- | ------------------ | ------------------------------------------ |
+| id          | int, PK, auto      |                                            |
+| vacancy     | relation → Vacancy | one-to-one                                 |
+| provider    | string             | Название источника (hh.ru, linkedin, etc.) |
+| externalId  | string             | ID на источнике                            |
+| originalUrl | string             |                                            |
+| parsedAt    | datetime           |                                            |
+| updatedAt   | datetime           |                                            |
 
 **Индексы:** `provider + externalId` (unique)
 
@@ -236,42 +243,42 @@ Education:
 
 Статические данные, управляются через Strapi Admin.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| code | enum(free, pro, max) | unique |
-| name | string | |
-| vacanciesPerMonth | int | |
-| activeVacanciesLimit | int | |
-| vacancyBoostsPerDay | int | |
-| applicationsPerDay | int | |
-| resumesLimit | int | |
-| resumeDatabaseAccess | boolean | |
-| starsPrice | int, nullable | Цена в Telegram Stars (null = бесплатно) |
-| durationDays | int | Default: 30 |
+| Поле                 | Тип                  | Описание                                 |
+| -------------------- | -------------------- | ---------------------------------------- |
+| id                   | int, PK, auto        |                                          |
+| code                 | enum(free, pro, max) | unique                                   |
+| name                 | string               |                                          |
+| vacanciesPerMonth    | int                  |                                          |
+| activeVacanciesLimit | int                  |                                          |
+| vacancyBoostsPerDay  | int                  |                                          |
+| applicationsPerDay   | int                  |                                          |
+| resumesLimit         | int                  |                                          |
+| resumeDatabaseAccess | boolean              |                                          |
+| starsPrice           | int, nullable        | Цена в Telegram Stars (null = бесплатно) |
+| durationDays         | int                  | Default: 30                              |
 
 ---
 
 ### VacancyPackage
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| name | string | |
-| vacancyCredits | int | |
-| boostCredits | int | |
-| starsPrice | int | |
+| Поле           | Тип           | Описание |
+| -------------- | ------------- | -------- |
+| id             | int, PK, auto |          |
+| name           | string        |          |
+| vacancyCredits | int           |          |
+| boostCredits   | int           |          |
+| starsPrice     | int           |          |
 
 ---
 
 ### ApplyPackage
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| name | string | |
-| applyCredits | int | |
-| starsPrice | int | |
+| Поле         | Тип           | Описание |
+| ------------ | ------------- | -------- |
+| id           | int, PK, auto |          |
+| name         | string        |          |
+| applyCredits | int           |          |
+| starsPrice   | int           |          |
 
 ---
 
@@ -279,15 +286,15 @@ Education:
 
 Агрегация по дням для каждой вакансии.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| vacancy | relation → Vacancy | many-to-one |
-| date | date | |
-| views | int | Default: 0 |
-| uniqueViews | int | Default: 0 |
-| applications | int | Default: 0 |
-| ctr | float | Default: 0 |
+| Поле         | Тип                | Описание    |
+| ------------ | ------------------ | ----------- |
+| id           | int, PK, auto      |             |
+| vacancy      | relation → Vacancy | many-to-one |
+| date         | date               |             |
+| views        | int                | Default: 0  |
+| uniqueViews  | int                | Default: 0  |
+| applications | int                | Default: 0  |
+| ctr          | float              | Default: 0  |
 
 **Индексы:** `vacancy + date` (unique)
 
@@ -295,14 +302,14 @@ Education:
 
 ### ResumeAnalytics
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| resume | relation → Resume | many-to-one |
-| date | date | |
-| views | int | Default: 0 |
-| uniqueViews | int | Default: 0 |
-| invitations | int | Default: 0 |
+| Поле        | Тип               | Описание    |
+| ----------- | ----------------- | ----------- |
+| id          | int, PK, auto     |             |
+| resume      | relation → Resume | many-to-one |
+| date        | date              |             |
+| views       | int               | Default: 0  |
+| uniqueViews | int               | Default: 0  |
+| invitations | int               | Default: 0  |
 
 **Индексы:** `resume + date` (unique)
 
@@ -310,18 +317,19 @@ Education:
 
 ### Notification
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| user | relation → User | many-to-one |
-| type | enum (см. ниже) | |
-| title | string | |
-| body | text | |
-| isRead | boolean | Default: false |
-| data | json, nullable | {entityType, entityId} для ссылки |
-| createdAt | datetime, auto | |
+| Поле      | Тип             | Описание                          |
+| --------- | --------------- | --------------------------------- |
+| id        | int, PK, auto   |                                   |
+| user      | relation → User | many-to-one                       |
+| type      | enum (см. ниже) |                                   |
+| title     | string          |                                   |
+| body      | text            |                                   |
+| isRead    | boolean         | Default: false                    |
+| data      | json, nullable  | {entityType, entityId} для ссылки |
+| createdAt | datetime, auto  |                                   |
 
 **Типы уведомлений:**
+
 - Кандидат: resume_viewed, application_approved, application_rejected, interview_invitation, offer_received, subscription_expired
 - Работодатель: new_application, vacancy_viewed, subscription_expired, limits_reached, vacancy_expiring_soon
 
@@ -331,27 +339,27 @@ Education:
 
 ### SavedSearch
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| user | relation → User | many-to-one |
-| name | string, nullable | |
-| type | enum(vacancy, resume) | |
-| filters | json | Объект с параметрами фильтров |
-| lastNotifiedAt | datetime, nullable | Дата последнего уведомления |
-| createdAt | datetime, auto | |
+| Поле           | Тип                   | Описание                      |
+| -------------- | --------------------- | ----------------------------- |
+| id             | int, PK, auto         |                               |
+| user           | relation → User       | many-to-one                   |
+| name           | string, nullable      |                               |
+| type           | enum(vacancy, resume) |                               |
+| filters        | json                  | Объект с параметрами фильтров |
+| lastNotifiedAt | datetime, nullable    | Дата последнего уведомления   |
+| createdAt      | datetime, auto        |                               |
 
 ---
 
 ### Favorite
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| user | relation → User | many-to-one |
-| type | enum(vacancy, resume, company) | |
-| targetId | int | ID целевой сущности |
-| createdAt | datetime, auto | |
+| Поле      | Тип                            | Описание            |
+| --------- | ------------------------------ | ------------------- |
+| id        | int, PK, auto                  |                     |
+| user      | relation → User                | many-to-one         |
+| type      | enum(vacancy, resume, company) |                     |
+| targetId  | int                            | ID целевой сущности |
+| createdAt | datetime, auto                 |                     |
 
 **Ограничение:** уникальная пара (user, type, targetId).
 **Индексы:** `user + type`, `user + type + targetId` (unique)
@@ -360,28 +368,28 @@ Education:
 
 ### Report (Жалоба)
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| reporter | relation → User | many-to-one |
-| type | enum(vacancy, resume, company, user) | |
-| targetId | int | |
-| reason | enum(spam, fraud, inappropriate, other) | |
-| comment | text, nullable | |
-| status | enum(pending, reviewed, resolved) | Default: pending |
-| createdAt | datetime, auto | |
+| Поле      | Тип                                     | Описание         |
+| --------- | --------------------------------------- | ---------------- |
+| id        | int, PK, auto                           |                  |
+| reporter  | relation → User                         | many-to-one      |
+| type      | enum(vacancy, resume, company, user)    |                  |
+| targetId  | int                                     |                  |
+| reason    | enum(spam, fraud, inappropriate, other) |                  |
+| comment   | text, nullable                          |                  |
+| status    | enum(pending, reviewed, resolved)       | Default: pending |
+| createdAt | datetime, auto                          |                  |
 
 ---
 
 ### Block (Блокировки)
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | int, PK, auto | |
-| user | relation → User | many-to-one (кто блокирует) |
-| targetType | enum(employer, candidate) | |
-| targetId | int | ID заблокированного User |
-| createdAt | datetime, auto | |
+| Поле       | Тип                       | Описание                    |
+| ---------- | ------------------------- | --------------------------- |
+| id         | int, PK, auto             |                             |
+| user       | relation → User           | many-to-one (кто блокирует) |
+| targetType | enum(employer, candidate) |                             |
+| targetId   | int                       | ID заблокированного User    |
+| createdAt  | datetime, auto            |                             |
 
 **Индексы:** `user + targetId` (unique)
 
