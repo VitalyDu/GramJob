@@ -20,6 +20,18 @@ describe('toSlug', () => {
   it('collapses consecutive hyphens', () => {
     expect(toSlug('A--B')).toBe('a-b')
   })
+
+  it('strips leading hyphens', () => {
+    expect(toSlug('-Acme')).toBe('acme')
+  })
+
+  it('strips trailing hyphens', () => {
+    expect(toSlug('Acme-')).toBe('acme')
+  })
+
+  it('returns empty string for special-char-only input', () => {
+    expect(toSlug('---')).toBe('')
+  })
 })
 
 describe('canSubmit', () => {
