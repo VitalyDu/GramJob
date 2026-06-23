@@ -10,6 +10,12 @@
     "dev:backend": "pnpm --filter backend run develop",
     "dev:frontend": "pnpm --filter frontend run dev"
   },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "^19.0.0",
+      "@types/react-dom": "^19.0.0"
+    }
+  },
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
