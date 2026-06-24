@@ -73,6 +73,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const updated = await strapi.documents('api::company.company').update({
         documentId: id,
         data: { status: 'moderation' },
+        fields: ['documentId', 'name', 'slug', 'status', 'createdAt'],
       })
 
       return ctx.send({ data: updated })
