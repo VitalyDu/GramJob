@@ -121,3 +121,142 @@ export interface CompanyCreateInput {
 }
 
 export type CompanyUpdateInput = Partial<CompanyCreateInput>
+
+// --- Vacancy ---
+
+export type VacancyStatusEnum =
+  | 'draft'
+  | 'moderation'
+  | 'published'
+  | 'rejected'
+  | 'expired'
+  | 'archived'
+
+export type WorkFormatEnum = 'office' | 'remote' | 'hybrid'
+
+export type EmploymentTypeEnum = 'full-time' | 'part-time' | 'contract' | 'internship' | 'freelance'
+
+export type SeniorityEnum = 'intern' | 'junior' | 'middle' | 'senior' | 'lead' | 'principal'
+
+export type SalaryCurrencyEnum = 'USD' | 'EUR' | 'RUB' | 'GBP'
+
+export type SourceTypeEnum = 'internal' | 'external'
+
+export interface IndustryRef {
+  documentId: string
+  slug: string
+  name: { ru: string; en: string }
+}
+
+export interface SpecializationRef {
+  documentId: string
+  slug: string
+  name: { ru: string; en: string }
+}
+
+export interface VacancyCompanyRef {
+  documentId: string
+  name: string
+  slug: string
+  logo?: StrapiMedia | null
+}
+
+export interface Vacancy {
+  id: number
+  documentId: string
+  title: string
+  country: string
+  city?: string | null
+  workFormat: WorkFormatEnum
+  employmentType: EmploymentTypeEnum
+  seniority: SeniorityEnum
+  salaryFrom?: number | null
+  salaryTo?: number | null
+  salaryCurrency?: SalaryCurrencyEnum | null
+  description?: string
+  responsibilities?: string
+  requirements?: string
+  conditions?: string | null
+  skills?: string[] | null
+  languages?: string[] | null
+  experienceYears?: number | null
+  sourceType: SourceTypeEnum
+  sourceName?: string | null
+  sourceUrl?: string | null
+  highlighted: boolean
+  urgent: boolean
+  topPlacement: boolean
+  views?: number
+  uniqueViews?: number
+  applicationsCount?: number
+  status: VacancyStatusEnum
+  expiresAt?: string | null
+  createdAt: string
+  industry: IndustryRef
+  specialization: SpecializationRef
+  company: VacancyCompanyRef
+}
+
+export interface VacancyListParams {
+  search?: string
+  industry?: string
+  specialization?: string
+  country?: string
+  city?: string
+  workFormat?: WorkFormatEnum
+  employmentType?: EmploymentTypeEnum
+  seniority?: SeniorityEnum
+  salaryFrom?: number
+  salaryTo?: number
+  salaryCurrency?: SalaryCurrencyEnum
+  experienceYears?: number
+  skills?: string
+  languages?: string
+  sourceType?: SourceTypeEnum
+  urgent?: boolean
+  topPlacement?: boolean
+  sort?: 'newest' | 'salary_asc' | 'salary_desc' | 'relevance'
+  page?: number
+  pageSize?: number
+  status?: VacancyStatusEnum
+}
+
+export interface VacancyCreateInput {
+  title: string
+  company: string
+  industry: string
+  specialization: string
+  employmentType: EmploymentTypeEnum
+  workFormat: WorkFormatEnum
+  seniority: SeniorityEnum
+  country: string
+  city?: string
+  salaryFrom?: number
+  salaryTo?: number
+  salaryCurrency?: SalaryCurrencyEnum
+  description: string
+  responsibilities: string
+  requirements: string
+  conditions?: string
+  skills?: string[]
+  languages?: string[]
+  experienceYears?: number
+  urgent?: boolean
+}
+
+export type VacancyUpdateInput = Partial<VacancyCreateInput>
+
+export interface Industry {
+  id: number
+  documentId: string
+  slug: string
+  name: { ru: string; en: string }
+  specializations: Specialization[]
+}
+
+export interface Specialization {
+  id: number
+  documentId: string
+  slug: string
+  name: { ru: string; en: string }
+}
