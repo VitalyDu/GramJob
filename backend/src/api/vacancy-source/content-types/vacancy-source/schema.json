@@ -1,0 +1,38 @@
+{
+  "kind": "collectionType",
+  "collectionName": "vacancy_sources",
+  "info": {
+    "singularName": "vacancy-source",
+    "pluralName": "vacancy-sources",
+    "displayName": "VacancySource",
+    "description": "External source metadata for parsed vacancies"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "vacancy": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::vacancy.vacancy",
+      "mappedBy": "vacancySource"
+    },
+    "provider": {
+      "type": "string",
+      "required": true
+    },
+    "externalId": {
+      "type": "string",
+      "required": true
+    },
+    "originalUrl": {
+      "type": "string",
+      "required": true
+    },
+    "parsedAt": {
+      "type": "datetime",
+      "required": true
+    }
+  }
+}
