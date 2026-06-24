@@ -63,26 +63,28 @@
 - [x] Seed: заполнить industries и specializations (список из `docs/seed-data.md`)
 - [x] `GET /industries` — с populate specializations
 - [x] Content type: Company (все поля по схеме)
-- [ ] `POST /companies` — создать (статус draft)
-- [ ] `POST /companies/:id/submit` — draft → moderation
-- [ ] `GET /companies` — список published (search + country фильтр + пагинация)
-- [ ] `GET /companies/:id` — публичная карточка
-- [ ] `GET /companies/slug/:slug` — по slug
-- [ ] `PUT /companies/:id` — обновить (policy: is-company-owner)
-- [ ] `DELETE /companies/:id` — проверка нет активных вакансий
-- [ ] `GET /companies/my` — мои компании (все статусы)
-- [ ] Lifecycle hook: Company afterUpdate(published) → Notification пользователю
-- [ ] Policy: `is-company-owner`
+- [x] `POST /companies` — создать (статус draft)
+- [x] `POST /companies/:id/submit` — draft → moderation
+- [x] `GET /companies` — список published (search + country фильтр + пагинация)
+- [x] `GET /companies/:id` — публичная карточка
+- [x] `GET /companies/slug/:slug` — по slug
+- [x] `PUT /companies/:id` — обновить (policy: is-company-owner)
+- [x] `DELETE /companies/:id` — проверка нет активных вакансий
+- [x] `GET /companies/my` — мои компании (все статусы)
+- [x] Lifecycle hook: Company afterUpdate(published) → логирование (Notification — Sprint 7)
+- [x] Policy: `is-company-owner`
 
 ### Frontend
 
-- [ ] CompanyStore: список, текущая компания, CRUD-методы
-- [ ] Страница: `/companies` — список с поиском и фильтром по стране
-- [ ] Компонент: CompanyCard (лого, название, статус, размер, страна)
-- [ ] Страница: `/companies/:id` — полная карточка компании
-- [ ] Страница: `/dashboard/companies` — мои компании (список + статусы)
-- [ ] Форма: создать/редактировать компанию (все поля, загрузка логотипа)
-- [ ] Статус-badge: draft / на модерации / опубликована / отклонена + причина
+- [x] CompanyStore: список, текущая компания, CRUD-методы (16 тестов)
+- [x] Страница: `/companies` — список с поиском и фильтром по стране
+- [x] Компонент: CompanyCard (лого, название, статус, размер, страна)
+- [x] Страница: `/companies/[id]` — полная карточка компании
+- [x] Страница: `/dashboard/companies` — мои компании (список + статусы + действия)
+- [x] Страница: `/dashboard/companies/new` — создать компанию
+- [x] Страница: `/dashboard/companies/[id]/edit` — редактировать компанию
+- [x] Форма: создать/редактировать компанию (React Hook Form + Zod; загрузка логотипа — Sprint 3)
+- [x] Компонент: StatusBadge — draft / на модерации / опубликована / отклонена
 
 ---
 
