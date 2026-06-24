@@ -46,5 +46,36 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.status = 201
       return ctx.send({ data: company })
     },
+
+    async submit(ctx: any) {
+      const user = ctx.state.user as { id: number } | undefined
+      if (!user) return ctx.unauthorized('Authentication required')
+
+      const { id } = ctx.params as { id: string }
+
+      const company = await strapi.documents('api::company.company').findOne({
+        documentId: id,
+        populate: { owner: { fields: ['id'] } },
+      })
+
+      if (!company) return ctx.notFound('Company not found')
+
+      const owner = company.owner as { id: number } | null
+      if (!owner || owner.id !== user.id) {
+        return ctx.forbidden('You are not the owner of this company')
+      }
+
+      const status = company.status as string | null | undefined
+      if (!status || !canSubmit(status)) {
+        return ctx.badRequest(`Cannot submit company with status "${status}". Must be "draft".`)
+      }
+
+      const updated = await strapi.documents('api::company.company').update({
+        documentId: id,
+        data: { status: 'moderation' },
+      })
+
+      return ctx.send({ data: updated })
+    },
   }
 }
