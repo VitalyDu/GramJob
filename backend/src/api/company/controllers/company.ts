@@ -137,5 +137,45 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         },
       })
     },
+
+    async findOne(ctx: any) {
+      const { id } = ctx.params as { id: string }
+
+      const company = await strapi.documents('api::company.company').findOne({
+        documentId: id,
+        populate: {
+          logo: true,
+          cover: true,
+          owner: { fields: ['id', 'firstName', 'lastName'] },
+        },
+      })
+
+      if (!company) return ctx.notFound('Company not found')
+
+      const status = company.status as string | null | undefined
+      if (status !== 'published') return ctx.notFound('Company not found')
+
+      return ctx.send({ data: company })
+    },
+
+    async findBySlug(ctx: any) {
+      const { slug } = ctx.params as { slug: string }
+
+      const company = await strapi.documents('api::company.company').findFirst({
+        filters: {
+          slug: { $eq: slug },
+          status: { $eq: 'published' },
+        },
+        populate: {
+          logo: true,
+          cover: true,
+          owner: { fields: ['id', 'firstName', 'lastName'] },
+        },
+      })
+
+      if (!company) return ctx.notFound('Company not found')
+
+      return ctx.send({ data: company })
+    },
   }
 }
