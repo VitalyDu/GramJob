@@ -143,6 +143,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const company = await strapi.documents('api::company.company').findOne({
         documentId: id,
+        fields: [
+          'documentId',
+          'name',
+          'slug',
+          'description',
+          'website',
+          'telegram',
+          'linkedin',
+          'country',
+          'city',
+          'companySize',
+          'status',
+          'createdAt',
+        ],
         populate: {
           logo: true,
           cover: true,
@@ -166,6 +180,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           slug: { $eq: slug },
           status: { $eq: 'published' },
         },
+        fields: [
+          'documentId',
+          'name',
+          'slug',
+          'description',
+          'website',
+          'telegram',
+          'linkedin',
+          'country',
+          'city',
+          'companySize',
+          'status',
+          'createdAt',
+        ],
         populate: {
           logo: true,
           cover: true,
