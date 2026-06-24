@@ -1,0 +1,144 @@
+{
+  "kind": "collectionType",
+  "collectionName": "vacancies",
+  "info": {
+    "singularName": "vacancy",
+    "pluralName": "vacancies",
+    "displayName": "Vacancy",
+    "description": "Job vacancy posting"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "company": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::company.company"
+    },
+    "postedBy": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "required": true
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "industry": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::industry.industry",
+      "required": true
+    },
+    "specialization": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::specialization.specialization",
+      "required": true
+    },
+    "employmentType": {
+      "type": "enumeration",
+      "enum": ["full-time", "part-time", "contract", "internship", "freelance"],
+      "required": true
+    },
+    "workFormat": {
+      "type": "enumeration",
+      "enum": ["office", "remote", "hybrid"],
+      "required": true
+    },
+    "seniority": {
+      "type": "enumeration",
+      "enum": ["intern", "junior", "middle", "senior", "lead", "principal"],
+      "required": true
+    },
+    "country": {
+      "type": "string",
+      "required": true
+    },
+    "city": {
+      "type": "string"
+    },
+    "salaryFrom": {
+      "type": "integer"
+    },
+    "salaryTo": {
+      "type": "integer"
+    },
+    "salaryCurrency": {
+      "type": "enumeration",
+      "enum": ["USD", "EUR", "RUB", "GBP"]
+    },
+    "description": {
+      "type": "richtext",
+      "required": true
+    },
+    "responsibilities": {
+      "type": "richtext",
+      "required": true
+    },
+    "requirements": {
+      "type": "richtext",
+      "required": true
+    },
+    "conditions": {
+      "type": "richtext"
+    },
+    "skills": {
+      "type": "json"
+    },
+    "languages": {
+      "type": "json"
+    },
+    "experienceYears": {
+      "type": "integer"
+    },
+    "sourceType": {
+      "type": "enumeration",
+      "enum": ["internal", "external"],
+      "default": "internal",
+      "required": true
+    },
+    "sourceName": {
+      "type": "string"
+    },
+    "sourceUrl": {
+      "type": "string"
+    },
+    "highlighted": {
+      "type": "boolean",
+      "default": false
+    },
+    "urgent": {
+      "type": "boolean",
+      "default": false
+    },
+    "topPlacement": {
+      "type": "boolean",
+      "default": false
+    },
+    "views": {
+      "type": "integer",
+      "default": 0
+    },
+    "uniqueViews": {
+      "type": "integer",
+      "default": 0
+    },
+    "applicationsCount": {
+      "type": "integer",
+      "default": 0
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["draft", "moderation", "published", "rejected", "expired", "archived"],
+      "default": "draft",
+      "required": true
+    },
+    "expiresAt": {
+      "type": "datetime"
+    }
+  }
+}
