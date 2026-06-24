@@ -223,6 +223,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const pageSizeNum = Math.min(50, Math.max(1, parseInt(pageSize, 10) || 20))
       const offset = (pageNum - 1) * pageSizeNum
 
+      const sortMap: Record<string, string> = {
+        newest: 'createdAt:desc',
+        salary_asc: 'salaryFrom:asc',
+        salary_desc: 'salaryFrom:desc',
+        relevance: 'topPlacement:desc,createdAt:desc',
+      }
+      const strapiSort = sortMap[sort] ?? sortMap.relevance
+
       // Full-text search via raw SQL
       if (search) {
         const { documentIds, total } = await svc().searchByVector(
@@ -263,12 +271,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           filters: searchFilters,
           fields: VACANCY_CARD_FIELDS as any,
           populate: VACANCY_POPULATE as any,
+          sort: (sort !== 'relevance' ? (sortMap[sort] ?? sortMap.relevance) : undefined) as any,
         })
 
-        // Re-sort to match SQL relevance order
-        const sorted = documentIds
-          .map((docId) => vacancies.find((v) => v.documentId === docId))
-          .filter(Boolean)
+        let sorted: typeof vacancies
+        if (sort === 'relevance' || !sortMap[sort]) {
+          // Re-sort to match SQL relevance order
+          sorted = documentIds
+            .map((docId) => vacancies.find((v) => v.documentId === docId))
+            .filter((v): v is NonNullable<typeof v> => v != null)
+        } else {
+          sorted = vacancies
+        }
 
         return ctx.send({
           data: sorted,
@@ -301,14 +315,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (urgent === 'true') filters.urgent = { $eq: true }
       if (topPlacement === 'true') filters.topPlacement = { $eq: true }
 
-      const sortMap: Record<string, string> = {
-        newest: 'createdAt:desc',
-        salary_asc: 'salaryFrom:asc',
-        salary_desc: 'salaryFrom:desc',
-        relevance: 'topPlacement:desc,createdAt:desc',
-      }
-      const strapiSort = sortMap[sort] ?? sortMap.relevance
-
       const [vacancies, total] = await Promise.all([
         strapi.documents('api::vacancy.vacancy').findMany({
           filters,
@@ -340,6 +346,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         filters: {
           documentId: { $eq: id },
           status: { $eq: 'published' },
+          expiresAt: { $gt: new Date().toISOString() },
         },
         fields: VACANCY_FULL_FIELDS as any,
         populate: VACANCY_POPULATE as any,
