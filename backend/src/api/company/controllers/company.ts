@@ -241,6 +241,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         if (field in body) updateData[field] = body[field]
       }
 
+      if (Object.keys(updateData).length === 0) {
+        return ctx.badRequest('No updatable fields provided.')
+      }
+
+      if (
+        'name' in updateData &&
+        (typeof updateData.name !== 'string' || !updateData.name.trim())
+      ) {
+        return ctx.badRequest('name must be a non-empty string')
+      }
+
       if (updateData.companySize !== undefined) {
         if (
           !VALID_COMPANY_SIZES.includes(
@@ -251,7 +262,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         }
       }
 
-      if (updateData.name && updateData.name !== existing.name) {
+      if (updateData.name !== undefined && updateData.name !== existing.name) {
         const baseSlug = toSlug(updateData.name as string)
         updateData.slug = await svc().generateUniqueSlug(baseSlug, id)
       }
