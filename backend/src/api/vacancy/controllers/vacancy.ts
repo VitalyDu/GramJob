@@ -233,7 +233,69 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Full-text search via raw SQL
       if (search) {
-        const { documentIds, total } = await svc().searchByVector(
+        // Get all FTS-matching IDs (SQL handles status+expiresAt; no pagination here for accurate count)
+        const { documentIds: allFtsIds } = await svc().searchByVector(search, 0, 10000, '', [])
+
+        if (allFtsIds.length === 0) {
+          return ctx.send({
+            data: [],
+            meta: { total: 0, page: pageNum, pageSize: pageSizeNum, pageCount: 0 },
+          })
+        }
+
+        // Build filters that include FTS IDs + all user-requested filters
+        const baseFilters: Record<string, unknown> = {
+          documentId: { $in: allFtsIds },
+          status: { $eq: 'published' },
+          expiresAt: { $gt: new Date().toISOString() },
+        }
+        if (industry) baseFilters.industry = { documentId: { $eq: industry } }
+        if (specialization) baseFilters.specialization = { documentId: { $eq: specialization } }
+        if (country) baseFilters.country = { $eq: country }
+        if (city) baseFilters.city = { $containsi: city }
+        if (workFormat) baseFilters.workFormat = { $eq: workFormat }
+        if (employmentType) baseFilters.employmentType = { $eq: employmentType }
+        if (seniority) baseFilters.seniority = { $eq: seniority }
+        if (salaryCurrency) baseFilters.salaryCurrency = { $eq: salaryCurrency }
+        if (salaryFrom) baseFilters.salaryTo = { $gte: parseInt(salaryFrom, 10) }
+        if (salaryTo) baseFilters.salaryFrom = { $lte: parseInt(salaryTo, 10) }
+        if (sourceType) baseFilters.sourceType = { $eq: sourceType }
+        if (urgent === 'true') baseFilters.urgent = { $eq: true }
+        if (topPlacement === 'true') baseFilters.topPlacement = { $eq: true }
+
+        // Accurate total: counts only docs that pass all filters (including extra ones)
+        const total = await strapi.documents('api::vacancy.vacancy').count({ filters: baseFilters })
+
+        if (total === 0) {
+          return ctx.send({
+            data: [],
+            meta: { total: 0, page: pageNum, pageSize: pageSizeNum, pageCount: 0 },
+          })
+        }
+
+        if (sort !== 'relevance' && sortMap[sort]) {
+          // Non-relevance sort: Strapi handles ordering and pagination
+          const vacancies = await strapi.documents('api::vacancy.vacancy').findMany({
+            filters: baseFilters,
+            fields: VACANCY_CARD_FIELDS as any,
+            populate: VACANCY_POPULATE as any,
+            start: offset,
+            limit: pageSizeNum,
+            sort: sortMap[sort] as any,
+          })
+          return ctx.send({
+            data: vacancies,
+            meta: {
+              total,
+              page: pageNum,
+              pageSize: pageSizeNum,
+              pageCount: Math.ceil(total / pageSizeNum),
+            },
+          })
+        }
+
+        // Relevance sort: SQL handles pagination and ordering, Strapi hydrates the fields
+        const { documentIds: pageIds } = await svc().searchByVector(
           search,
           offset,
           pageSizeNum,
@@ -241,48 +303,28 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           []
         )
 
-        if (documentIds.length === 0) {
+        if (pageIds.length === 0) {
           return ctx.send({
             data: [],
-            meta: { total: 0, page: pageNum, pageSize: pageSizeNum, pageCount: 0 },
+            meta: {
+              total,
+              page: pageNum,
+              pageSize: pageSizeNum,
+              pageCount: Math.ceil(total / pageSizeNum),
+            },
           })
         }
 
-        const searchFilters: Record<string, unknown> = {
-          documentId: { $in: documentIds },
-          status: { $eq: 'published' },
-          expiresAt: { $gt: new Date().toISOString() },
-        }
-        if (industry) searchFilters.industry = { documentId: { $eq: industry } }
-        if (specialization) searchFilters.specialization = { documentId: { $eq: specialization } }
-        if (country) searchFilters.country = { $eq: country }
-        if (city) searchFilters.city = { $containsi: city }
-        if (workFormat) searchFilters.workFormat = { $eq: workFormat }
-        if (employmentType) searchFilters.employmentType = { $eq: employmentType }
-        if (seniority) searchFilters.seniority = { $eq: seniority }
-        if (salaryCurrency) searchFilters.salaryCurrency = { $eq: salaryCurrency }
-        if (salaryFrom) searchFilters.salaryTo = { $gte: parseInt(salaryFrom, 10) }
-        if (salaryTo) searchFilters.salaryFrom = { $lte: parseInt(salaryTo, 10) }
-        if (sourceType) searchFilters.sourceType = { $eq: sourceType }
-        if (urgent === 'true') searchFilters.urgent = { $eq: true }
-        if (topPlacement === 'true') searchFilters.topPlacement = { $eq: true }
-
         const vacancies = await strapi.documents('api::vacancy.vacancy').findMany({
-          filters: searchFilters,
+          filters: { ...baseFilters, documentId: { $in: pageIds } },
           fields: VACANCY_CARD_FIELDS as any,
           populate: VACANCY_POPULATE as any,
-          sort: (sort !== 'relevance' ? (sortMap[sort] ?? sortMap.relevance) : undefined) as any,
         })
 
-        let sorted: typeof vacancies
-        if (sort === 'relevance' || !sortMap[sort]) {
-          // Re-sort to match SQL relevance order
-          sorted = documentIds
-            .map((docId) => vacancies.find((v) => v.documentId === docId))
-            .filter((v): v is NonNullable<typeof v> => v != null)
-        } else {
-          sorted = vacancies
-        }
+        // Re-sort to match SQL relevance order
+        const sorted = pageIds
+          .map((docId) => vacancies.find((v) => v.documentId === docId))
+          .filter((v): v is NonNullable<typeof v> => v != null)
 
         return ctx.send({
           data: sorted,
@@ -357,15 +399,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const unique = isUniqueView(id, ip)
       recordView(id, ip)
 
+      const newViews = (vacancy.views ?? 0) + 1
+      const newUniqueViews = unique ? (vacancy.uniqueViews ?? 0) + 1 : (vacancy.uniqueViews ?? 0)
+
       await strapi.documents('api::vacancy.vacancy').update({
         documentId: id,
-        data: {
-          views: (vacancy.views ?? 0) + 1,
-          uniqueViews: unique ? (vacancy.uniqueViews ?? 0) + 1 : (vacancy.uniqueViews ?? 0),
-        },
+        data: { views: newViews, uniqueViews: newUniqueViews },
       })
 
-      return ctx.send({ data: { ...vacancy, views: (vacancy.views ?? 0) + 1 } })
+      return ctx.send({ data: { ...vacancy, views: newViews, uniqueViews: newUniqueViews } })
     },
 
     async update(ctx: any) {
