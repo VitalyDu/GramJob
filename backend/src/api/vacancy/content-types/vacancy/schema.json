@@ -17,6 +17,12 @@
       "relation": "manyToOne",
       "target": "api::company.company"
     },
+    "vacancySource": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::vacancy-source.vacancy-source",
+      "inversedBy": "vacancy"
+    },
     "postedBy": {
       "type": "relation",
       "relation": "manyToOne",
