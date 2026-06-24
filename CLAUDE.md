@@ -17,7 +17,7 @@
 
 ## Текущее состояние проекта
 
-**Фаза: Разработка. Sprint 1 завершён, Sprint 2 Backend завершён, Sprint 2 Frontend завершён.**
+**Фаза: Разработка. Sprint 1 завершён, Sprint 2 завершён, Sprint 3 Backend завершён, Sprint 3 Frontend — следующий.**
 
 Выполнено (Sprint 1):
 
@@ -54,7 +54,7 @@
 - GET /companies/:id — публичная карточка (только published)
 - GET /companies/slug/:slug — по slug (только published)
 - PUT /companies/:id — обновление (owner via policy, slug re-gen при смене name)
-- DELETE /companies/:id — удаление (только draft/rejected, stub vacancy check)
+- DELETE /companies/:id — удаление (только draft/rejected, реальная проверка вакансий)
 - GET /companies/my — мои компании (все статусы, пагинация)
 - Company lifecycle hook — логирует событие published (TODO Telegram notification Sprint 7)
 
@@ -75,7 +75,32 @@
 - `app/dashboard/companies/[id]/edit/page.tsx` — редактирование компании → редирект на dashboard
 - Итого: 89 тестов, 0 ошибок TypeScript
 
-Текущий шаг — Sprint 3 (следующий): Vacancy content type + CRUD endpoints.
+Выполнено (Sprint 3 Backend):
+
+- Content type: Vacancy (все поля из БД-схемы: relations, enums, json, boolean, integer, datetime)
+- Content type: VacancySource (oneToOne → Vacancy, provider, externalId, originalUrl, parsedAt)
+- Утилиты: `canPublish`, `canBoost`, `canArchive`, `canEdit`, `publishedTransitionsOnEdit` + 26 тестов
+- Credit service: `PLAN_LIMITS`, `getLimitForPlan`, `getBoostsLimitForPlan`, `checkAndConsumeVacancyCredit`, `checkAndConsumeBoost` + 9 тестов
+- Policy `is-vacancy-owner` — проверка владельца через `postedBy` + 4 теста
+- Vacancy routes — кастомный файл маршрутов (порядок: `/my` ДО `/:id`), включает DELETE /vacancies/:id
+- Vacancy service — `createVacancy`, `searchByVector` (raw SQL tsvector, GIN-индекс)
+- Vacancy controller — все endpoint-ы: create, publish, findPublished (FTS + filters), findOne (views/uniqueViews), update, boost, archive, findMine
+- Lifecycle hook `beforeUpdate` — устанавливает `expiresAt = now + 60 дней` при переходе в published
+- Lifecycle hook `afterCreate/afterUpdate` — обновляет `search_vector` через raw SQL
+- FTS setup в bootstrap: `ALTER TABLE vacancies ADD COLUMN search_vector tsvector` + GIN-индекс (idempotent)
+- Cron job (hourly): находит `published` вакансии с `expiresAt < now`, переводит в `expired`
+- DELETE /companies/:id — реальная проверка активных вакансий (published/moderation) вместо stub
+- POST /vacancies — проверяет владение компанией (`companyId`) перед созданием
+- Credit filter исправлен: считает только `moderation/published` вакансии в месячный лимит
+- Итого: 79 тестов, 0 ошибок TypeScript
+
+Известные MVP-ограничения Sprint 3 (запланированы к исправлению в Sprint 6):
+
+- Boost/views счётчики хранятся in-memory (сбрасываются при рестарте, не масштабируются)
+- Кредитный лимит без атомарных транзакций (race condition при высокой нагрузке)
+- FTS возвращает максимум первые 10 000 результатов по релевантности
+
+Текущий шаг — Sprint 3 Frontend.
 Планы: `docs/superpowers/plans/`
 
 ---

@@ -94,19 +94,20 @@
 
 ### Backend
 
-- [ ] Content type: Vacancy (все поля)
-- [ ] Content type: VacancySource (для external-вакансий)
-- [ ] `POST /vacancies` — создать (статус draft)
-- [ ] `POST /vacancies/:id/publish` — draft → moderation + проверка лимитов
-- [ ] Сервис: `checkAndConsumeVacancyCredit(userId)` — кредиты пакета → лимит плана → LIMIT_REACHED
-- [ ] `GET /vacancies` — поиск с полным набором фильтров + сортировка (see api-spec)
-- [ ] `GET /vacancies/:id` — карточка (инкремент views + uniqueViews по IP)
-- [ ] `PUT /vacancies/:id` — обновить (owner, переводит published → draft)
-- [ ] `POST /vacancies/:id/boost` — буст (проверка vacancyBoostsPerDay)
-- [ ] `POST /vacancies/:id/archive` — архивировать
-- [ ] `GET /vacancies/my` — мои вакансии (все статусы)
-- [ ] Full-text search: PostgreSQL `tsvector` индекс на title + description (миграция)
-- [ ] Cron (ежечасно): Vacancy: expiresAt < now → status expired + уведомление
+- [x] Content type: Vacancy (все поля)
+- [x] Content type: VacancySource (для external-вакансий)
+- [x] `POST /vacancies` — создать (статус draft)
+- [x] `POST /vacancies/:id/publish` — draft → moderation + проверка лимитов
+- [x] Сервис: `checkAndConsumeVacancyCredit(userId)` — кредиты пакета → лимит плана → LIMIT_REACHED
+- [x] `GET /vacancies` — поиск с полным набором фильтров + сортировка (see api-spec)
+- [x] `GET /vacancies/:id` — карточка (инкремент views + uniqueViews по IP)
+- [x] `PUT /vacancies/:id` — обновить (owner, переводит published → draft)
+- [x] `POST /vacancies/:id/boost` — буст (проверка vacancyBoostsPerDay)
+- [x] `POST /vacancies/:id/archive` — архивировать
+- [x] `DELETE /vacancies/:id` — архивировать (alias для archive)
+- [x] `GET /vacancies/my` — мои вакансии (все статусы)
+- [x] Full-text search: PostgreSQL `tsvector` индекс на title + description (GIN + lifecycle hook)
+- [x] Cron (ежечасно): Vacancy: expiresAt < now → status expired + уведомление
 
 ### Frontend
 
