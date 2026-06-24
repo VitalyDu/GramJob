@@ -1,10 +1,12 @@
 import { apiRateLimit, authRateLimit } from './middlewares/rate-limit'
+import { seedIndustries } from './scripts/seed-industries'
 import type { Core } from '@strapi/strapi'
 
 export default {
   register({ strapi: _strapi }: { strapi: Core.Strapi }) {},
 
-  bootstrap({ strapi }: { strapi: Core.Strapi }) {
+  async bootstrap({ strapi }: { strapi: Core.Strapi }) {
+    await seedIndustries(strapi)
     const app = strapi.server.app
 
     // Stricter limit for auth endpoints

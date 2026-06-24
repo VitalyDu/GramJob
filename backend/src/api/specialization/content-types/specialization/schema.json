@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "specializations",
+  "info": {
+    "singularName": "specialization",
+    "pluralName": "specializations",
+    "displayName": "Specialization",
+    "description": "Job specialization within an industry"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "industry": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::industry.industry",
+      "inversedBy": "specializations"
+    },
+    "name": {
+      "type": "json",
+      "required": true
+    },
+    "slug": {
+      "type": "string",
+      "unique": true,
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "industries",
+  "info": {
+    "singularName": "industry",
+    "pluralName": "industries",
+    "displayName": "Industry",
+    "description": "Job industry category"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "json",
+      "required": true
+    },
+    "slug": {
+      "type": "string",
+      "unique": true,
+      "required": true
+    },
+    "specializations": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::specialization.specialization",
+      "mappedBy": "industry"
+    }
+  }
+}
