@@ -1,20 +1,35 @@
 import type { Core } from '@strapi/strapi'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { toSlug, canSubmit, canDelete } from '../services/company-utils'
 import type companyServiceFactory from '../services/company'
 
 type CompanyService = ReturnType<typeof companyServiceFactory>
+
+const VALID_COMPANY_SIZES = [
+  'size_1_10',
+  'size_11_50',
+  'size_51_200',
+  'size_201_500',
+  'size_500_plus',
+] as const
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const svc = () => strapi.service('api::company.company') as unknown as CompanyService
 
   return {
     async create(ctx: any) {
-      const user = ctx.state.user as { id: number }
+      const user = ctx.state.user as { id: number } | undefined
+      if (!user) return ctx.unauthorized('Authentication required')
+
       const body = ctx.request.body as Record<string, unknown>
 
       const { name, description, country, companySize } = body
       if (!name || !description || !country || !companySize) {
         return ctx.badRequest('name, description, country and companySize are required')
+      }
+
+      if (!VALID_COMPANY_SIZES.includes(companySize as (typeof VALID_COMPANY_SIZES)[number])) {
+        return ctx.badRequest(`companySize must be one of: ${VALID_COMPANY_SIZES.join(', ')}`)
       }
 
       const company = await svc().createCompany(user.id, {
@@ -29,7 +44,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       })
 
       ctx.status = 201
-      ctx.send({ data: company })
+      return ctx.send({ data: company })
     },
   }
 }
