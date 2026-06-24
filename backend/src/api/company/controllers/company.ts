@@ -298,8 +298,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         )
       }
 
-      // MVP stub: vacancy count is always 0 (real check in Sprint 3)
-      const activeVacancies = 0
+      const activeVacancies = await strapi.documents('api::vacancy.vacancy').count({
+        filters: {
+          company: { documentId: { $eq: id } },
+          status: { $in: ['published', 'moderation'] },
+        },
+      })
       if (!canDelete(activeVacancies)) {
         return ctx.badRequest(`Cannot delete company with active vacancies.`)
       }
