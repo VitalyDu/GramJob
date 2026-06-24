@@ -5,7 +5,7 @@ type CreateCompanyInput = {
   name: string
   description: string
   country: string
-  companySize: 'size_1_10' | 'size_11_50' | 'size_51_200' | 'size_201_500' | 'size_500_plus'
+  companySize: string
   city?: string
   website?: string
   telegram?: string
@@ -19,7 +19,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     return strapi.documents('api::company.company').create({
       data: {
-        ...input,
+        name: input.name,
+        description: input.description,
+        country: input.country,
+        companySize: input.companySize as
+          | 'size_1_10'
+          | 'size_11_50'
+          | 'size_51_200'
+          | 'size_201_500'
+          | 'size_500_plus',
+        city: input.city,
+        website: input.website,
+        telegram: input.telegram,
+        linkedin: input.linkedin,
         slug,
         status: 'draft',
         owner: ownerId,
