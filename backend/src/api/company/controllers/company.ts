@@ -88,8 +88,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         pageSize = '20',
       } = ctx.query as Record<string, string>
 
-      const pageNum = Math.max(1, parseInt(page, 10))
-      const pageSizeNum = Math.min(100, Math.max(1, parseInt(pageSize, 10)))
+      const pageNum = Math.max(1, parseInt(page, 10) || 1)
+      const pageSizeNum = Math.min(100, Math.max(1, parseInt(pageSize, 10) || 20))
+
+      if (
+        companySize &&
+        !VALID_COMPANY_SIZES.includes(companySize as (typeof VALID_COMPANY_SIZES)[number])
+      ) {
+        return ctx.badRequest(`companySize must be one of: ${VALID_COMPANY_SIZES.join(', ')}`)
+      }
 
       const filters: Record<string, unknown> = { status: { $eq: 'published' } }
 
