@@ -17,7 +17,7 @@
 
 ## Текущее состояние проекта
 
-**Фаза: Разработка. Sprint 1 завершён, Sprint 2 Backend в процессе.**
+**Фаза: Разработка. Sprint 1 завершён, Sprint 2 Backend завершён.**
 
 Выполнено (Sprint 1):
 
@@ -36,18 +36,30 @@
 - Email Login/Register (React Hook Form + Zod), Telegram Mini App init
 - Layout shell: WebHeader (web) + MiniAppBottomNav (mini app)
 
-Выполнено (Sprint 2 Backend, в процессе):
+Выполнено (Sprint 2 Backend):
 
 - Content type: Industry (`name: json{ru,en}`, `slug`, oneToMany → Specialization)
 - Content type: Specialization (`industry: manyToOne`, `name: json{ru,en}`, `slug`)
 - Seed: 12 отраслей, 87 специализаций — idempotent bootstrap (`src/scripts/seed-industries.ts`)
 - GET /industries — возвращает все отрасли с populate specializations
 - Content type: Company (все поля: owner, name, slug, logo, cover, description, website, telegram, linkedin, country, city, companySize, status)
-- Утилиты: `toSlug`, `canSubmit`, `canDelete` с unit-тестами (37 тестов)
+- Утилиты: `toSlug`, `canSubmit`, `canDelete` с unit-тестами (40 тестов)
 - Примечание: `companySize` хранится как `size_1_10` и т.д. (ограничение Strapi 5 enum naming)
+- Policy `is-company-owner` — проверка владельца через `ctx.state.user` + unit-тест
+- Company routes — кастомный файл маршрутов (порядок: `/my`, `/slug/:slug` ДО `/:id`)
+- Company service — `createCompany`, `generateUniqueSlug` (уникальный slug с суффиксом)
+- POST /companies — создание компании (auth, валидация, slug)
+- POST /companies/:id/submit — смена статуса draft → moderation
+- GET /companies — публичный список (фильтры: search, country, companySize; пагинация)
+- GET /companies/:id — публичная карточка (только published)
+- GET /companies/slug/:slug — по slug (только published)
+- PUT /companies/:id — обновление (owner via policy, slug re-gen при смене name)
+- DELETE /companies/:id — удаление (только draft/rejected, stub vacancy check)
+- GET /companies/my — мои компании (все статусы, пагинация)
+- Company lifecycle hook — логирует событие published (TODO Telegram notification Sprint 7)
 
-Текущий шаг — Sprint 2 Backend: реализация Company CRUD endpoints (Tasks 7–17).
-План: `docs/superpowers/plans/2026-06-24-sprint2-backend.md`
+Текущий шаг — Sprint 3 (следующий): Vacancy content type + CRUD endpoints.
+Планы: `docs/superpowers/plans/`
 
 ---
 

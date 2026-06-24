@@ -18,17 +18,17 @@
 - [x] **Task 4** — GET /industries (populate specializations)
 - [x] **Task 5** — Company schema + skeleton файлы
 - [x] **Task 6** — Company business logic utilities (unit-тесты)
-- [ ] **Task 7** — Policy `is-company-owner` (unit-тесты)
-- [ ] **Task 8** — Company routes (все маршруты)
-- [ ] **Task 9** — Company service (createCompany + generateUniqueSlug)
-- [ ] **Task 10** — POST /companies контроллер
-- [ ] **Task 11** — POST /companies/:id/submit контроллер
-- [ ] **Task 12** — GET /companies (публичный список + фильтры)
-- [ ] **Task 13** — GET /companies/:id + GET /companies/slug/:slug
-- [ ] **Task 14** — PUT /companies/:id
-- [ ] **Task 15** — DELETE /companies/:id
-- [ ] **Task 16** — GET /companies/my
-- [ ] **Task 17** — Company lifecycle hook (published → notification stub)
+- [x] **Task 7** — Policy `is-company-owner` (unit-тесты)
+- [x] **Task 8** — Company routes (все маршруты)
+- [x] **Task 9** — Company service (createCompany + generateUniqueSlug)
+- [x] **Task 10** — POST /companies контроллер
+- [x] **Task 11** — POST /companies/:id/submit контроллер
+- [x] **Task 12** — GET /companies (публичный список + фильтры)
+- [x] **Task 13** — GET /companies/:id + GET /companies/slug/:slug
+- [x] **Task 14** — PUT /companies/:id
+- [x] **Task 15** — DELETE /companies/:id
+- [x] **Task 16** — GET /companies/my
+- [x] **Task 17** — Company lifecycle hook (published → notification stub)
 
 ---
 
