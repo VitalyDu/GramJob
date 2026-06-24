@@ -319,5 +319,50 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.status = 204
       ctx.body = null
     },
+
+    async findMine(ctx: any) {
+      const user = ctx.state.user as { id: number } | undefined
+      if (!user) return ctx.unauthorized('Authentication required')
+
+      const { page = '1', pageSize = '20' } = ctx.query as Record<string, string>
+
+      const pageNum = Math.max(1, parseInt(page, 10) || 1)
+      const pageSizeNum = Math.min(100, Math.max(1, parseInt(pageSize, 10) || 20))
+
+      const filters: Record<string, unknown> = {
+        owner: { id: { $eq: user.id } },
+      }
+
+      const [companies, total] = await Promise.all([
+        strapi.documents('api::company.company').findMany({
+          filters,
+          fields: [
+            'documentId',
+            'name',
+            'slug',
+            'country',
+            'city',
+            'companySize',
+            'status',
+            'createdAt',
+          ],
+          populate: { logo: true },
+          start: (pageNum - 1) * pageSizeNum,
+          limit: pageSizeNum,
+          sort: 'createdAt:desc',
+        }),
+        strapi.documents('api::company.company').count({ filters }),
+      ])
+
+      return ctx.send({
+        data: companies,
+        meta: {
+          total,
+          page: pageNum,
+          pageSize: pageSizeNum,
+          pageCount: Math.ceil(total / pageSizeNum),
+        },
+      })
+    },
   }
 }
