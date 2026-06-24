@@ -126,6 +126,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return ctx.badRequest(`seniority must be one of: ${VALID_SENIORITIES.join(', ')}`)
       }
 
+      if (body.companyId) {
+        const company = await strapi.documents('api::company.company').findOne({
+          documentId: body.companyId as string,
+          populate: { owner: { fields: ['id'] } },
+          fields: ['documentId', 'status'],
+        })
+        if (!company || (company as any).owner?.id !== user.id) {
+          return ctx.forbidden('You do not own this company')
+        }
+        if ((company as any).status !== 'published') {
+          return ctx.badRequest('Company must be published to post vacancies')
+        }
+      }
+
       const vacancy = await svc().createVacancy(user.id, {
         title: title as string,
         industryId: industryId as string,
@@ -459,6 +473,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (publishedTransitionsOnEdit(status)) {
         updateData.status = 'draft'
+        updateData.expiresAt = null
       }
 
       const updated = await strapi.documents('api::vacancy.vacancy').update({
