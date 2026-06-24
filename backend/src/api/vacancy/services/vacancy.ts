@@ -75,6 +75,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     })
   },
 
+  /**
+   * @param extraFilters - MUST be a static SQL fragment only (e.g. "AND country = ?").
+   *   Never interpolate user input here directly — pass user values via extraParams instead.
+   */
   async searchByVector(
     searchQuery: string,
     offset: number,
