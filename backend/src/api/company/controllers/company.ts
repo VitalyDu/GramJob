@@ -205,5 +205,77 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       return ctx.send({ data: company })
     },
+
+    async update(ctx: any) {
+      const user = ctx.state.user as { id: number } | undefined
+      if (!user) return ctx.unauthorized('Authentication required')
+
+      const { id } = ctx.params as { id: string }
+      const body = ctx.request.body as Record<string, unknown>
+
+      const existing = await strapi.documents('api::company.company').findOne({
+        documentId: id,
+        fields: ['documentId', 'status', 'name', 'slug'],
+      })
+      if (!existing) return ctx.notFound('Company not found')
+
+      const existingStatus = existing.status as string
+      if (existingStatus !== 'draft' && existingStatus !== 'rejected') {
+        return ctx.badRequest(
+          `Cannot edit company with status "${existingStatus}". Must be draft or rejected.`
+        )
+      }
+
+      const updateData: Record<string, unknown> = {}
+      const allowedFields = [
+        'name',
+        'description',
+        'country',
+        'city',
+        'companySize',
+        'website',
+        'telegram',
+        'linkedin',
+      ]
+      for (const field of allowedFields) {
+        if (field in body) updateData[field] = body[field]
+      }
+
+      if (updateData.companySize !== undefined) {
+        if (
+          !VALID_COMPANY_SIZES.includes(
+            updateData.companySize as (typeof VALID_COMPANY_SIZES)[number]
+          )
+        ) {
+          return ctx.badRequest(`companySize must be one of: ${VALID_COMPANY_SIZES.join(', ')}`)
+        }
+      }
+
+      if (updateData.name && updateData.name !== existing.name) {
+        const baseSlug = toSlug(updateData.name as string)
+        updateData.slug = await svc().generateUniqueSlug(baseSlug, id)
+      }
+
+      const updated = await strapi.documents('api::company.company').update({
+        documentId: id,
+        data: updateData as any,
+        fields: [
+          'documentId',
+          'name',
+          'slug',
+          'description',
+          'website',
+          'telegram',
+          'linkedin',
+          'country',
+          'city',
+          'companySize',
+          'status',
+          'createdAt',
+        ],
+      })
+
+      return ctx.send({ data: updated })
+    },
   }
 }
