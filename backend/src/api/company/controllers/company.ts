@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/strapi'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 import { toSlug, canSubmit, canDelete } from '../services/company-utils'
 import type companyServiceFactory from '../services/company'
 
@@ -287,6 +287,30 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       })
 
       return ctx.send({ data: updated })
+    },
+
+    async delete(ctx: any) {
+      const { id } = ctx.params as { id: string }
+
+      // TODO Sprint 3: заменить на реальный count после создания Vacancy content type
+      // const activeCount = await strapi.documents('api::vacancy.vacancy').count({
+      //   filters: {
+      //     company: { documentId: { $eq: id } },
+      //     status: { $in: ['published', 'moderation'] },
+      //   },
+      // })
+      const activeCount = 0
+
+      if (!canDelete(activeCount)) {
+        return ctx.badRequest(
+          `Cannot delete company with ${activeCount} active vacancy(ies). Archive them first.`
+        )
+      }
+
+      await strapi.documents('api::company.company').delete({ documentId: id })
+
+      ctx.status = 204
+      ctx.body = null
     },
   }
 }
