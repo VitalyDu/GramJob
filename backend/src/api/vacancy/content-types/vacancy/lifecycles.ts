@@ -1,14 +1,31 @@
-type VacancyEvent = {
+type VacancyBeforeUpdateEvent = {
+  params: {
+    data: Record<string, unknown>
+    documentId?: string
+    where?: Record<string, unknown>
+  }
+}
+
+type VacancyAfterEvent = {
   result: { documentId?: string; id?: number; status?: string; expiresAt?: string | null }
   params: unknown
 }
 
 export default {
-  async afterCreate(event: VacancyEvent) {
+  async beforeUpdate(event: VacancyBeforeUpdateEvent) {
+    const { data } = event.params
+    if (data?.status === 'published') {
+      const expiresAt = new Date()
+      expiresAt.setUTCDate(expiresAt.getUTCDate() + 60)
+      data.expiresAt = expiresAt.toISOString()
+    }
+  },
+
+  async afterCreate(event: VacancyAfterEvent) {
     await updateSearchVector(event.result.id)
   },
 
-  async afterUpdate(event: VacancyEvent) {
+  async afterUpdate(event: VacancyAfterEvent) {
     await updateSearchVector(event.result.id)
 
     if (event.result.status === 'published') {
