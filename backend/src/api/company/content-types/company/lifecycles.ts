@@ -8,13 +8,12 @@ type CompanyLifecycleEvent = {
   params: unknown
 }
 
-declare const strapi: Core.Strapi
-
 export default {
   async afterUpdate(event: CompanyLifecycleEvent) {
     if (event.result.status === 'published') {
+      const s = globalThis.strapi as Core.Strapi
       // TODO: send Telegram notification to company owner (Sprint 3)
-      strapi.log.info(`[company] Company ${event.result.documentId} published`)
+      s.log.info(`[company] Company ${event.result.documentId} published`)
     }
   },
 }

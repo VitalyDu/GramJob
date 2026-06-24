@@ -48,22 +48,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async submit(ctx: any) {
-      const user = ctx.state.user as { id: number } | undefined
-      if (!user) return ctx.unauthorized('Authentication required')
-
       const { id } = ctx.params as { id: string }
 
+      // Ownership already verified by is-company-owner policy
       const company = await strapi.documents('api::company.company').findOne({
         documentId: id,
-        populate: { owner: { fields: ['id'] } },
+        fields: ['documentId', 'status'],
       })
 
       if (!company) return ctx.notFound('Company not found')
-
-      const owner = company.owner as { id: number } | null
-      if (!owner || owner.id !== user.id) {
-        return ctx.forbidden('You are not the owner of this company')
-      }
 
       const status = company.status as string | null | undefined
       if (!status || !canSubmit(status)) {
@@ -141,8 +134,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async findOne(ctx: any) {
       const { id } = ctx.params as { id: string }
 
-      const company = await strapi.documents('api::company.company').findOne({
-        documentId: id,
+      const company = await strapi.documents('api::company.company').findFirst({
+        filters: { documentId: { $eq: id }, status: { $eq: 'published' } },
         fields: [
           'documentId',
           'name',
@@ -165,9 +158,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       })
 
       if (!company) return ctx.notFound('Company not found')
-
-      const status = company.status as string | null | undefined
-      if (status !== 'published') return ctx.notFound('Company not found')
 
       return ctx.send({ data: company })
     },

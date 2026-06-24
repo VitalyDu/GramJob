@@ -38,12 +38,14 @@ export default {
       config: { auth: false },
     },
 
-    // By id — authenticated
+    // By id — owner only (policy)
     {
       method: 'POST',
       path: '/companies/:id/submit',
       handler: 'company.submit',
-      config: {},
+      config: {
+        policies: ['api::company.is-company-owner'],
+      },
     },
 
     // By id — owner only (policy)
