@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/strapi'
- 
+
 import { toSlug, canSubmit, canDelete } from '../services/company-utils'
 import type companyServiceFactory from '../services/company'
 
@@ -290,21 +290,28 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async delete(ctx: any) {
+      const user = ctx.state.user as { id: number } | undefined
+      if (!user) return ctx.unauthorized('Authentication required')
+
       const { id } = ctx.params as { id: string }
 
-      // TODO Sprint 3: заменить на реальный count после создания Vacancy content type
-      // const activeCount = await strapi.documents('api::vacancy.vacancy').count({
-      //   filters: {
-      //     company: { documentId: { $eq: id } },
-      //     status: { $in: ['published', 'moderation'] },
-      //   },
-      // })
-      const activeCount = 0
+      const company = await strapi.documents('api::company.company').findOne({
+        documentId: id,
+        fields: ['documentId', 'status'],
+      })
+      if (!company) return ctx.notFound('Company not found')
 
-      if (!canDelete(activeCount)) {
+      const status = company.status as string
+      if (status !== 'draft' && status !== 'rejected') {
         return ctx.badRequest(
-          `Cannot delete company with ${activeCount} active vacancy(ies). Archive them first.`
+          `Cannot delete company with status "${status}". Must be draft or rejected.`
         )
+      }
+
+      // MVP stub: vacancy count is always 0 (real check in Sprint 3)
+      const activeVacancies = 0
+      if (!canDelete(activeVacancies)) {
+        return ctx.badRequest(`Cannot delete company with active vacancies.`)
       }
 
       await strapi.documents('api::company.company').delete({ documentId: id })
