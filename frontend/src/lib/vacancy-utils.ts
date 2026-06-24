@@ -1,0 +1,69 @@
+import type {
+  VacancyStatusEnum,
+  WorkFormatEnum,
+  EmploymentTypeEnum,
+  SeniorityEnum,
+  SalaryCurrencyEnum,
+} from '@/types/api'
+
+export const WORK_FORMAT_LABELS: Record<WorkFormatEnum, string> = {
+  office: 'Офис',
+  remote: 'Удалённо',
+  hybrid: 'Гибрид',
+}
+
+export const EMPLOYMENT_TYPE_LABELS: Record<EmploymentTypeEnum, string> = {
+  'full-time': 'Полная занятость',
+  'part-time': 'Частичная занятость',
+  contract: 'Контракт',
+  internship: 'Стажировка',
+  freelance: 'Фриланс',
+}
+
+export const SENIORITY_LABELS: Record<SeniorityEnum, string> = {
+  intern: 'Intern',
+  junior: 'Junior',
+  middle: 'Middle',
+  senior: 'Senior',
+  lead: 'Lead',
+  principal: 'Principal',
+}
+
+export const SALARY_CURRENCY_SYMBOLS: Record<SalaryCurrencyEnum, string> = {
+  USD: '$',
+  EUR: '€',
+  RUB: '₽',
+  GBP: '£',
+}
+
+export function canPublishVacancy(status: VacancyStatusEnum): boolean {
+  return status === 'draft' || status === 'rejected' || status === 'expired'
+}
+
+export function canBoostVacancy(status: VacancyStatusEnum): boolean {
+  return status === 'published'
+}
+
+export function canArchiveVacancy(status: VacancyStatusEnum): boolean {
+  return status !== 'archived' && status !== 'moderation'
+}
+
+export function canEditVacancy(status: VacancyStatusEnum): boolean {
+  return status !== 'archived'
+}
+
+export function canDeleteVacancy(status: VacancyStatusEnum): boolean {
+  return status === 'draft' || status === 'rejected'
+}
+
+export function formatSalary(
+  from?: number | null,
+  to?: number | null,
+  currency?: SalaryCurrencyEnum | null
+): string {
+  if (!from && !to) return ''
+  const sym = currency ? (SALARY_CURRENCY_SYMBOLS[currency] ?? '') : ''
+  if (from && to) return `${sym}${from.toLocaleString('ru')} — ${sym}${to.toLocaleString('ru')}`
+  if (from) return `от ${sym}${from.toLocaleString('ru')}`
+  return `до ${sym}${to!.toLocaleString('ru')}`
+}
