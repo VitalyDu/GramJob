@@ -13,6 +13,7 @@ export default {
             expiresAt: { $lt: now },
           },
           fields: ['documentId', 'title'],
+          limit: 1000,
         })
 
         if (expired.length === 0) return
