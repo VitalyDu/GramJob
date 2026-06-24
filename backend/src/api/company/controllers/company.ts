@@ -78,5 +78,57 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       return ctx.send({ data: updated })
     },
+
+    async findPublished(ctx: any) {
+      const {
+        search,
+        country,
+        companySize,
+        page = '1',
+        pageSize = '20',
+      } = ctx.query as Record<string, string>
+
+      const pageNum = Math.max(1, parseInt(page, 10))
+      const pageSizeNum = Math.min(100, Math.max(1, parseInt(pageSize, 10)))
+
+      const filters: Record<string, unknown> = { status: { $eq: 'published' } }
+
+      if (search) {
+        filters.$or = [{ name: { $containsi: search } }, { description: { $containsi: search } }]
+      }
+      if (country) filters.country = { $eq: country }
+      if (companySize) filters.companySize = { $eq: companySize }
+
+      const [companies, total] = await Promise.all([
+        strapi.documents('api::company.company').findMany({
+          filters,
+          fields: [
+            'documentId',
+            'name',
+            'slug',
+            'country',
+            'city',
+            'companySize',
+            'status',
+            'createdAt',
+          ],
+          populate: { logo: true },
+          start: (pageNum - 1) * pageSizeNum,
+          limit: pageSizeNum,
+          sort: 'createdAt:desc',
+        }),
+        strapi.documents('api::company.company').count({ filters }),
+      ])
+
+      return ctx.send({
+        data: companies,
+        meta: {
+          total,
+          page: pageNum,
+          pageSize: pageSizeNum,
+          pageCount: Math.ceil(total / pageSizeNum),
+        },
+      })
+    },
   }
 }
