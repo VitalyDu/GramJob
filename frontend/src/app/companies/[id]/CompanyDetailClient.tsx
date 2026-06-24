@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
 import { StatusBadge } from '@/components/company/StatusBadge'
@@ -23,10 +24,11 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
     return <p className="text-sm text-muted-foreground">Загрузка...</p>
   }
 
-  if (!store.currentCompany) {
+  if (store.error || !store.currentCompany) {
     return (
       <div className="py-16 text-center">
         <p className="text-lg font-medium text-gray-900">Компания не найдена</p>
+        {store.error && <p className="mt-1 text-sm text-muted-foreground">{store.error}</p>}
         <Link href="/companies" className="mt-4 inline-block text-sm text-primary hover:underline">
           ← Все компании
         </Link>
@@ -41,15 +43,21 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
   return (
     <div className="space-y-6">
       {coverUrl && (
-        <div className="h-48 w-full overflow-hidden rounded-xl bg-gray-100">
-          <img src={coverUrl} alt="" className="h-full w-full object-cover" />
+        <div className="relative h-48 w-full overflow-hidden rounded-xl bg-gray-100">
+          <Image src={coverUrl} alt="" fill className="object-cover" />
         </div>
       )}
 
       <div className="flex items-start gap-5">
         <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-100">
           {logoUrl ? (
-            <img src={logoUrl} alt={company.name} className="h-full w-full object-cover" />
+            <Image
+              src={logoUrl}
+              alt={company.name}
+              width={80}
+              height={80}
+              className="h-full w-full object-cover"
+            />
           ) : (
             <span className="text-3xl font-bold text-gray-400">
               {company.name.charAt(0).toUpperCase()}

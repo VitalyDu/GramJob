@@ -5,6 +5,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import type { CompanyCreateInput, CompanySizeEnum } from '@/types/api'
 import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
+
+const COMPANY_SIZE_VALUES = Object.keys(COMPANY_SIZE_LABELS) as [
+  CompanySizeEnum,
+  ...CompanySizeEnum[],
+]
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,13 +19,7 @@ const schema = z.object({
   description: z.string().optional().default(''),
   country: z.string().min(1, 'Страна обязательна'),
   city: z.string().optional().default(''),
-  companySize: z.enum([
-    'size_1_10',
-    'size_11_50',
-    'size_51_200',
-    'size_201_500',
-    'size_500_plus',
-  ] as const),
+  companySize: z.enum(COMPANY_SIZE_VALUES),
   website: z.string().url('Введите корректный URL').or(z.literal('')).optional().default(''),
   telegram: z.string().optional().default(''),
   linkedin: z.string().url('Введите корректный URL').or(z.literal('')).optional().default(''),
@@ -34,7 +33,7 @@ interface Props {
   isLoading?: boolean
 }
 
-const SIZE_OPTIONS = Object.entries(COMPANY_SIZE_LABELS) as [CompanySizeEnum, string][]
+const SIZE_OPTIONS = Object.entries(COMPANY_SIZE_LABELS) as Array<[CompanySizeEnum, string]>
 
 export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
   const {

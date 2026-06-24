@@ -2,21 +2,13 @@
 
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
 import { StatusBadge } from '@/components/company/StatusBadge'
-import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
+import { COMPANY_SIZE_LABELS, canSubmitCompany, canDeleteCompany } from '@/lib/company-utils'
 import { getMediaUrl } from '@/lib/media'
 import { Button } from '@/components/ui/button'
-import type { Company } from '@/types/api'
-
-function canSubmit(status: Company['status']) {
-  return status === 'draft' || status === 'rejected'
-}
-
-function canDelete(status: Company['status']) {
-  return status === 'draft' || status === 'rejected'
-}
 
 export const MyCompaniesClient = observer(function MyCompaniesClient() {
   const { company: store } = useStores()
@@ -75,7 +67,13 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
             >
               <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-100">
                 {logoUrl ? (
-                  <img src={logoUrl} alt={company.name} className="h-full w-full object-cover" />
+                  <Image
+                    src={logoUrl}
+                    alt={company.name}
+                    width={48}
+                    height={48}
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <span className="text-lg font-bold text-gray-400">
                     {company.name.charAt(0).toUpperCase()}
@@ -101,7 +99,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
                   Редактировать
                 </Link>
 
-                {canSubmit(company.status) && (
+                {canSubmitCompany(company.status) && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -112,7 +110,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
                   </Button>
                 )}
 
-                {canDelete(company.status) && (
+                {canDeleteCompany(company.status) && (
                   <Button
                     size="sm"
                     variant="outline"

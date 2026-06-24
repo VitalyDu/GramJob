@@ -1,4 +1,4 @@
-import type { CompanySizeEnum } from '@/types/api'
+import type { CompanySizeEnum, CompanyStatusEnum } from '@/types/api'
 
 export const COMPANY_SIZE_LABELS: Record<CompanySizeEnum, string> = {
   size_1_10: '1–10',
@@ -6,4 +6,12 @@ export const COMPANY_SIZE_LABELS: Record<CompanySizeEnum, string> = {
   size_51_200: '51–200',
   size_201_500: '201–500',
   size_500_plus: '500+',
+}
+
+export function canSubmitCompany(status: CompanyStatusEnum): boolean {
+  return status === 'draft' || status === 'rejected'
+}
+
+export function canDeleteCompany(status: CompanyStatusEnum): boolean {
+  return status === 'draft' || status === 'rejected'
 }

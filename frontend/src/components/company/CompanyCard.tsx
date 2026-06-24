@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import type { Company } from '@/types/api'
 import { getMediaUrl } from '@/lib/media'
@@ -16,7 +17,13 @@ export function CompanyCard({ company }: Props) {
       <div className="flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-4 transition hover:border-gray-300 hover:shadow-sm">
         <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-100">
           {logoUrl ? (
-            <img src={logoUrl} alt={company.name} className="h-full w-full object-cover" />
+            <Image
+              src={logoUrl}
+              alt={company.name}
+              width={56}
+              height={56}
+              className="h-full w-full object-cover"
+            />
           ) : (
             <span className="text-xl font-bold text-gray-400">
               {company.name.charAt(0).toUpperCase()}

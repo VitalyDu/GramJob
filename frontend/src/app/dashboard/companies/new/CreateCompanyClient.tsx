@@ -13,9 +13,8 @@ export const CreateCompanyClient = observer(function CreateCompanyClient() {
 
   const handleSubmit = async (data: CompanyCreateInput) => {
     try {
-      const company = await store.createCompany(data)
-      router.push(`/dashboard/companies`)
-      void company
+      await store.createCompany(data)
+      router.push('/dashboard/companies')
     } catch {
       // error сохранён в store.error
     }

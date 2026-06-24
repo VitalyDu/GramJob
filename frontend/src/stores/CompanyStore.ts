@@ -29,7 +29,7 @@ export class CompanyStore {
   }
 
   get pageCount(): number {
-    return Math.ceil(this.total / this.pageSize)
+    return this.pageSize > 0 ? Math.ceil(this.total / this.pageSize) : 0
   }
 
   async fetchCompanies(params: CompanyListParams = {}): Promise<void> {

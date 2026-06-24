@@ -74,11 +74,11 @@ export const EditCompanyClient = observer(function EditCompanyClient({ id }: Pro
           name: company.name,
           country: company.country,
           companySize: company.companySize,
-          ...(company.description && { description: company.description }),
-          ...(company.city && { city: company.city }),
-          ...(company.website && { website: company.website }),
-          ...(company.telegram && { telegram: company.telegram }),
-          ...(company.linkedin && { linkedin: company.linkedin }),
+          description: company.description ?? '',
+          city: company.city ?? '',
+          website: company.website ?? '',
+          telegram: company.telegram ?? '',
+          linkedin: company.linkedin ?? '',
         }}
       />
     </div>
