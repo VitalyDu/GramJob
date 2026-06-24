@@ -240,8 +240,27 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           })
         }
 
+        const searchFilters: Record<string, unknown> = {
+          documentId: { $in: documentIds },
+          status: { $eq: 'published' },
+          expiresAt: { $gt: new Date().toISOString() },
+        }
+        if (industry) searchFilters.industry = { documentId: { $eq: industry } }
+        if (specialization) searchFilters.specialization = { documentId: { $eq: specialization } }
+        if (country) searchFilters.country = { $eq: country }
+        if (city) searchFilters.city = { $containsi: city }
+        if (workFormat) searchFilters.workFormat = { $eq: workFormat }
+        if (employmentType) searchFilters.employmentType = { $eq: employmentType }
+        if (seniority) searchFilters.seniority = { $eq: seniority }
+        if (salaryCurrency) searchFilters.salaryCurrency = { $eq: salaryCurrency }
+        if (salaryFrom) searchFilters.salaryTo = { $gte: parseInt(salaryFrom, 10) }
+        if (salaryTo) searchFilters.salaryFrom = { $lte: parseInt(salaryTo, 10) }
+        if (sourceType) searchFilters.sourceType = { $eq: sourceType }
+        if (urgent === 'true') searchFilters.urgent = { $eq: true }
+        if (topPlacement === 'true') searchFilters.topPlacement = { $eq: true }
+
         const vacancies = await strapi.documents('api::vacancy.vacancy').findMany({
-          filters: { documentId: { $in: documentIds } },
+          filters: searchFilters,
           fields: VACANCY_CARD_FIELDS as any,
           populate: VACANCY_POPULATE as any,
         })
