@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/strapi'
 
-type CompanyWithOwner = { owner: { id: number } | null }
+type CompanyWithOwner = { owner: { id: number } | null | undefined }
 
 export function checkIsOwner(company: CompanyWithOwner, userId: number): boolean {
   return company.owner?.id === userId
