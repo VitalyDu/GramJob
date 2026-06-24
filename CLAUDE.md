@@ -17,7 +17,7 @@
 
 ## Текущее состояние проекта
 
-**Фаза: Разработка. Sprint 1 завершён, Sprint 2 Backend завершён.**
+**Фаза: Разработка. Sprint 1 завершён, Sprint 2 Backend завершён, Sprint 2 Frontend завершён.**
 
 Выполнено (Sprint 1):
 
@@ -57,6 +57,23 @@
 - DELETE /companies/:id — удаление (только draft/rejected, stub vacancy check)
 - GET /companies/my — мои компании (все статусы, пагинация)
 - Company lifecycle hook — логирует событие published (TODO Telegram notification Sprint 7)
+
+Выполнено (Sprint 2 Frontend):
+
+- `types/api.ts` — Company-типы: `Company`, `CompanySizeEnum`, `CompanyStatusEnum`, `StrapiMedia`, `CompanyCreateInput`, `CompanyUpdateInput`, `CompanyListParams`
+- `lib/media.ts` — `getMediaUrl()` для Strapi media URLs
+- `lib/company-utils.ts` — `COMPANY_SIZE_LABELS` (size_1_10 → "1–10" и т.д.)
+- `stores/CompanyStore.ts` — MobX стор: `fetchCompanies`, `fetchMyCompanies`, `fetchCompanyById`, `createCompany`, `updateCompany`, `deleteCompany`, `submitCompany` (16 тестов)
+- `stores/RootStore.ts` — добавлен `company: CompanyStore`
+- `components/company/StatusBadge.tsx` — бейдж статуса компании с цветовой кодировкой
+- `components/company/CompanyCard.tsx` — карточка компании (лого, название, статус, размер, страна)
+- `components/company/CompanyForm.tsx` — форма создания/редактирования (React Hook Form + Zod)
+- `app/companies/page.tsx` — публичный каталог компаний (поиск, фильтр по стране, пагинация)
+- `app/companies/[id]/page.tsx` — публичный профиль компании
+- `app/dashboard/companies/page.tsx` — список своих компаний (подать на модерацию, удалить)
+- `app/dashboard/companies/new/page.tsx` — создание компании → редирект на dashboard
+- `app/dashboard/companies/[id]/edit/page.tsx` — редактирование компании → редирект на dashboard
+- Итого: 89 тестов, 0 ошибок TypeScript
 
 Текущий шаг — Sprint 3 (следующий): Vacancy content type + CRUD endpoints.
 Планы: `docs/superpowers/plans/`
