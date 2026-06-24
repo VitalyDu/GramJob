@@ -63,5 +63,13 @@ export default {
         policies: ['api::vacancy.is-vacancy-owner'],
       },
     },
+    {
+      method: 'DELETE',
+      path: '/vacancies/:id',
+      handler: 'vacancy.archive',
+      config: {
+        policies: ['api::vacancy.is-vacancy-owner'],
+      },
+    },
   ],
 }
