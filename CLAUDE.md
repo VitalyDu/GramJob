@@ -17,7 +17,7 @@
 
 ## Текущее состояние проекта
 
-**Фаза: Разработка. Sprint 1 завершён, Sprint 2 завершён, Sprint 3 Backend завершён, Sprint 3 Frontend — следующий.**
+**Фаза: Разработка. Sprint 1 завершён, Sprint 2 завершён, Sprint 3 Backend завершён, Sprint 3 Frontend — в процессе (Tasks 1–12 из 15 выполнены).**
 
 Выполнено (Sprint 1):
 
@@ -100,7 +100,23 @@
 - Кредитный лимит без атомарных транзакций (race condition при высокой нагрузке)
 - FTS возвращает максимум первые 10 000 результатов по релевантности
 
-Текущий шаг — Sprint 3 Frontend.
+Выполнено (Sprint 3 Frontend, Tasks 1–12):
+
+- `types/api.ts` — Vacancy-типы: `Vacancy`, `VacancyStatusEnum`, `WorkFormatEnum`, `EmploymentTypeEnum`, `SeniorityEnum`, `SalaryCurrencyEnum`, `VacancyCreateInput`, `VacancyUpdateInput`, `VacancyListParams`, `Industry`, `Specialization`
+- `lib/vacancy-utils.ts` — `WORK_FORMAT_LABELS`, `EMPLOYMENT_TYPE_LABELS`, `SENIORITY_LABELS`, `formatSalary`, `canPublishVacancy`, `canBoostVacancy`, `canArchiveVacancy`, `canEditVacancy`
+- `stores/VacancyStore.ts` — MobX стор: `fetchVacancies`, `fetchMyVacancies`, `fetchVacancyById`, `createVacancy`, `updateVacancy`, `publishVacancy`, `boostVacancy`, `archiveVacancy`, `deleteVacancy`, `clearLimitReached` (16 тестов)
+- `stores/RootStore.ts` — добавлен `vacancy: VacancyStore`
+- `components/vacancy/VacancyStatusBadge.tsx` — бейдж статуса (6 статусов: draft/moderation/published/rejected/expired/archived)
+- `components/vacancy/VacancyCard.tsx` — карточка вакансии (urgent, top, highlighted, external badge)
+- `components/vacancy/LimitBar.tsx` — прогресс-бар кредитов (зелёный/жёлтый/красный)
+- `components/vacancy/UpsellModal.tsx` — модал при LIMIT_REACHED с планами Pro и Max
+- `components/vacancy/VacancyFilters.tsx` — панель фильтров (workFormat, employmentType, seniority, sort)
+- `components/vacancy/VacancyForm.tsx` — форма создания/редактирования (все поля, React Hook Form + Zod)
+- `app/vacancies/page.tsx` + `VacanciesClient.tsx` — публичный поиск (фильтры + карточки + пагинация)
+- `app/vacancies/[id]/page.tsx` + `VacancyDetailClient.tsx` — полная карточка (Apply on Source для external)
+- Итого: ~130+ тестов (Tasks 3–11 покрыты), 0 ошибок TypeScript
+
+Текущий шаг — Sprint 3 Frontend, Tasks 13–15 (dashboard/vacancies + create + edit).
 Планы: `docs/superpowers/plans/`
 
 ---

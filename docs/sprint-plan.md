@@ -111,15 +111,15 @@
 
 ### Frontend
 
-- [ ] VacancyStore: список/фильтры, текущая, CRUD
-- [ ] Страница: `/vacancies` — поиск (панель фильтров + список + infinite scroll)
-- [ ] Компонент: VacancyCard (все варианты: highlighted, urgent, top, external)
-- [ ] Компонент: VacancyFilters (все фильтры из api-spec)
-- [ ] Страница: `/vacancies/:id` — полная карточка (Apply / Apply on Source)
+- [x] VacancyStore: список/фильтры, текущая, CRUD
+- [x] Страница: `/vacancies` — поиск (панель фильтров + список + пагинация)
+- [x] Компонент: VacancyCard (все варианты: highlighted, urgent, top, external)
+- [x] Компонент: VacancyFilters (все фильтры из api-spec)
+- [x] Страница: `/vacancies/:id` — полная карточка (Apply / Apply on Source)
 - [ ] Страница: `/dashboard/vacancies` — мои вакансии + управление (буст, архив)
-- [ ] Форма: создать/редактировать вакансию (все поля, skills/languages теги)
-- [ ] Компонент: LimitBar — `N/M вакансий использовано`, сброс через N дней
-- [ ] Обработка ошибки `LIMIT_REACHED` → upsell-модал
+- [x] Форма: создать/редактировать вакансию (все поля, skills/languages теги)
+- [x] Компонент: LimitBar — `N/M вакансий использовано`, сброс через N дней
+- [x] Обработка ошибки `LIMIT_REACHED` → upsell-модал
 
 ---
 
