@@ -24,6 +24,7 @@ export class VacancyStore {
   page = 1
   pageSize = 20
   limitReached = false
+  boostsRemaining: number | null = null
 
   constructor() {
     makeAutoObservable(this)
