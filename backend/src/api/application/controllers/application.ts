@@ -1,0 +1,223 @@
+import type { Core } from '@strapi/strapi'
+import { canTransitionTo } from '../services/application-utils'
+import { checkAndConsumeApplyCredit } from '../services/apply-credit-service'
+
+const APPLICATION_POPULATE = {
+  vacancy: {
+    fields: ['documentId', 'title', 'status', 'sourceType'],
+    populate: {
+      company: { fields: ['documentId', 'name', 'slug'] },
+      postedBy: { fields: ['id'] },
+    },
+  },
+  resume: {
+    fields: ['documentId', 'title', 'firstName', 'lastName', 'status'],
+    populate: { user: { fields: ['id'] } },
+  },
+  user: { fields: ['id', 'firstName', 'lastName'] },
+} as const
+
+export default ({ strapi }: { strapi: Core.Strapi }) => ({
+  async create(ctx: any) {
+    const user = ctx.state.user as { id: number } | undefined
+    if (!user) return ctx.unauthorized('Authentication required')
+
+    const body = ctx.request.body as Record<string, unknown>
+    const { vacancyId, resumeId, coverLetter } = body
+
+    if (!vacancyId || !resumeId) {
+      return ctx.badRequest('vacancyId and resumeId are required')
+    }
+
+    // Validate vacancy is published and internal
+    const vacancy = await (strapi.documents as any)('api::vacancy.vacancy').findOne({
+      documentId: vacancyId as string,
+      fields: ['documentId', 'status', 'sourceType'],
+      populate: { postedBy: { fields: ['id'] } },
+    })
+    if (!vacancy) return ctx.notFound('Vacancy not found')
+    if (vacancy.status !== 'published') {
+      return ctx.badRequest('Vacancy is not published')
+    }
+    if (vacancy.sourceType === 'external') {
+      return ctx.badRequest('Cannot apply to external vacancies through this endpoint')
+    }
+
+    // Validate resume ownership and published status
+    const resume = await (strapi.documents as any)('api::resume.resume').findOne({
+      documentId: resumeId as string,
+      fields: ['documentId', 'status'],
+      populate: { user: { fields: ['id'] } },
+    })
+    if (!resume) return ctx.notFound('Resume not found')
+    if (resume.user?.id !== user.id) {
+      return ctx.forbidden('You do not own this resume')
+    }
+    if (resume.status !== 'published') {
+      return ctx.badRequest('Resume must be published to apply')
+    }
+
+    // Enforce one application per vacancy per user
+    const existing = await (strapi.documents as any)('api::application.application').findFirst({
+      filters: {
+        vacancy: { documentId: { $eq: vacancyId as string } },
+        user: { id: { $eq: user.id } },
+      },
+    })
+    if (existing) {
+      ctx.status = 409
+      return ctx.send({
+        error: { code: 'ALREADY_APPLIED', message: 'You have already applied to this vacancy' },
+      })
+    }
+
+    // Check and consume apply credit
+    try {
+      await checkAndConsumeApplyCredit(strapi, user.id)
+    } catch (err: any) {
+      if (err?.code === 'LIMIT_REACHED') {
+        ctx.status = 403
+        return ctx.send({
+          error: {
+            code: 'LIMIT_REACHED',
+            message: 'Daily application limit reached',
+            details: err.details,
+          },
+        })
+      }
+      throw err
+    }
+
+    const application = await (strapi.documents as any)('api::application.application').create({
+      data: {
+        vacancy: vacancyId as string,
+        resume: resumeId as string,
+        user: user.id,
+        coverLetter: coverLetter as string | undefined,
+        status: 'applied',
+      },
+      populate: APPLICATION_POPULATE as any,
+    })
+
+    ctx.status = 201
+    return ctx.send({ data: application })
+  },
+
+  async findMine(ctx: any) {
+    const user = ctx.state.user as { id: number } | undefined
+    if (!user) return ctx.unauthorized('Authentication required')
+
+    const { status, page = '1', pageSize = '20' } = ctx.query as Record<string, string>
+
+    const pageNum = Math.max(1, parseInt(page, 10) || 1)
+    const pageSizeNum = Math.min(100, Math.max(1, parseInt(pageSize, 10) || 20))
+
+    const filters: Record<string, unknown> = { user: { id: { $eq: user.id } } }
+    if (status) filters.status = { $eq: status }
+
+    const [applications, total] = await Promise.all([
+      (strapi.documents as any)('api::application.application').findMany({
+        filters,
+        populate: APPLICATION_POPULATE as any,
+        start: (pageNum - 1) * pageSizeNum,
+        limit: pageSizeNum,
+        sort: 'createdAt:desc',
+      }),
+      (strapi.documents as any)('api::application.application').count({ filters }),
+    ])
+
+    return ctx.send({
+      data: applications,
+      meta: {
+        total,
+        page: pageNum,
+        pageSize: pageSizeNum,
+        pageCount: Math.ceil(total / pageSizeNum),
+      },
+    })
+  },
+
+  async findByVacancy(ctx: any) {
+    const user = ctx.state.user as { id: number } | undefined
+    if (!user) return ctx.unauthorized('Authentication required')
+
+    const { id } = ctx.params as { id: string }
+    const { status, page = '1', pageSize = '20' } = ctx.query as Record<string, string>
+
+    // Verify the requesting user owns the vacancy
+    const vacancy = await (strapi.documents as any)('api::vacancy.vacancy').findOne({
+      documentId: id,
+      fields: ['documentId'],
+      populate: { postedBy: { fields: ['id'] } },
+    })
+    if (!vacancy) return ctx.notFound('Vacancy not found')
+    if (vacancy.postedBy?.id !== user.id) {
+      return ctx.forbidden('You do not own this vacancy')
+    }
+
+    const pageNum = Math.max(1, parseInt(page, 10) || 1)
+    const pageSizeNum = Math.min(100, Math.max(1, parseInt(pageSize, 10) || 20))
+
+    const filters: Record<string, unknown> = {
+      vacancy: { documentId: { $eq: id } },
+    }
+    if (status) filters.status = { $eq: status }
+
+    const [applications, total] = await Promise.all([
+      (strapi.documents as any)('api::application.application').findMany({
+        filters,
+        populate: APPLICATION_POPULATE as any,
+        start: (pageNum - 1) * pageSizeNum,
+        limit: pageSizeNum,
+        sort: 'createdAt:desc',
+      }),
+      (strapi.documents as any)('api::application.application').count({ filters }),
+    ])
+
+    return ctx.send({
+      data: applications,
+      meta: {
+        total,
+        page: pageNum,
+        pageSize: pageSizeNum,
+        pageCount: Math.ceil(total / pageSizeNum),
+      },
+    })
+  },
+
+  async updateStatus(ctx: any) {
+    const user = ctx.state.user as { id: number } | undefined
+    if (!user) return ctx.unauthorized('Authentication required')
+
+    const { id } = ctx.params as { id: string }
+    const body = ctx.request.body as { status?: string }
+
+    if (!body.status) return ctx.badRequest('status is required')
+
+    const application = await (strapi.documents as any)('api::application.application').findOne({
+      documentId: id,
+      populate: APPLICATION_POPULATE as any,
+    })
+    if (!application) return ctx.notFound('Application not found')
+
+    // Only the vacancy owner (employer) may change status
+    if (application.vacancy?.postedBy?.id !== user.id) {
+      return ctx.forbidden('Only the vacancy owner can update application status')
+    }
+
+    const currentStatus = application.status as string
+    if (!canTransitionTo(currentStatus, body.status)) {
+      return ctx.badRequest(
+        `Cannot transition application status from "${currentStatus}" to "${body.status}"`
+      )
+    }
+
+    const updated = await (strapi.documents as any)('api::application.application').update({
+      documentId: id,
+      data: { status: body.status as any },
+      populate: APPLICATION_POPULATE as any,
+    })
+
+    return ctx.send({ data: updated })
+  },
+})
