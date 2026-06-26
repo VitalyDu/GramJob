@@ -19,12 +19,12 @@ describe('canPublish', () => {
     expect(canPublish('published')).toBe(false)
   })
 
-  it('blocks publish from rejected', () => {
-    expect(canPublish('rejected')).toBe(false)
+  it('allows publish from rejected', () => {
+    expect(canPublish('rejected')).toBe(true)
   })
 
-  it('blocks publish from expired', () => {
-    expect(canPublish('expired')).toBe(false)
+  it('allows publish from expired', () => {
+    expect(canPublish('expired')).toBe(true)
   })
 
   it('blocks publish from archived', () => {

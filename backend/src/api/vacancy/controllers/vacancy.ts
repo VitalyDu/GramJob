@@ -184,7 +184,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const status = vacancy.status as string
       if (!canPublish(status)) {
-        return ctx.badRequest(`Cannot publish vacancy with status "${status}". Must be "draft".`)
+        return ctx.badRequest(
+          `Cannot publish vacancy with status "${status}". Must be "draft", "rejected", or "expired".`
+        )
       }
 
       try {

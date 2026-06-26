@@ -1,5 +1,5 @@
 export function canPublish(status: string): boolean {
-  return status === 'draft'
+  return status === 'draft' || status === 'rejected' || status === 'expired'
 }
 
 export function canBoost(status: string): boolean {
