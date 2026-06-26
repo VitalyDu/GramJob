@@ -49,7 +49,7 @@ export function canArchiveVacancy(status: VacancyStatusEnum): boolean {
 }
 
 export function canEditVacancy(status: VacancyStatusEnum): boolean {
-  return status !== 'archived'
+  return status === 'draft' || status === 'rejected' || status === 'published'
 }
 
 export function canDeleteVacancy(status: VacancyStatusEnum): boolean {
