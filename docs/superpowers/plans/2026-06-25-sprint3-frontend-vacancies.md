@@ -2279,7 +2279,7 @@ git commit -m "feat(frontend): add VacancyForm with all fields"
 - Create: `frontend/src/app/dashboard/vacancies/MyVacanciesClient.tsx`
 - Create: `frontend/src/app/dashboard/vacancies/MyVacanciesClient.test.tsx`
 
-- [ ] **Step 1: Написать тест `frontend/src/app/dashboard/vacancies/MyVacanciesClient.test.tsx`**
+- [x] **Step 1: Написать тест `frontend/src/app/dashboard/vacancies/MyVacanciesClient.test.tsx`**
 
 ```typescript
 import { describe, it, expect, vi } from 'vitest'
@@ -2330,7 +2330,7 @@ describe('MyVacanciesClient', () => {
 })
 ```
 
-- [ ] **Step 2: Создать `frontend/src/app/dashboard/vacancies/MyVacanciesClient.tsx`**
+- [x] **Step 2: Создать `frontend/src/app/dashboard/vacancies/MyVacanciesClient.tsx`**
 
 ```typescript
 'use client'
@@ -2490,7 +2490,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
 })
 ```
 
-- [ ] **Step 3: Создать `frontend/src/app/dashboard/vacancies/plan-limits.ts`**
+- [x] **Step 3: Создать `frontend/src/app/dashboard/vacancies/plan-limits.ts`**
 
 ```typescript
 export const PLAN_LIMITS: Record<string, number> = {
@@ -2501,7 +2501,7 @@ export const PLAN_LIMITS: Record<string, number> = {
 }
 ```
 
-- [ ] **Step 4: Создать `frontend/src/app/dashboard/vacancies/page.tsx`**
+- [x] **Step 4: Создать `frontend/src/app/dashboard/vacancies/page.tsx`**
 
 ```typescript
 import { MyVacanciesClient } from './MyVacanciesClient'
@@ -2515,13 +2515,13 @@ export default function MyVacanciesPage() {
 }
 ```
 
-- [ ] **Step 5: Запустить тесты**
+- [x] **Step 5: Запустить тесты**
 
 ```bash
 cd frontend && pnpm test MyVacanciesClient && pnpm typecheck
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add frontend/src/app/dashboard/vacancies/
@@ -2538,7 +2538,7 @@ git commit -m "feat(frontend): add my vacancies dashboard with publish/boost/arc
 - Create: `frontend/src/app/dashboard/vacancies/new/CreateVacancyClient.test.tsx`
 - Create: `frontend/src/app/dashboard/vacancies/new/page.tsx`
 
-- [ ] **Step 1: Написать тест `frontend/src/app/dashboard/vacancies/new/CreateVacancyClient.test.tsx`**
+- [x] **Step 1: Написать тест `frontend/src/app/dashboard/vacancies/new/CreateVacancyClient.test.tsx`**
 
 ```typescript
 import { describe, it, expect, vi } from 'vitest'
@@ -2566,7 +2566,7 @@ describe('CreateVacancyClient', () => {
 })
 ```
 
-- [ ] **Step 2: Создать `frontend/src/app/dashboard/vacancies/new/CreateVacancyClient.tsx`**
+- [x] **Step 2: Создать `frontend/src/app/dashboard/vacancies/new/CreateVacancyClient.tsx`**
 
 ```typescript
 'use client'
@@ -2621,7 +2621,7 @@ export const CreateVacancyClient = observer(function CreateVacancyClient() {
 })
 ```
 
-- [ ] **Step 3: Создать `frontend/src/app/dashboard/vacancies/new/page.tsx`**
+- [x] **Step 3: Создать `frontend/src/app/dashboard/vacancies/new/page.tsx`**
 
 ```typescript
 import { CreateVacancyClient } from './CreateVacancyClient'
@@ -2635,13 +2635,13 @@ export default function CreateVacancyPage() {
 }
 ```
 
-- [ ] **Step 4: Запустить тесты**
+- [x] **Step 4: Запустить тесты**
 
 ```bash
 cd frontend && pnpm test CreateVacancyClient && pnpm typecheck
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add frontend/src/app/dashboard/vacancies/new/
@@ -2658,7 +2658,7 @@ git commit -m "feat(frontend): add create vacancy page"
 - Create: `frontend/src/app/dashboard/vacancies/[id]/edit/EditVacancyClient.test.tsx`
 - Create: `frontend/src/app/dashboard/vacancies/[id]/edit/page.tsx`
 
-- [ ] **Step 1: Написать тест `frontend/src/app/dashboard/vacancies/[id]/edit/EditVacancyClient.test.tsx`**
+- [x] **Step 1: Написать тест `frontend/src/app/dashboard/vacancies/[id]/edit/EditVacancyClient.test.tsx`**
 
 ```typescript
 import { describe, it, expect, vi } from 'vitest'
@@ -2687,7 +2687,7 @@ describe('EditVacancyClient', () => {
 })
 ```
 
-- [ ] **Step 2: Создать `frontend/src/app/dashboard/vacancies/[id]/edit/EditVacancyClient.tsx`**
+- [x] **Step 2: Создать `frontend/src/app/dashboard/vacancies/[id]/edit/EditVacancyClient.tsx`**
 
 ```typescript
 'use client'
@@ -2775,7 +2775,7 @@ export const EditVacancyClient = observer(function EditVacancyClient({ id }: Pro
 })
 ```
 
-- [ ] **Step 3: Создать `frontend/src/app/dashboard/vacancies/[id]/edit/page.tsx`**
+- [x] **Step 3: Создать `frontend/src/app/dashboard/vacancies/[id]/edit/page.tsx`**
 
 ```typescript
 import type { Metadata } from 'next'
@@ -2799,7 +2799,7 @@ export default async function EditVacancyPage({ params }: Props) {
 }
 ```
 
-- [ ] **Step 4: Запустить все тесты и typecheck**
+- [x] **Step 4: Запустить все тесты и typecheck**
 
 ```bash
 cd frontend && pnpm test && pnpm typecheck
@@ -2807,7 +2807,7 @@ cd frontend && pnpm test && pnpm typecheck
 
 Ожидаем: все тесты PASS, 0 ошибок TypeScript.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add frontend/src/app/dashboard/vacancies/[id]/
@@ -2818,7 +2818,7 @@ git commit -m "feat(frontend): add edit vacancy page"
 
 ## Финальная проверка
 
-- [ ] **Запустить полный suite**
+- [x] **Запустить полный suite**
 
 ```bash
 cd frontend && pnpm test
@@ -2826,7 +2826,7 @@ cd frontend && pnpm test
 
 Ожидаем: ≥ 40 тестов PASS, 0 FAIL.
 
-- [ ] **Проверить типы**
+- [x] **Проверить типы**
 
 ```bash
 cd frontend && pnpm typecheck
@@ -2834,7 +2834,7 @@ cd frontend && pnpm typecheck
 
 Ожидаем: 0 ошибок.
 
-- [ ] **Финальный commit**
+- [x] **Финальный commit**
 
 ```bash
 git add -A

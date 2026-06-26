@@ -116,7 +116,7 @@
 - [x] Компонент: VacancyCard (все варианты: highlighted, urgent, top, external)
 - [x] Компонент: VacancyFilters (все фильтры из api-spec)
 - [x] Страница: `/vacancies/:id` — полная карточка (Apply / Apply on Source)
-- [ ] Страница: `/dashboard/vacancies` — мои вакансии + управление (буст, архив)
+- [x] Страница: `/dashboard/vacancies` — мои вакансии + управление (буст, архив)
 - [x] Форма: создать/редактировать вакансию (все поля, skills/languages теги)
 - [x] Компонент: LimitBar — `N/M вакансий использовано`, сброс через N дней
 - [x] Обработка ошибки `LIMIT_REACHED` → upsell-модал
