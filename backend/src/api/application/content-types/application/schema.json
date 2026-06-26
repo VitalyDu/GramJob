@@ -1,0 +1,52 @@
+{
+  "kind": "collectionType",
+  "collectionName": "applications",
+  "info": {
+    "singularName": "application",
+    "pluralName": "applications",
+    "displayName": "Application",
+    "description": "Job application from candidate"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "vacancy": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::vacancy.vacancy",
+      "required": true
+    },
+    "resume": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::resume.resume",
+      "required": true
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "applied",
+        "viewed",
+        "in-review",
+        "interview",
+        "test-task",
+        "offer",
+        "hired",
+        "rejected"
+      ],
+      "default": "applied",
+      "required": true
+    },
+    "coverLetter": {
+      "type": "text"
+    }
+  }
+}
