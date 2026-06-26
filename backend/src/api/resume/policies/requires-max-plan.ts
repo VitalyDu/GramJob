@@ -3,7 +3,7 @@ import type { Core } from '@strapi/strapi'
 type UserWithPlan = { subscriptionPlan: string }
 
 export function checkIsMaxPlan(user: UserWithPlan): boolean {
-  return user.subscriptionPlan === 'max'
+  return user.subscriptionPlan === 'max' || user.subscriptionPlan === 'vip'
 }
 
 export default async (

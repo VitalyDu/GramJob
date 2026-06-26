@@ -13,6 +13,10 @@ describe('checkIsMaxPlan', () => {
     expect(checkIsMaxPlan({ subscriptionPlan: 'pro' })).toBe(false)
   })
 
+  it('returns true for vip plan (vip includes max features)', () => {
+    expect(checkIsMaxPlan({ subscriptionPlan: 'vip' })).toBe(true)
+  })
+
   it('returns false for unknown plan', () => {
     expect(checkIsMaxPlan({ subscriptionPlan: 'unknown' })).toBe(false)
   })
