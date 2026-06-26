@@ -1,0 +1,103 @@
+{
+  "kind": "collectionType",
+  "collectionName": "resumes",
+  "info": {
+    "singularName": "resume",
+    "pluralName": "resumes",
+    "displayName": "Resume",
+    "description": "Candidate resume"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "required": true
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "lastName": {
+      "type": "string",
+      "required": true
+    },
+    "avatar": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "country": {
+      "type": "string",
+      "required": true
+    },
+    "city": {
+      "type": "string"
+    },
+    "desiredSalary": {
+      "type": "integer"
+    },
+    "currency": {
+      "type": "enumeration",
+      "enum": ["USD", "EUR", "RUB", "GBP"]
+    },
+    "workFormat": {
+      "type": "enumeration",
+      "enum": ["office", "remote", "hybrid", "any"],
+      "required": true
+    },
+    "employmentType": {
+      "type": "enumeration",
+      "enum": ["full-time", "part-time", "contract", "internship", "freelance"],
+      "required": true
+    },
+    "experienceYears": {
+      "type": "integer"
+    },
+    "about": {
+      "type": "richtext"
+    },
+    "skills": {
+      "type": "json"
+    },
+    "languages": {
+      "type": "json"
+    },
+    "contacts": {
+      "type": "json"
+    },
+    "workExperience": {
+      "type": "component",
+      "repeatable": true,
+      "component": "resume.work-experience"
+    },
+    "education": {
+      "type": "component",
+      "repeatable": true,
+      "component": "resume.education"
+    },
+    "views": {
+      "type": "integer",
+      "default": 0
+    },
+    "invitations": {
+      "type": "integer",
+      "default": 0
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["draft", "moderation", "published", "rejected", "archived"],
+      "default": "draft",
+      "required": true
+    }
+  }
+}
