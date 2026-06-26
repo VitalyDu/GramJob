@@ -38,9 +38,8 @@ export const EditVacancyClient = observer(function EditVacancyClient({ id }: Pro
 
   const defaultValues: Partial<VacancyCreateInput> = {
     title: v.title,
-    company: v.company.documentId,
-    industry: v.industry.documentId,
-    specialization: v.specialization.documentId,
+    industryId: v.industry.documentId,
+    specializationId: v.specialization.documentId,
     workFormat: v.workFormat,
     employmentType: v.employmentType,
     seniority: v.seniority,
@@ -49,6 +48,7 @@ export const EditVacancyClient = observer(function EditVacancyClient({ id }: Pro
     responsibilities: v.responsibilities ?? '',
     requirements: v.requirements ?? '',
     urgent: v.urgent,
+    ...(v.company?.documentId ? { companyId: v.company.documentId } : {}),
     ...(v.city ? { city: v.city } : {}),
     ...(v.salaryFrom != null ? { salaryFrom: v.salaryFrom } : {}),
     ...(v.salaryTo != null ? { salaryTo: v.salaryTo } : {}),

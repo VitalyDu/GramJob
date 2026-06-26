@@ -147,9 +147,8 @@ describe('VacancyStore', () => {
 
       const result = await store.createVacancy({
         title: 'Senior Frontend Developer',
-        company: 'comp1',
-        industry: 'ind1',
-        specialization: 'spec1',
+        industryId: 'ind1',
+        specializationId: 'spec1',
         employmentType: 'full-time',
         workFormat: 'remote',
         seniority: 'senior',
@@ -169,9 +168,8 @@ describe('VacancyStore', () => {
       await expect(
         store.createVacancy({
           title: '',
-          company: 'comp1',
-          industry: 'ind1',
-          specialization: 'spec1',
+          industryId: 'ind1',
+          specializationId: 'spec1',
           employmentType: 'full-time',
           workFormat: 'remote',
           seniority: 'senior',

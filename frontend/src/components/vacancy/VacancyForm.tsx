@@ -22,9 +22,9 @@ import { api } from '@/services/api'
 
 const schema = z.object({
   title: z.string().min(1, 'Название обязательно'),
-  company: z.string().min(1, 'Компания обязательна'),
-  industry: z.string().min(1, 'Отрасль обязательна'),
-  specialization: z.string().min(1, 'Специализация обязательна'),
+  companyId: z.string().optional().default(''),
+  industryId: z.string().min(1, 'Отрасль обязательна'),
+  specializationId: z.string().min(1, 'Специализация обязательна'),
   workFormat: z.enum(['office', 'remote', 'hybrid']),
   employmentType: z.enum(['full-time', 'part-time', 'contract', 'internship', 'freelance']),
   seniority: z.enum(['intern', 'junior', 'middle', 'senior', 'lead', 'principal']),
@@ -74,9 +74,9 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
     resolver: zodResolver(schema),
     defaultValues: {
       title: defaultValues?.title ?? '',
-      company: defaultValues?.company ?? myCompanies[0]?.documentId ?? '',
-      industry: defaultValues?.industry ?? '',
-      specialization: defaultValues?.specialization ?? '',
+      companyId: defaultValues?.companyId ?? myCompanies[0]?.documentId ?? '',
+      industryId: defaultValues?.industryId ?? '',
+      specializationId: defaultValues?.specializationId ?? '',
       workFormat: (defaultValues?.workFormat as WorkFormatEnum) ?? 'remote',
       employmentType: (defaultValues?.employmentType as EmploymentTypeEnum) ?? 'full-time',
       seniority: (defaultValues?.seniority as SeniorityEnum) ?? 'middle',
@@ -96,7 +96,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
     },
   })
 
-  const selectedIndustry = watch('industry')
+  const selectedIndustry = watch('industryId')
 
   useEffect(() => {
     void api
@@ -126,9 +126,8 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
 
     const input: VacancyCreateInput = {
       title: data.title,
-      company: data.company,
-      industry: data.industry,
-      specialization: data.specialization,
+      industryId: data.industryId,
+      specializationId: data.specializationId,
       workFormat: data.workFormat,
       employmentType: data.employmentType,
       seniority: data.seniority,
@@ -137,6 +136,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
       responsibilities: data.responsibilities,
       requirements: data.requirements,
       urgent: data.urgent,
+      ...(data.companyId ? { companyId: data.companyId } : {}),
       ...(data.city ? { city: data.city } : {}),
       ...(data.salaryFrom !== undefined ? { salaryFrom: data.salaryFrom } : {}),
       ...(data.salaryTo !== undefined ? { salaryTo: data.salaryTo } : {}),
@@ -166,9 +166,9 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
 
       {/* Компания */}
       <div className="space-y-1">
-        <Label htmlFor="company">Компания *</Label>
-        <select id="company" {...register('company')} className={selectClass}>
-          <option value="">Выберите компанию</option>
+        <Label htmlFor="companyId">Компания</Label>
+        <select id="companyId" {...register('companyId')} className={selectClass}>
+          <option value="">Без компании (фриланс)</option>
           {myCompanies
             .filter((c) => c.status === 'published')
             .map((c) => (
@@ -177,13 +177,12 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
               </option>
             ))}
         </select>
-        {errors.company && <p className="text-xs text-destructive">{errors.company.message}</p>}
       </div>
 
       {/* Отрасль */}
       <div className="space-y-1">
-        <Label htmlFor="industry">Отрасль *</Label>
-        <select id="industry" {...register('industry')} className={selectClass}>
+        <Label htmlFor="industryId">Отрасль *</Label>
+        <select id="industryId" {...register('industryId')} className={selectClass}>
           <option value="">Выберите отрасль</option>
           {industries.map((i) => (
             <option key={i.documentId} value={i.documentId}>
@@ -191,15 +190,17 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
             </option>
           ))}
         </select>
-        {errors.industry && <p className="text-xs text-destructive">{errors.industry.message}</p>}
+        {errors.industryId && (
+          <p className="text-xs text-destructive">{errors.industryId.message}</p>
+        )}
       </div>
 
       {/* Специализация */}
       <div className="space-y-1">
-        <Label htmlFor="specialization">Специализация *</Label>
+        <Label htmlFor="specializationId">Специализация *</Label>
         <select
-          id="specialization"
-          {...register('specialization')}
+          id="specializationId"
+          {...register('specializationId')}
           className={selectClass}
           disabled={!selectedIndustry}
         >
@@ -210,8 +211,8 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
             </option>
           ))}
         </select>
-        {errors.specialization && (
-          <p className="text-xs text-destructive">{errors.specialization.message}</p>
+        {errors.specializationId && (
+          <p className="text-xs text-destructive">{errors.specializationId.message}</p>
         )}
       </div>
 

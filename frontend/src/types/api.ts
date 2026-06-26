@@ -223,9 +223,8 @@ export interface VacancyListParams {
 
 export interface VacancyCreateInput {
   title: string
-  company: string
-  industry: string
-  specialization: string
+  industryId: string
+  specializationId: string
   employmentType: EmploymentTypeEnum
   workFormat: WorkFormatEnum
   seniority: SeniorityEnum
@@ -242,6 +241,7 @@ export interface VacancyCreateInput {
   languages?: string[]
   experienceYears?: number
   urgent?: boolean
+  companyId?: string
 }
 
 export type VacancyUpdateInput = Partial<VacancyCreateInput>
