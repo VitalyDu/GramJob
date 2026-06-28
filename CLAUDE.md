@@ -17,7 +17,7 @@
 
 ## Текущее состояние проекта
 
-**Фаза: Разработка. Sprint 1 завершён, Sprint 2 завершён, Sprint 3 завершён (Backend + Frontend). Следующий: Sprint 4 — Resumes & Applications.**
+**Фаза: Разработка. Sprint 1 завершён, Sprint 2 завершён, Sprint 3 завершён (Backend + Frontend), Sprint 4 Backend завершён, Sprint 4 Frontend Part 1 (Resumes) завершён. Следующий: Sprint 4 Frontend Part 2 — Applications.**
 
 Выполнено (Sprint 1):
 
@@ -119,7 +119,48 @@
 - `app/dashboard/vacancies/[id]/edit/page.tsx` + `EditVacancyClient.tsx` — редактирование вакансии
 - Итого: 169 тестов, 0 ошибок TypeScript
 
-Текущий шаг — Sprint 4 (Resumes & Applications).
+Выполнено (Sprint 4 Backend):
+
+- Strapi компоненты: `resume.work-experience`, `resume.education` (JSON-схемы)
+- Content type: Resume (title, firstName, lastName, country, city, desiredSalary, currency, workFormat, employmentType, experienceYears, about, skills, languages, contacts, status: draft/moderation/published/rejected/archived)
+- Утилиты: `canPublishResume`, `canEditResume`, `canArchiveResume`, `publishedTransitionsOnEditResume` + тесты
+- Policy `is-resume-owner` — проверка владельца резюме + тест
+- Policy `requires-max-plan` — gate для доступа к базе резюме (Max + VIP) + тесты
+- Resume service — `createResume` factory
+- Resume controller — create, publish (→ moderation), findPublic (фильтры + пагинация), findOne (views++, контакты masked), update, archive, findMine
+- Resume routes — `/resumes`, `/resumes/my`, `/resumes/:id`, `/resumes/:id/publish`
+- Content type: Application (vacancy, resume, user, status, coverLetter)
+- Lifecycle hook Application `afterCreate` — INCREMENT applicationsCount на vacancy через raw SQL
+- Lifecycle hook Application `afterUpdate` — лог + TODO Sprint 7 Telegram
+- Утилиты: `STATUS_TRANSITIONS` map + `canTransitionTo` + 19 тестов
+- Apply credit service: `APPLY_PLAN_LIMITS`, `getApplyLimitForPlan`, `checkAndConsumeApplyCredit` (in-memory daily tracker) + тесты
+- Application controller — create (валидация vacancy/resume, дедупликация, кредитный лимит), findMine, findByVacancy (employer), updateStatus (employer + валидация переходов)
+- Application routes — GET/POST /applications, GET /vacancies/:id/applications, PATCH /applications/:id
+- Итого: 132 теста, 0 ошибок TypeScript
+
+Известные MVP-ограничения Sprint 4 (запланированы к исправлению в Sprint 6):
+
+- Апплай-кредиты хранятся in-memory (сбрасываются при рестарте, не масштабируются)
+
+Выполнено (Sprint 4 Frontend Part 1 — Resumes):
+
+- `types/api.ts` — Resume-типы: `Resume`, `ResumeStatusEnum`, `ResumeWorkFormatEnum`, `ResumeCurrencyEnum`, `WorkExperience`, `Education`, `ResumeCreateInput`, `ResumeUpdateInput`, `ResumeListParams`
+- `lib/resume-utils.ts` — `RESUME_WORK_FORMAT_LABELS`, `RESUME_EMPLOYMENT_TYPE_LABELS`, `APPLY_PLAN_LIMITS`, `canPublishResume`, `canEditResume`, `canArchiveResume` (10 тестов)
+- `stores/ResumeStore.ts` — MobX стор: `fetchResumes` (403 → accessDenied), `fetchMyResumes`, `fetchResumeById`, `createResume`, `updateResume`, `publishResume`, `archiveResume`, `clearAccessDenied`, `pageCount` (16 тестов)
+- `stores/RootStore.ts` — добавлен `resume: ResumeStore`
+- `components/resume/ResumeStatusBadge.tsx` — бейдж статуса (5 статусов)
+- `components/resume/ResumeCard.tsx` — карточка резюме (аватар-инициал, skills tags, href → Link)
+- `components/resume/ResumeForm.tsx` — форма с динамическими секциями workExperience + education (`useFieldArray`)
+- `app/resumes/page.tsx` + `ResumesClient.tsx` — публичная база резюме (Max-gate на 403, фильтры + пагинация)
+- `app/resumes/[id]/page.tsx` + `ResumeDetailClient.tsx` — карточка резюме (опыт, образование, контакты)
+- `app/dashboard/resumes/page.tsx` + `MyResumesClient.tsx` — мои резюме (publish/archive, лимит откликов)
+- `app/dashboard/resumes/new/page.tsx` + `CreateResumeClient.tsx` — создание резюме
+- `app/dashboard/resumes/[id]/edit/page.tsx` + `EditResumeClient.tsx` — редактирование резюме
+- Итого: 195 тестов, 0 ошибок TypeScript
+
+Ключевой паттерн (критично для всего frontend): `exactOptionalPropertyTypes: true` в tsconfig требует использовать conditional spread (`...(x ? { field: x } : {})`) вместо `field: x || undefined` при передаче опциональных параметров.
+
+Текущий шаг — Sprint 4 Frontend Part 2 (Applications).
 Планы: `docs/superpowers/plans/`
 
 ---

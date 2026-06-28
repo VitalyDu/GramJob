@@ -129,30 +129,40 @@
 
 ### Backend
 
-- [ ] Content type: Resume + Strapi Components: WorkExperience, Education
-- [ ] `POST /resumes` — создать
-- [ ] `POST /resumes/:id/publish` — draft → moderation
-- [ ] `GET /resumes` — база резюме (только Max-план, policy: requires-max-plan)
-- [ ] `GET /resumes/:id` — карточка (контакты = null если нет одобренного отклика)
-- [ ] `PUT /resumes/:id` — обновить (owner)
-- [ ] `GET /resumes/my` — мои резюме
-- [ ] Content type: Application
-- [ ] `POST /applications` — подать отклик (уникальность + лимит откликов)
-- [ ] Сервис: `checkAndConsumeApplyCredit(userId)` — апплай-кредиты → суточный лимит → LIMIT_REACHED
-- [ ] `GET /applications` — мои отклики (как кандидата)
-- [ ] `GET /vacancies/:id/applications` — отклики на мою вакансию (как employer)
-- [ ] `PATCH /applications/:id` — смена статуса (employer + валидация допустимых переходов)
-- [ ] Lifecycle hook: Application создан → Notification работодателю (NewApplication)
-- [ ] Lifecycle hook: Application статус изменён → Notification кандидату
-- [ ] Policy: `requires-max-plan` для GET /resumes
+- [x] Content type: Resume + Strapi Components: WorkExperience, Education
+- [x] `POST /resumes` — создать
+- [x] `POST /resumes/:id/publish` — draft → moderation
+- [x] `GET /resumes` — база резюме (только Max-план, policy: requires-max-plan)
+- [x] `GET /resumes/:id` — карточка (контакты = null если нет одобренного отклика)
+- [x] `PUT /resumes/:id` — обновить (owner)
+- [x] `GET /resumes/my` — мои резюме
+- [x] Content type: Application
+- [x] `POST /applications` — подать отклик (уникальность + лимит откликов)
+- [x] Сервис: `checkAndConsumeApplyCredit(userId)` — апплай-кредиты → суточный лимит → LIMIT_REACHED
+- [x] `GET /applications` — мои отклики (как кандидата)
+- [x] `GET /vacancies/:id/applications` — отклики на мою вакансию (как employer)
+- [x] `PATCH /applications/:id` — смена статуса (employer + валидация допустимых переходов)
+- [x] Lifecycle hook: Application создан → Notification работодателю (NewApplication)
+- [x] Lifecycle hook: Application статус изменён → Notification кандидату
+- [x] Policy: `requires-max-plan` для GET /resumes
 
-### Frontend
+### Frontend (Part 1 — Resumes: завершён)
 
-- [ ] ResumeStore + ApplicationStore
-- [ ] Страница: `/resumes` — база резюме (только для Max, поиск + фильтры)
-- [ ] Страница: `/resumes/:id` — карточка резюме (контакты скрыты/открыты)
-- [ ] Страница: `/dashboard/resumes` — мои резюме (список + статусы)
-- [ ] Форма: создать/редактировать резюме (опыт + образование — динамические секции)
+- [x] Resume types в `types/api.ts`
+- [x] `lib/resume-utils.ts` — labels + status guards
+- [x] `ResumeStore` + тесты (16 тестов)
+- [x] `RootStore` — добавлен `resume: ResumeStore`
+- [x] `ResumeStatusBadge` component
+- [x] `ResumeCard` component
+- [x] `ResumeForm` — форма (workExperience + education динамические секции)
+- [x] Страница: `/resumes` — база резюме (Max-gate, поиск + фильтры + пагинация)
+- [x] Страница: `/resumes/:id` — карточка резюме
+- [x] Страница: `/dashboard/resumes` — мои резюме (список + статусы + publish/archive)
+- [x] Страница: `/dashboard/resumes/new` — создать резюме
+- [x] Страница: `/dashboard/resumes/:id/edit` — редактировать резюме
+
+### Frontend (Part 2 — Applications: в планировании)
+
 - [ ] Страница: `/dashboard/applications` — мои отклики (кандидат) — timeline статусов
 - [ ] Страница: `/dashboard/vacancies/:id/applications` — отклики на вакансию (employer)
 - [ ] Компонент: ApplicationCard + статус-badge
