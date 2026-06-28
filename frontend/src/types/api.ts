@@ -260,3 +260,94 @@ export interface Specialization {
   slug: string
   name: { ru: string; en: string }
 }
+
+// --- Resume ---
+
+export type ResumeStatusEnum = 'draft' | 'moderation' | 'published' | 'rejected' | 'archived'
+
+export type ResumeWorkFormatEnum = 'office' | 'remote' | 'hybrid' | 'any'
+
+export type ResumeCurrencyEnum = 'USD' | 'EUR' | 'RUB' | 'GBP'
+
+export interface WorkExperience {
+  company: string
+  position: string
+  startDate: string
+  endDate?: string | null
+  current?: boolean
+  description?: string | null
+}
+
+export interface Education {
+  institution: string
+  degree: string
+  field: string
+  startDate: string
+  endDate?: string | null
+  current?: boolean
+}
+
+export interface ResumeUserRef {
+  id: number
+  firstName: string
+  lastName: string
+}
+
+export interface Resume {
+  id: number
+  documentId: string
+  title: string
+  firstName: string
+  lastName: string
+  country: string
+  city?: string | null
+  desiredSalary?: number | null
+  currency?: ResumeCurrencyEnum | null
+  workFormat: ResumeWorkFormatEnum
+  employmentType: EmploymentTypeEnum
+  experienceYears?: number | null
+  about?: string | null
+  skills?: string[] | null
+  languages?: Array<{ lang: string; level: string }> | null
+  contacts?: { telegram?: string; email?: string; phone?: string } | null
+  workExperience?: WorkExperience[]
+  education?: Education[]
+  views?: number
+  invitations?: number
+  status: ResumeStatusEnum
+  user?: ResumeUserRef | null
+  avatar?: StrapiMedia | null
+  createdAt: string
+}
+
+export interface ResumeListParams {
+  search?: string
+  country?: string
+  city?: string
+  workFormat?: ResumeWorkFormatEnum
+  employmentType?: EmploymentTypeEnum
+  experienceYears?: number
+  page?: number
+  pageSize?: number
+}
+
+export interface ResumeCreateInput {
+  title: string
+  firstName: string
+  lastName: string
+  country: string
+  city?: string
+  desiredSalary?: number
+  currency?: ResumeCurrencyEnum
+  workFormat: ResumeWorkFormatEnum
+  employmentType: EmploymentTypeEnum
+  experienceYears?: number
+  about?: string
+  skills?: string[]
+  languages?: Array<{ lang: string; level: string }>
+  contacts?: { telegram?: string; email?: string; phone?: string }
+  workExperience?: WorkExperience[]
+  education?: Education[]
+}
+
+export type ResumeUpdateInput = Partial<ResumeCreateInput>
