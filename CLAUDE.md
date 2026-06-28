@@ -17,7 +17,7 @@
 
 ## Текущее состояние проекта
 
-**Фаза: Разработка. Sprint 1 завершён, Sprint 2 завершён, Sprint 3 завершён (Backend + Frontend), Sprint 4 Backend завершён, Sprint 4 Frontend Part 1 (Resumes) завершён. Следующий: Sprint 4 Frontend Part 2 — Applications.**
+**Фаза: Разработка. Sprint 1 завершён, Sprint 2 завершён, Sprint 3 завершён (Backend + Frontend), Sprint 4 полностью завершён (Backend + Frontend Resumes + Frontend Applications). Следующий: Sprint 5 — Favorites, Saved Searches, Reports & Blocks.**
 
 Выполнено (Sprint 1):
 
@@ -160,7 +160,20 @@
 
 Ключевой паттерн (критично для всего frontend): `exactOptionalPropertyTypes: true` в tsconfig требует использовать conditional spread (`...(x ? { field: x } : {})`) вместо `field: x || undefined` при передаче опциональных параметров.
 
-Текущий шаг — Sprint 4 Frontend Part 2 (Applications).
+Выполнено (Sprint 4 Frontend Part 2 — Applications):
+
+- `types/api.ts` — Application-типы: `Application`, `ApplicationStatusEnum`, `ApplicationVacancyRef`, `ApplicationResumeRef`, `ApplicationUserRef`, `ApplicationCreateInput`
+- `stores/ApplicationStore.ts` — MobX стор: `createApplication` (403 LIMIT_REACHED, 409 ALREADY_APPLIED), `fetchMyApplications`, `fetchVacancyApplications`, `updateApplicationStatus`, `clearFlags` (14 тестов)
+- `stores/RootStore.ts` — добавлен `application: ApplicationStore`
+- `components/application/ApplicationStatusBadge.tsx` — бейдж (8 статусов)
+- `components/application/ApplicationCard.tsx` — карточка (candidate mode + employer mode со сменой статусов)
+- `components/application/ApplyDialog.tsx` — диалог отклика (загружает опубл. резюме, cover letter)
+- `app/vacancies/[id]/VacancyDetailClient.tsx` — кнопка «Откликнуться» + ApplyDialog
+- `app/dashboard/applications/page.tsx` + `MyApplicationsClient.tsx` — мои отклики (кандидат)
+- `app/dashboard/vacancies/[id]/applications/page.tsx` + `VacancyApplicationsClient.tsx` — отклики на вакансию (работодатель)
+- Итого: 209 тестов, 0 ошибок TypeScript
+
+Текущий шаг — Sprint 5 (Favorites, Saved Searches, Reports & Blocks).
 Планы: `docs/superpowers/plans/`
 
 ---

@@ -161,13 +161,17 @@
 - [x] Страница: `/dashboard/resumes/new` — создать резюме
 - [x] Страница: `/dashboard/resumes/:id/edit` — редактировать резюме
 
-### Frontend (Part 2 — Applications: в планировании)
+### Frontend (Part 2 — Applications: завершён)
 
-- [ ] Страница: `/dashboard/applications` — мои отклики (кандидат) — timeline статусов
-- [ ] Страница: `/dashboard/vacancies/:id/applications` — отклики на вакансию (employer)
-- [ ] Компонент: ApplicationCard + статус-badge
-- [ ] Диалог: форма отклика (выбор резюме + cover letter)
-- [ ] Компонент: ApplicationKanban или список с быстрой сменой статуса
+- [x] Application types в `types/api.ts`
+- [x] `ApplicationStore` + тесты (14 тестов)
+- [x] `RootStore` — добавлен `application: ApplicationStore`
+- [x] `ApplicationStatusBadge` component (8 статусов)
+- [x] `ApplicationCard` component (candidate + employer mode)
+- [x] `ApplyDialog` component (выбор резюме + cover letter)
+- [x] `VacancyDetailClient` — добавлена кнопка «Откликнуться» + ApplyDialog
+- [x] Страница: `/dashboard/applications` — мои отклики (кандидат)
+- [x] Страница: `/dashboard/vacancies/:id/applications` — отклики на вакансию (employer)
 
 ---
 
