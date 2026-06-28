@@ -72,6 +72,7 @@ describe('ApplicationStore', () => {
     expect(store.isLoading).toBe(false)
     expect(store.error).toBeNull()
     expect(store.total).toBe(0)
+    expect(store.vacancyTotal).toBe(0)
     expect(store.limitReached).toBe(false)
     expect(store.alreadyApplied).toBe(false)
   })
@@ -140,7 +141,15 @@ describe('ApplicationStore', () => {
       vi.mocked(api.get).mockResolvedValue(mockListResponse)
       await store.fetchVacancyApplications('vac123')
       expect(store.vacancyApplications).toEqual([mockApplication])
-      expect(store.total).toBe(1)
+      expect(store.vacancyTotal).toBe(1)
+      expect(store.vacancyPage).toBe(1)
+    })
+
+    it('не перезаписывает total кандидата', async () => {
+      store.total = 5
+      vi.mocked(api.get).mockResolvedValue(mockListResponse)
+      await store.fetchVacancyApplications('vac123')
+      expect(store.total).toBe(5) // candidate total must be unchanged
     })
 
     it('устанавливает error при сбое', async () => {
@@ -189,6 +198,18 @@ describe('ApplicationStore', () => {
       store.total = 45
       store.pageSize = 20
       expect(store.pageCount).toBe(3)
+    })
+  })
+
+  describe('vacancyPageCount', () => {
+    it('вычисляет vacancyPageCount из vacancyTotal и pageSize', () => {
+      store.vacancyTotal = 45
+      store.pageSize = 20
+      expect(store.vacancyPageCount).toBe(3)
+    })
+
+    it('возвращает 0 если vacancyTotal равен 0', () => {
+      expect(store.vacancyPageCount).toBe(0)
     })
   })
 })

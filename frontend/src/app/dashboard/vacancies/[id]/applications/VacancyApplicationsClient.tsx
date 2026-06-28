@@ -41,7 +41,9 @@ export const VacancyApplicationsClient = observer(function VacancyApplicationsCl
         <h1 className="text-2xl font-bold">Отклики на вакансию</h1>
       </div>
 
-      {store.total > 0 && <p className="text-sm text-muted-foreground">{store.total} откликов</p>}
+      {store.vacancyTotal > 0 && (
+        <p className="text-sm text-muted-foreground">{store.vacancyTotal} откликов</p>
+      )}
 
       {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
 
@@ -69,24 +71,24 @@ export const VacancyApplicationsClient = observer(function VacancyApplicationsCl
         ))}
       </div>
 
-      {store.pageCount > 1 && (
+      {store.vacancyPageCount > 1 && (
         <div className="flex items-center justify-center gap-2">
           <Button
             variant="outline"
             size="sm"
-            disabled={store.page <= 1}
-            onClick={() => handlePageChange(store.page - 1)}
+            disabled={store.vacancyPage <= 1}
+            onClick={() => handlePageChange(store.vacancyPage - 1)}
           >
             ← Назад
           </Button>
           <span className="text-sm text-muted-foreground">
-            {store.page} / {store.pageCount}
+            {store.vacancyPage} / {store.vacancyPageCount}
           </span>
           <Button
             variant="outline"
             size="sm"
-            disabled={store.page >= store.pageCount}
-            onClick={() => handlePageChange(store.page + 1)}
+            disabled={store.vacancyPage >= store.vacancyPageCount}
+            onClick={() => handlePageChange(store.vacancyPage + 1)}
           >
             Вперёд →
           </Button>

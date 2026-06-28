@@ -204,16 +204,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         if (requestUser.id === resumeOwnerId) {
           contacts = resume.contacts
         } else {
-          const approvedApp = await (strapi.documents as any)(
-            'api::application.application'
-          ).findFirst({
-            filters: {
-              resume: { user: { id: { $eq: resumeOwnerId } } },
-              vacancy: { postedBy: { id: { $eq: requestUser.id } } },
-              status: { $in: ['in-review', 'interview', 'test-task', 'offer', 'hired'] },
-            },
-          })
-          if (approvedApp) contacts = resume.contacts
+          // Raw SQL is used here because Strapi 5 Document Service does not reliably
+          // support multi-level deep relation filters (resume→user→id, vacancy→postedBy→id)
+          const result = await strapi.db.connection.raw(
+            `SELECT a.id
+             FROM applications a
+             JOIN resumes r ON r.id = a.resume_id
+             JOIN vacancies v ON v.id = a.vacancy_id
+             WHERE r.user_id = ?
+               AND v.posted_by_id = ?
+               AND a.status IN ('in-review', 'interview', 'test-task', 'offer', 'hired')
+             LIMIT 1`,
+            [resumeOwnerId, requestUser.id]
+          )
+          if ((result.rows?.length ?? 0) > 0) contacts = (resume as any).contacts
         }
       }
 

@@ -99,6 +99,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       populate: APPLICATION_POPULATE as any,
     })
 
+    // Increment applicationsCount directly — lifecycle result in Strapi 5
+    // does not reliably populate relations, so we use the documentId we already have
+    try {
+      await strapi.db.connection.raw(
+        `UPDATE vacancies SET applications_count = applications_count + 1 WHERE document_id = ?`,
+        [vacancyId as string]
+      )
+    } catch {
+      strapi.log.warn(
+        `[application] Failed to increment applicationsCount for vacancy ${vacancyId}`
+      )
+    }
+
     ctx.status = 201
     return ctx.send({ data: application })
   },

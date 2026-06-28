@@ -14,9 +14,13 @@ export class ApplicationStore {
   vacancyApplications: Application[] = []
   isLoading = false
   error: string | null = null
+  // candidate view pagination
   total = 0
   page = 1
   pageSize = 20
+  // employer view pagination (separate to avoid overwriting candidate state)
+  vacancyTotal = 0
+  vacancyPage = 1
   limitReached = false
   alreadyApplied = false
 
@@ -26,6 +30,10 @@ export class ApplicationStore {
 
   get pageCount(): number {
     return this.pageSize > 0 ? Math.ceil(this.total / this.pageSize) : 0
+  }
+
+  get vacancyPageCount(): number {
+    return this.pageSize > 0 ? Math.ceil(this.vacancyTotal / this.pageSize) : 0
   }
 
   async createApplication(data: ApplicationCreateInput): Promise<Application> {
@@ -104,8 +112,8 @@ export class ApplicationStore {
       )
       runInAction(() => {
         this.vacancyApplications = res.data
-        this.total = res.meta.total
-        this.page = page
+        this.vacancyTotal = res.meta.total
+        this.vacancyPage = page
       })
     } catch (e) {
       runInAction(() => {

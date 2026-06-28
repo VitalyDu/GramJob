@@ -18,13 +18,14 @@ export const ResumesClient = observer(function ResumesClient() {
   const [employmentType, setEmploymentType] = useState<EmploymentTypeEnum | ''>('')
 
   useEffect(() => {
+    if (!auth.user) return // don't fetch before auth is resolved; avoids spurious 403 → accessDenied
     void store.fetchResumes({
       search,
       country,
       ...(workFormat ? { workFormat } : {}),
       ...(employmentType ? { employmentType } : {}),
     })
-  }, [store, search, country, workFormat, employmentType])
+  }, [store, auth.user, search, country, workFormat, employmentType])
 
   const handlePageChange = (page: number) => {
     void store.fetchResumes({
@@ -34,6 +35,19 @@ export const ResumesClient = observer(function ResumesClient() {
       ...(employmentType ? { employmentType } : {}),
       page,
     })
+  }
+
+  if (!auth.user) {
+    return (
+      <div className="py-16 text-center">
+        <p className="text-lg font-medium text-gray-900">
+          Войдите, чтобы просматривать базу резюме
+        </p>
+        <Link href="/login" className="mt-4 inline-block text-sm text-primary hover:underline">
+          Войти
+        </Link>
+      </div>
+    )
   }
 
   if (store.accessDenied) {
@@ -48,19 +62,6 @@ export const ResumesClient = observer(function ResumesClient() {
           className="mt-6 inline-flex items-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-medium text-white hover:bg-indigo-700"
         >
           Перейти к подпискам →
-        </Link>
-      </div>
-    )
-  }
-
-  if (!auth.user) {
-    return (
-      <div className="py-16 text-center">
-        <p className="text-lg font-medium text-gray-900">
-          Войдите, чтобы просматривать базу резюме
-        </p>
-        <Link href="/login" className="mt-4 inline-block text-sm text-primary hover:underline">
-          Войти
         </Link>
       </div>
     )
