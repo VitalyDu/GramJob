@@ -351,3 +351,58 @@ export interface ResumeCreateInput {
 }
 
 export type ResumeUpdateInput = Partial<ResumeCreateInput>
+
+// --- Application ---
+
+export type ApplicationStatusEnum =
+  | 'applied'
+  | 'viewed'
+  | 'in-review'
+  | 'interview'
+  | 'test-task'
+  | 'offer'
+  | 'hired'
+  | 'rejected'
+
+export interface ApplicationVacancyRef {
+  documentId: string
+  title: string
+  status: VacancyStatusEnum
+  sourceType: SourceTypeEnum
+  company: {
+    documentId: string
+    name: string
+    slug: string
+  }
+}
+
+export interface ApplicationResumeRef {
+  documentId: string
+  title: string
+  firstName: string
+  lastName: string
+  status: ResumeStatusEnum
+}
+
+export interface ApplicationUserRef {
+  id: number
+  firstName: string
+  lastName: string
+}
+
+export interface Application {
+  id: number
+  documentId: string
+  vacancy: ApplicationVacancyRef
+  resume: ApplicationResumeRef
+  user: ApplicationUserRef
+  status: ApplicationStatusEnum
+  coverLetter?: string | null
+  createdAt: string
+}
+
+export interface ApplicationCreateInput {
+  vacancyId: string
+  resumeId: string
+  coverLetter?: string
+}
