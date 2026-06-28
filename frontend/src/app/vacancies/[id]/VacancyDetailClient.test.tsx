@@ -51,6 +51,18 @@ const mockVacancy = {
   company: { documentId: 'comp1', name: 'Acme Corp', slug: 'acme-corp', logo: null },
 }
 
+const mockAppStore = {
+  isLoading: false,
+  limitReached: false,
+  alreadyApplied: false,
+  clearFlags: vi.fn(),
+  createApplication: vi.fn().mockResolvedValue(undefined),
+}
+
+const mockAuth = {
+  user: null,
+}
+
 function makeStore(overrides = {}) {
   return {
     currentVacancy: null,
@@ -61,29 +73,32 @@ function makeStore(overrides = {}) {
   }
 }
 
+function makeUseStoresReturn(vacancyOverrides = {}) {
+  return {
+    vacancy: makeStore(vacancyOverrides),
+    application: mockAppStore,
+    auth: mockAuth,
+  } as unknown as ReturnType<typeof useStores>
+}
+
 describe('VacancyDetailClient', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   it('вызывает fetchVacancyById при монтировании', async () => {
-    const store = makeStore()
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    const storesReturn = makeUseStoresReturn()
+    vi.mocked(useStores).mockReturnValue(storesReturn)
 
     render(<VacancyDetailClient id="vac123" />)
 
     await waitFor(() => {
-      expect(store.fetchVacancyById).toHaveBeenCalledWith('vac123')
+      expect(storesReturn.vacancy.fetchVacancyById).toHaveBeenCalledWith('vac123')
     })
   })
 
   it('отображает загрузку', () => {
-    const store = makeStore({ isLoading: true })
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(makeUseStoresReturn({ isLoading: true }))
 
     render(<VacancyDetailClient id="vac123" />)
 
@@ -91,10 +106,7 @@ describe('VacancyDetailClient', () => {
   })
 
   it('отображает "не найдена" если currentVacancy=null и нет загрузки', () => {
-    const store = makeStore({ currentVacancy: null })
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(makeUseStoresReturn({ currentVacancy: null }))
 
     render(<VacancyDetailClient id="vac123" />)
 
@@ -102,10 +114,7 @@ describe('VacancyDetailClient', () => {
   })
 
   it('отображает название вакансии', () => {
-    const store = makeStore({ currentVacancy: mockVacancy })
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(makeUseStoresReturn({ currentVacancy: mockVacancy }))
 
     render(<VacancyDetailClient id="vac123" />)
 
@@ -113,10 +122,7 @@ describe('VacancyDetailClient', () => {
   })
 
   it('отображает название компании', () => {
-    const store = makeStore({ currentVacancy: mockVacancy })
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(makeUseStoresReturn({ currentVacancy: mockVacancy }))
 
     render(<VacancyDetailClient id="vac123" />)
 
@@ -124,10 +130,7 @@ describe('VacancyDetailClient', () => {
   })
 
   it('отображает формат работы', () => {
-    const store = makeStore({ currentVacancy: mockVacancy })
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(makeUseStoresReturn({ currentVacancy: mockVacancy }))
 
     render(<VacancyDetailClient id="vac123" />)
 
@@ -135,10 +138,7 @@ describe('VacancyDetailClient', () => {
   })
 
   it('отображает зарплату', () => {
-    const store = makeStore({ currentVacancy: mockVacancy })
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(makeUseStoresReturn({ currentVacancy: mockVacancy }))
 
     render(<VacancyDetailClient id="vac123" />)
 
@@ -146,10 +146,7 @@ describe('VacancyDetailClient', () => {
   })
 
   it('отображает описание', () => {
-    const store = makeStore({ currentVacancy: mockVacancy })
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(makeUseStoresReturn({ currentVacancy: mockVacancy }))
 
     render(<VacancyDetailClient id="vac123" />)
 
@@ -162,10 +159,7 @@ describe('VacancyDetailClient', () => {
       sourceType: 'external' as const,
       sourceUrl: 'https://example.com/job',
     }
-    const store = makeStore({ currentVacancy: externalVacancy })
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(makeUseStoresReturn({ currentVacancy: externalVacancy }))
 
     render(<VacancyDetailClient id="vac123" />)
 
