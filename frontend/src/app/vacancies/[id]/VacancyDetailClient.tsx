@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
+import { ApplyDialog } from '@/components/application/ApplyDialog'
 import {
   WORK_FORMAT_LABELS,
   EMPLOYMENT_TYPE_LABELS,
@@ -17,11 +18,26 @@ interface Props {
 }
 
 export const VacancyDetailClient = observer(function VacancyDetailClient({ id }: Props) {
-  const { vacancy: store } = useStores()
+  const { vacancy: store, application: appStore, auth } = useStores()
+  const [applyOpen, setApplyOpen] = useState(false)
 
   useEffect(() => {
     void store.fetchVacancyById(id)
   }, [store, id])
+
+  const handleApplyClose = () => {
+    setApplyOpen(false)
+    appStore.clearFlags()
+  }
+
+  const handleApplySubmit = async (resumeId: string, coverLetter: string) => {
+    try {
+      await appStore.createApplication({ vacancyId: id, resumeId, coverLetter })
+      setApplyOpen(false)
+    } catch {
+      // errors reflected in appStore.limitReached / appStore.alreadyApplied
+    }
+  }
 
   if (store.isLoading) {
     return <p className="text-sm text-muted-foreground">Загрузка...</p>
@@ -41,6 +57,8 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
 
   const v = store.currentVacancy
   const salary = formatSalary(v.salaryFrom, v.salaryTo, v.salaryCurrency)
+  const isInternal = v.sourceType === 'internal'
+  const isPublished = v.status === 'published'
 
   return (
     <div className="space-y-6">
@@ -120,6 +138,24 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
         </div>
       )}
 
+      {isPublished && isInternal && auth.user && (
+        <button
+          onClick={() => setApplyOpen(true)}
+          className="inline-flex items-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-medium text-white hover:bg-indigo-700"
+        >
+          Откликнуться
+        </button>
+      )}
+
+      {isPublished && isInternal && !auth.user && (
+        <Link
+          href="/login"
+          className="inline-flex items-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-medium text-white hover:bg-indigo-700"
+        >
+          Войдите, чтобы откликнуться
+        </Link>
+      )}
+
       {v.sourceType === 'external' && v.sourceUrl && (
         <a
           href={v.sourceUrl}
@@ -136,6 +172,17 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
           ← Все вакансии
         </Link>
       </div>
+
+      <ApplyDialog
+        isOpen={applyOpen}
+        vacancyId={id}
+        vacancyTitle={v.title}
+        onClose={handleApplyClose}
+        onSubmit={handleApplySubmit}
+        isLoading={appStore.isLoading}
+        limitReached={appStore.limitReached}
+        alreadyApplied={appStore.alreadyApplied}
+      />
     </div>
   )
 })
