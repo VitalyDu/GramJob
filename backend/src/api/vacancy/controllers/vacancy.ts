@@ -7,6 +7,7 @@ import {
   publishedTransitionsOnEdit,
 } from '../services/vacancy-utils'
 import { checkAndConsumeVacancyCredit, checkAndConsumeBoost } from '../services/credit-service'
+import { getBlockedUserIds } from '../../block/services/block-filter'
 import type vacancyServiceFactory from '../services/vacancy'
 
 type VacancyService = ReturnType<typeof vacancyServiceFactory>
@@ -239,6 +240,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const pageSizeNum = Math.min(50, Math.max(1, parseInt(pageSize, 10) || 20))
       const offset = (pageNum - 1) * pageSizeNum
 
+      // Block filter: hide vacancies from users the current user has blocked
+      let blockedUserIds: number[] = []
+      if (ctx.state.user) {
+        blockedUserIds = await getBlockedUserIds(strapi, (ctx.state.user as { id: number }).id)
+      }
+
       const sortMap: Record<string, string> = {
         newest: 'createdAt:desc',
         salary_asc: 'salaryFrom:asc',
@@ -278,6 +285,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         if (sourceType) baseFilters.sourceType = { $eq: sourceType }
         if (urgent === 'true') baseFilters.urgent = { $eq: true }
         if (topPlacement === 'true') baseFilters.topPlacement = { $eq: true }
+        if (blockedUserIds.length > 0) {
+          baseFilters.postedBy = { id: { $notIn: blockedUserIds } }
+        }
 
         // Accurate total: counts only docs that pass all filters (including extra ones)
         const total = await strapi.documents('api::vacancy.vacancy').count({ filters: baseFilters })
@@ -372,6 +382,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (sourceType) filters.sourceType = { $eq: sourceType }
       if (urgent === 'true') filters.urgent = { $eq: true }
       if (topPlacement === 'true') filters.topPlacement = { $eq: true }
+      if (blockedUserIds.length > 0) {
+        filters.postedBy = { id: { $notIn: blockedUserIds } }
+      }
 
       const [vacancies, total] = await Promise.all([
         strapi.documents('api::vacancy.vacancy').findMany({

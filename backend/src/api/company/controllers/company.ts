@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/strapi'
 
 import { toSlug, canSubmit, canDelete } from '../services/company-utils'
+import { getBlockedUserIds } from '../../block/services/block-filter'
 import type companyServiceFactory from '../services/company'
 
 type CompanyService = ReturnType<typeof companyServiceFactory>
@@ -91,6 +92,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return ctx.badRequest(`companySize must be one of: ${VALID_COMPANY_SIZES.join(', ')}`)
       }
 
+      // Block filter: hide companies owned by blocked users
+      let blockedUserIds: number[] = []
+      if (ctx.state.user) {
+        blockedUserIds = await getBlockedUserIds(strapi, (ctx.state.user as { id: number }).id)
+      }
+
       const filters: Record<string, unknown> = { status: { $eq: 'published' } }
 
       if (search) {
@@ -98,6 +105,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
       if (country) filters.country = { $eq: country }
       if (companySize) filters.companySize = { $eq: companySize }
+      if (blockedUserIds.length > 0) {
+        filters.owner = { id: { $notIn: blockedUserIds } }
+      }
 
       const [companies, total] = await Promise.all([
         strapi.documents('api::company.company').findMany({
