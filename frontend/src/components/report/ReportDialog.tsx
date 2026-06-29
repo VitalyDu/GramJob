@@ -26,12 +26,14 @@ export function ReportDialog({ type, targetId, isOpen, onClose }: Props) {
   const [comment, setComment] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [sent, setSent] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   if (!isOpen) return null
   if (!auth.user) return null
 
   const handleSubmit = async () => {
     setIsLoading(true)
+    setSubmitError(null)
     try {
       await api.post('/reports', {
         type,
@@ -40,6 +42,8 @@ export function ReportDialog({ type, targetId, isOpen, onClose }: Props) {
         ...(comment.trim() ? { comment: comment.trim() } : {}),
       })
       setSent(true)
+    } catch {
+      setSubmitError('Не удалось отправить жалобу. Попробуйте ещё раз.')
     } finally {
       setIsLoading(false)
     }
@@ -49,6 +53,7 @@ export function ReportDialog({ type, targetId, isOpen, onClose }: Props) {
     setSent(false)
     setComment('')
     setReason('spam')
+    setSubmitError(null)
     onClose()
   }
 
@@ -98,6 +103,8 @@ export function ReportDialog({ type, targetId, isOpen, onClose }: Props) {
                 />
               </div>
             </div>
+
+            {submitError && <p className="mt-3 text-sm text-red-600">{submitError}</p>}
 
             <div className="mt-5 flex gap-3">
               <Button onClick={() => void handleSubmit()} disabled={isLoading}>

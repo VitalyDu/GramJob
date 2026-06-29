@@ -31,11 +31,11 @@ export const BlockButton = observer(function BlockButton({
     )
       return
     await store.createBlock({ targetType, targetId })
-    if (!store.error && !store.alreadyBlocked) {
+    if (!store.error) {
       setIsBlocked(true)
-    } else if (store.alreadyBlocked) {
-      setIsBlocked(true)
-      store.clearFlags()
+      if (store.alreadyBlocked) {
+        store.clearFlags()
+      }
     }
   }
 
