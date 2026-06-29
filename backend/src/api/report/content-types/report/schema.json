@@ -1,0 +1,45 @@
+{
+  "kind": "collectionType",
+  "collectionName": "reports",
+  "info": {
+    "singularName": "report",
+    "pluralName": "reports",
+    "displayName": "Report",
+    "description": "User complaint reports"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "reporter": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "required": true
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["vacancy", "resume", "company", "user"],
+      "required": true
+    },
+    "targetId": {
+      "type": "string",
+      "required": true
+    },
+    "reason": {
+      "type": "enumeration",
+      "enum": ["spam", "fraud", "inappropriate", "other"],
+      "required": true
+    },
+    "comment": {
+      "type": "text"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "reviewed", "resolved"],
+      "default": "pending",
+      "required": true
+    }
+  }
+}
