@@ -1,10 +1,13 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
 import { ResumeStatusBadge } from '@/components/resume/ResumeStatusBadge'
+import { FavoriteButton } from '@/components/favorite/FavoriteButton'
+import { ReportDialog } from '@/components/report/ReportDialog'
+import { BlockButton } from '@/components/block/BlockButton'
 import { RESUME_WORK_FORMAT_LABELS, RESUME_EMPLOYMENT_TYPE_LABELS } from '@/lib/resume-utils'
 import { SALARY_CURRENCY_SYMBOLS } from '@/lib/vacancy-utils'
 import type { SalaryCurrencyEnum } from '@/types/api'
@@ -14,7 +17,8 @@ interface Props {
 }
 
 export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: Props) {
-  const { resume: store } = useStores()
+  const { resume: store, auth } = useStores()
+  const [reportOpen, setReportOpen] = useState(false)
 
   useEffect(() => {
     void store.fetchResumeById(id)
@@ -50,6 +54,19 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
           <ResumeStatusBadge status={r.status} />
         </div>
         <p className="mt-1 text-base font-medium text-gray-700">{name}</p>
+
+        {auth.user && (
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <FavoriteButton type="resume" targetId={id} />
+            <button
+              onClick={() => setReportOpen(true)}
+              className="text-sm text-gray-500 hover:text-red-500"
+            >
+              Пожаловаться
+            </button>
+            {r.user && <BlockButton targetType="candidate" targetId={r.user.id} />}
+          </div>
+        )}
 
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-gray-500">
           <span>
@@ -164,6 +181,13 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
           ← Все резюме
         </Link>
       </div>
+
+      <ReportDialog
+        type="resume"
+        targetId={id}
+        isOpen={reportOpen}
+        onClose={() => setReportOpen(false)}
+      />
     </div>
   )
 })

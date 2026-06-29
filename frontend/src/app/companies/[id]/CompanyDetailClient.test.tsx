@@ -56,9 +56,10 @@ describe('CompanyDetailClient', () => {
 
   it('вызывает fetchCompanyById при монтировании', async () => {
     const store = makeStore()
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      company: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<CompanyDetailClient id="abc123" />)
 
@@ -69,9 +70,10 @@ describe('CompanyDetailClient', () => {
 
   it('отображает индикатор загрузки', () => {
     const store = makeStore({ isLoading: true })
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      company: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<CompanyDetailClient id="abc123" />)
 
@@ -80,9 +82,10 @@ describe('CompanyDetailClient', () => {
 
   it('отображает ошибку 404 если компания не найдена', () => {
     const store = makeStore({ error: 'Not found', currentCompany: null })
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      company: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<CompanyDetailClient id="abc123" />)
 
@@ -91,9 +94,10 @@ describe('CompanyDetailClient', () => {
 
   it('отображает название компании', () => {
     const store = makeStore({ currentCompany: mockCompany })
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      company: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<CompanyDetailClient id="abc123" />)
 
@@ -102,9 +106,10 @@ describe('CompanyDetailClient', () => {
 
   it('отображает описание компании', () => {
     const store = makeStore({ currentCompany: mockCompany })
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      company: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<CompanyDetailClient id="abc123" />)
 
@@ -113,9 +118,10 @@ describe('CompanyDetailClient', () => {
 
   it('отображает страну и город', () => {
     const store = makeStore({ currentCompany: mockCompany })
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      company: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<CompanyDetailClient id="abc123" />)
 
@@ -125,9 +131,10 @@ describe('CompanyDetailClient', () => {
 
   it('отображает размер компании в читаемом виде', () => {
     const store = makeStore({ currentCompany: mockCompany })
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      company: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<CompanyDetailClient id="abc123" />)
 
@@ -136,9 +143,10 @@ describe('CompanyDetailClient', () => {
 
   it('отображает ссылку на сайт', () => {
     const store = makeStore({ currentCompany: mockCompany })
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      company: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<CompanyDetailClient id="abc123" />)
 

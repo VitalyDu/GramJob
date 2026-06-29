@@ -1,11 +1,13 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
 import { StatusBadge } from '@/components/company/StatusBadge'
+import { FavoriteButton } from '@/components/favorite/FavoriteButton'
+import { ReportDialog } from '@/components/report/ReportDialog'
 import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
 import { getMediaUrl } from '@/lib/media'
 
@@ -14,7 +16,8 @@ interface Props {
 }
 
 export const CompanyDetailClient = observer(function CompanyDetailClient({ id }: Props) {
-  const { company: store } = useStores()
+  const { company: store, auth } = useStores()
+  const [reportOpen, setReportOpen] = useState(false)
 
   useEffect(() => {
     void store.fetchCompanyById(id)
@@ -75,6 +78,18 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
             {company.city && <span>{company.city}</span>}
             <span>{COMPANY_SIZE_LABELS[company.companySize]}</span>
           </div>
+
+          {auth.user && (
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <FavoriteButton type="company" targetId={id} />
+              <button
+                onClick={() => setReportOpen(true)}
+                className="text-sm text-gray-500 hover:text-red-500"
+              >
+                Пожаловаться
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -119,6 +134,13 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
           ← Все компании
         </Link>
       </div>
+
+      <ReportDialog
+        type="company"
+        targetId={id}
+        isOpen={reportOpen}
+        onClose={() => setReportOpen(false)}
+      />
     </div>
   )
 })

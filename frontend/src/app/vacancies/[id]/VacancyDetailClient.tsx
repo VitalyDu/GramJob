@@ -6,6 +6,9 @@ import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
 import { ApplyDialog } from '@/components/application/ApplyDialog'
+import { FavoriteButton } from '@/components/favorite/FavoriteButton'
+import { ReportDialog } from '@/components/report/ReportDialog'
+import { BlockButton } from '@/components/block/BlockButton'
 import {
   WORK_FORMAT_LABELS,
   EMPLOYMENT_TYPE_LABELS,
@@ -20,6 +23,7 @@ interface Props {
 export const VacancyDetailClient = observer(function VacancyDetailClient({ id }: Props) {
   const { vacancy: store, application: appStore, auth } = useStores()
   const [applyOpen, setApplyOpen] = useState(false)
+  const [reportOpen, setReportOpen] = useState(false)
 
   useEffect(() => {
     void store.fetchVacancyById(id)
@@ -91,6 +95,19 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
           <span className="mt-2 inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700">
             🔥 Urgent
           </span>
+        )}
+
+        {auth.user && (
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <FavoriteButton type="vacancy" targetId={id} />
+            <button
+              onClick={() => setReportOpen(true)}
+              className="text-sm text-gray-500 hover:text-red-500"
+            >
+              Пожаловаться
+            </button>
+            {v.postedBy && <BlockButton targetType="employer" targetId={v.postedBy.id} />}
+          </div>
         )}
       </div>
 
@@ -182,6 +199,13 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
         isLoading={appStore.isLoading}
         limitReached={appStore.limitReached}
         alreadyApplied={appStore.alreadyApplied}
+      />
+
+      <ReportDialog
+        type="vacancy"
+        targetId={id}
+        isOpen={reportOpen}
+        onClose={() => setReportOpen(false)}
       />
     </div>
   )
