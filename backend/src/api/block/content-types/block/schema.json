@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "blocks",
+  "info": {
+    "singularName": "block",
+    "pluralName": "blocks",
+    "displayName": "Block",
+    "description": "User blocks (hidden employers or candidates)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "required": true
+    },
+    "targetType": {
+      "type": "enumeration",
+      "enum": ["employer", "candidate"],
+      "required": true
+    },
+    "targetId": {
+      "type": "integer",
+      "required": true
+    }
+  }
+}
