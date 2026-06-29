@@ -256,8 +256,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Full-text search via raw SQL
       if (search) {
+        // Build SQL fragment to exclude blocked users (applied at SQL level to avoid page underfill)
+        const blockSql =
+          blockedUserIds.length > 0
+            ? `AND posted_by_id NOT IN (${blockedUserIds.map(() => '?').join(',')})`
+            : ''
+        const blockParams = blockedUserIds.length > 0 ? blockedUserIds : []
+
         // Get all FTS-matching IDs (SQL handles status+expiresAt; no pagination here for accurate count)
-        const { documentIds: allFtsIds } = await svc().searchByVector(search, 0, 10000, '', [])
+        const { documentIds: allFtsIds } = await svc().searchByVector(
+          search,
+          0,
+          10000,
+          blockSql,
+          blockParams
+        )
 
         if (allFtsIds.length === 0) {
           return ctx.send({
@@ -325,8 +338,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           search,
           offset,
           pageSizeNum,
-          '',
-          []
+          blockSql,
+          blockParams
         )
 
         if (pageIds.length === 0) {
