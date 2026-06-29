@@ -195,6 +195,7 @@ export interface Vacancy {
   industry: IndustryRef
   specialization: SpecializationRef
   company: VacancyCompanyRef
+  postedBy?: { id: number; firstName: string; lastName: string } | null
 }
 
 export interface VacancyListParams {
@@ -405,4 +406,126 @@ export interface ApplicationCreateInput {
   vacancyId: string
   resumeId: string
   coverLetter?: string
+}
+
+// --- Favorite ---
+
+export type FavoriteType = 'vacancy' | 'resume' | 'company'
+
+export interface FavoriteVacancyCard {
+  documentId: string
+  title: string
+  country: string
+  city?: string | null
+  workFormat: WorkFormatEnum
+  employmentType: EmploymentTypeEnum
+  seniority: SeniorityEnum
+  salaryFrom?: number | null
+  salaryTo?: number | null
+  salaryCurrency?: SalaryCurrencyEnum | null
+  urgent: boolean
+  topPlacement: boolean
+  highlighted: boolean
+  sourceType: SourceTypeEnum
+  status: VacancyStatusEnum
+  expiresAt?: string | null
+  createdAt: string
+  industry?: IndustryRef | null
+  specialization?: SpecializationRef | null
+  company: VacancyCompanyRef
+}
+
+export interface FavoriteResumeCard {
+  documentId: string
+  title: string
+  firstName: string
+  lastName: string
+  country: string
+  city?: string | null
+  desiredSalary?: number | null
+  currency?: ResumeCurrencyEnum | null
+  workFormat: ResumeWorkFormatEnum
+  employmentType: EmploymentTypeEnum
+  experienceYears?: number | null
+  skills?: string[] | null
+  views?: number
+  status: ResumeStatusEnum
+  createdAt: string
+}
+
+export interface FavoriteCompanyCard {
+  documentId: string
+  name: string
+  slug: string
+  country: string
+  city?: string | null
+  companySize: CompanySizeEnum
+  status: CompanyStatusEnum
+  createdAt: string
+  logo?: StrapiMedia | null
+}
+
+export type FavoriteEntity = FavoriteVacancyCard | FavoriteResumeCard | FavoriteCompanyCard | null
+
+export interface Favorite {
+  documentId: string
+  type: FavoriteType
+  targetId: string
+  entity: FavoriteEntity
+  createdAt: string
+}
+
+export interface FavoriteCreateInput {
+  type: FavoriteType
+  targetId: string
+}
+
+// --- Saved Search ---
+
+export type SavedSearchType = 'vacancy' | 'resume'
+
+export type SavedSearchFilters = Record<string, string | number | boolean | undefined>
+
+export interface SavedSearch {
+  documentId: string
+  name?: string | null
+  type: SavedSearchType
+  filters: SavedSearchFilters
+  lastNotifiedAt?: string | null
+  createdAt: string
+}
+
+export interface SavedSearchCreateInput {
+  type: SavedSearchType
+  filters: SavedSearchFilters
+  name?: string
+}
+
+// --- Block ---
+
+export type BlockTargetType = 'employer' | 'candidate'
+
+export interface Block {
+  documentId: string
+  targetType: BlockTargetType
+  targetId: number
+  createdAt: string
+}
+
+export interface BlockCreateInput {
+  targetType: BlockTargetType
+  targetId: number
+}
+
+// --- Report ---
+
+export type ReportType = 'vacancy' | 'resume' | 'company' | 'user'
+
+export type ReportReason = 'spam' | 'fraud' | 'inappropriate' | 'other'
+
+export interface ReportCreateInput {
+  type: ReportType
+  targetId: string
+  reason: ReportReason
+  comment?: string
 }
