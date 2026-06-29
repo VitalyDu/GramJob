@@ -45,7 +45,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     if (!isValidSavedSearchType(type as string)) {
       return ctx.badRequest('type must be one of: vacancy, resume')
     }
-    if (!savedFilters || typeof savedFilters !== 'object') {
+    if (!savedFilters || typeof savedFilters !== 'object' || Array.isArray(savedFilters)) {
       return ctx.badRequest('filters is required and must be an object')
     }
 
