@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "favorites",
+  "info": {
+    "singularName": "favorite",
+    "pluralName": "favorites",
+    "displayName": "Favorite",
+    "description": "User's saved vacancies, resumes and companies"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "required": true
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["vacancy", "resume", "company"],
+      "required": true
+    },
+    "targetId": {
+      "type": "string",
+      "required": true
+    }
+  }
+}
