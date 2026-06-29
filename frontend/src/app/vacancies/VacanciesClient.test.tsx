@@ -63,9 +63,10 @@ describe('VacanciesClient', () => {
 
   it('вызывает fetchVacancies при монтировании', async () => {
     const store = makeStore()
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      vacancy: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<VacanciesClient />)
 
@@ -76,9 +77,10 @@ describe('VacanciesClient', () => {
 
   it('отображает вакансии из стора', () => {
     const store = makeStore({ vacancies: [mockVacancy] })
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      vacancy: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<VacanciesClient />)
 
@@ -87,9 +89,10 @@ describe('VacanciesClient', () => {
 
   it('отображает сообщение о загрузке', () => {
     const store = makeStore({ isLoading: true })
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      vacancy: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<VacanciesClient />)
 
@@ -98,9 +101,10 @@ describe('VacanciesClient', () => {
 
   it('отображает ошибку из стора', () => {
     const store = makeStore({ error: 'Network error' })
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      vacancy: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<VacanciesClient />)
 
@@ -109,9 +113,10 @@ describe('VacanciesClient', () => {
 
   it('отображает "не найдены" если список пуст', () => {
     const store = makeStore({ vacancies: [] })
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      vacancy: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<VacanciesClient />)
 
@@ -120,9 +125,10 @@ describe('VacanciesClient', () => {
 
   it('не показывает пагинацию если pageCount <= 1', () => {
     const store = makeStore({ pageCount: 1 })
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      vacancy: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<VacanciesClient />)
 
@@ -131,9 +137,10 @@ describe('VacanciesClient', () => {
 
   it('показывает пагинацию если pageCount > 1', () => {
     const store = makeStore({ pageCount: 3, page: 2, vacancies: [mockVacancy] })
-    vi.mocked(useStores).mockReturnValue({ vacancy: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue({
+      vacancy: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
 
     render(<VacanciesClient />)
 

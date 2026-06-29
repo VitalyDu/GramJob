@@ -6,6 +6,7 @@ import { useStores } from '@/stores/StoreProvider'
 import { VacancyCard } from '@/components/vacancy/VacancyCard'
 import { VacancyFilters } from '@/components/vacancy/VacancyFilters'
 import { Button } from '@/components/ui/button'
+import { SaveSearchButton } from '@/components/saved-search/SaveSearchButton'
 import type { VacancyListParams } from '@/types/api'
 
 export const VacanciesClient = observer(function VacanciesClient() {
@@ -30,6 +31,12 @@ export const VacanciesClient = observer(function VacanciesClient() {
   return (
     <div className="space-y-6">
       <VacancyFilters params={params} onChange={handleFiltersChange} />
+      <div className="flex items-center justify-end">
+        <SaveSearchButton
+          searchType="vacancy"
+          filters={params as Record<string, string | number | boolean | undefined>}
+        />
+      </div>
 
       {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
 

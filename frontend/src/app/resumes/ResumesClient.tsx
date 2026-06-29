@@ -8,6 +8,7 @@ import { ResumeCard } from '@/components/resume/ResumeCard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { RESUME_WORK_FORMAT_LABELS, RESUME_EMPLOYMENT_TYPE_LABELS } from '@/lib/resume-utils'
+import { SaveSearchButton } from '@/components/saved-search/SaveSearchButton'
 import type { ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 
 export const ResumesClient = observer(function ResumesClient() {
@@ -109,6 +110,18 @@ export const ResumesClient = observer(function ResumesClient() {
             )
           )}
         </select>
+      </div>
+
+      <div className="flex items-center justify-end">
+        <SaveSearchButton
+          searchType="resume"
+          filters={{
+            ...(search ? { search } : {}),
+            ...(country ? { country } : {}),
+            ...(workFormat ? { workFormat } : {}),
+            ...(employmentType ? { employmentType } : {}),
+          }}
+        />
       </div>
 
       {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
