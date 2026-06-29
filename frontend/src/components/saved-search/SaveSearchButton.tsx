@@ -19,14 +19,18 @@ export const SaveSearchButton = observer(function SaveSearchButton({ searchType,
   if (!auth.user) return null
 
   const handleSave = async () => {
-    await store.createSavedSearch({
-      type: searchType,
-      filters,
-      ...(name.trim() ? { name: name.trim() } : {}),
-    })
-    setSaved(true)
-    setShowForm(false)
-    setName('')
+    try {
+      await store.createSavedSearch({
+        type: searchType,
+        filters,
+        ...(name.trim() ? { name: name.trim() } : {}),
+      })
+      setSaved(true)
+      setShowForm(false)
+      setName('')
+    } catch {
+      // store.error is set by the store — user can retry
+    }
   }
 
   if (saved) {
