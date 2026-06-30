@@ -17,7 +17,7 @@
 
 ## Текущее состояние проекта
 
-**Фаза: Разработка. Sprint 1 завершён, Sprint 2 завершён, Sprint 3 завершён (Backend + Frontend), Sprint 4 полностью завершён (Backend + Frontend Resumes + Frontend Applications), Sprint 5 полностью завершён (Backend + Frontend Favorites/SavedSearches/Blocks/Reports). Следующий: Sprint 6 — Subscriptions & Payments.**
+**Фаза: Разработка. Sprint 1–6 полностью завершены. Sprint 7 Backend завершён. Следующий: Sprint 7 Frontend — Notifications & Analytics UI.**
 
 Выполнено (Sprint 1):
 
@@ -207,7 +207,36 @@
 - `app/companies/[id]/CompanyDetailClient.tsx` — добавлены `FavoriteButton` + «Пожаловаться»
 - Итого: 241 тест, 0 ошибок TypeScript
 
-Текущий шаг — Sprint 6 (Subscriptions & Payments).
+Выполнено (Sprint 6 Backend + Frontend):
+
+- SubscriptionPlan / VacancyPackage / ApplyPackage content types + seed данные
+- GET /subscription-plans, GET /vacancy-packages, GET /apply-packages
+- Telegram Bot: инициализация, webhook, pre_checkout_query, successful_payment
+- POST /payments/subscribe, /payments/vacancy-pack, /payments/apply-pack → createInvoiceLink
+- Сервис: `activateSubscription`, `addCredits`; VIP: `User.isVip` + автоподсветка вакансий
+- Cron: истечение подписок (02:00 UTC), предупреждение за 7 дней (09:00 UTC)
+- PaymentStore (fetchPlans, fetchVacancyPackages, fetchApplyPackages, subscribeToPlan, buyVacancyPack, buyApplyPack)
+- Страница: `/subscription` (планы, пакеты вакансий + откликов, Telegram Stars оплата)
+- Компоненты: `SubscriptionPlanCard`, `PackageCard`, `SubscriptionBadge` (в WebHeader)
+- Хук: `useTelegramPayment` — WebApp.openInvoice + web fallback
+
+Выполнено (Sprint 7 Backend):
+
+- Content type: Notification (16 типов: new_application, application_approved/rejected, interview_invitation, test_task, offer_received, resume_viewed, vacancy_viewed, vacancy_expiring_soon, vacancy_expired, subscription_expiring/expired, limits_reached, saved_search_match, moderation_approved/rejected)
+- Сервис: `sendNotification(strapi, payload)` — сохранение в БД + Telegram sendMessage (независимые try/catch)
+- `sendMessage` / `TelegramQueue` (50ms delay) / `sendMessageWithRetry` (5s backoff на 429)
+- `buildNotificationMessage` — HTML-шаблоны для всех 16 типов уведомлений
+- Telegram Bot команды: `/start`, `/help`, `/profile`, `/notifications`, `/vacancies`, `/resume`, `/subscribe`
+- Lifecycle hooks: Application afterCreate/afterUpdate → sendNotification; Resume/Company afterUpdate(published) → moderation_approved
+- Cron tasks обновлены: все TODO replaced с реальными sendNotification вызовами
+- Новые cron: 18:00 UTC дайджест просмотров; 00:00 UTC очистка старых прочитанных уведомлений; 01:00 UTC агрегация аналитики
+- Content types: VacancyAnalytics (vacancy, date, views, uniqueViews, applications, ctr), ResumeAnalytics (resume, date, views, uniqueViews, invitations)
+- Сервис: `analytics.service.ts` — `computeDelta(current, prevTotal)`, `yesterdayUTC()`
+- GET /notifications, PATCH /notifications/:id/read, POST /notifications/read-all
+- GET /analytics/vacancies/:id, GET /analytics/resumes/:id (owner-only, date range, total + daily)
+- Итого: 206 тестов (+30 новых), 0 ошибок TypeScript
+
+Текущий шаг — Sprint 7 Frontend (Notifications & Analytics UI).
 Планы: `docs/superpowers/plans/`
 
 ---
