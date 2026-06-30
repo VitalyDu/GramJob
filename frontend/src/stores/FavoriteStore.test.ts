@@ -136,11 +136,12 @@ describe('FavoriteStore', () => {
       await store.fetchFavorites()
     })
 
-    it('calls DELETE and removes from list', async () => {
+    it('calls DELETE and removes from list and decrements total', async () => {
       vi.mocked(api.delete).mockResolvedValue(undefined)
       await store.removeFavorite('vacancy', 'vac456')
       expect(vi.mocked(api.delete)).toHaveBeenCalledWith('/favorites/vacancy/vac456')
       expect(store.favorites).toHaveLength(0)
+      expect(store.total).toBe(0)
     })
 
     it('sets error and rethrows on failure', async () => {

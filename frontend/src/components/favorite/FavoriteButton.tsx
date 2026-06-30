@@ -30,10 +30,14 @@ export const FavoriteButton = observer(function FavoriteButton({
         // error shown via store.error
       }
     } else {
-      await store.addFavorite({ type, targetId })
-      if (!store.error) {
-        setIsFavorited(true)
-        store.clearFlags()
+      try {
+        await store.addFavorite({ type, targetId })
+        if (!store.error) {
+          setIsFavorited(true)
+          store.clearFlags()
+        }
+      } catch {
+        // error shown via store.error
       }
     }
   }

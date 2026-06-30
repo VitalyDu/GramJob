@@ -84,6 +84,7 @@ export class FavoriteStore {
       await api.delete(`/favorites/${type}/${targetId}`)
       runInAction(() => {
         this.favorites = this.favorites.filter((f) => !(f.type === type && f.targetId === targetId))
+        this.total = Math.max(0, this.total - 1)
       })
     } catch (e) {
       runInAction(() => {
