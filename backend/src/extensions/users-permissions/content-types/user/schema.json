@@ -86,6 +86,10 @@
       "type": "enumeration",
       "enum": ["ru", "en"],
       "default": "ru"
+    },
+    "isVip": {
+      "type": "boolean",
+      "default": false
     }
   }
 }
