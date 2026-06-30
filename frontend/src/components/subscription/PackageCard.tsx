@@ -34,8 +34,8 @@ export function PackageCard(props: Props) {
       </div>
 
       <ul className="space-y-1 text-sm text-gray-600">
-        {details.map((d) => (
-          <li key={d}>• {d}</li>
+        {details.map((d, idx) => (
+          <li key={idx}>• {d}</li>
         ))}
       </ul>
 
@@ -44,9 +44,7 @@ export function PackageCard(props: Props) {
         variant="outline"
         className="w-full"
         disabled={isBuying}
-        onClick={() => {
-          onBuy(pkg.id)
-        }}
+        onClick={() => onBuy(pkg.id)}
       >
         {isBuying ? 'Создание счёта...' : 'Купить'}
       </Button>
