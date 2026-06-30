@@ -17,7 +17,7 @@
 
 ## Текущее состояние проекта
 
-**Фаза: Разработка. Sprint 1 завершён, Sprint 2 завершён, Sprint 3 завершён (Backend + Frontend), Sprint 4 полностью завершён (Backend + Frontend Resumes + Frontend Applications). Следующий: Sprint 5 — Favorites, Saved Searches, Reports & Blocks.**
+**Фаза: Разработка. Sprint 1 завершён, Sprint 2 завершён, Sprint 3 завершён (Backend + Frontend), Sprint 4 полностью завершён (Backend + Frontend Resumes + Frontend Applications), Sprint 5 полностью завершён (Backend + Frontend Favorites/SavedSearches/Blocks/Reports). Следующий: Sprint 6 — Subscriptions & Payments.**
 
 Выполнено (Sprint 1):
 
@@ -173,7 +173,41 @@
 - `app/dashboard/vacancies/[id]/applications/page.tsx` + `VacancyApplicationsClient.tsx` — отклики на вакансию (работодатель)
 - Итого: 209 тестов, 0 ошибок TypeScript
 
-Текущий шаг — Sprint 5 (Favorites, Saved Searches, Reports & Blocks).
+Выполнено (Sprint 5 Backend):
+
+- Content type: Favorite (user, type: vacancy/resume/company, targetId string; uniqueness enforced в controller)
+- Favorite controller: GET /favorites (paginated, type filter, block filter), POST /favorites (409 ALREADY_FAVORITED), DELETE /favorites/:type/:targetId
+- Content type: SavedSearch (user, name optional, type: vacancy/resume, filters jsonb, lastNotifiedAt)
+- SavedSearch controller: GET /saved-searches (paginated), POST /saved-searches, DELETE /saved-searches/:id
+- Content type: Block (user, targetType: employer/candidate, targetId int; uniqueness enforced в controller)
+- Block controller: GET /blocks (paginated), POST /blocks (self-block prevention, 409 ALREADY_BLOCKED), DELETE /blocks/:id
+- Block filter service: `getBlockedUserIds` — интегрирован во все публичные endpoints (vacancies, resumes, companies)
+- Content type: Report (reporter, type: vacancy/resume/company/user, targetId, reason: spam/fraud/inappropriate/other, comment, status: pending)
+- Report controller: POST /reports (auth, валидация type + reason)
+- Bug fix: FTS в vacancy findPublished не передавал block filter в searchByVector → вакансии заблокированных пользователей появлялись в FTS-результатах; исправлено передачей blockSql/blockParams в обе ветки
+
+Выполнено (Sprint 5 Frontend):
+
+- `types/api.ts` — Sprint 5 типы: `FavoriteType`, `FavoriteVacancyCard`, `FavoriteResumeCard`, `FavoriteCompanyCard`, `FavoriteEntity`, `Favorite`, `FavoriteCreateInput`, `SavedSearchType`, `SavedSearchFilters`, `SavedSearch`, `SavedSearchCreateInput`, `BlockTargetType`, `Block`, `BlockCreateInput`, `ReportType`, `ReportReason`, `ReportCreateInput`; добавлено поле `postedBy` в `Vacancy`
+- `stores/FavoriteStore.ts` — MobX стор: `fetchFavorites` (type filter), `addFavorite` (ALREADY_FAVORITED handling), `removeFavorite`, `clearFlags`, `pageCount` (11 тестов)
+- `stores/SavedSearchStore.ts` — MobX стор: `fetchSavedSearches`, `createSavedSearch` (prepend + total++), `removeSavedSearch`, `pageCount` (8 тестов)
+- `stores/BlockStore.ts` — MobX стор: `fetchBlocks`, `createBlock` (ALREADY_BLOCKED handling), `removeBlock`, `clearFlags`, `pageCount` (10 тестов)
+- `stores/RootStore.ts` — добавлены `favorite`, `savedSearch`, `block` stores
+- `components/favorite/FavoriteButton.tsx` — кнопка ★/☆ (amber/серый), local state, auth guard
+- `components/saved-search/SaveSearchButton.tsx` — inline-форма с необязательным именем, try/catch
+- `components/report/ReportDialog.tsx` — модал: select причины + textarea, success state, error state
+- `components/block/BlockButton.tsx` — кнопка блокировки с confirm, self-block guard, ALREADY_BLOCKED handling
+- `app/dashboard/favorites/` — страница с 4 вкладками (Все/Вакансии/Резюме/Компании), рендер карточек по типу, remove, pagination
+- `app/dashboard/saved-searches/` — список с badge типа, «Открыть» link (реконструкция query string из filters), «Удалить» с confirm
+- `app/dashboard/blocks/` — список (Работодатель/Кандидат #id, дата), кнопка разблокировать
+- `app/vacancies/VacanciesClient.tsx` — добавлена `SaveSearchButton`
+- `app/resumes/ResumesClient.tsx` — добавлена `SaveSearchButton`
+- `app/vacancies/[id]/VacancyDetailClient.tsx` — добавлены `FavoriteButton` + «Пожаловаться» + `BlockButton` (employer)
+- `app/resumes/[id]/ResumeDetailClient.tsx` — добавлены `FavoriteButton` + «Пожаловаться» + `BlockButton` (candidate)
+- `app/companies/[id]/CompanyDetailClient.tsx` — добавлены `FavoriteButton` + «Пожаловаться»
+- Итого: 241 тест, 0 ошибок TypeScript
+
+Текущий шаг — Sprint 6 (Subscriptions & Payments).
 Планы: `docs/superpowers/plans/`
 
 ---

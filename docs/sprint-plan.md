@@ -181,26 +181,26 @@
 
 ### Backend
 
-- [ ] Content type: Favorite (уникальный constraint на user+type+targetId)
-- [ ] `GET/POST/DELETE /favorites` — CRUD
-- [ ] Content type: SavedSearch
-- [ ] `GET/POST/DELETE /saved-searches` — CRUD
-- [ ] Cron (каждые 2ч): для каждого SavedSearch → запустить поиск → новые результаты → Telegram уведомление
-- [ ] Content type: Block (уникальный constraint на user+targetId)
-- [ ] `GET/POST/DELETE /blocks` — CRUD
-- [ ] Middleware: фильтровать заблокированные сущности из /vacancies и /companies ответов
-- [ ] Content type: Report
-- [ ] `POST /reports` — создать жалобу
+- [x] Content type: Favorite (уникальный constraint на user+type+targetId)
+- [x] `GET/POST/DELETE /favorites` — CRUD
+- [x] Content type: SavedSearch
+- [x] `GET/POST/DELETE /saved-searches` — CRUD
+- [ ] Cron (каждые 2ч): для каждого SavedSearch → запустить поиск → новые результаты → Telegram уведомление (перенесено в Sprint 7 — зависит от Notification сервиса)
+- [x] Content type: Block (уникальный constraint на user+targetId)
+- [x] `GET/POST/DELETE /blocks` — CRUD
+- [x] Middleware: фильтровать заблокированные сущности из /vacancies и /companies ответов
+- [x] Content type: Report
+- [x] `POST /reports` — создать жалобу
 
 ### Frontend
 
-- [ ] Кнопка ♥ «В избранное» на VacancyCard, ResumeCard, CompanyCard
-- [ ] Страница: `/dashboard/favorites` — три вкладки (вакансии / резюме / компании)
-- [ ] Кнопка «Сохранить поиск» в панели фильтров (с именем)
-- [ ] Страница: `/dashboard/saved-searches` — список с управлением
-- [ ] Диалог: «Пожаловаться» (тип + причина + комментарий)
-- [ ] Кнопка «Заблокировать работодателя» на карточке компании/вакансии
-- [ ] Страница: `/dashboard/blocks` — список заблокированных
+- [x] Кнопка ♥ «В избранное» на страницах вакансий, резюме, компаний (detail pages)
+- [x] Страница: `/dashboard/favorites` — четыре вкладки (все / вакансии / резюме / компании)
+- [x] Кнопка «Сохранить поиск» в панели фильтров (с именем)
+- [x] Страница: `/dashboard/saved-searches` — список с управлением
+- [x] Диалог: «Пожаловаться» (тип + причина + комментарий)
+- [x] Кнопка «Заблокировать» на страницах вакансий (employer) и резюме (candidate)
+- [x] Страница: `/dashboard/blocks` — список заблокированных
 
 ---
 
