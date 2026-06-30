@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "subscription_plans",
+  "info": {
+    "singularName": "subscription-plan",
+    "pluralName": "subscription-plans",
+    "displayName": "Subscription Plan"
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": {},
+  "attributes": {
+    "code": {
+      "type": "enumeration",
+      "enum": ["free", "pro", "max", "vip"],
+      "required": true,
+      "unique": true
+    },
+    "name": { "type": "string", "required": true },
+    "vacanciesPerMonth": { "type": "integer", "required": true },
+    "activeVacanciesLimit": { "type": "integer", "required": true },
+    "vacancyBoostsPerDay": { "type": "integer", "required": true },
+    "applicationsPerDay": { "type": "integer", "required": true },
+    "resumesLimit": { "type": "integer", "required": true },
+    "resumeDatabaseAccess": { "type": "boolean", "default": false },
+    "starsPrice": { "type": "integer" },
+    "durationDays": { "type": "integer", "default": 30 }
+  }
+}

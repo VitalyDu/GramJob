@@ -1,0 +1,17 @@
+{
+  "kind": "collectionType",
+  "collectionName": "vacancy_packages",
+  "info": {
+    "singularName": "vacancy-package",
+    "pluralName": "vacancy-packages",
+    "displayName": "Vacancy Package"
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": {},
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "vacancyCredits": { "type": "integer", "required": true },
+    "boostCredits": { "type": "integer", "required": true },
+    "starsPrice": { "type": "integer", "required": true }
+  }
+}
