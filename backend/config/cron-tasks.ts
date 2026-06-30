@@ -233,4 +233,74 @@ export default {
     },
     options: { tz: 'UTC' },
   },
+
+  // Daily 18:00 UTC: vacancy views digest (notify employer if ≥5 views yesterday)
+  '0 18 * * *': {
+    task: async ({ strapi }: { strapi: Core.Strapi }) => {
+      try {
+        const yesterday = new Date()
+        yesterday.setUTCDate(yesterday.getUTCDate() - 1)
+        const yesterdayDate = yesterday.toISOString().slice(0, 10)
+
+        const records = (await strapi.db
+          .query('api::vacancy-analytics.vacancy-analytics')
+          .findMany({
+            where: { date: yesterdayDate, views: { $gte: 5 } },
+            populate: {
+              vacancy: {
+                select: ['documentId', 'title'],
+                populate: { postedBy: { select: ['id'] } },
+              },
+            },
+            limit: 1000,
+          })) as Array<{
+          views: number
+          vacancy?: { documentId?: string; title?: string; postedBy?: { id?: number } }
+        }>
+
+        strapi.log.info(
+          `[cron] ${records.length} vacancies with ≥5 views yesterday (${yesterdayDate})`
+        )
+
+        for (const record of records) {
+          const posterId = record.vacancy?.postedBy?.id
+          if (posterId) {
+            await sendNotification(strapi, {
+              userId: posterId,
+              type: 'vacancy_viewed',
+              templateData: {
+                vacancyTitle: record.vacancy?.title ?? '',
+                vacancyId: record.vacancy?.documentId ?? '',
+                views: record.views,
+              },
+            })
+          }
+        }
+      } catch (err) {
+        strapi.log.error('[cron] Failed to send vacancy views digest', err)
+      }
+    },
+    options: { tz: 'UTC' },
+  },
+
+  // Weekly Sunday 00:00 UTC: delete read notifications older than 30 days
+  '0 0 * * 0': {
+    task: async ({ strapi }: { strapi: Core.Strapi }) => {
+      try {
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
+        const result = await strapi.db.query('api::notification.notification').deleteMany({
+          where: {
+            isRead: true,
+            createdAt: { $lt: thirtyDaysAgo },
+          },
+        })
+
+        strapi.log.info(`[cron] Deleted old read notifications (older than 30 days)`)
+      } catch (err) {
+        strapi.log.error('[cron] Failed to cleanup notifications', err)
+      }
+    },
+    options: { tz: 'UTC' },
+  },
 }
