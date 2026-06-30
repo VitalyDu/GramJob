@@ -10,6 +10,7 @@ export interface User {
   subscriptionExpiresAt: string | null
   vacancyCredits: number
   applyCredits: number
+  isVip: boolean
   createdAt: string
 }
 
@@ -528,4 +529,37 @@ export interface ReportCreateInput {
   targetId: string
   reason: ReportReason
   comment?: string
+}
+
+// --- Subscription & Payments ---
+
+export interface SubscriptionPlan {
+  documentId: string
+  code: 'free' | 'pro' | 'max' | 'vip'
+  name: string
+  vacanciesPerMonth: number
+  activeVacanciesLimit: number
+  vacancyBoostsPerDay: number
+  applicationsPerDay: number
+  resumesLimit: number
+  resumeDatabaseAccess: boolean
+  starsPrice: number | null
+  durationDays: number
+}
+
+export interface VacancyPackage {
+  id: number
+  documentId: string
+  name: string
+  vacancyCredits: number
+  boostCredits: number
+  starsPrice: number
+}
+
+export interface ApplyPackage {
+  id: number
+  documentId: string
+  name: string
+  applyCredits: number
+  starsPrice: number
 }
