@@ -6,6 +6,7 @@ import { ApplicationStore } from './ApplicationStore'
 import { FavoriteStore } from './FavoriteStore'
 import { SavedSearchStore } from './SavedSearchStore'
 import { BlockStore } from './BlockStore'
+import { PaymentStore } from './PaymentStore'
 
 export class RootStore {
   auth: AuthStore
@@ -16,6 +17,7 @@ export class RootStore {
   favorite: FavoriteStore
   savedSearch: SavedSearchStore
   block: BlockStore
+  payment: PaymentStore
 
   constructor() {
     this.auth = new AuthStore()
@@ -26,6 +28,7 @@ export class RootStore {
     this.favorite = new FavoriteStore()
     this.savedSearch = new SavedSearchStore()
     this.block = new BlockStore()
+    this.payment = new PaymentStore()
   }
 }
 
