@@ -10,20 +10,21 @@
 
 Единая модель пользователя. Один пользователь может быть одновременно кандидатом и работодателем.
 
-| Поле                  | Тип                      | Описание                             |
-| --------------------- | ------------------------ | ------------------------------------ |
-| id                    | int, PK, auto            |                                      |
-| email                 | string, unique, nullable | Null для Telegram-only пользователей |
-| telegramId            | string, unique, nullable | Telegram User ID                     |
-| firstName             | string                   |                                      |
-| lastName              | string, nullable         |                                      |
-| avatar                | media, nullable          | Загружается в S3                     |
-| language              | enum(ru, en)             | Default: ru                          |
-| subscriptionPlan      | enum(free, pro, max)     | Default: free                        |
-| subscriptionExpiresAt | datetime, nullable       | Null = бессрочный Free               |
-| vacancyCredits        | int                      | Default: 0, из пакетов               |
-| applyCredits          | int                      | Default: 0, из пакетов               |
-| createdAt             | datetime, auto           |                                      |
+| Поле                  | Тип                       | Описание                             |
+| --------------------- | ------------------------- | ------------------------------------ |
+| id                    | int, PK, auto             |                                      |
+| email                 | string, unique, nullable  | Null для Telegram-only пользователей |
+| telegramId            | string, unique, nullable  | Telegram User ID                     |
+| firstName             | string                    |                                      |
+| lastName              | string, nullable          |                                      |
+| avatar                | media, nullable           | Загружается в S3                     |
+| language              | enum(ru, en)              | Default: ru                          |
+| subscriptionPlan      | enum(free, pro, max, vip) | Default: free                        |
+| subscriptionExpiresAt | datetime, nullable        | Null = бессрочный Free               |
+| vacancyCredits        | int                       | Default: 0, из пакетов               |
+| applyCredits          | int                       | Default: 0, из пакетов               |
+| isVip                 | boolean                   | Default: false; true когда plan=vip  |
+| createdAt             | datetime, auto            |                                      |
 
 **Связи:**
 
@@ -330,8 +331,8 @@ Education:
 
 **Типы уведомлений:**
 
-- Кандидат: resume_viewed, application_approved, application_rejected, interview_invitation, offer_received, subscription_expired
-- Работодатель: new_application, vacancy_viewed, subscription_expired, limits_reached, vacancy_expiring_soon
+- Кандидат: `resume_viewed`, `application_approved`, `application_rejected`, `interview_invitation`, `test_task`, `offer_received`, `subscription_expiring`, `subscription_expired`, `moderation_approved`, `moderation_rejected`, `saved_search_match`
+- Работодатель: `new_application`, `vacancy_viewed`, `vacancy_expiring_soon`, `vacancy_expired`, `subscription_expiring`, `subscription_expired`, `limits_reached`
 
 **Индексы:** `user`, `isRead`, `createdAt`
 
@@ -392,6 +393,57 @@ Education:
 | createdAt  | datetime, auto            |                             |
 
 **Индексы:** `user + targetId` (unique)
+
+---
+
+---
+
+### SubscriptionPlan (Sprint 6)
+
+Read-only справочник. Заполняется seed-скриптом при старте.
+
+| Поле                 | Тип                               | Описание                 |
+| -------------------- | --------------------------------- | ------------------------ |
+| id                   | int, PK, auto                     |                          |
+| code                 | enum(free, pro, max, vip), unique |                          |
+| name                 | string                            |                          |
+| vacanciesPerMonth    | int                               |                          |
+| activeVacanciesLimit | int                               |                          |
+| vacancyBoostsPerDay  | int                               |                          |
+| applicationsPerDay   | int                               |                          |
+| resumesLimit         | int                               |                          |
+| resumeDatabaseAccess | boolean                           | Default: false           |
+| starsPrice           | int, nullable                     | Null = Free (бесплатный) |
+| durationDays         | int                               | Default: 30              |
+
+**Таблица:** `subscription_plans`
+
+---
+
+### VacancyPackage (Sprint 6)
+
+| Поле           | Тип    | Описание |
+| -------------- | ------ | -------- |
+| id             | int    |          |
+| name           | string |          |
+| vacancyCredits | int    |          |
+| boostCredits   | int    |          |
+| starsPrice     | int    |          |
+
+**Таблица:** `vacancy_packages`
+
+---
+
+### ApplyPackage (Sprint 6)
+
+| Поле         | Тип    | Описание |
+| ------------ | ------ | -------- |
+| id           | int    |          |
+| name         | string |          |
+| applyCredits | int    |          |
+| starsPrice   | int    |          |
+
+**Таблица:** `apply_packages`
 
 ---
 

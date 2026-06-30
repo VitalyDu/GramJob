@@ -210,32 +210,34 @@
 
 ### Backend
 
-- [ ] Content type: SubscriptionPlan — seed (Free, Pro 299★, Max 999★, VIP +499★)
-- [ ] Content type: VacancyPackage — seed (10/20/50/100 вакансий)
-- [ ] Content type: ApplyPackage — seed (50/100/500 откликов)
-- [ ] `GET /subscription-plans` — список с ценами
-- [ ] `GET /vacancy-packages` — список пакетов вакансий
-- [ ] `GET /apply-packages` — список пакетов откликов
-- [ ] Telegram Bot: инициализировать (Bot API, установить webhook)
-- [ ] `POST /payments/subscribe` → sendInvoice (Stars) → вернуть invoice link
-- [ ] `POST /payments/vacancy-pack` → sendInvoice → invoice link
-- [ ] `POST /payments/apply-pack` → sendInvoice → invoice link
-- [ ] `POST /telegram/webhook` — обработать `pre_checkout_query` (answerPreCheckoutQuery)
-- [ ] `POST /telegram/webhook` — обработать `successful_payment` → активировать план/кредиты
-- [ ] Сервис: `activateSubscription(userId, planCode)` — обновить план + expiresAt
-- [ ] Сервис: `addCredits(userId, type, amount)` — добавить vacancyCredits или applyCredits
-- [ ] Cron (ежедневно): за 7 дней до истечения → Notification пользователю
-- [ ] VIP Employer: флаг `User.isVip`, автопроставление `Vacancy.highlighted` для VIP-работодателей
+- [x] Content type: SubscriptionPlan — seed (Free, Pro 299★, Max 999★, VIP +499★)
+- [x] Content type: VacancyPackage — seed (10/20/50/100 вакансий)
+- [x] Content type: ApplyPackage — seed (50/100/500 откликов)
+- [x] `GET /subscription-plans` — список с ценами
+- [x] `GET /vacancy-packages` — список пакетов вакансий
+- [x] `GET /apply-packages` — список пакетов откликов
+- [x] Telegram Bot: инициализировать (Bot API, установить webhook)
+- [x] `POST /payments/subscribe` → createInvoiceLink (Stars) → вернуть invoice link
+- [x] `POST /payments/vacancy-pack` → createInvoiceLink → invoice link
+- [x] `POST /payments/apply-pack` → createInvoiceLink → invoice link
+- [x] `POST /telegram/webhook` — обработать `pre_checkout_query` (answerPreCheckoutQuery)
+- [x] `POST /telegram/webhook` — обработать `successful_payment` → активировать план/кредиты
+- [x] Сервис: `activateSubscription(userId, planCode)` — обновить план + expiresAt
+- [x] Сервис: `addCredits(userId, type, amount)` — добавить vacancyCredits или applyCredits
+- [x] Cron (02:00 UTC): истечение подписок → откат на Free + isVip=false
+- [x] Cron (09:00 UTC): за 7 дней до истечения → лог (Notification — Sprint 7)
+- [x] VIP Employer: флаг `User.isVip`, автопроставление `Vacancy.highlighted` для VIP-работодателей
 
 ### Frontend
 
-- [ ] SubscriptionStore
-- [ ] Страница: `/subscription` — сравнение планов (таблица) + кнопки купить
-- [ ] Страница: `/subscription/packages` — пакеты вакансий + откликов
-- [ ] Компонент: PlanCard (features list, цена, CTA, текущий план выделен)
-- [ ] Обработка `LIMIT_REACHED` → UpsellModal (с deeplink на подписку)
-- [ ] Индикатор плана + кредитов в профиле/хедере
-- [ ] Открытие Telegram Stars платёжного экрана (tg.openInvoice или window.open)
+- [x] PaymentStore (`fetchPlans`, `fetchVacancyPackages`, `fetchApplyPackages`, `subscribeToPlan`, `buyVacancyPack`, `buyApplyPack`)
+- [x] Страница: `/subscription` — текущий план, сравнение планов, пакеты вакансий + откликов
+- [x] Компонент: `SubscriptionPlanCard` (features list, цена, CTA, текущий план выделен)
+- [x] Компонент: `PackageCard` (vacancy / apply пакеты)
+- [x] Компонент: `SubscriptionBadge` — бейдж плана с датой истечения в WebHeader
+- [x] Хук: `useTelegramPayment` — `openInvoice()` (Mini App WebApp.openInvoice + web fallback)
+- [x] Кнопка «Обновить статус» после оплаты в web (fetchMe())
+- [x] Индикатор плана + кредитов на странице /subscription
 
 ---
 
@@ -245,18 +247,21 @@
 
 ### Backend
 
-- [ ] Content type: Notification
-- [ ] Сервис: `sendNotification(userId, type, data)` — создать запись в БД + sendMessage в Telegram
-- [ ] Telegram Bot: команды `/start`, `/help`, `/profile`, `/notifications`
-- [ ] Все lifecycle hooks подключены к sendNotification (по списку из telegram-bot-specification.md)
-- [ ] `GET /notifications` — список (фильтр isRead + пагинация)
-- [ ] `PATCH /notifications/:id/read`
-- [ ] `POST /notifications/read-all`
-- [ ] Content type: VacancyAnalytics
-- [ ] Content type: ResumeAnalytics
-- [ ] Cron (ежедневно 01:00 UTC): агрегация аналитики за вчера
-- [ ] `GET /analytics/vacancies/:id` — аналитика вакансии (total + daily breakdown)
-- [ ] `GET /analytics/resumes/:id` — аналитика резюме
+- [x] Content type: Notification (16-type enum: new_application, application_approved/rejected, interview_invitation, test_task, offer_received, resume_viewed, vacancy_viewed, vacancy_expiring_soon, vacancy_expired, subscription_expiring/expired, limits_reached, saved_search_match, moderation_approved/rejected)
+- [x] Сервис: `sendNotification(strapi, { userId, type, templateData })` — создать запись в БД + sendMessage в Telegram (независимые try/catch)
+- [x] Telegram Bot: команды `/start`, `/help`, `/profile`, `/notifications`, `/vacancies`, `/resume`, `/subscribe`
+- [x] Все lifecycle hooks подключены к sendNotification: application (afterCreate → new_application, afterUpdate → status-change), resume/company (afterUpdate(published) → moderation_approved)
+- [x] Все cron tasks подключены к sendNotification: vacancy_expired, saved_search_match, subscription_expired, subscription_expiring_soon, vacancy_expiring_soon
+- [x] `GET /notifications` — список (фильтр isRead + пагинация)
+- [x] `PATCH /notifications/:id/read`
+- [x] `POST /notifications/read-all`
+- [x] Content type: VacancyAnalytics (vacancy, date, views, uniqueViews, applications, ctr)
+- [x] Content type: ResumeAnalytics (resume, date, views, uniqueViews, invitations)
+- [x] Cron (ежедневно 01:00 UTC): агрегация аналитики за вчера (delta = current_total - SUM(existing records))
+- [x] Cron (ежедневно 18:00 UTC): дайджест просмотров за день (vacancy_viewed)
+- [x] Cron (еженедельно 00:00 UTC): очистка прочитанных уведомлений старше 30 дней
+- [x] `GET /analytics/vacancies/:id` — аналитика вакансии (total + daily breakdown, только владелец)
+- [x] `GET /analytics/resumes/:id` — аналитика резюме (только владелец)
 
 ### Frontend
 
