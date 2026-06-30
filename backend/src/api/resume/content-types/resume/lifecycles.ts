@@ -1,14 +1,40 @@
+import { sendNotification } from '../../../../services/notification.service'
+import type { Core } from '@strapi/strapi'
+
 type ResumeAfterEvent = {
-  result: { documentId?: string; status?: string }
+  result: { documentId?: string; status?: string; title?: string }
   params: unknown
 }
 
 export default {
   async afterUpdate(event: ResumeAfterEvent) {
-    if (event.result.status === 'published') {
-      const s = globalThis.strapi
-      s.log.info(`[resume] Resume ${event.result.documentId} published`)
-      // TODO Sprint 7: send Telegram notification to resume.user
+    const s = globalThis.strapi as Core.Strapi
+
+    if (event.result.status !== 'published') return
+
+    s.log.info(`[resume] Resume ${event.result.documentId} published`)
+
+    try {
+      const resume = await (s.documents as any)('api::resume.resume').findOne({
+        documentId: event.result.documentId!,
+        populate: { user: { fields: ['id'] } },
+        fields: ['documentId', 'title'],
+      })
+
+      if (!resume?.user?.id) return
+
+      await sendNotification(s, {
+        userId: resume.user.id,
+        type: 'moderation_approved',
+        templateData: {
+          title: resume.title ?? '',
+          entityType: 'resume',
+          entityId: event.result.documentId ?? '',
+          resumeId: event.result.documentId ?? '',
+        },
+      })
+    } catch (err) {
+      s.log.error('[resume] Failed to send moderation_approved notification', err)
     }
   },
 }
