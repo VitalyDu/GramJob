@@ -534,6 +534,7 @@ export interface ReportCreateInput {
 // --- Subscription & Payments ---
 
 export interface SubscriptionPlan {
+  id: number
   documentId: string
   code: 'free' | 'pro' | 'max' | 'vip'
   name: string
