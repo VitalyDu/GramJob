@@ -86,7 +86,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                   <VacancyStatusBadge status={v.status} />
                 </div>
                 <p className="mt-1 text-sm text-gray-500">
-                  {v.company.name} · {SENIORITY_LABELS[v.seniority]} ·{' '}
+                  {v.company?.name} · {SENIORITY_LABELS[v.seniority]} ·{' '}
                   {WORK_FORMAT_LABELS[v.workFormat]}
                 </p>
               </div>

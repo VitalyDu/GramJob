@@ -51,6 +51,7 @@ function makeStore(overrides = {}) {
     isLoading: false,
     error: null,
     fetchCompanyById: vi.fn().mockResolvedValue(undefined),
+    fetchMyCompanyById: vi.fn().mockResolvedValue(undefined),
     updateCompany: vi.fn().mockResolvedValue(existingCompany),
     ...overrides,
   }
@@ -61,7 +62,7 @@ describe('EditCompanyClient', () => {
     vi.clearAllMocks()
   })
 
-  it('вызывает fetchCompanyById при монтировании', async () => {
+  it('вызывает fetchMyCompanyById при монтировании', async () => {
     const store = makeStore()
     vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
       typeof useStores
@@ -69,7 +70,7 @@ describe('EditCompanyClient', () => {
     render(<EditCompanyClient id="abc123" />)
 
     await waitFor(() => {
-      expect(store.fetchCompanyById).toHaveBeenCalledWith('abc123')
+      expect(store.fetchMyCompanyById).toHaveBeenCalledWith('abc123')
     })
   })
 

@@ -324,6 +324,43 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.body = null
     },
 
+    async findMineById(ctx: any) {
+      const user = ctx.state.user as { id: number } | undefined
+      if (!user) return ctx.unauthorized('Authentication required')
+
+      const { id } = ctx.params as { id: string }
+
+      const company = await strapi.documents('api::company.company').findFirst({
+        filters: {
+          documentId: { $eq: id },
+          owner: { id: { $eq: user.id } },
+        },
+        fields: [
+          'documentId',
+          'name',
+          'slug',
+          'description',
+          'website',
+          'telegram',
+          'linkedin',
+          'country',
+          'city',
+          'companySize',
+          'status',
+          'createdAt',
+        ],
+        populate: {
+          logo: true,
+          cover: true,
+          owner: { fields: ['id', 'firstName', 'lastName'] },
+        },
+      })
+
+      if (!company) return ctx.notFound('Company not found')
+
+      return ctx.send({ data: company })
+    },
+
     async findMine(ctx: any) {
       const user = ctx.state.user as { id: number } | undefined
       if (!user) return ctx.unauthorized('Authentication required')

@@ -16,6 +16,12 @@ export default {
       config: {},
     },
     {
+      method: 'GET',
+      path: '/vacancies/my/:id',
+      handler: 'vacancy.findMineById',
+      config: {},
+    },
+    {
       method: 'POST',
       path: '/vacancies',
       handler: 'vacancy.create',

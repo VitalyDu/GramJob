@@ -100,8 +100,8 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
 
   useEffect(() => {
     void api
-      .get<{ data: Industry[] }>('/industries')
-      .then((res) => setIndustries(res.data))
+      .get<Industry[]>('/industries')
+      .then((res) => setIndustries(res))
       .catch(() => {})
   }, [])
 

@@ -167,8 +167,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         companyId: body.companyId as string | undefined,
       })
 
+      const populated = await strapi.documents('api::vacancy.vacancy').findOne({
+        documentId: vacancy.documentId,
+        fields: VACANCY_CARD_FIELDS as any,
+        populate: VACANCY_POPULATE as any,
+      })
+
       ctx.status = 201
-      return ctx.send({ data: vacancy })
+      return ctx.send({ data: populated })
     },
 
     async publish(ctx: any) {
@@ -209,7 +215,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const updated = await strapi.documents('api::vacancy.vacancy').update({
         documentId: id,
         data: { status: 'moderation' },
-        fields: ['documentId', 'title', 'status', 'createdAt'],
+        fields: VACANCY_CARD_FIELDS as any,
+        populate: VACANCY_POPULATE as any,
       })
 
       return ctx.send({ data: updated })
@@ -577,10 +584,31 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const updated = await strapi.documents('api::vacancy.vacancy').update({
         documentId: id,
         data: { status: 'archived' },
-        fields: ['documentId', 'title', 'status'],
+        fields: VACANCY_CARD_FIELDS as any,
+        populate: VACANCY_POPULATE as any,
       })
 
       return ctx.send({ data: updated })
+    },
+
+    async findMineById(ctx: any) {
+      const user = ctx.state.user as { id: number } | undefined
+      if (!user) return ctx.unauthorized('Authentication required')
+
+      const { id } = ctx.params as { id: string }
+
+      const vacancy = await strapi.documents('api::vacancy.vacancy').findFirst({
+        filters: {
+          documentId: { $eq: id },
+          postedBy: { id: { $eq: user.id } },
+        },
+        fields: VACANCY_FULL_FIELDS as any,
+        populate: VACANCY_POPULATE as any,
+      })
+
+      if (!vacancy) return ctx.notFound('Vacancy not found')
+
+      return ctx.send({ data: vacancy })
     },
 
     async findMine(ctx: any) {

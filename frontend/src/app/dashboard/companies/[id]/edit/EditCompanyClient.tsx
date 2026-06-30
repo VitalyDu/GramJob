@@ -17,7 +17,7 @@ export const EditCompanyClient = observer(function EditCompanyClient({ id }: Pro
   const router = useRouter()
 
   useEffect(() => {
-    void store.fetchCompanyById(id)
+    void store.fetchMyCompanyById(id)
   }, [store, id])
 
   const handleSubmit = async (data: CompanyUpdateInput) => {

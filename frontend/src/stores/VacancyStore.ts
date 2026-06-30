@@ -114,6 +114,28 @@ export class VacancyStore {
     }
   }
 
+  async fetchMyVacancyById(id: string): Promise<void> {
+    runInAction(() => {
+      this.isLoading = true
+      this.error = null
+      this.currentVacancy = null
+    })
+    try {
+      const res = await api.get<{ data: Vacancy }>(`/vacancies/my/${id}`)
+      runInAction(() => {
+        this.currentVacancy = res.data
+      })
+    } catch (e) {
+      runInAction(() => {
+        this.error = e instanceof Error ? e.message : 'Failed to fetch vacancy'
+      })
+    } finally {
+      runInAction(() => {
+        this.isLoading = false
+      })
+    }
+  }
+
   async createVacancy(data: VacancyCreateInput): Promise<Vacancy> {
     runInAction(() => {
       this.isLoading = true

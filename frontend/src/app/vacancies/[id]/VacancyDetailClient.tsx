@@ -72,12 +72,14 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
           <VacancyStatusBadge status={v.status} />
         </div>
 
-        <Link
-          href={`/companies/${v.company.documentId}`}
-          className="mt-1 text-sm font-medium text-primary hover:underline"
-        >
-          {v.company.name}
-        </Link>
+        {v.company && (
+          <Link
+            href={`/companies/${v.company.documentId}`}
+            className="mt-1 text-sm font-medium text-primary hover:underline"
+          >
+            {v.company.name}
+          </Link>
+        )}
 
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-gray-500">
           <span>

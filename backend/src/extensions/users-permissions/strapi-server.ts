@@ -14,6 +14,7 @@ const SAFE_RESPONSE_FIELDS = [
   'subscriptionExpiresAt',
   'vacancyCredits',
   'applyCredits',
+  'isVip',
   'createdAt',
 ] as const
 

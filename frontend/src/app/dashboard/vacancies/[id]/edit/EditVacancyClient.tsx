@@ -17,7 +17,7 @@ export const EditVacancyClient = observer(function EditVacancyClient({ id }: Pro
   const router = useRouter()
 
   useEffect(() => {
-    void vStore.fetchVacancyById(id)
+    void vStore.fetchMyVacancyById(id)
     void cStore.fetchMyCompanies(1)
   }, [vStore, cStore, id])
 

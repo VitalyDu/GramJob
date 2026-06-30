@@ -17,9 +17,19 @@ type VacancyAfterEvent = {
   params: unknown
 }
 
+function sanitizeJsonFields(data: Record<string, unknown>) {
+  for (const field of ['skills', 'languages']) {
+    if (data[field] === '' || data[field] === undefined) {
+      data[field] = null
+    }
+  }
+}
+
 export default {
   async beforeCreate(event: VacancyBeforeCreateEvent) {
     const { data } = event.params
+    sanitizeJsonFields(data)
+
     const posterId = typeof data.postedBy === 'number' ? data.postedBy : null
     if (!posterId) return
 
@@ -34,6 +44,8 @@ export default {
 
   async beforeUpdate(event: VacancyBeforeUpdateEvent) {
     const { data } = event.params
+    sanitizeJsonFields(data)
+
     if (data?.status === 'published') {
       const expiresAt = new Date()
       expiresAt.setUTCDate(expiresAt.getUTCDate() + 60)

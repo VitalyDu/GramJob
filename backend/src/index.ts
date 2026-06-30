@@ -2,6 +2,7 @@ import { apiRateLimit, authRateLimit } from './middlewares/rate-limit'
 import { seedIndustries } from './scripts/seed-industries'
 import { seedSubscriptionPlans } from './scripts/seed-subscription-plans'
 import { seedPackages } from './scripts/seed-packages'
+import { seedPermissions } from './scripts/seed-permissions'
 import { setWebhook } from './api/payment/services/telegram-bot'
 import type { Core } from '@strapi/strapi'
 
@@ -29,6 +30,7 @@ export default {
     await setupVacancySearch(strapi)
     await seedSubscriptionPlans(strapi)
     await seedPackages(strapi)
+    await seedPermissions(strapi)
 
     const botToken = process.env.TELEGRAM_BOT_TOKEN
     const webhookUrl = process.env.TELEGRAM_WEBHOOK_URL

@@ -3,7 +3,24 @@ import type { Core } from '@strapi/strapi'
 const config: Core.Config.Middlewares = [
   'strapi::logger',
   'strapi::errors',
-  'strapi::security',
+  {
+    name: 'strapi::security',
+    config: {
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          'img-src': [
+            "'self'",
+            'data:',
+            'blob:',
+            'localhost:9000',
+            '*.gramjob.com',
+            'market-assets.strapi.io',
+          ],
+        },
+      },
+    },
+  },
   {
     name: 'strapi::cors',
     config: {

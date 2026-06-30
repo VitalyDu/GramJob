@@ -12,10 +12,21 @@ export class AuthStore {
 
   constructor() {
     makeAutoObservable(this)
+    this._syncToken()
   }
 
   get isAuthenticated(): boolean {
     return this.jwt !== null && this.user !== null
+  }
+
+  // Reads JWT from localStorage synchronously so API calls made in child useEffect
+  // hooks don't fire without auth (child effects run before parent StoreProvider effect)
+  private _syncToken(): void {
+    if (typeof window === 'undefined') return
+    const stored = localStorage.getItem(JWT_KEY)
+    if (!stored) return
+    this.jwt = stored
+    setAuthToken(stored)
   }
 
   async init(): Promise<void> {

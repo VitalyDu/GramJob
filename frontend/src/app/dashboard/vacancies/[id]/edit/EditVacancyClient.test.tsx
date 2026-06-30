@@ -10,6 +10,7 @@ vi.mock('@/stores/StoreProvider', () => ({
       isLoading: true,
       error: null,
       fetchVacancyById: vi.fn(),
+      fetchMyVacancyById: vi.fn(),
       updateVacancy: vi.fn(),
     },
     company: { myCompanies: [], fetchMyCompanies: vi.fn() },

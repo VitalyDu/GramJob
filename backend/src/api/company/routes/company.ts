@@ -16,6 +16,12 @@ export default {
       config: {},
     },
     {
+      method: 'GET',
+      path: '/companies/my/:id',
+      handler: 'company.findMineById',
+      config: {},
+    },
+    {
       method: 'POST',
       path: '/companies',
       handler: 'company.create',

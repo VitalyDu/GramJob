@@ -112,6 +112,28 @@ export class CompanyStore {
     }
   }
 
+  async fetchMyCompanyById(id: string): Promise<void> {
+    runInAction(() => {
+      this.isLoading = true
+      this.error = null
+      this.currentCompany = null
+    })
+    try {
+      const res = await api.get<{ data: Company }>(`/companies/my/${id}`)
+      runInAction(() => {
+        this.currentCompany = res.data
+      })
+    } catch (e) {
+      runInAction(() => {
+        this.error = e instanceof Error ? e.message : 'Failed to fetch company'
+      })
+    } finally {
+      runInAction(() => {
+        this.isLoading = false
+      })
+    }
+  }
+
   async createCompany(data: CompanyCreateInput): Promise<Company> {
     runInAction(() => {
       this.isLoading = true
