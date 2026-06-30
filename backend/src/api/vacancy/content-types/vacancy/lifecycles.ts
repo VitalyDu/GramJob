@@ -1,3 +1,9 @@
+type VacancyBeforeCreateEvent = {
+  params: {
+    data: Record<string, unknown>
+  }
+}
+
 type VacancyBeforeUpdateEvent = {
   params: {
     data: Record<string, unknown>
@@ -12,6 +18,20 @@ type VacancyAfterEvent = {
 }
 
 export default {
+  async beforeCreate(event: VacancyBeforeCreateEvent) {
+    const { data } = event.params
+    const posterId = typeof data.postedBy === 'number' ? data.postedBy : null
+    if (!posterId) return
+
+    const poster = await (globalThis.strapi.db as any)
+      .query('plugin::users-permissions.user')
+      .findOne({ where: { id: posterId }, select: ['subscriptionPlan'] })
+
+    if (poster?.subscriptionPlan === 'vip') {
+      data.highlighted = true
+    }
+  },
+
   async beforeUpdate(event: VacancyBeforeUpdateEvent) {
     const { data } = event.params
     if (data?.status === 'published') {
