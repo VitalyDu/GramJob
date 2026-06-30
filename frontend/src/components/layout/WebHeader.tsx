@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
 import { useStores } from '@/stores/StoreProvider'
 import { Button } from '@/components/ui/button'
+import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 
 export const WebHeader = observer(function WebHeader() {
   const { t } = useTranslation()
@@ -25,8 +26,15 @@ export const WebHeader = observer(function WebHeader() {
             {t('nav.vacancies')}
           </Link>
 
-          {auth.isAuthenticated ? (
+          {auth.isAuthenticated && auth.user ? (
             <div className="flex items-center gap-2">
+              <Link
+                href="/subscription"
+                className="flex items-center"
+                aria-label="Управление подпиской"
+              >
+                <SubscriptionBadge plan={auth.user.subscriptionPlan} />
+              </Link>
               <Link
                 href="/dashboard"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
