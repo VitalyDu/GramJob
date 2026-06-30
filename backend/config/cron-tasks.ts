@@ -100,4 +100,74 @@ export default {
       tz: 'UTC',
     },
   },
+
+  // Daily at 02:00 UTC: expire subscriptions
+  '0 2 * * *': {
+    task: async ({ strapi }: { strapi: Core.Strapi }) => {
+      try {
+        const now = new Date().toISOString()
+
+        const expiredUsers = await strapi.db.query('plugin::users-permissions.user').findMany({
+          where: {
+            subscriptionPlan: { $notIn: ['free'] },
+            subscriptionExpiresAt: { $lte: now },
+          },
+          select: ['id', 'subscriptionPlan'],
+          limit: 1000,
+        })
+
+        if (expiredUsers.length === 0) return
+
+        strapi.log.info(`[cron] Expiring ${expiredUsers.length} user subscriptions`)
+
+        for (const user of expiredUsers) {
+          await strapi.db.query('plugin::users-permissions.user').update({
+            where: { id: user.id },
+            data: { subscriptionPlan: 'free', subscriptionExpiresAt: null, isVip: false },
+          })
+          strapi.log.info(`[cron] User ${user.id} plan=${user.subscriptionPlan} → free (expired)`)
+          // TODO Sprint 7: send Telegram notification subscription_expired to user
+        }
+      } catch (err) {
+        strapi.log.error('[cron] Failed to expire subscriptions', err)
+      }
+    },
+    options: { tz: 'UTC' },
+  },
+
+  // Daily at 09:00 UTC: 7-day expiry warning
+  '0 9 * * *': {
+    task: async ({ strapi }: { strapi: Core.Strapi }) => {
+      try {
+        const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        const sixDaysFromNow = new Date(Date.now() + 6 * 24 * 60 * 60 * 1000)
+
+        const expiringUsers = await strapi.db.query('plugin::users-permissions.user').findMany({
+          where: {
+            subscriptionPlan: { $notIn: ['free'] },
+            subscriptionExpiresAt: {
+              $gt: sixDaysFromNow.toISOString(),
+              $lte: sevenDaysFromNow.toISOString(),
+            },
+          },
+          select: ['id', 'subscriptionPlan', 'subscriptionExpiresAt'],
+          limit: 1000,
+        })
+
+        if (expiringUsers.length === 0) return
+
+        strapi.log.info(`[cron] ${expiringUsers.length} subscriptions expiring in 7 days`)
+
+        for (const user of expiringUsers) {
+          strapi.log.info(
+            `[cron] User ${user.id} plan=${user.subscriptionPlan} expires at ${user.subscriptionExpiresAt}`
+          )
+          // TODO Sprint 7: send Telegram notification subscription_expiring_soon to user
+        }
+      } catch (err) {
+        strapi.log.error('[cron] Failed to check expiring subscriptions', err)
+      }
+    },
+    options: { tz: 'UTC' },
+  },
 }
