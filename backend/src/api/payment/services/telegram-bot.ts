@@ -74,3 +74,191 @@ export async function setWebhook(url: string, secretToken?: string): Promise<voi
     allowed_updates: ['message', 'pre_checkout_query'],
   })
 }
+
+export type NotificationType =
+  | 'new_application'
+  | 'application_approved'
+  | 'application_rejected'
+  | 'interview_invitation'
+  | 'test_task'
+  | 'offer_received'
+  | 'resume_viewed'
+  | 'vacancy_viewed'
+  | 'vacancy_expiring_soon'
+  | 'vacancy_expired'
+  | 'subscription_expiring'
+  | 'subscription_expired'
+  | 'limits_reached'
+  | 'saved_search_match'
+  | 'moderation_approved'
+  | 'moderation_rejected'
+
+export interface TelegramMessageOptions {
+  parse_mode?: 'HTML' | 'Markdown'
+  reply_markup?: { inline_keyboard: Array<Array<{ text: string; url: string }>> }
+}
+
+export interface TelegramMessage {
+  text: string
+  options?: TelegramMessageOptions
+}
+
+export const APPLICATION_STATUS_TO_NOTIFICATION: Record<string, NotificationType | undefined> = {
+  'in-review': 'application_approved',
+  rejected: 'application_rejected',
+  interview: 'interview_invitation',
+  'test-task': 'test_task',
+  offer: 'offer_received',
+}
+
+const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME ?? 'GramJobBot'
+
+function buildDeepLink(type: string, data: Record<string, unknown>): string | null {
+  if (
+    data['vacancyId'] &&
+    ['new_application', 'vacancy_expiring_soon', 'vacancy_expired', 'vacancy_viewed'].includes(type)
+  ) {
+    return `vacancy_${data['vacancyId']}`
+  }
+  if (
+    data['applicationId'] &&
+    [
+      'application_approved',
+      'application_rejected',
+      'interview_invitation',
+      'test_task',
+      'offer_received',
+    ].includes(type)
+  ) {
+    return `application_${data['applicationId']}`
+  }
+  if (['subscription_expiring', 'subscription_expired', 'limits_reached'].includes(type)) {
+    return 'subscription'
+  }
+  if (type === 'saved_search_match') {
+    return data['searchType'] === 'resume' ? 'resumes' : 'vacancies'
+  }
+  if (data['entityId'] && ['moderation_approved', 'moderation_rejected'].includes(type)) {
+    return `${data['entityType']}_${data['entityId']}`
+  }
+  return null
+}
+
+const BUTTON_TEXTS: Partial<Record<NotificationType, string>> = {
+  new_application: '👤 Посмотреть отклик',
+  application_approved: '✅ Открыть контакты',
+  offer_received: '🎉 Посмотреть оффер',
+  subscription_expiring: '💳 Продлить подписку',
+  subscription_expired: '💳 Обновить подписку',
+  saved_search_match: '🔍 Посмотреть результаты',
+  limits_reached: '⬆️ Апгрейд плана',
+}
+
+export function buildNotificationMessage(
+  type: NotificationType | string,
+  data: Record<string, unknown>
+): TelegramMessage {
+  const templates: Record<string, string> = {
+    new_application: `📩 Новый отклик на «${data['vacancyTitle'] ?? ''}» от ${data['candidateName'] ?? 'кандидата'}`,
+    application_approved: `✅ Ваш отклик на «${data['vacancyTitle'] ?? ''}» одобрен! Теперь доступны контакты работодателя`,
+    application_rejected: `❌ Отклик на «${data['vacancyTitle'] ?? ''}» отклонён`,
+    interview_invitation: `📅 Вас приглашают на интервью по вакансии «${data['vacancyTitle'] ?? ''}»`,
+    test_task: `📝 Вам отправили тестовое задание по вакансии «${data['vacancyTitle'] ?? ''}»`,
+    offer_received: `🎉 Вам сделали оффер по вакансии «${data['vacancyTitle'] ?? ''}»!`,
+    resume_viewed: `👁 Ваше резюме «${data['resumeTitle'] ?? ''}» просмотрел работодатель`,
+    vacancy_viewed: `👁 Вашу вакансию «${data['vacancyTitle'] ?? ''}» просмотрели ${data['views'] ?? 0} раз за вчера`,
+    vacancy_expiring_soon: `⏰ Вакансия «${data['vacancyTitle'] ?? ''}» истекает через 3 дня. Продлите публикацию`,
+    vacancy_expired: `🔴 Вакансия «${data['vacancyTitle'] ?? ''}» истекла. Опубликуйте заново`,
+    subscription_expiring: `⚠️ Ваша подписка ${data['plan'] ?? ''} истекает через 7 дней`,
+    subscription_expired: `🔴 Ваша подписка истекла. Продлите для продолжения работы`,
+    limits_reached: `🚫 Исчерпан лимит ${data['limitType'] ?? ''}. Рассмотрите апгрейд`,
+    saved_search_match: `🔔 ${data['count'] ?? 0} новых ${data['searchType'] === 'resume' ? 'резюме' : 'вакансий'} по вашему поиску`,
+    moderation_approved: `✅ «${data['title'] ?? ''}» опубликовано после модерации`,
+    moderation_rejected: `❌ «${data['title'] ?? ''}» отклонено. Причина: ${data['reason'] ?? 'см. детали'}`,
+  }
+
+  const text = templates[type] ?? `📢 Уведомление: ${type}`
+  const deepLink = buildDeepLink(type, data)
+  const buttonText = BUTTON_TEXTS[type as NotificationType]
+
+  return {
+    text,
+    options:
+      deepLink && buttonText
+        ? {
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: buttonText,
+                    url: `https://t.me/${BOT_USERNAME}/app?startapp=${deepLink}`,
+                  },
+                ],
+              ],
+            },
+          }
+        : { parse_mode: 'HTML' },
+  }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+class TelegramQueue {
+  private queue: Array<() => Promise<void>> = []
+  private processing = false
+
+  add(fn: () => Promise<void>): void {
+    this.queue.push(fn)
+    if (!this.processing) void this.process()
+  }
+
+  private async process(): Promise<void> {
+    this.processing = true
+    while (this.queue.length > 0) {
+      const task = this.queue.shift()!
+      try {
+        await task()
+      } catch (e) {
+        console.error('[TelegramQueue] task error:', e)
+      }
+      await sleep(50)
+    }
+    this.processing = false
+  }
+}
+
+const telegramQueue = new TelegramQueue()
+
+async function sendMessageWithRetry(
+  chatId: string,
+  message: TelegramMessage,
+  retries = 3
+): Promise<void> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await telegramCall<unknown>('sendMessage', {
+        chat_id: chatId,
+        text: message.text,
+        ...message.options,
+      })
+      return
+    } catch (err: any) {
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.includes('429')) {
+        await sleep(5000)
+      } else if (msg.includes('403')) {
+        console.warn(`[telegram] Bot blocked by chat ${chatId}`)
+        return
+      } else if (i < retries - 1) {
+        await sleep(Math.pow(2, i) * 1000)
+      }
+    }
+  }
+}
+
+export function sendMessage(chatId: string, message: TelegramMessage): void {
+  telegramQueue.add(() => sendMessageWithRetry(chatId, message))
+}
