@@ -1,5 +1,8 @@
 import { apiRateLimit, authRateLimit } from './middlewares/rate-limit'
 import { seedIndustries } from './scripts/seed-industries'
+import { seedSubscriptionPlans } from './scripts/seed-subscription-plans'
+import { seedPackages } from './scripts/seed-packages'
+import { setWebhook } from './api/payment/services/telegram-bot'
 import type { Core } from '@strapi/strapi'
 
 async function setupVacancySearch(strapi: Core.Strapi) {
@@ -24,10 +27,24 @@ export default {
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
     await seedIndustries(strapi)
     await setupVacancySearch(strapi)
+    await seedSubscriptionPlans(strapi)
+    await seedPackages(strapi)
+
+    const botToken = process.env.TELEGRAM_BOT_TOKEN
+    const webhookUrl = process.env.TELEGRAM_WEBHOOK_URL
+    const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET
+
+    if (botToken && webhookUrl) {
+      try {
+        await setWebhook(webhookUrl, webhookSecret)
+        strapi.log.info(`[telegram] Webhook registered: ${webhookUrl}`)
+      } catch (err) {
+        strapi.log.warn('[telegram] Failed to register webhook (bot may not be configured):', err)
+      }
+    }
 
     const app = strapi.server.app
 
-    // Stricter limit for auth endpoints
     app.use(async (ctx, next) => {
       if (ctx.path.startsWith('/api/auth/')) {
         return authRateLimit(ctx, next)
@@ -35,7 +52,6 @@ export default {
       return next()
     })
 
-    // General limit for all API endpoints
     app.use(async (ctx, next) => {
       if (ctx.path.startsWith('/api/')) {
         return apiRateLimit(ctx, next)
