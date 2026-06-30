@@ -4,6 +4,7 @@ import {
   buildResumeFiltersFromSaved,
 } from '../src/api/saved-search/services/saved-search-utils'
 import { sendNotification } from '../src/services/notification.service'
+import { computeDelta, yesterdayUTC } from '../src/services/analytics.service'
 
 export default {
   // Every hour at minute 0: expire vacancies
@@ -299,6 +300,109 @@ export default {
         strapi.log.info(`[cron] Deleted old read notifications (older than 30 days)`)
       } catch (err) {
         strapi.log.error('[cron] Failed to cleanup notifications', err)
+      }
+    },
+    options: { tz: 'UTC' },
+  },
+
+  // Daily 01:00 UTC: aggregate analytics for yesterday
+  '0 1 * * *': {
+    task: async ({ strapi }: { strapi: Core.Strapi }) => {
+      const date = yesterdayUTC()
+      strapi.log.info(`[cron] Aggregating analytics for ${date}`)
+
+      try {
+        // --- Vacancy Analytics ---
+        const vacancies = (await (strapi.documents as any)('api::vacancy.vacancy').findMany({
+          filters: { status: { $in: ['published', 'expired', 'archived'] } },
+          fields: ['documentId', 'views', 'uniqueViews', 'applicationsCount'],
+          limit: 10000,
+        })) as Array<{
+          documentId: string
+          views: number
+          uniqueViews: number
+          applicationsCount: number
+        }>
+
+        for (const vacancy of vacancies) {
+          try {
+            const existing = (await strapi.db
+              .query('api::vacancy-analytics.vacancy-analytics')
+              .findMany({
+                where: { vacancy: { documentId: vacancy.documentId } },
+                select: ['views', 'uniqueViews', 'applications'],
+              })) as Array<{ views: number; uniqueViews: number; applications: number }>
+
+            const prevViews = existing.reduce((s, r) => s + (r.views ?? 0), 0)
+            const prevUnique = existing.reduce((s, r) => s + (r.uniqueViews ?? 0), 0)
+            const prevApps = existing.reduce((s, r) => s + (r.applications ?? 0), 0)
+
+            const deltaViews = computeDelta(vacancy.views ?? 0, prevViews)
+            const deltaUnique = computeDelta(vacancy.uniqueViews ?? 0, prevUnique)
+            const deltaApps = computeDelta(vacancy.applicationsCount ?? 0, prevApps)
+
+            if (deltaViews === 0 && deltaUnique === 0 && deltaApps === 0) continue
+
+            const ctr = deltaUnique > 0 ? Math.round((deltaApps / deltaUnique) * 100 * 10) / 10 : 0
+
+            await strapi.db.query('api::vacancy-analytics.vacancy-analytics').create({
+              data: {
+                vacancy: { documentId: vacancy.documentId },
+                date,
+                views: deltaViews,
+                uniqueViews: deltaUnique,
+                applications: deltaApps,
+                ctr,
+              },
+            })
+          } catch (e) {
+            strapi.log.warn(`[cron] analytics failed for vacancy ${vacancy.documentId}`, e)
+          }
+        }
+
+        // --- Resume Analytics ---
+        const resumes = (await (strapi.documents as any)('api::resume.resume').findMany({
+          filters: { status: { $in: ['published', 'archived'] } },
+          fields: ['documentId', 'views', 'invitations'],
+          limit: 10000,
+        })) as Array<{ documentId: string; views: number; invitations: number }>
+
+        for (const resume of resumes) {
+          try {
+            const existing = (await strapi.db
+              .query('api::resume-analytics.resume-analytics')
+              .findMany({
+                where: { resume: { documentId: resume.documentId } },
+                select: ['views', 'invitations'],
+              })) as Array<{ views: number; invitations: number }>
+
+            const prevViews = existing.reduce((s, r) => s + (r.views ?? 0), 0)
+            const prevInv = existing.reduce((s, r) => s + (r.invitations ?? 0), 0)
+
+            const deltaViews = computeDelta(resume.views ?? 0, prevViews)
+            const deltaInv = computeDelta(resume.invitations ?? 0, prevInv)
+
+            if (deltaViews === 0 && deltaInv === 0) continue
+
+            await strapi.db.query('api::resume-analytics.resume-analytics').create({
+              data: {
+                resume: { documentId: resume.documentId },
+                date,
+                views: deltaViews,
+                uniqueViews: deltaViews,
+                invitations: deltaInv,
+              },
+            })
+          } catch (e) {
+            strapi.log.warn(`[cron] analytics failed for resume ${resume.documentId}`, e)
+          }
+        }
+
+        strapi.log.info(
+          `[cron] Analytics done: ${vacancies.length} vacancies, ${resumes.length} resumes`
+        )
+      } catch (err) {
+        strapi.log.error('[cron] Analytics aggregation failed', err)
       }
     },
     options: { tz: 'UTC' },
