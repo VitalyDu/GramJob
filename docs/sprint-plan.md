@@ -265,11 +265,11 @@
 
 ### Frontend
 
-- [ ] NotificationStore
-- [ ] Страница: `/dashboard/notifications` — список + mark read
-- [ ] Компонент: NotificationBadge — счётчик непрочитанных в навигации
-- [ ] Страница: `/dashboard/vacancies/:id/analytics` — графики (recharts или chart.js)
-- [ ] Страница: `/dashboard/resumes/:id/analytics` — просмотры + приглашения по дням
+- [x] NotificationStore
+- [x] Страница: `/dashboard/notifications` — список + mark read
+- [x] Компонент: NotificationBadge — счётчик непрочитанных в навигации
+- [x] Страница: `/dashboard/vacancies/:id/analytics` — графики (recharts)
+- [x] Страница: `/dashboard/resumes/:id/analytics` — просмотры + приглашения по дням
 
 ---
 
