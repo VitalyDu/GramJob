@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite'
 import { useStores } from '@/stores/StoreProvider'
 import { Button } from '@/components/ui/button'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
+import { NotificationBadge } from '@/components/notification/NotificationBadge'
 
 export const WebHeader = observer(function WebHeader() {
   const { t } = useTranslation()
@@ -35,6 +36,7 @@ export const WebHeader = observer(function WebHeader() {
               >
                 <SubscriptionBadge plan={auth.user.subscriptionPlan} />
               </Link>
+              <NotificationBadge />
               <Link
                 href="/dashboard"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
