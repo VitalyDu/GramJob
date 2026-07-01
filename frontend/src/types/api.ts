@@ -564,3 +564,78 @@ export interface ApplyPackage {
   applyCredits: number
   starsPrice: number
 }
+
+// --- Notifications ---
+
+export type NotificationType =
+  | 'new_application'
+  | 'application_approved'
+  | 'application_rejected'
+  | 'interview_invitation'
+  | 'test_task'
+  | 'offer_received'
+  | 'resume_viewed'
+  | 'vacancy_viewed'
+  | 'vacancy_expiring_soon'
+  | 'vacancy_expired'
+  | 'subscription_expiring'
+  | 'subscription_expired'
+  | 'limits_reached'
+  | 'saved_search_match'
+  | 'moderation_approved'
+  | 'moderation_rejected'
+
+export interface NotificationData {
+  entityType?: string
+  entityId?: string | number
+}
+
+export interface Notification {
+  documentId: string
+  type: NotificationType
+  title: string
+  body: string
+  isRead: boolean
+  data?: NotificationData | null
+  createdAt: string
+}
+
+// --- Analytics ---
+
+export interface VacancyAnalyticsDailyRecord {
+  date: string
+  views: number
+  uniqueViews: number
+  applications: number
+  ctr: number
+}
+
+export interface VacancyAnalyticsTotal {
+  views: number
+  uniqueViews: number
+  applications: number
+  ctr: number
+}
+
+export interface VacancyAnalyticsResponse {
+  total: VacancyAnalyticsTotal
+  daily: VacancyAnalyticsDailyRecord[]
+}
+
+export interface ResumeAnalyticsDailyRecord {
+  date: string
+  views: number
+  uniqueViews: number
+  invitations: number
+}
+
+export interface ResumeAnalyticsTotal {
+  views: number
+  uniqueViews: number
+  invitations: number
+}
+
+export interface ResumeAnalyticsResponse {
+  total: ResumeAnalyticsTotal
+  daily: ResumeAnalyticsDailyRecord[]
+}
