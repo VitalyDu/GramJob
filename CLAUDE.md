@@ -17,7 +17,7 @@
 
 ## Текущее состояние проекта
 
-**Фаза: Разработка. Sprint 1–6 полностью завершены. Sprint 7 Backend завершён. Следующий: Sprint 7 Frontend — Notifications & Analytics UI.**
+**Фаза: Разработка. Sprint 1–6 завершены. Sprint 7 (Notifications & Analytics) реализован: Backend — ветка `worktree-sprint7-backend`, Frontend — ветка `worktree-sprint7-frontend`; обе ждут мержа в main. Следующий: Sprint 8 — Moderation.**
 
 Выполнено (Sprint 1):
 
@@ -207,36 +207,68 @@
 - `app/companies/[id]/CompanyDetailClient.tsx` — добавлены `FavoriteButton` + «Пожаловаться»
 - Итого: 241 тест, 0 ошибок TypeScript
 
-Выполнено (Sprint 6 Backend + Frontend):
+Выполнено (Sprint 6 Backend — Subscriptions & Payments):
 
-- SubscriptionPlan / VacancyPackage / ApplyPackage content types + seed данные
-- GET /subscription-plans, GET /vacancy-packages, GET /apply-packages
-- Telegram Bot: инициализация, webhook, pre_checkout_query, successful_payment
-- POST /payments/subscribe, /payments/vacancy-pack, /payments/apply-pack → createInvoiceLink
-- Сервис: `activateSubscription`, `addCredits`; VIP: `User.isVip` + автоподсветка вакансий
-- Cron: истечение подписок (02:00 UTC), предупреждение за 7 дней (09:00 UTC)
-- PaymentStore (fetchPlans, fetchVacancyPackages, fetchApplyPackages, subscribeToPlan, buyVacancyPack, buyApplyPack)
-- Страница: `/subscription` (планы, пакеты вакансий + откликов, Telegram Stars оплата)
-- Компоненты: `SubscriptionPlanCard`, `PackageCard`, `SubscriptionBadge` (в WebHeader)
-- Хук: `useTelegramPayment` — WebApp.openInvoice + web fallback
+- Content type: SubscriptionPlan (code, name, лимиты, starsPrice, durationDays) — seed при старте
+- Content type: VacancyPackage (name, vacancyCredits, boostCredits, starsPrice) — seed при старте
+- Content type: ApplyPackage (name, applyCredits, starsPrice) — seed при старте
+- GET /subscription-plans, GET /vacancy-packages, GET /apply-packages — публичные
+- User schema: добавлено поле `isVip: boolean` (default: false)
+- Subscription service: `activateSubscription`, `addCredits`, `expireSubscription`, `calculateExpiresAt`, `buildUserUpdateData`
+- Telegram Bot service: `createInvoiceLink`, `answerPreCheckoutQuery`, `setWebhook`, `buildInvoicePayload`, `parseInvoicePayload`
+- POST /payments/subscribe — создаёт Telegram Stars invoice для подписки (pro/max/vip; VIP требует активный max)
+- POST /payments/vacancy-pack, POST /payments/apply-pack — invoice для пакетов
+- POST /telegram/webhook — обработчик pre_checkout_query + successful_payment; проверка TELEGRAM_WEBHOOK_SECRET
+- Vacancy lifecycle beforeCreate: VIP-работодатель → highlighted=true автоматически
+- Cron 02:00 UTC: истечение подписок → откат на Free + isVip=false
+- Cron 09:00 UTC: предупреждение за 7 дней до истечения (TODO Sprint 7: уведомление)
+- Bootstrap: seed plans + seed packages + регистрация Telegram webhook
+- Итого: 189 тестов backend, 0 ошибок TypeScript
 
-Выполнено (Sprint 7 Backend):
+Выполнено (Sprint 6 Frontend — Subscriptions & Payments):
 
-- Content type: Notification (16 типов: new_application, application_approved/rejected, interview_invitation, test_task, offer_received, resume_viewed, vacancy_viewed, vacancy_expiring_soon, vacancy_expired, subscription_expiring/expired, limits_reached, saved_search_match, moderation_approved/rejected)
-- Сервис: `sendNotification(strapi, payload)` — сохранение в БД + Telegram sendMessage (независимые try/catch)
-- `sendMessage` / `TelegramQueue` (50ms delay) / `sendMessageWithRetry` (5s backoff на 429)
-- `buildNotificationMessage` — HTML-шаблоны для всех 16 типов уведомлений
-- Telegram Bot команды: `/start`, `/help`, `/profile`, `/notifications`, `/vacancies`, `/resume`, `/subscribe`
-- Lifecycle hooks: Application afterCreate/afterUpdate → sendNotification; Resume/Company afterUpdate(published) → moderation_approved
-- Cron tasks обновлены: все TODO replaced с реальными sendNotification вызовами
-- Новые cron: 18:00 UTC дайджест просмотров; 00:00 UTC очистка старых прочитанных уведомлений; 01:00 UTC агрегация аналитики
-- Content types: VacancyAnalytics (vacancy, date, views, uniqueViews, applications, ctr), ResumeAnalytics (resume, date, views, uniqueViews, invitations)
-- Сервис: `analytics.service.ts` — `computeDelta(current, prevTotal)`, `yesterdayUTC()`
-- GET /notifications, PATCH /notifications/:id/read, POST /notifications/read-all
-- GET /analytics/vacancies/:id, GET /analytics/resumes/:id (owner-only, date range, total + daily)
-- Итого: 206 тестов (+30 новых), 0 ошибок TypeScript
+- `types/api.ts` — добавлены: `isVip` в User, `SubscriptionPlan`, `VacancyPackage`, `ApplyPackage`
+- `lib/subscription-utils.ts` — `PLAN_LABELS`, `PLAN_COLORS`, `formatStarsPrice`, `canUpgradeToPlan`, `getPlanBadgeClasses`
+- `stores/PaymentStore.ts` — MobX стор: `fetchPlans`, `fetchVacancyPackages`, `fetchApplyPackages`, `subscribeToPlan`, `buyVacancyPack`, `buyApplyPack`, `clearError`
+- `stores/RootStore.ts` — добавлен `payment: PaymentStore`
+- `hooks/useTelegramPayment.ts` — `openInvoice()`: Mini App WebApp.openInvoice + web fallback window.open
+- `components/subscription/SubscriptionBadge.tsx` — бейдж плана с датой истечения
+- `components/subscription/SubscriptionPlanCard.tsx` — карточка плана с лимитами и кнопкой покупки
+- `components/subscription/PackageCard.tsx` — карточка vacancy/apply пакета
+- `app/subscription/page.tsx` + `SubscriptionClient.tsx` — страница /subscription: текущий план, планы, пакеты, "Обновить статус" после оплаты
+- `components/layout/WebHeader.tsx` — SubscriptionBadge рядом с Dashboard, ссылка на /subscription
+- Итого: 269 тестов frontend, 0 ошибок TypeScript
 
-Текущий шаг — Sprint 7 Frontend (Notifications & Analytics UI).
+Исправления после ревью Sprint 6:
+
+- Bug fix: `isVip` добавлен в `SAFE_RESPONSE_FIELDS` (`GET /users/me` теперь возвращает поле)
+- `contentTypes.d.ts`: добавлены `isVip` в PluginUsersPermissionsUser + Sprint 6 content types (SubscriptionPlan, VacancyPackage, ApplyPackage)
+
+Выполнено (Sprint 7 Backend — Notifications & Analytics, ветка `worktree-sprint7-backend`, ещё не слита):
+
+- Content type: Notification (16 типов), сервис `sendNotification` (БД + Telegram sendMessage)
+- Telegram Bot команды, lifecycle hooks и cron tasks подключены к уведомлениям
+- GET /notifications (isRead + пагинация), PATCH /notifications/:id/read, POST /notifications/read-all
+- Content types: VacancyAnalytics, ResumeAnalytics + cron-агрегация
+- GET /analytics/vacancies/:id, GET /analytics/resumes/:id (total + daily, только владелец)
+- Детали: `docs/sprint-plan.md` (Sprint 7 Backend — все чекбоксы отмечены)
+
+Выполнено (Sprint 7 Frontend — Notifications & Analytics, ветка `worktree-sprint7-frontend`):
+
+- `types/api.ts` — `NotificationType` (16 типов), `NotificationData`, `Notification`, `VacancyAnalyticsResponse`, `ResumeAnalyticsResponse` (+ daily/total записи)
+- `stores/NotificationStore.ts` — MobX стор: `fetchNotifications(isRead?, page)`, `fetchUnreadCount` (тихо игнорирует ошибки), `markRead`, `markAllRead`, `pageCount` (11 тестов)
+- `stores/AnalyticsStore.ts` — MobX стор: `fetchVacancyAnalytics(documentId, from?, to?)`, `fetchResumeAnalytics(documentId, from?, to?)` (8 тестов)
+- `stores/RootStore.ts` — добавлены `notification` + `analytics` stores
+- recharts ^3.9.1 установлен
+- `components/notification/NotificationBadge.tsx` — 🔔 с бейджем непрочитанных (99+ cap), в WebHeader между SubscriptionBadge и Dashboard
+- `app/dashboard/notifications/` — страница уведомлений: фильтры Все/Непрочитанные/Прочитанные, иконки по типу, «Прочитано», «Прочитать все», пагинация
+- `app/dashboard/vacancies/[id]/analytics/` — AreaChart (просмотры + отклики), 4 стат-карточки (views, uniqueViews, applications, CTR), date range (30 дней по умолчанию)
+- `app/dashboard/resumes/[id]/analytics/` — AreaChart (просмотры + приглашения), 3 стат-карточки
+- Ссылки «Аналитика» добавлены в MyVacanciesClient и MyResumesClient
+- Примечание: recharts v3 типизирует `labelFormatter` как ReactNode → используется inferred-параметр + `String(v)`
+- Итого: 288 тестов frontend, 0 ошибок TypeScript
+
+Текущий шаг — слить ветки Sprint 7 (backend первым или вместе с frontend, иначе новые страницы получат 404). Следующий: Sprint 8 — Moderation.
 Планы: `docs/superpowers/plans/`
 
 ---

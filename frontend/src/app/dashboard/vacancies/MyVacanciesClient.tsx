@@ -134,6 +134,12 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                     В архив
                   </Button>
                 )}
+                <Link
+                  href={`/dashboard/vacancies/${v.documentId}/analytics`}
+                  className="text-sm text-indigo-600 hover:underline"
+                >
+                  Аналитика
+                </Link>
               </div>
             </div>
 
