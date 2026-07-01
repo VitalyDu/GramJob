@@ -84,6 +84,12 @@ export const MyResumesClient = observer(function MyResumesClient() {
               </div>
 
               <div className="flex shrink-0 flex-wrap gap-2">
+                <Link
+                  href={`/dashboard/resumes/${r.documentId}/analytics`}
+                  className="text-sm text-indigo-600 hover:underline"
+                >
+                  Аналитика
+                </Link>
                 {canEditResume(r.status) && (
                   <Link
                     href={`/dashboard/resumes/${r.documentId}/edit`}
