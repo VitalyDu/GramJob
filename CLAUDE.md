@@ -17,7 +17,7 @@
 
 ## Текущее состояние проекта
 
-**Фаза: Разработка. Sprint 1–6 завершены. Sprint 7 (Notifications & Analytics) реализован: Backend — ветка `worktree-sprint7-backend`, Frontend — ветка `worktree-sprint7-frontend`; обе ждут мержа в main. Следующий: Sprint 8 — Moderation.**
+**Фаза: Разработка. Sprint 1–7 завершены (слиты в main). Следующий: Sprint 8 — Moderation.**
 
 Выполнено (Sprint 1):
 
@@ -268,7 +268,7 @@
 - Примечание: recharts v3 типизирует `labelFormatter` как ReactNode → используется inferred-параметр + `String(v)`
 - Итого: 288 тестов frontend, 0 ошибок TypeScript
 
-Текущий шаг — слить ветки Sprint 7 (backend первым или вместе с frontend, иначе новые страницы получат 404). Следующий: Sprint 8 — Moderation.
+Текущий шаг — Sprint 8 (Moderation).
 Планы: `docs/superpowers/plans/`
 
 ---
