@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "vacancy_analytics",
+  "info": {
+    "singularName": "vacancy-analytics",
+    "pluralName": "vacancy-analytics",
+    "displayName": "VacancyAnalytics",
+    "description": "Daily analytics snapshot per vacancy"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "vacancy": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::vacancy.vacancy"
+    },
+    "date": {
+      "type": "date",
+      "required": true
+    },
+    "views": {
+      "type": "integer",
+      "default": 0
+    },
+    "uniqueViews": {
+      "type": "integer",
+      "default": 0
+    },
+    "applications": {
+      "type": "integer",
+      "default": 0
+    },
+    "ctr": {
+      "type": "float",
+      "default": 0
+    }
+  }
+}

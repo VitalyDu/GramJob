@@ -1,0 +1,37 @@
+{
+  "kind": "collectionType",
+  "collectionName": "resume_analytics",
+  "info": {
+    "singularName": "resume-analytics",
+    "pluralName": "resume-analytics",
+    "displayName": "ResumeAnalytics",
+    "description": "Daily analytics snapshot per resume"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "resume": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::resume.resume"
+    },
+    "date": {
+      "type": "date",
+      "required": true
+    },
+    "views": {
+      "type": "integer",
+      "default": 0
+    },
+    "uniqueViews": {
+      "type": "integer",
+      "default": 0
+    },
+    "invitations": {
+      "type": "integer",
+      "default": 0
+    }
+  }
+}

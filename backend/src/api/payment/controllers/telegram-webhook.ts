@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/strapi'
 import { answerPreCheckoutQuery, parseInvoicePayload } from '../services/telegram-bot'
 import { activateSubscription, addCredits } from '../services/subscription-service'
+import { handleBotCommand } from '../services/bot-commands'
 
 type TelegramUser = { id: number; first_name?: string }
 
@@ -24,6 +25,8 @@ type TelegramUpdate = {
   pre_checkout_query?: PreCheckoutQuery
   message?: {
     from?: TelegramUser
+    chat?: { id: number }
+    text?: string
     successful_payment?: SuccessfulPayment
   }
 }
@@ -47,6 +50,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       await handlePreCheckout(update.pre_checkout_query)
     } else if (update.message?.successful_payment) {
       await handleSuccessfulPayment(strapi, update.message.successful_payment)
+    } else if (update.message?.text?.startsWith('/')) {
+      const chatId = String(update.message.chat?.id ?? update.message.from?.id ?? '')
+      if (chatId) {
+        await handleBotCommand(strapi, chatId, update.message.text)
+      }
     }
 
     // Always respond 200 to Telegram

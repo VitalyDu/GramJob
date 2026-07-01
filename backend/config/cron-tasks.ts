@@ -3,6 +3,8 @@ import {
   buildVacancyFiltersFromSaved,
   buildResumeFiltersFromSaved,
 } from '../src/api/saved-search/services/saved-search-utils'
+import { sendNotification } from '../src/services/notification.service'
+import { computeDelta, yesterdayUTC } from '../src/services/analytics.service'
 
 export default {
   // Every hour at minute 0: expire vacancies
@@ -11,12 +13,13 @@ export default {
       try {
         const now = new Date().toISOString()
 
-        const expired = await strapi.documents('api::vacancy.vacancy').findMany({
+        const expired = await (strapi.documents as any)('api::vacancy.vacancy').findMany({
           filters: {
             status: { $eq: 'published' },
             expiresAt: { $lt: now },
           },
           fields: ['documentId', 'title'],
+          populate: { postedBy: { fields: ['id'] } },
           limit: 1000,
         })
 
@@ -25,11 +28,22 @@ export default {
         strapi.log.info(`[cron] Expiring ${expired.length} vacancies`)
 
         for (const vacancy of expired) {
-          await strapi.documents('api::vacancy.vacancy').update({
+          await (strapi.documents as any)('api::vacancy.vacancy').update({
             documentId: vacancy.documentId,
             data: { status: 'expired' },
           })
-          // TODO Sprint 7: send Telegram notification vacancy_expiring_soon to postedBy user
+
+          const posterId = (vacancy as any).postedBy?.id
+          if (posterId) {
+            await sendNotification(strapi, {
+              userId: posterId,
+              type: 'vacancy_expired',
+              templateData: {
+                vacancyTitle: (vacancy as any).title ?? '',
+                vacancyId: vacancy.documentId ?? '',
+              },
+            })
+          }
         }
       } catch (err) {
         strapi.log.error('[cron] Failed to expire vacancies', err)
@@ -81,7 +95,17 @@ export default {
               strapi.log.info(
                 `[cron] SavedSearch ${search.documentId}: ${newCount} new ${search.type}(s) for user ${search.user?.id}`
               )
-              // TODO Sprint 7: send Telegram notification to search.user.telegramId
+
+              if (search.user?.id) {
+                await sendNotification(strapi, {
+                  userId: search.user.id,
+                  type: 'saved_search_match',
+                  templateData: {
+                    count: newCount,
+                    searchType: search.type,
+                  },
+                })
+              }
 
               await (strapi.documents as any)('api::saved-search.saved-search').update({
                 documentId: search.documentId,
@@ -126,7 +150,12 @@ export default {
             data: { subscriptionPlan: 'free', subscriptionExpiresAt: null, isVip: false },
           })
           strapi.log.info(`[cron] User ${user.id} plan=${user.subscriptionPlan} → free (expired)`)
-          // TODO Sprint 7: send Telegram notification subscription_expired to user
+
+          await sendNotification(strapi, {
+            userId: user.id,
+            type: 'subscription_expired',
+            templateData: { plan: user.subscriptionPlan },
+          })
         }
       } catch (err) {
         strapi.log.error('[cron] Failed to expire subscriptions', err)
@@ -135,10 +164,11 @@ export default {
     options: { tz: 'UTC' },
   },
 
-  // Daily at 09:00 UTC: 7-day expiry warning
+  // Daily at 09:00 UTC: subscription 7-day warning + vacancy expiring in 3 days
   '0 9 * * *': {
     task: async ({ strapi }: { strapi: Core.Strapi }) => {
       try {
+        // 1. Subscription 7-day warning
         const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         const sixDaysFromNow = new Date(Date.now() + 6 * 24 * 60 * 60 * 1000)
 
@@ -150,22 +180,229 @@ export default {
               $lte: sevenDaysFromNow.toISOString(),
             },
           },
-          select: ['id', 'subscriptionPlan', 'subscriptionExpiresAt'],
+          select: ['id', 'subscriptionPlan'],
           limit: 1000,
         })
-
-        if (expiringUsers.length === 0) return
 
         strapi.log.info(`[cron] ${expiringUsers.length} subscriptions expiring in 7 days`)
 
         for (const user of expiringUsers) {
-          strapi.log.info(
-            `[cron] User ${user.id} plan=${user.subscriptionPlan} expires at ${user.subscriptionExpiresAt}`
-          )
-          // TODO Sprint 7: send Telegram notification subscription_expiring_soon to user
+          await sendNotification(strapi, {
+            userId: user.id,
+            type: 'subscription_expiring',
+            templateData: { plan: user.subscriptionPlan },
+          })
+        }
+
+        // 2. Vacancies expiring in 3 days
+        const threeDaysFromNow = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+        const twoDaysFromNow = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
+
+        const expiringSoonVacancies = await (strapi.documents as any)(
+          'api::vacancy.vacancy'
+        ).findMany({
+          filters: {
+            status: { $eq: 'published' },
+            expiresAt: {
+              $gt: twoDaysFromNow.toISOString(),
+              $lte: threeDaysFromNow.toISOString(),
+            },
+          },
+          fields: ['documentId', 'title'],
+          populate: { postedBy: { fields: ['id'] } },
+          limit: 1000,
+        })
+
+        strapi.log.info(`[cron] ${expiringSoonVacancies.length} vacancies expiring in 3 days`)
+
+        for (const vacancy of expiringSoonVacancies) {
+          const posterId = (vacancy as any).postedBy?.id
+          if (posterId) {
+            await sendNotification(strapi, {
+              userId: posterId,
+              type: 'vacancy_expiring_soon',
+              templateData: {
+                vacancyTitle: (vacancy as any).title ?? '',
+                vacancyId: vacancy.documentId ?? '',
+              },
+            })
+          }
         }
       } catch (err) {
-        strapi.log.error('[cron] Failed to check expiring subscriptions', err)
+        strapi.log.error('[cron] Failed to process daily 09:00 notifications', err)
+      }
+    },
+    options: { tz: 'UTC' },
+  },
+
+  // Daily 18:00 UTC: vacancy views digest (notify employer if ≥5 views yesterday)
+  '0 18 * * *': {
+    task: async ({ strapi }: { strapi: Core.Strapi }) => {
+      try {
+        const yesterday = new Date()
+        yesterday.setUTCDate(yesterday.getUTCDate() - 1)
+        const yesterdayDate = yesterday.toISOString().slice(0, 10)
+
+        const records = (await strapi.db
+          .query('api::vacancy-analytics.vacancy-analytics')
+          .findMany({
+            where: { date: yesterdayDate, views: { $gte: 5 } },
+            populate: {
+              vacancy: {
+                select: ['documentId', 'title'],
+                populate: { postedBy: { select: ['id'] } },
+              },
+            },
+            limit: 1000,
+          })) as Array<{
+          views: number
+          vacancy?: { documentId?: string; title?: string; postedBy?: { id?: number } }
+        }>
+
+        strapi.log.info(
+          `[cron] ${records.length} vacancies with ≥5 views yesterday (${yesterdayDate})`
+        )
+
+        for (const record of records) {
+          const posterId = record.vacancy?.postedBy?.id
+          if (posterId) {
+            await sendNotification(strapi, {
+              userId: posterId,
+              type: 'vacancy_viewed',
+              templateData: {
+                vacancyTitle: record.vacancy?.title ?? '',
+                vacancyId: record.vacancy?.documentId ?? '',
+                views: record.views,
+              },
+            })
+          }
+        }
+      } catch (err) {
+        strapi.log.error('[cron] Failed to send vacancy views digest', err)
+      }
+    },
+    options: { tz: 'UTC' },
+  },
+
+  // Weekly Sunday 00:00 UTC: delete read notifications older than 30 days
+  '0 0 * * 0': {
+    task: async ({ strapi }: { strapi: Core.Strapi }) => {
+      try {
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
+        const result = await strapi.db.query('api::notification.notification').deleteMany({
+          where: {
+            isRead: true,
+            createdAt: { $lt: thirtyDaysAgo },
+          },
+        })
+
+        strapi.log.info(`[cron] Deleted old read notifications (older than 30 days)`)
+      } catch (err) {
+        strapi.log.error('[cron] Failed to cleanup notifications', err)
+      }
+    },
+    options: { tz: 'UTC' },
+  },
+
+  // Daily 01:00 UTC: aggregate analytics for yesterday
+  '0 1 * * *': {
+    task: async ({ strapi }: { strapi: Core.Strapi }) => {
+      const date = yesterdayUTC()
+      strapi.log.info(`[cron] Aggregating analytics for ${date}`)
+
+      try {
+        // --- Vacancy Analytics ---
+        const vacancies = (await (strapi.documents as any)('api::vacancy.vacancy').findMany({
+          filters: { status: { $in: ['published', 'expired', 'archived'] } },
+          fields: ['documentId', 'views', 'uniqueViews', 'applicationsCount'],
+          limit: 10000,
+        })) as Array<{
+          documentId: string
+          views: number
+          uniqueViews: number
+          applicationsCount: number
+        }>
+
+        for (const vacancy of vacancies) {
+          try {
+            const existing = (await strapi.db
+              .query('api::vacancy-analytics.vacancy-analytics')
+              .findMany({
+                where: { vacancy: { documentId: vacancy.documentId } },
+                select: ['views', 'uniqueViews', 'applications'],
+              })) as Array<{ views: number; uniqueViews: number; applications: number }>
+
+            const prevViews = existing.reduce((s, r) => s + (r.views ?? 0), 0)
+            const prevUnique = existing.reduce((s, r) => s + (r.uniqueViews ?? 0), 0)
+            const prevApps = existing.reduce((s, r) => s + (r.applications ?? 0), 0)
+
+            const deltaViews = computeDelta(vacancy.views ?? 0, prevViews)
+            const deltaUnique = computeDelta(vacancy.uniqueViews ?? 0, prevUnique)
+            const deltaApps = computeDelta(vacancy.applicationsCount ?? 0, prevApps)
+
+            if (deltaViews === 0 && deltaUnique === 0 && deltaApps === 0) continue
+
+            const ctr = deltaUnique > 0 ? Math.round((deltaApps / deltaUnique) * 100 * 10) / 10 : 0
+
+            await strapi.db.query('api::vacancy-analytics.vacancy-analytics').create({
+              data: {
+                vacancy: { documentId: vacancy.documentId },
+                date,
+                views: deltaViews,
+                uniqueViews: deltaUnique,
+                applications: deltaApps,
+                ctr,
+              },
+            })
+          } catch (e) {
+            strapi.log.warn(`[cron] analytics failed for vacancy ${vacancy.documentId}`, e)
+          }
+        }
+
+        // --- Resume Analytics ---
+        const resumes = (await (strapi.documents as any)('api::resume.resume').findMany({
+          filters: { status: { $in: ['published', 'archived'] } },
+          fields: ['documentId', 'views', 'invitations'],
+          limit: 10000,
+        })) as Array<{ documentId: string; views: number; invitations: number }>
+
+        for (const resume of resumes) {
+          try {
+            const existing = (await strapi.db
+              .query('api::resume-analytics.resume-analytics')
+              .findMany({
+                where: { resume: { documentId: resume.documentId } },
+                select: ['views', 'invitations'],
+              })) as Array<{ views: number; invitations: number }>
+
+            const prevViews = existing.reduce((s, r) => s + (r.views ?? 0), 0)
+            const prevInv = existing.reduce((s, r) => s + (r.invitations ?? 0), 0)
+
+            const deltaViews = computeDelta(resume.views ?? 0, prevViews)
+            const deltaInv = computeDelta(resume.invitations ?? 0, prevInv)
+
+            if (deltaViews === 0 && deltaInv === 0) continue
+
+            await strapi.db.query('api::resume-analytics.resume-analytics').create({
+              data: {
+                resume: { documentId: resume.documentId },
+                date,
+                views: deltaViews,
+                uniqueViews: deltaViews,
+                invitations: deltaInv,
+              },
+            })
+          } catch (e) {
+            strapi.log.warn(`[cron] analytics failed for resume ${resume.documentId}`, e)
+          }
+        }
+
+        strapi.log.info(
+          `[cron] Analytics done: ${vacancies.length} vacancies, ${resumes.length} resumes`
+        )
+      } catch (err) {
+        strapi.log.error('[cron] Analytics aggregation failed', err)
       }
     },
     options: { tz: 'UTC' },

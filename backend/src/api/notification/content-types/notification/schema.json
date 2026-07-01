@@ -1,0 +1,59 @@
+{
+  "kind": "collectionType",
+  "collectionName": "notifications",
+  "info": {
+    "singularName": "notification",
+    "pluralName": "notifications",
+    "displayName": "Notification",
+    "description": "User notifications (applications, subscriptions, moderation, etc.)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "required": true
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "new_application",
+        "application_approved",
+        "application_rejected",
+        "interview_invitation",
+        "test_task",
+        "offer_received",
+        "resume_viewed",
+        "vacancy_viewed",
+        "vacancy_expiring_soon",
+        "vacancy_expired",
+        "subscription_expiring",
+        "subscription_expired",
+        "limits_reached",
+        "saved_search_match",
+        "moderation_approved",
+        "moderation_rejected"
+      ],
+      "required": true
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "body": {
+      "type": "text",
+      "required": true
+    },
+    "isRead": {
+      "type": "boolean",
+      "default": false
+    },
+    "data": {
+      "type": "json"
+    }
+  }
+}
