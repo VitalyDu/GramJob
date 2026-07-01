@@ -54,11 +54,13 @@ export default {
   },
 
   async afterCreate(event: VacancyAfterEvent) {
-    await updateSearchVector(event.result.id)
+    // No await: raw SQL runs after Strapi commits the transaction to avoid lock deadlock
+    updateSearchVector(event.result.id)
   },
 
   async afterUpdate(event: VacancyAfterEvent) {
-    await updateSearchVector(event.result.id)
+    // No await: raw SQL runs after Strapi commits the transaction to avoid lock deadlock
+    updateSearchVector(event.result.id)
 
     if (event.result.status === 'published') {
       const s = globalThis.strapi
