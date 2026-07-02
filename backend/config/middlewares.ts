@@ -34,6 +34,7 @@ const config: Core.Config.Middlewares = [
   'strapi::session',
   'strapi::favicon',
   'strapi::public',
+  'global::telegram-auth',
 ]
 
 export default config
