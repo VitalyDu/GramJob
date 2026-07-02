@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/strapi'
-import { canTransitionTo } from '../services/application-utils'
+import { canTransitionTo, canViewApplication } from '../services/application-utils'
 import {
   checkAndConsumeApplyCredit,
   refundApplyCredit,
@@ -160,6 +160,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         pageCount: Math.ceil(total / pageSizeNum),
       },
     })
+  },
+
+  async findOne(ctx: any) {
+    const user = ctx.state.user as { id: number } | undefined
+    if (!user) return ctx.unauthorized('Authentication required')
+
+    const { id } = ctx.params as { id: string }
+    const application = await (strapi.documents as any)('api::application.application').findOne({
+      documentId: id,
+      populate: APPLICATION_POPULATE as any,
+    })
+    if (!application) return ctx.notFound('Application not found')
+    if (!canViewApplication(application, user.id)) {
+      return ctx.forbidden('You do not have access to this application')
+    }
+
+    ctx.body = { data: application }
   },
 
   async findByVacancy(ctx: any) {

@@ -16,6 +16,14 @@ export default {
       config: {},
     },
 
+    // Candidate or vacancy owner: view single application
+    {
+      method: 'GET',
+      path: '/applications/:id',
+      handler: 'application.findOne',
+      config: {},
+    },
+
     // Employer: view applications for a specific vacancy
     // NOTE: path starts with /vacancies but handler lives in application controller
     {
