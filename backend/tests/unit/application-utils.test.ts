@@ -1,6 +1,7 @@
 import {
   canTransitionTo,
   STATUS_TRANSITIONS,
+  canViewApplication,
 } from '../../src/api/application/services/application-utils'
 
 describe('STATUS_TRANSITIONS', () => {
@@ -94,5 +95,26 @@ describe('canTransitionTo', () => {
 
   it('returns false for unknown status', () => {
     expect(canTransitionTo('unknown', 'viewed')).toBe(false)
+  })
+})
+
+describe('canViewApplication', () => {
+  it('кандидат (владелец отклика) имеет доступ', () => {
+    expect(canViewApplication({ user: { id: 7 }, vacancy: { postedBy: { id: 2 } } }, 7)).toBe(true)
+  })
+
+  it('работодатель (владелец вакансии) имеет доступ', () => {
+    expect(canViewApplication({ user: { id: 7 }, vacancy: { postedBy: { id: 2 } } }, 2)).toBe(true)
+  })
+
+  it('посторонний пользователь не имеет доступа', () => {
+    expect(canViewApplication({ user: { id: 7 }, vacancy: { postedBy: { id: 2 } } }, 99)).toBe(
+      false
+    )
+  })
+
+  it('отсутствующие связи не дают доступ', () => {
+    expect(canViewApplication({ user: null, vacancy: null }, 7)).toBe(false)
+    expect(canViewApplication({}, 7)).toBe(false)
   })
 })
