@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { CompanyForm } from '@/components/company/CompanyForm'
 import type { CompanyUpdateInput } from '@/types/api'
 
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export const EditCompanyClient = observer(function EditCompanyClient({ id }: Props) {
+  useTelegramBackButton()
   const { company: store } = useStores()
   const router = useRouter()
 

@@ -14,6 +14,7 @@ import {
   Legend,
 } from 'recharts'
 import { useStores } from '@/stores/StoreProvider'
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 
 function defaultFrom(): string {
   const d = new Date()
@@ -32,6 +33,7 @@ interface Props {
 export const VacancyAnalyticsClient = observer(function VacancyAnalyticsClient({
   vacancyId,
 }: Props) {
+  useTelegramBackButton()
   const { analytics: store } = useStores()
   const [from, setFrom] = useState(defaultFrom())
   const [to, setTo] = useState(defaultTo())

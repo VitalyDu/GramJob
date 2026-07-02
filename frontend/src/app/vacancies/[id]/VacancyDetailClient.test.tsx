@@ -18,6 +18,10 @@ vi.mock('next/link', () => ({
   ),
 }))
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ back: vi.fn() }),
+}))
+
 import { useStores } from '@/stores/StoreProvider'
 
 const mockVacancy = {

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
 import { ApplyDialog } from '@/components/application/ApplyDialog'
 import { FavoriteButton } from '@/components/favorite/FavoriteButton'
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export const VacancyDetailClient = observer(function VacancyDetailClient({ id }: Props) {
+  useTelegramBackButton()
   const { vacancy: store, application: appStore, auth } = useStores()
   const [applyOpen, setApplyOpen] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)

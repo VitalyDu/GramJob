@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { ApplicationCard } from '@/components/application/ApplicationCard'
 import { Button } from '@/components/ui/button'
 import type { ApplicationStatusEnum } from '@/types/api'
@@ -15,6 +16,7 @@ interface Props {
 export const VacancyApplicationsClient = observer(function VacancyApplicationsClient({
   vacancyId,
 }: Props) {
+  useTelegramBackButton()
   const { application: store } = useStores()
 
   useEffect(() => {

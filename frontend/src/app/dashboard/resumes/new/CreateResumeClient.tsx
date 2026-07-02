@@ -5,10 +5,12 @@ import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { ResumeForm } from '@/components/resume/ResumeForm'
 import type { ResumeCreateInput } from '@/types/api'
 
 export const CreateResumeClient = observer(function CreateResumeClient() {
+  useTelegramBackButton()
   const { resume: store } = useStores()
   const router = useRouter()
   const [submitError, setSubmitError] = useState<string | null>(null)

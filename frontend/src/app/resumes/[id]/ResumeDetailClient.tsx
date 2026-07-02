@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { ResumeStatusBadge } from '@/components/resume/ResumeStatusBadge'
 import { FavoriteButton } from '@/components/favorite/FavoriteButton'
 import { ReportDialog } from '@/components/report/ReportDialog'
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: Props) {
+  useTelegramBackButton()
   const { resume: store, auth } = useStores()
   const [reportOpen, setReportOpen] = useState(false)
 

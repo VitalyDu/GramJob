@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { StatusBadge } from '@/components/company/StatusBadge'
 import { FavoriteButton } from '@/components/favorite/FavoriteButton'
 import { ReportDialog } from '@/components/report/ReportDialog'
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export const CompanyDetailClient = observer(function CompanyDetailClient({ id }: Props) {
+  useTelegramBackButton()
   const { company: store, auth } = useStores()
   const [reportOpen, setReportOpen] = useState(false)
 

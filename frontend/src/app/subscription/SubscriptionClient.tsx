@@ -9,8 +9,10 @@ import { PackageCard } from '@/components/subscription/PackageCard'
 import { Button } from '@/components/ui/button'
 import { canUpgradeToPlan } from '@/lib/subscription-utils'
 import { useTelegramPayment } from '@/hooks/useTelegramPayment'
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 
 export const SubscriptionClient = observer(function SubscriptionClient() {
+  useTelegramBackButton()
   const { auth, payment } = useStores()
   const { openInvoice } = useTelegramPayment()
 

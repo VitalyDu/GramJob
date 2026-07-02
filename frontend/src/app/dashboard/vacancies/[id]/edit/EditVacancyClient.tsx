@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { VacancyForm } from '@/components/vacancy/VacancyForm'
 import type { VacancyCreateInput } from '@/types/api'
 
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export const EditVacancyClient = observer(function EditVacancyClient({ id }: Props) {
+  useTelegramBackButton()
   const { vacancy: vStore, company: cStore } = useStores()
   const router = useRouter()
 
