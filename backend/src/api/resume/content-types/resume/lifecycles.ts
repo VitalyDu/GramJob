@@ -1,4 +1,6 @@
 import { sendNotification } from '../../../../services/notification.service'
+import { logModeration } from '../../../../services/moderation.service'
+import { rejectionReasonLabel } from '../../../../services/moderation-utils'
 import type { Core } from '@strapi/strapi'
 
 type ResumeAfterEvent = {
@@ -10,31 +12,61 @@ export default {
   async afterUpdate(event: ResumeAfterEvent) {
     const s = globalThis.strapi as Core.Strapi
 
-    if (event.result.status !== 'published') return
+    // Counter updates (views++) on published resumes must not re-trigger this.
+    const statusSet = (event.params as any)?.data?.['status']
+    if (statusSet !== 'moderation' && statusSet !== 'published' && statusSet !== 'rejected') {
+      return
+    }
 
-    s.log.info(`[resume] Resume ${event.result.documentId} published`)
+    const documentId = event.result.documentId
+    if (!documentId) return
 
     try {
       const resume = await (s.documents as any)('api::resume.resume').findOne({
-        documentId: event.result.documentId!,
+        documentId,
         populate: { user: { fields: ['id'] } },
-        fields: ['documentId', 'title'],
+        fields: ['documentId', 'title', 'rejectionReason'],
       })
+
+      if (statusSet === 'moderation') {
+        await logModeration(s, {
+          entityType: 'resume',
+          entityDocumentId: documentId,
+          entityTitle: resume?.title ?? '',
+          action: 'submitted',
+        })
+        return
+      }
 
       if (!resume?.user?.id) return
 
-      await sendNotification(s, {
-        userId: resume.user.id,
-        type: 'moderation_approved',
-        templateData: {
-          title: resume.title ?? '',
-          entityType: 'resume',
-          entityId: event.result.documentId ?? '',
-          resumeId: event.result.documentId ?? '',
-        },
-      })
+      if (statusSet === 'published') {
+        s.log.info(`[resume] Resume ${documentId} published`)
+        await sendNotification(s, {
+          userId: resume.user.id,
+          type: 'moderation_approved',
+          templateData: {
+            title: resume.title ?? '',
+            entityType: 'resume',
+            entityId: documentId,
+            resumeId: documentId,
+          },
+        })
+      } else {
+        await sendNotification(s, {
+          userId: resume.user.id,
+          type: 'moderation_rejected',
+          templateData: {
+            title: resume.title ?? '',
+            reason: rejectionReasonLabel(resume.rejectionReason),
+            entityType: 'resume',
+            entityId: documentId,
+            resumeId: documentId,
+          },
+        })
+      }
     } catch (err) {
-      s.log.error('[resume] Failed to send moderation_approved notification', err)
+      s.log.error('[resume] Moderation lifecycle failed', err)
     }
   },
 }
