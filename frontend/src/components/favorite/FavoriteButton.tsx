@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useStores } from '@/stores/StoreProvider'
+import { hapticSelection } from '@/lib/telegram'
 import type { FavoriteType } from '@/types/api'
 
 interface Props {
@@ -22,6 +23,7 @@ export const FavoriteButton = observer(function FavoriteButton({
   if (!auth.user) return null
 
   const handleToggle = async () => {
+    hapticSelection()
     if (isFavorited) {
       try {
         await store.removeFavorite(type, targetId)

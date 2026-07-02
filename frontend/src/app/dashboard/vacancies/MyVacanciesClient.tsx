@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
+import { hapticNotify } from '@/lib/telegram'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
 import { LimitBar } from '@/components/vacancy/LimitBar'
 import { UpsellModal } from '@/components/vacancy/UpsellModal'
@@ -36,6 +37,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
   const handlePublish = async (id: string) => {
     await store.publishVacancy(id)
     if (!store.error && !store.limitReached) {
+      hapticNotify('success')
       toast.success(t('moderation.toasts.vacancySubmitted'))
     }
   }

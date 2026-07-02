@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
+import { hapticNotify } from '@/lib/telegram'
 import { StatusBadge } from '@/components/company/StatusBadge'
 import { COMPANY_SIZE_LABELS, canSubmitCompany, canDeleteCompany } from '@/lib/company-utils'
 import { getMediaUrl } from '@/lib/media'
@@ -24,6 +25,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
   const handleSubmit = async (id: string) => {
     await store.submitCompany(id)
     if (!store.error) {
+      hapticNotify('success')
       toast.success(t('moderation.toasts.companySubmitted'))
     }
   }

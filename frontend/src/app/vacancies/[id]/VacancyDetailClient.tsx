@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
+import { hapticNotify } from '@/lib/telegram'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
 import { ApplyDialog } from '@/components/application/ApplyDialog'
 import { FavoriteButton } from '@/components/favorite/FavoriteButton'
@@ -39,6 +40,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
   const handleApplySubmit = async (resumeId: string, coverLetter: string) => {
     try {
       await appStore.createApplication({ vacancyId: id, resumeId, coverLetter })
+      hapticNotify('success')
       setApplyOpen(false)
     } catch {
       // errors reflected in appStore.limitReached / appStore.alreadyApplied

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
+import { hapticNotify } from '@/lib/telegram'
 import { ResumeStatusBadge } from '@/components/resume/ResumeStatusBadge'
 import { Button } from '@/components/ui/button'
 import {
@@ -32,6 +33,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
   const handlePublish = async (id: string) => {
     await store.publishResume(id)
     if (!store.error) {
+      hapticNotify('success')
       toast.success(t('moderation.toasts.resumeSubmitted'))
     }
   }

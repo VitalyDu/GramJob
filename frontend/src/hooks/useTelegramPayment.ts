@@ -1,6 +1,6 @@
 'use client'
 
-import { getTelegramWebApp } from '@/lib/telegram'
+import { getTelegramWebApp, hapticNotify } from '@/lib/telegram'
 
 export function useTelegramPayment() {
   const openInvoice = (url: string, onPaid?: () => void): void => {
@@ -9,6 +9,7 @@ export function useTelegramPayment() {
     if (webApp?.openInvoice) {
       webApp.openInvoice(url, (status: string) => {
         if (status === 'paid' && onPaid) {
+          hapticNotify('success')
           onPaid()
         }
       })
