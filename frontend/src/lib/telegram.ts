@@ -72,3 +72,17 @@ export function parseStartParam(param: string | null | undefined): string | null
   if (!kind || !id) return null
   return kind === 'vacancy' ? `/vacancies/${id}` : `/dashboard/applications/${id}`
 }
+
+export function hapticImpact(
+  style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft' = 'light'
+): void {
+  getTelegramWebApp()?.HapticFeedback.impactOccurred(style)
+}
+
+export function hapticNotify(type: 'error' | 'success' | 'warning'): void {
+  getTelegramWebApp()?.HapticFeedback.notificationOccurred(type)
+}
+
+export function hapticSelection(): void {
+  getTelegramWebApp()?.HapticFeedback.selectionChanged()
+}
