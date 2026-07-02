@@ -2,16 +2,17 @@ import type { Core } from '@strapi/strapi'
 import { validateInitData, parseInitData } from '../api/telegram-auth/services/telegram-validation'
 
 /**
- * Route-level middleware: accepts X-Telegram-Init-Data header as auth.
- * If the header is present and valid, sets ctx.state.user from DB.
- * If the header is absent, passes through to standard JWT auth.
- * If the header is present but invalid, returns 401.
+ * Global middleware: accepts X-Telegram-Init-Data header as auth.
+ * On valid initData issues a standard users-permissions JWT and injects it
+ * into the Authorization header, so the regular auth strategy chain
+ * (permissions, policies, ctx.state.user) works unchanged downstream.
+ * Requests that already carry an Authorization header pass through untouched.
  */
 export default (_config: unknown, { strapi }: { strapi: Core.Strapi }) => {
   return async (ctx: any, next: () => Promise<void>) => {
     const initDataHeader = ctx.request.headers['x-telegram-init-data'] as string | undefined
 
-    if (!initDataHeader) {
+    if (!initDataHeader || ctx.request.headers.authorization) {
       return next()
     }
 
@@ -48,8 +49,8 @@ export default (_config: unknown, { strapi }: { strapi: Core.Strapi }) => {
       return
     }
 
-    ctx.state.user = user
-    ctx.state.auth = { strategy: { name: 'telegram-init-data' }, credentials: user }
+    const jwt = strapi.plugin('users-permissions').service('jwt').issue({ id: user.id })
+    ctx.request.headers.authorization = `Bearer ${jwt}`
 
     await next()
   }
