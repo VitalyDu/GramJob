@@ -1,0 +1,55 @@
+{
+  "kind": "collectionType",
+  "collectionName": "moderation_logs",
+  "info": {
+    "singularName": "moderation-log",
+    "pluralName": "moderation-logs",
+    "displayName": "ModerationLog",
+    "description": "Audit log of moderation decisions (who, when, what)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "entityType": {
+      "type": "enumeration",
+      "enum": ["vacancy", "resume", "company", "report"],
+      "required": true
+    },
+    "entityDocumentId": {
+      "type": "string",
+      "required": true
+    },
+    "entityTitle": {
+      "type": "string"
+    },
+    "action": {
+      "type": "enumeration",
+      "enum": ["submitted", "approved", "rejected", "report_resolved", "report_dismissed"],
+      "required": true
+    },
+    "reason": {
+      "type": "enumeration",
+      "enum": [
+        "spam",
+        "fake",
+        "inappropriate",
+        "incomplete",
+        "wrong_category",
+        "salary_mismatch",
+        "contact_info",
+        "other"
+      ]
+    },
+    "comment": {
+      "type": "text"
+    },
+    "moderatorId": {
+      "type": "integer"
+    },
+    "moderatorName": {
+      "type": "string"
+    }
+  }
+}
