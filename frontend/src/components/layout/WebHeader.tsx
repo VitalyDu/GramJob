@@ -38,6 +38,12 @@ export const WebHeader = observer(function WebHeader() {
               </Link>
               <NotificationBadge />
               <Link
+                href="/dashboard/publications"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {t('nav.publications')}
+              </Link>
+              <Link
                 href="/dashboard"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
