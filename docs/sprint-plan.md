@@ -302,9 +302,9 @@
 
 ### Backend
 
-- [ ] Все существующие endpoints принимают initData auth (не только JWT)
-- [ ] Deep link routing: `startapp=vacancy_123` → `/vacancies/123`
-- [ ] Deep link routing: `startapp=application_456` → `/dashboard/applications/456`
+- [x] Все существующие endpoints принимают initData auth (не только JWT)
+- [x] Deep link routing: `startapp=vacancy_123` → `/vacancies/123`
+- [x] Deep link routing: `startapp=application_456` → `/dashboard/applications/456`
 
 ### Frontend
 

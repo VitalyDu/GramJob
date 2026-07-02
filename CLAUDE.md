@@ -299,7 +299,15 @@
 - `frontend/src/locales/ru/common.json` + `en/common.json` — ключ `nav.publications`
 - Итого: 310 тестов frontend, 0 ошибок TypeScript
 
-Текущий шаг — Sprint 9 (Telegram Mini App).
+Выполнено (Sprint 9 Backend — Telegram Mini App):
+
+- `src/middlewares/telegram-auth.ts` переработан: при валидном `X-Telegram-Init-Data` инъектирует штатный JWT (users-permissions `jwt.issue`) в `Authorization` — вся цепочка permissions/policies работает без изменений; запросы с существующим `Authorization` не трогает
+- `global::telegram-auth` зарегистрирован в `config/middlewares.ts` — все endpoints принимают initData auth (не только JWT)
+- Rate limiting перенесён из bootstrap в config middlewares (`global::auth-rate-limit`, `global::api-rate-limit`) — лимиты срабатывают ДО telegram-auth, закрыт unthrottled-401 oracle
+- Integration-тесты: `/users/me` и `/vacancies/my` через initData без JWT, невалидный/незарегистрированный/заблокированный initData → 401, приоритет JWT над initData
+- Контрактные unit-тесты deep links: `startapp=vacancy_{documentId}`, `startapp=application_{documentId}`, `startapp=subscription` (реализация `buildDeepLink` существовала со Sprint 7)
+
+Текущий шаг — Sprint 9 (Telegram Mini App): backend завершён, остаётся frontend-часть.
 Планы: `docs/superpowers/plans/`
 
 ---
