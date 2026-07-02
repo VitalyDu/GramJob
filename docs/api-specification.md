@@ -587,6 +587,84 @@ Response всегда `200 { "ok": true }` (даже при ошибках, чт
 
 ---
 
+## Moderation Admin API (Sprint 8)
+
+Все эндпоинты — **admin-only** (Strapi Admin JWT, policy `admin::isAuthenticatedAdmin`). Базовый префикс: `/moderation` (без `/api`).
+
+### POST /moderation/:entityType/:documentId/approve
+
+Одобрить сущность. `:entityType` — `vacancy`, `resume` или `company`.
+
+Response `200`: `{ "ok": true }`
+
+Errors:
+
+- `400` — неизвестный entityType
+- `404` — сущность не найдена
+- `409` — статус не `moderation`
+
+Side effects: статус → `published`; сброс `rejectionReason`/`rejectionComment`; запись в ModerationLog; lifecycle отправляет уведомление `moderation_approved`.
+
+### POST /moderation/:entityType/:documentId/reject
+
+Отклонить сущность с указанием причины.
+
+Request:
+
+```json
+{
+  "reason": "spam",
+  "comment": "необязательный комментарий"
+}
+```
+
+Причины: `spam`, `fake`, `inappropriate`, `incomplete`, `wrong_category`, `salary_mismatch`, `contact_info`, `other`. Для `other` комментарий обязателен.
+
+Response `200`: `{ "ok": true }`
+
+Errors:
+
+- `400` — неизвестный entityType или невалидная причина (`INVALID_REASON`, `COMMENT_REQUIRED`)
+- `404` — сущность не найдена
+- `409` — статус не `moderation`
+
+Side effects: статус → `rejected`; установка `rejectionReason`/`rejectionComment`; запись в ModerationLog; lifecycle отправляет уведомление `moderation_rejected` с меткой причины.
+
+### POST /moderation/reports/:documentId/resolve
+
+Подтвердить жалобу (Report) — статус → `resolved`.
+
+Response `200`: `{ "ok": true }`
+
+Errors: `404` — не найдена, `409` — статус не `pending`
+
+### POST /moderation/reports/:documentId/dismiss
+
+Отклонить жалобу — статус → `dismissed`.
+
+Response `200`: `{ "ok": true }`
+
+### GET /moderation/stats
+
+Статистика очереди модерации.
+
+Response:
+
+```json
+{
+  "queue": {
+    "vacancies": 5,
+    "resumes": 3,
+    "companies": 1,
+    "reports": 2
+  },
+  "avgProcessingHours": 4.5,
+  "decidedLast7Days": 42
+}
+```
+
+---
+
 ### Коды бизнес-ошибок
 
 | Код                     | Ситуация                                  |

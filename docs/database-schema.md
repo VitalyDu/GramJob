@@ -42,23 +42,25 @@
 
 ### Company
 
-| Поле        | Тип                                                                   | Описание                                                        |
-| ----------- | --------------------------------------------------------------------- | --------------------------------------------------------------- |
-| id          | int, PK, auto                                                         |                                                                 |
-| owner       | relation → User                                                       | many-to-one                                                     |
-| name        | string                                                                |                                                                 |
-| slug        | string, unique                                                        | URL-friendly идентификатор                                      |
-| logo        | media, nullable                                                       |                                                                 |
-| cover       | media, nullable                                                       |                                                                 |
-| description | richtext                                                              |                                                                 |
-| website     | string, nullable                                                      |                                                                 |
-| telegram    | string, nullable                                                      | @username или t.me/...                                          |
-| linkedin    | string, nullable                                                      |                                                                 |
-| country     | string                                                                |                                                                 |
-| city        | string, nullable                                                      |                                                                 |
-| companySize | enum(size_1_10, size_11_50, size_51_200, size_201_500, size_500_plus) | Strapi enum; display labels: 1–10, 11–50, 51–200, 201–500, 500+ |
-| status      | enum(draft, moderation, published, rejected)                          | Default: draft                                                  |
-| createdAt   | datetime, auto                                                        |                                                                 |
+| Поле             | Тип                                                                                                         | Описание                                                        |
+| ---------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| id               | int, PK, auto                                                                                               |                                                                 |
+| owner            | relation → User                                                                                             | many-to-one                                                     |
+| name             | string                                                                                                      |                                                                 |
+| slug             | string, unique                                                                                              | URL-friendly идентификатор                                      |
+| logo             | media, nullable                                                                                             |                                                                 |
+| cover            | media, nullable                                                                                             |                                                                 |
+| description      | richtext                                                                                                    |                                                                 |
+| website          | string, nullable                                                                                            |                                                                 |
+| telegram         | string, nullable                                                                                            | @username или t.me/...                                          |
+| linkedin         | string, nullable                                                                                            |                                                                 |
+| country          | string                                                                                                      |                                                                 |
+| city             | string, nullable                                                                                            |                                                                 |
+| companySize      | enum(size_1_10, size_11_50, size_51_200, size_201_500, size_500_plus)                                       | Strapi enum; display labels: 1–10, 11–50, 51–200, 201–500, 500+ |
+| status           | enum(draft, moderation, published, rejected)                                                                | Default: draft                                                  |
+| rejectionReason  | enum(spam, fake, inappropriate, incomplete, wrong_category, salary_mismatch, contact_info, other), nullable | Причина отклонения                                              |
+| rejectionComment | text, nullable                                                                                              | Комментарий модератора (виден автору)                           |
+| createdAt        | datetime, auto                                                                                              |                                                                 |
 
 **Связи:**
 
@@ -71,41 +73,44 @@
 
 ### Vacancy
 
-| Поле              | Тип                                                             | Описание                                |
-| ----------------- | --------------------------------------------------------------- | --------------------------------------- |
-| id                | int, PK, auto                                                   |                                         |
-| company           | relation → Company, nullable                                    | Null если физлицо                       |
-| postedBy          | relation → User                                                 | Кто опубликовал                         |
-| title             | string                                                          |                                         |
-| industry          | relation → Industry                                             | many-to-one                             |
-| specialization    | relation → Specialization                                       | many-to-one                             |
-| employmentType    | enum(full-time, part-time, contract, internship, freelance)     |                                         |
-| workFormat        | enum(office, remote, hybrid)                                    |                                         |
-| seniority         | enum(intern, junior, middle, senior, lead, principal)           |                                         |
-| country           | string                                                          |                                         |
-| city              | string, nullable                                                |                                         |
-| salaryFrom        | int, nullable                                                   |                                         |
-| salaryTo          | int, nullable                                                   |                                         |
-| salaryCurrency    | enum(USD, EUR, RUB, GBP), nullable                              |                                         |
-| description       | richtext                                                        |                                         |
-| responsibilities  | richtext                                                        |                                         |
-| requirements      | richtext                                                        |                                         |
-| conditions        | richtext, nullable                                              |                                         |
-| skills            | json array                                                      | Список строк                            |
-| languages         | json array                                                      | [{lang, level}]                         |
-| experienceYears   | int, nullable                                                   |                                         |
-| sourceType        | enum(internal, external)                                        | Default: internal                       |
-| sourceName        | string, nullable                                                | Для external: название источника        |
-| sourceUrl         | string, nullable                                                | Для external: URL                       |
-| highlighted       | boolean                                                         | Default: false (Pro/Max подсветка)      |
-| urgent            | boolean                                                         | Default: false (🔥 маркер)              |
-| topPlacement      | boolean                                                         | Default: false (TOP закрепление)        |
-| views             | int                                                             | Default: 0                              |
-| uniqueViews       | int                                                             | Default: 0                              |
-| applicationsCount | int                                                             | Default: 0                              |
-| status            | enum(draft, moderation, published, rejected, expired, archived) | Default: draft                          |
-| expiresAt         | datetime, nullable                                              | Устанавливается при публикации +60 дней |
-| createdAt         | datetime, auto                                                  |                                         |
+| Поле              | Тип                                                                                                         | Описание                                |
+| ----------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| id                | int, PK, auto                                                                                               |                                         |
+| company           | relation → Company, nullable                                                                                | Null если физлицо                       |
+| postedBy          | relation → User                                                                                             | Кто опубликовал                         |
+| title             | string                                                                                                      |                                         |
+| industry          | relation → Industry                                                                                         | many-to-one                             |
+| specialization    | relation → Specialization                                                                                   | many-to-one                             |
+| employmentType    | enum(full-time, part-time, contract, internship, freelance)                                                 |                                         |
+| workFormat        | enum(office, remote, hybrid)                                                                                |                                         |
+| seniority         | enum(intern, junior, middle, senior, lead, principal)                                                       |                                         |
+| country           | string                                                                                                      |                                         |
+| city              | string, nullable                                                                                            |                                         |
+| salaryFrom        | int, nullable                                                                                               |                                         |
+| salaryTo          | int, nullable                                                                                               |                                         |
+| salaryCurrency    | enum(USD, EUR, RUB, GBP), nullable                                                                          |                                         |
+| description       | richtext                                                                                                    |                                         |
+| responsibilities  | richtext                                                                                                    |                                         |
+| requirements      | richtext                                                                                                    |                                         |
+| conditions        | richtext, nullable                                                                                          |                                         |
+| skills            | json array                                                                                                  | Список строк                            |
+| languages         | json array                                                                                                  | [{lang, level}]                         |
+| experienceYears   | int, nullable                                                                                               |                                         |
+| sourceType        | enum(internal, external)                                                                                    | Default: internal                       |
+| sourceName        | string, nullable                                                                                            | Для external: название источника        |
+| sourceUrl         | string, nullable                                                                                            | Для external: URL                       |
+| highlighted       | boolean                                                                                                     | Default: false (Pro/Max подсветка)      |
+| urgent            | boolean                                                                                                     | Default: false (🔥 маркер)              |
+| topPlacement      | boolean                                                                                                     | Default: false (TOP закрепление)        |
+| views             | int                                                                                                         | Default: 0                              |
+| uniqueViews       | int                                                                                                         | Default: 0                              |
+| applicationsCount | int                                                                                                         | Default: 0                              |
+| status            | enum(draft, moderation, published, rejected, expired, archived)                                             | Default: draft                          |
+| expiresAt         | datetime, nullable                                                                                          | Устанавливается при публикации +60 дней |
+| boostedAt         | datetime, nullable                                                                                          | Обновляется при буст-продвижении        |
+| rejectionReason   | enum(spam, fake, inappropriate, incomplete, wrong_category, salary_mismatch, contact_info, other), nullable | Причина отклонения                      |
+| rejectionComment  | text, nullable                                                                                              | Комментарий модератора (виден автору)   |
+| createdAt         | datetime, auto                                                                                              |                                         |
 
 **Связи:**
 
@@ -123,31 +128,33 @@
 
 ### Resume
 
-| Поле            | Тип                                                         | Описание                               |
-| --------------- | ----------------------------------------------------------- | -------------------------------------- |
-| id              | int, PK, auto                                               |                                        |
-| user            | relation → User                                             | many-to-one                            |
-| title           | string                                                      | Желаемая должность                     |
-| firstName       | string                                                      |                                        |
-| lastName        | string                                                      |                                        |
-| avatar          | media, nullable                                             |                                        |
-| country         | string                                                      |                                        |
-| city            | string, nullable                                            |                                        |
-| desiredSalary   | int, nullable                                               |                                        |
-| currency        | enum(USD, EUR, RUB, GBP), nullable                          |                                        |
-| workFormat      | enum(office, remote, hybrid, any)                           |                                        |
-| employmentType  | enum(full-time, part-time, contract, internship, freelance) |                                        |
-| experienceYears | int, nullable                                               |                                        |
-| about           | richtext, nullable                                          |                                        |
-| skills          | json array                                                  | Список строк                           |
-| languages       | json array                                                  | [{lang, level}]                        |
-| contacts        | json                                                        | {phone?, email?, telegram?, linkedin?} |
-| workExperience  | component[], repeatable                                     | Записи о работе                        |
-| education       | component[], repeatable                                     | Образование                            |
-| views           | int                                                         | Default: 0                             |
-| invitations     | int                                                         | Default: 0                             |
-| status          | enum(draft, moderation, published, rejected, archived)      | Default: draft                         |
-| createdAt       | datetime, auto                                              |                                        |
+| Поле             | Тип                                                                                                         | Описание                               |
+| ---------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| id               | int, PK, auto                                                                                               |                                        |
+| user             | relation → User                                                                                             | many-to-one                            |
+| title            | string                                                                                                      | Желаемая должность                     |
+| firstName        | string                                                                                                      |                                        |
+| lastName         | string                                                                                                      |                                        |
+| avatar           | media, nullable                                                                                             |                                        |
+| country          | string                                                                                                      |                                        |
+| city             | string, nullable                                                                                            |                                        |
+| desiredSalary    | int, nullable                                                                                               |                                        |
+| currency         | enum(USD, EUR, RUB, GBP), nullable                                                                          |                                        |
+| workFormat       | enum(office, remote, hybrid, any)                                                                           |                                        |
+| employmentType   | enum(full-time, part-time, contract, internship, freelance)                                                 |                                        |
+| experienceYears  | int, nullable                                                                                               |                                        |
+| about            | richtext, nullable                                                                                          |                                        |
+| skills           | json array                                                                                                  | Список строк                           |
+| languages        | json array                                                                                                  | [{lang, level}]                        |
+| contacts         | json                                                                                                        | {phone?, email?, telegram?, linkedin?} |
+| workExperience   | component[], repeatable                                                                                     | Записи о работе                        |
+| education        | component[], repeatable                                                                                     | Образование                            |
+| views            | int                                                                                                         | Default: 0                             |
+| invitations      | int                                                                                                         | Default: 0                             |
+| status           | enum(draft, moderation, published, rejected, archived)                                                      | Default: draft                         |
+| rejectionReason  | enum(spam, fake, inappropriate, incomplete, wrong_category, salary_mismatch, contact_info, other), nullable | Причина отклонения                     |
+| rejectionComment | text, nullable                                                                                              | Комментарий модератора (виден автору)  |
+| createdAt        | datetime, auto                                                                                              |                                        |
 
 **Компоненты Resume:**
 
@@ -377,7 +384,7 @@ Education:
 | targetId  | int                                     |                  |
 | reason    | enum(spam, fraud, inappropriate, other) |                  |
 | comment   | text, nullable                          |                  |
-| status    | enum(pending, reviewed, resolved)       | Default: pending |
+| status    | enum(pending, resolved, dismissed)      | Default: pending |
 | createdAt | datetime, auto                          |                  |
 
 ---
@@ -395,6 +402,27 @@ Education:
 **Индексы:** `user + targetId` (unique)
 
 ---
+
+---
+
+### ModerationLog (Sprint 8)
+
+Audit log модерационных решений. Только запись — читается через Strapi Admin.
+
+| Поле             | Тип                                                                                                         | Описание                         |
+| ---------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| id               | int, PK, auto                                                                                               |                                  |
+| entityType       | enum(vacancy, resume, company, report), required                                                            |                                  |
+| entityDocumentId | string, required                                                                                            | Strapi documentId сущности       |
+| entityTitle      | string, nullable                                                                                            | Название (денормализовано)       |
+| action           | enum(submitted, approved, rejected, report_resolved, report_dismissed), required                            |                                  |
+| reason           | enum(spam, fake, inappropriate, incomplete, wrong_category, salary_mismatch, contact_info, other), nullable | Причина отклонения               |
+| comment          | text, nullable                                                                                              |                                  |
+| moderatorId      | int, nullable                                                                                               | ID admin::user (денормализовано) |
+| moderatorName    | string, nullable                                                                                            | Имя/email модератора             |
+| createdAt        | datetime, auto                                                                                              |                                  |
+
+**Таблица:** `moderation_logs`
 
 ---
 
@@ -465,6 +493,8 @@ Industry → Specialization → Vacancy
 Vacancy → VacancySource (external only)
 Vacancy → VacancyAnalytics[]
 Resume → ResumeAnalytics[]
+
+ModerationLog ← (vacancy | resume | company | report) [audit trail]
 ```
 
 ---
