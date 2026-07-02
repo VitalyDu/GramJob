@@ -41,4 +41,28 @@ describe('buildNotificationData', () => {
   it('subscription_expiring возвращает null (нет конкретной сущности)', () => {
     expect(buildNotificationData('subscription_expiring', {})).toBeNull()
   })
+
+  it('moderation_approved с entityType=vacancy строит vacancy', () => {
+    const d = buildNotificationData('moderation_approved', {
+      entityType: 'vacancy',
+      entityId: 'v1',
+    })
+    expect(d?.entityType).toBe('vacancy')
+    expect(d?.entityId).toBe('v1')
+  })
+
+  it('moderation_rejected с entityType=company строит company', () => {
+    const d = buildNotificationData('moderation_rejected', {
+      entityType: 'company',
+      entityId: 'c1',
+    })
+    expect(d?.entityType).toBe('company')
+    expect(d?.entityId).toBe('c1')
+  })
+
+  it('moderation_approved с resumeId (без entityType) остаётся resume', () => {
+    const d = buildNotificationData('moderation_approved', { resumeId: 'r1' })
+    expect(d?.entityType).toBe('resume')
+    expect(d?.entityId).toBe('r1')
+  })
 })
