@@ -97,6 +97,8 @@ export interface Company {
   city?: string
   companySize: CompanySizeEnum
   status: CompanyStatusEnum
+  rejectionReason?: ModerationRejectionReason | null
+  rejectionComment?: string | null
   logo?: StrapiMedia | null
   cover?: StrapiMedia | null
   owner?: CompanyOwner | null
@@ -123,6 +125,18 @@ export interface CompanyCreateInput {
 }
 
 export type CompanyUpdateInput = Partial<CompanyCreateInput>
+
+// --- Moderation ---
+
+export type ModerationRejectionReason =
+  | 'spam'
+  | 'fake'
+  | 'inappropriate'
+  | 'incomplete'
+  | 'wrong_category'
+  | 'salary_mismatch'
+  | 'contact_info'
+  | 'other'
 
 // --- Vacancy ---
 
@@ -192,6 +206,8 @@ export interface Vacancy {
   uniqueViews?: number
   applicationsCount?: number
   status: VacancyStatusEnum
+  rejectionReason?: ModerationRejectionReason | null
+  rejectionComment?: string | null
   expiresAt?: string | null
   createdAt: string
   industry: IndustryRef
@@ -318,6 +334,8 @@ export interface Resume {
   views?: number
   invitations?: number
   status: ResumeStatusEnum
+  rejectionReason?: ModerationRejectionReason | null
+  rejectionComment?: string | null
   user?: ResumeUserRef | null
   avatar?: StrapiMedia | null
   createdAt: string
