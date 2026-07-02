@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
 import { ResumeStatusBadge } from '@/components/resume/ResumeStatusBadge'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,7 @@ import {
   RESUME_WORK_FORMAT_LABELS,
   RESUME_EMPLOYMENT_TYPE_LABELS,
 } from '@/lib/resume-utils'
+import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 
 export const MyResumesClient = observer(function MyResumesClient() {
   const { resume: store, auth } = useStores()
@@ -25,8 +27,11 @@ export const MyResumesClient = observer(function MyResumesClient() {
   const plan = auth.user?.subscriptionPlan ?? 'free'
   const applyLimit = APPLY_PLAN_LIMITS[plan] ?? 3
 
-  const handlePublish = (id: string) => {
-    void store.publishResume(id)
+  const handlePublish = async (id: string) => {
+    await store.publishResume(id)
+    if (!store.error) {
+      toast.success('Резюме отправлено на модерацию')
+    }
   }
 
   const handleArchive = (id: string) => {
@@ -102,7 +107,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handlePublish(r.documentId)}
+                    onClick={() => void handlePublish(r.documentId)}
                     disabled={store.isLoading}
                   >
                     На модерацию
@@ -131,6 +136,15 @@ export const MyResumesClient = observer(function MyResumesClient() {
                 </span>
               )}
             </div>
+            {r.status === 'rejected' && (
+              <RejectionNotice
+                {...(r.rejectionReason != null ? { reason: r.rejectionReason } : {})}
+                {...(r.rejectionComment != null ? { comment: r.rejectionComment } : {})}
+                editHref={`/dashboard/resumes/${r.documentId}/edit`}
+                onResubmit={() => void handlePublish(r.documentId)}
+                resubmitDisabled={store.isLoading}
+              />
+            )}
           </div>
         ))}
       </div>

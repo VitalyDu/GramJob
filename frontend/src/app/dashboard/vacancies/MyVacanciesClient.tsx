@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
 import { LimitBar } from '@/components/vacancy/LimitBar'
@@ -16,6 +17,7 @@ import {
   WORK_FORMAT_LABELS,
   SENIORITY_LABELS,
 } from '@/lib/vacancy-utils'
+import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 import { PLAN_LIMITS } from './plan-limits'
 
 export const MyVacanciesClient = observer(function MyVacanciesClient() {
@@ -29,8 +31,11 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
   const limit = PLAN_LIMITS[plan] ?? 3
   const used = auth.user?.vacancyCredits !== undefined ? limit - auth.user.vacancyCredits : 0
 
-  const handlePublish = (id: string) => {
-    void store.publishVacancy(id)
+  const handlePublish = async (id: string) => {
+    await store.publishVacancy(id)
+    if (!store.error && !store.limitReached) {
+      toast.success('Вакансия отправлена на модерацию')
+    }
   }
 
   const handleBoost = (id: string) => {
@@ -104,7 +109,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handlePublish(v.documentId)}
+                    onClick={() => void handlePublish(v.documentId)}
                     disabled={store.isLoading}
                   >
                     На модерацию
@@ -156,6 +161,15 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                 </span>
               )}
             </div>
+            {v.status === 'rejected' && (
+              <RejectionNotice
+                {...(v.rejectionReason != null ? { reason: v.rejectionReason } : {})}
+                {...(v.rejectionComment != null ? { comment: v.rejectionComment } : {})}
+                editHref={`/dashboard/vacancies/${v.documentId}/edit`}
+                onResubmit={() => void handlePublish(v.documentId)}
+                resubmitDisabled={store.isLoading}
+              />
+            )}
           </div>
         ))}
       </div>
