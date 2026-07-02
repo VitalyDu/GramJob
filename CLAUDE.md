@@ -281,7 +281,25 @@
 - Admin UI (`src/admin/app.tsx`): Document Actions «Одобрить»/«Отклонить» (модал с причиной) для vacancy/resume/company, «Жалоба подтверждена»/«Отклонить жалобу» для report, пункт меню «Модерация» со страницей статистики (очереди + среднее время обработки + решения за 7 дней)
 - Кредит при отклонении вакансии возвращается автоматически (лимит считает только moderation/published)
 
-Текущий шаг — Sprint 8 Frontend (Moderation).
+Выполнено (Sprint 8 Frontend — Moderation):
+
+- `backend/src/api/vacancy/controllers/vacancy.ts` — `REJECTION_FIELDS`, `VACANCY_OWNER_CARD_FIELDS`, `VACANCY_OWNER_FULL_FIELDS`; owner-эндпоинты возвращают rejectionReason/rejectionComment
+- `backend/src/api/resume/controllers/resume.ts` — `RESUME_OWNER_CARD_FIELDS`; `findMine` возвращает rejection-поля
+- `backend/src/api/company/controllers/company.ts` — `findMineById` и `findMine` возвращают rejection-поля
+- `frontend/src/types/api.ts` — `ModerationRejectionReason` union (8 значений); поля `rejectionReason?/rejectionComment?` добавлены в Company/Vacancy/Resume
+- `frontend/src/lib/moderation-utils.ts` + тест — `REJECTION_REASON_LABELS`, `getRejectionReasonLabel()` (5 тестов)
+- `frontend/src/components/moderation/RejectionNotice.tsx` + тест — блок причины отклонения с кнопками «Исправить»/«Отправить повторно» (6 тестов)
+- `frontend/src/components/moderation/ModerationToastWatcher.tsx` + тест — polling `/notifications?isRead=false` раз в 60 сек, toasts для moderation_approved/rejected (4 теста)
+- `frontend/src/components/layout/AppShell.tsx` — sonner `<Toaster>` + `<ModerationToastWatcher>`
+- `frontend/src/app/dashboard/vacancies/MyVacanciesClient.tsx` — async handlePublish + toast + RejectionNotice
+- `frontend/src/app/dashboard/resumes/MyResumesClient.tsx` — async handlePublish + toast + RejectionNotice
+- `frontend/src/app/dashboard/companies/MyCompaniesClient.tsx` — async handleSubmit + toast + RejectionNotice (обёртка карточки)
+- `frontend/src/app/dashboard/publications/` — сводная страница «Мои публикации» (PublicationsClient + page.tsx, 5 тестов)
+- `frontend/src/components/layout/WebHeader.tsx` — ссылка «Мои публикации» → `/dashboard/publications`
+- `frontend/src/locales/ru/common.json` + `en/common.json` — ключ `nav.publications`
+- Итого: 310 тестов frontend, 0 ошибок TypeScript
+
+Текущий шаг — Sprint 9 (Telegram Mini App).
 Планы: `docs/superpowers/plans/`
 
 ---
