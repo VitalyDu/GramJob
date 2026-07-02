@@ -160,6 +160,7 @@ export async function getModerationStats(strapi: Core.Strapi): Promise<Moderatio
     (strapi.documents as any)(uid).count({ filters: { status: 'moderation' } })
 
   const weekAgo = new Date(Date.now() - 7 * 24 * 3_600_000).toISOString()
+  const monthAgo = new Date(Date.now() - 30 * 24 * 3_600_000).toISOString()
 
   const [vacancies, resumes, companies, reports, logs, decidedLast7Days] = await Promise.all([
     countInModeration('api::vacancy.vacancy'),
@@ -169,10 +170,13 @@ export async function getModerationStats(strapi: Core.Strapi): Promise<Moderatio
       filters: { status: 'pending' },
     }),
     (strapi.documents as any)('api::moderation-log.moderation-log').findMany({
-      filters: { action: { $in: ['submitted', 'approved', 'rejected'] } },
+      filters: {
+        action: { $in: ['submitted', 'approved', 'rejected'] },
+        createdAt: { $gte: monthAgo },
+      },
       fields: ['entityType', 'entityDocumentId', 'action', 'createdAt'],
       sort: 'createdAt:desc',
-      limit: 500,
+      limit: 2000,
     }),
     (strapi.documents as any)('api::moderation-log.moderation-log').count({
       filters: {

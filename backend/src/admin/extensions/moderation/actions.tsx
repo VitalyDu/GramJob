@@ -4,6 +4,7 @@ import {
   Button,
   Field,
   Flex,
+  Modal,
   SingleSelect,
   SingleSelectOption,
   Textarea,
@@ -90,34 +91,36 @@ const RejectForm = ({
   }
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={4}>
-      <Field.Root>
-        <Field.Label>Причина отклонения</Field.Label>
-        <SingleSelect value={reason} onChange={(v: string | number) => setReason(String(v))}>
-          {REJECTION_REASONS.map((r) => (
-            <SingleSelectOption key={r.value} value={r.value}>
-              {r.label}
-            </SingleSelectOption>
-          ))}
-        </SingleSelect>
-      </Field.Root>
-      <Field.Root>
-        <Field.Label>Комментарий (виден пользователю)</Field.Label>
-        <Textarea
-          value={comment}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setComment(e.target.value)}
-        />
-      </Field.Root>
-      {error ? <Typography textColor="danger600">{error}</Typography> : null}
-      <Flex justifyContent="flex-end" gap={2}>
-        <Button variant="tertiary" onClick={onClose} disabled={submitting}>
-          Отмена
-        </Button>
-        <Button variant="danger" onClick={submit} loading={submitting}>
-          Отклонить
-        </Button>
+    <Modal.Body>
+      <Flex direction="column" alignItems="stretch" gap={4}>
+        <Field.Root>
+          <Field.Label>Причина отклонения</Field.Label>
+          <SingleSelect value={reason} onChange={(v: string | number) => setReason(String(v))}>
+            {REJECTION_REASONS.map((r) => (
+              <SingleSelectOption key={r.value} value={r.value}>
+                {r.label}
+              </SingleSelectOption>
+            ))}
+          </SingleSelect>
+        </Field.Root>
+        <Field.Root>
+          <Field.Label>Комментарий (виден пользователю)</Field.Label>
+          <Textarea
+            value={comment}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setComment(e.target.value)}
+          />
+        </Field.Root>
+        {error ? <Typography textColor="danger600">{error}</Typography> : null}
+        <Flex justifyContent="flex-end" gap={2}>
+          <Button variant="tertiary" onClick={onClose} disabled={submitting}>
+            Отмена
+          </Button>
+          <Button variant="danger" onClick={submit} loading={submitting}>
+            Отклонить
+          </Button>
+        </Flex>
       </Flex>
-    </Flex>
+    </Modal.Body>
   )
 }
 

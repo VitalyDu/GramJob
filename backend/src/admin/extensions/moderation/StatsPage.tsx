@@ -75,7 +75,7 @@ const StatsPage = () => {
             </Flex>
             <Flex gap={4} wrap="wrap">
               <StatCard
-                label="Среднее время обработки"
+                label="Среднее время обработки (30 дней)"
                 value={stats.avgProcessingHours === null ? '—' : `${stats.avgProcessingHours} ч`}
               />
               <StatCard label="Решений за 7 дней" value={String(stats.decidedLast7Days)} />
