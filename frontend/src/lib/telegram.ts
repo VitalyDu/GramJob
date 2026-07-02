@@ -62,3 +62,13 @@ export function getTelegramWebApp(): TelegramWebApp | null {
   if (typeof window === 'undefined') return null
   return window.Telegram?.WebApp ?? null
 }
+
+export function parseStartParam(param: string | null | undefined): string | null {
+  if (!param) return null
+  if (param === 'subscription') return '/subscription'
+  const match = /^(vacancy|application)_([A-Za-z0-9]+)$/.exec(param)
+  const kind = match?.[1]
+  const id = match?.[2]
+  if (!kind || !id) return null
+  return kind === 'vacancy' ? `/vacancies/${id}` : `/dashboard/applications/${id}`
+}
