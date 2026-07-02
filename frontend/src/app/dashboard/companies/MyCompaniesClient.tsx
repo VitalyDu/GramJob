@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
 import { StatusBadge } from '@/components/company/StatusBadge'
@@ -13,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 
 export const MyCompaniesClient = observer(function MyCompaniesClient() {
+  const { t } = useTranslation()
   const { company: store } = useStores()
 
   useEffect(() => {
@@ -22,7 +24,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
   const handleSubmit = async (id: string) => {
     await store.submitCompany(id)
     if (!store.error) {
-      toast.success('Компания отправлена на модерацию')
+      toast.success(t('moderation.toasts.companySubmitted'))
     }
   }
 

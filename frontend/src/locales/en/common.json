@@ -32,5 +32,43 @@
   "home": {
     "tagline": "International job board in Telegram",
     "cta": "Get Started"
+  },
+  "moderation": {
+    "reasons": {
+      "spam": "Spam or duplicate content",
+      "fake": "Fake vacancy/company",
+      "inappropriate": "Inappropriate content",
+      "incomplete": "Not enough information",
+      "wrong_category": "Wrong category",
+      "salary_mismatch": "Incorrect salary data",
+      "contact_info": "Contact details in restricted fields",
+      "other": "Other",
+      "unknown": "See moderator's comment"
+    },
+    "rejectedByModerator": "Rejected by moderator: {{reason}}",
+    "moderatorComment": "Moderator's comment: {{comment}}",
+    "fixHint": "Fix the issues and resubmit for moderation.",
+    "fix": "Fix",
+    "resubmit": "Resubmit",
+    "toasts": {
+      "vacancySubmitted": "Vacancy submitted for moderation",
+      "resumeSubmitted": "Resume submitted for moderation",
+      "companySubmitted": "Company submitted for moderation"
+    }
+  },
+  "publications": {
+    "title": "My publications",
+    "empty": "You have no publications yet.",
+    "vacancies": "Vacancies",
+    "resumes": "Resumes",
+    "companies": "Companies",
+    "all": "All →",
+    "hints": {
+      "draft": "Draft — complete it and submit for moderation.",
+      "moderation": "Awaiting moderator review. Usually takes up to 24 hours.",
+      "published": "Published and visible to everyone.",
+      "expired": "Publication expired. Resubmit to return it to search.",
+      "archived": "Archived — not shown in search."
+    }
   }
 }

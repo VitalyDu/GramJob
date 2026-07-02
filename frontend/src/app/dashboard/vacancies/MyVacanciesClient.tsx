@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
@@ -21,6 +22,7 @@ import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 import { PLAN_LIMITS } from './plan-limits'
 
 export const MyVacanciesClient = observer(function MyVacanciesClient() {
+  const { t } = useTranslation()
   const { vacancy: store, auth } = useStores()
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
   const handlePublish = async (id: string) => {
     await store.publishVacancy(id)
     if (!store.error && !store.limitReached) {
-      toast.success('Вакансия отправлена на модерацию')
+      toast.success(t('moderation.toasts.vacancySubmitted'))
     }
   }
 

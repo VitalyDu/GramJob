@@ -1,26 +1,37 @@
 import { describe, it, expect } from 'vitest'
-import { REJECTION_REASON_LABELS, getRejectionReasonLabel } from './moderation-utils'
+import { REJECTION_REASONS, getRejectionReasonKey } from './moderation-utils'
+import ruCommon from '@/locales/ru/common.json'
+import enCommon from '@/locales/en/common.json'
 
 describe('moderation-utils', () => {
-  it('содержит метки для всех 8 причин', () => {
-    expect(Object.keys(REJECTION_REASON_LABELS)).toHaveLength(8)
+  it('содержит все 8 причин', () => {
+    expect(REJECTION_REASONS).toHaveLength(8)
   })
 
-  it('возвращает метку для известной причины', () => {
-    expect(getRejectionReasonLabel('spam')).toBe('Спам или дублирующийся контент')
-    expect(getRejectionReasonLabel('incomplete')).toBe('Недостаточно информации')
+  it('возвращает i18n-ключ для известной причины', () => {
+    expect(getRejectionReasonKey('spam')).toBe('moderation.reasons.spam')
+    expect(getRejectionReasonKey('incomplete')).toBe('moderation.reasons.incomplete')
   })
 
-  it('возвращает метку для "other"', () => {
-    expect(getRejectionReasonLabel('other')).toBe('Другое')
+  it('возвращает ключ для "other"', () => {
+    expect(getRejectionReasonKey('other')).toBe('moderation.reasons.other')
   })
 
-  it('возвращает fallback для неизвестной причины', () => {
-    expect(getRejectionReasonLabel('unknown_reason')).toBe('См. комментарий модератора')
+  it('возвращает fallback-ключ для неизвестной причины', () => {
+    expect(getRejectionReasonKey('unknown_reason')).toBe('moderation.reasons.unknown')
   })
 
-  it('возвращает fallback для null и undefined', () => {
-    expect(getRejectionReasonLabel(null)).toBe('См. комментарий модератора')
-    expect(getRejectionReasonLabel(undefined)).toBe('См. комментарий модератора')
+  it('возвращает fallback-ключ для null и undefined', () => {
+    expect(getRejectionReasonKey(null)).toBe('moderation.reasons.unknown')
+    expect(getRejectionReasonKey(undefined)).toBe('moderation.reasons.unknown')
+  })
+
+  it('локали ru и en содержат переводы для всех причин', () => {
+    for (const locale of [ruCommon, enCommon]) {
+      const reasons = locale.moderation.reasons as Record<string, string>
+      for (const reason of [...REJECTION_REASONS, 'unknown']) {
+        expect(reasons[reason], `missing translation for ${reason}`).toBeTruthy()
+      }
+    }
   })
 })

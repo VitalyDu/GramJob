@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
 import { ResumeStatusBadge } from '@/components/resume/ResumeStatusBadge'
@@ -18,6 +19,7 @@ import {
 import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 
 export const MyResumesClient = observer(function MyResumesClient() {
+  const { t } = useTranslation()
   const { resume: store, auth } = useStores()
 
   useEffect(() => {
@@ -30,7 +32,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
   const handlePublish = async (id: string) => {
     await store.publishResume(id)
     if (!store.error) {
-      toast.success('Резюме отправлено на модерацию')
+      toast.success(t('moderation.toasts.resumeSubmitted'))
     }
   }
 

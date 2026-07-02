@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
@@ -10,15 +11,16 @@ import { ResumeStatusBadge } from '@/components/resume/ResumeStatusBadge'
 import { StatusBadge } from '@/components/company/StatusBadge'
 import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 
-const STATUS_HINTS: Record<string, string> = {
-  draft: 'Черновик — заполните и отправьте на модерацию.',
-  moderation: 'Ожидает проверки модератором. Обычно это занимает до 24 часов.',
-  published: 'Опубликовано и видно всем пользователям.',
-  expired: 'Срок публикации истёк. Отправьте повторно, чтобы вернуть в поиск.',
-  archived: 'В архиве — не отображается в поиске.',
+const STATUS_HINT_KEYS: Record<string, string> = {
+  draft: 'publications.hints.draft',
+  moderation: 'publications.hints.moderation',
+  published: 'publications.hints.published',
+  expired: 'publications.hints.expired',
+  archived: 'publications.hints.archived',
 }
 
 export const PublicationsClient = observer(function PublicationsClient() {
+  const { t } = useTranslation()
   const { vacancy, resume, company } = useStores()
 
   useEffect(() => {
@@ -37,42 +39,42 @@ export const PublicationsClient = observer(function PublicationsClient() {
   const resubmitVacancy = async (id: string) => {
     await vacancy.publishVacancy(id)
     if (!vacancy.error && !vacancy.limitReached) {
-      toast.success('Вакансия отправлена на модерацию')
+      toast.success(t('moderation.toasts.vacancySubmitted'))
     }
   }
 
   const resubmitResume = async (id: string) => {
     await resume.publishResume(id)
     if (!resume.error) {
-      toast.success('Резюме отправлено на модерацию')
+      toast.success(t('moderation.toasts.resumeSubmitted'))
     }
   }
 
   const resubmitCompany = async (id: string) => {
     await company.submitCompany(id)
     if (!company.error) {
-      toast.success('Компания отправлена на модерацию')
+      toast.success(t('moderation.toasts.companySubmitted'))
     }
   }
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Мои публикации</h1>
+      <h1 className="text-2xl font-bold">{t('publications.title')}</h1>
 
-      {isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
+      {isLoading && <p className="text-sm text-muted-foreground">{t('common.loading')}</p>}
 
       {isEmpty && (
         <div className="rounded-xl border border-dashed border-gray-300 py-16 text-center">
-          <p className="text-sm text-muted-foreground">У вас пока нет публикаций.</p>
+          <p className="text-sm text-muted-foreground">{t('publications.empty')}</p>
         </div>
       )}
 
       {vacancy.myVacancies.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Вакансии</h2>
+            <h2 className="text-lg font-semibold">{t('publications.vacancies')}</h2>
             <Link href="/dashboard/vacancies" className="text-sm text-indigo-600 hover:underline">
-              Все →
+              {t('publications.all')}
             </Link>
           </div>
           {vacancy.myVacancies.map((v) => (
@@ -81,8 +83,8 @@ export const PublicationsClient = observer(function PublicationsClient() {
                 <p className="truncate font-semibold text-gray-900">{v.title}</p>
                 <VacancyStatusBadge status={v.status} />
               </div>
-              {v.status !== 'rejected' && STATUS_HINTS[v.status] && (
-                <p className="mt-1 text-sm text-gray-500">{STATUS_HINTS[v.status]}</p>
+              {v.status !== 'rejected' && STATUS_HINT_KEYS[v.status] && (
+                <p className="mt-1 text-sm text-gray-500">{t(STATUS_HINT_KEYS[v.status]!)}</p>
               )}
               {v.status === 'rejected' && (
                 <RejectionNotice
@@ -101,9 +103,9 @@ export const PublicationsClient = observer(function PublicationsClient() {
       {resume.myResumes.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Резюме</h2>
+            <h2 className="text-lg font-semibold">{t('publications.resumes')}</h2>
             <Link href="/dashboard/resumes" className="text-sm text-indigo-600 hover:underline">
-              Все →
+              {t('publications.all')}
             </Link>
           </div>
           {resume.myResumes.map((r) => (
@@ -112,8 +114,8 @@ export const PublicationsClient = observer(function PublicationsClient() {
                 <p className="truncate font-semibold text-gray-900">{r.title}</p>
                 <ResumeStatusBadge status={r.status} />
               </div>
-              {r.status !== 'rejected' && STATUS_HINTS[r.status] && (
-                <p className="mt-1 text-sm text-gray-500">{STATUS_HINTS[r.status]}</p>
+              {r.status !== 'rejected' && STATUS_HINT_KEYS[r.status] && (
+                <p className="mt-1 text-sm text-gray-500">{t(STATUS_HINT_KEYS[r.status]!)}</p>
               )}
               {r.status === 'rejected' && (
                 <RejectionNotice
@@ -132,9 +134,9 @@ export const PublicationsClient = observer(function PublicationsClient() {
       {company.myCompanies.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Компании</h2>
+            <h2 className="text-lg font-semibold">{t('publications.companies')}</h2>
             <Link href="/dashboard/companies" className="text-sm text-indigo-600 hover:underline">
-              Все →
+              {t('publications.all')}
             </Link>
           </div>
           {company.myCompanies.map((c) => (
@@ -143,8 +145,8 @@ export const PublicationsClient = observer(function PublicationsClient() {
                 <p className="truncate font-semibold text-gray-900">{c.name}</p>
                 <StatusBadge status={c.status} />
               </div>
-              {c.status !== 'rejected' && STATUS_HINTS[c.status] && (
-                <p className="mt-1 text-sm text-gray-500">{STATUS_HINTS[c.status]}</p>
+              {c.status !== 'rejected' && STATUS_HINT_KEYS[c.status] && (
+                <p className="mt-1 text-sm text-gray-500">{t(STATUS_HINT_KEYS[c.status]!)}</p>
               )}
               {c.status === 'rejected' && (
                 <RejectionNotice
