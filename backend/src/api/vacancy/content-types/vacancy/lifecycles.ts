@@ -1,3 +1,8 @@
+import { sendNotification } from '../../../../services/notification.service'
+import { logModeration } from '../../../../services/moderation.service'
+import { rejectionReasonLabel } from '../../../../services/moderation-utils'
+import type { Core } from '@strapi/strapi'
+
 type VacancyBeforeCreateEvent = {
   params: {
     data: Record<string, unknown>
@@ -68,11 +73,59 @@ export default {
     // No await: raw SQL runs after Strapi commits the transaction to avoid lock deadlock
     updateSearchVector(event.result.id)
 
-    // Only log when the update itself sets status=published (not on views++ of published vacancies)
-    if (event.params.data?.['status'] === 'published') {
-      const s = globalThis.strapi
-      s.log.info(`[vacancy] Vacancy ${event.result.documentId} published`)
-      // TODO Sprint 8: send Telegram notification to postedBy user (moderation approval flow)
+    const statusSet = (event.params as any)?.data?.['status']
+    if (statusSet !== 'moderation' && statusSet !== 'published' && statusSet !== 'rejected') {
+      return
+    }
+
+    const s = globalThis.strapi as Core.Strapi
+    const documentId = event.result.documentId
+    if (!documentId) return
+
+    try {
+      const vacancy = await (s.documents as any)('api::vacancy.vacancy').findOne({
+        documentId,
+        populate: { postedBy: { fields: ['id'] } },
+        fields: ['documentId', 'title', 'rejectionReason'],
+      })
+
+      if (statusSet === 'moderation') {
+        await logModeration(s, {
+          entityType: 'vacancy',
+          entityDocumentId: documentId,
+          entityTitle: vacancy?.title ?? '',
+          action: 'submitted',
+        })
+        return
+      }
+
+      if (!vacancy?.postedBy?.id) return
+
+      if (statusSet === 'published') {
+        s.log.info(`[vacancy] Vacancy ${documentId} published`)
+        await sendNotification(s, {
+          userId: vacancy.postedBy.id,
+          type: 'moderation_approved',
+          templateData: {
+            title: vacancy.title ?? '',
+            entityType: 'vacancy',
+            entityId: documentId,
+          },
+        })
+      } else {
+        await sendNotification(s, {
+          userId: vacancy.postedBy.id,
+          type: 'moderation_rejected',
+          templateData: {
+            title: vacancy.title ?? '',
+            reason: rejectionReasonLabel(vacancy.rejectionReason),
+            entityType: 'vacancy',
+            entityId: documentId,
+          },
+        })
+      }
+    } catch (err) {
+      s.log.error('[vacancy] Moderation lifecycle failed', err)
     }
   },
 }

@@ -68,6 +68,22 @@
       "enum": ["draft", "moderation", "published", "rejected"],
       "default": "draft",
       "required": true
+    },
+    "rejectionReason": {
+      "type": "enumeration",
+      "enum": [
+        "spam",
+        "fake",
+        "inappropriate",
+        "incomplete",
+        "wrong_category",
+        "salary_mismatch",
+        "contact_info",
+        "other"
+      ]
+    },
+    "rejectionComment": {
+      "type": "text"
     }
   }
 }

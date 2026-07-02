@@ -1,4 +1,6 @@
 import { sendNotification } from '../../../../services/notification.service'
+import { logModeration } from '../../../../services/moderation.service'
+import { rejectionReasonLabel } from '../../../../services/moderation-utils'
 import type { Core } from '@strapi/strapi'
 
 type CompanyLifecycleEvent = {
@@ -12,32 +14,59 @@ type CompanyLifecycleEvent = {
 
 export default {
   async afterUpdate(event: CompanyLifecycleEvent) {
-    // Only react when the update itself sets status=published (moderation approval)
-    if (event.params.data?.['status'] !== 'published') return
+    const statusSet = (event.params as any)?.data?.['status']
+    if (statusSet !== 'moderation' && statusSet !== 'published' && statusSet !== 'rejected') {
+      return
+    }
 
     const s = globalThis.strapi as Core.Strapi
-    s.log.info(`[company] Company ${event.result.documentId} published`)
+    const documentId = event.result.documentId
+    if (!documentId) return
 
     try {
       const company = await (s.documents as any)('api::company.company').findOne({
-        documentId: event.result.documentId!,
+        documentId,
         populate: { owner: { fields: ['id'] } },
-        fields: ['documentId', 'name'],
+        fields: ['documentId', 'name', 'rejectionReason'],
       })
+
+      if (statusSet === 'moderation') {
+        await logModeration(s, {
+          entityType: 'company',
+          entityDocumentId: documentId,
+          entityTitle: company?.name ?? '',
+          action: 'submitted',
+        })
+        return
+      }
 
       if (!company?.owner?.id) return
 
-      await sendNotification(s, {
-        userId: company.owner.id,
-        type: 'moderation_approved',
-        templateData: {
-          title: company.name ?? '',
-          entityType: 'company',
-          entityId: event.result.documentId ?? '',
-        },
-      })
+      if (statusSet === 'published') {
+        s.log.info(`[company] Company ${documentId} published`)
+        await sendNotification(s, {
+          userId: company.owner.id,
+          type: 'moderation_approved',
+          templateData: {
+            title: company.name ?? '',
+            entityType: 'company',
+            entityId: documentId,
+          },
+        })
+      } else {
+        await sendNotification(s, {
+          userId: company.owner.id,
+          type: 'moderation_rejected',
+          templateData: {
+            title: company.name ?? '',
+            reason: rejectionReasonLabel(company.rejectionReason),
+            entityType: 'company',
+            entityId: documentId,
+          },
+        })
+      }
     } catch (err) {
-      s.log.error('[company] Failed to send moderation_approved notification', err)
+      s.log.error('[company] Moderation lifecycle failed', err)
     }
   },
 }

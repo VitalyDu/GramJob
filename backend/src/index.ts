@@ -4,6 +4,7 @@ import { seedSubscriptionPlans } from './scripts/seed-subscription-plans'
 import { seedPackages } from './scripts/seed-packages'
 import { seedPermissions } from './scripts/seed-permissions'
 import { setWebhook } from './api/payment/services/telegram-bot'
+import { registerModerationRoutes } from './services/moderation-routes'
 import type { Core } from '@strapi/strapi'
 
 async function setupVacancySearch(strapi: Core.Strapi) {
@@ -24,7 +25,9 @@ async function setupVacancySearch(strapi: Core.Strapi) {
 }
 
 export default {
-  register({ strapi: _strapi }: { strapi: Core.Strapi }) {},
+  register({ strapi }: { strapi: Core.Strapi }) {
+    registerModerationRoutes(strapi)
+  },
 
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
     await seedIndustries(strapi)

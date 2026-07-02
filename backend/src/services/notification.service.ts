@@ -41,6 +41,16 @@ export function buildNotificationData(
   templateData: Record<string, unknown>
 ): NotificationData {
   if (
+    ['moderation_approved', 'moderation_rejected'].includes(type) &&
+    templateData['entityType'] &&
+    templateData['entityId']
+  ) {
+    return {
+      entityType: templateData['entityType'] as string,
+      entityId: templateData['entityId'] as string | number,
+    }
+  }
+  if (
     templateData['vacancyId'] &&
     ['new_application', 'vacancy_expiring_soon', 'vacancy_expired', 'vacancy_viewed'].includes(type)
   ) {
