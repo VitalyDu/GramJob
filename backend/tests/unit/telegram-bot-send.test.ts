@@ -63,3 +63,52 @@ describe('APPLICATION_STATUS_TO_NOTIFICATION', () => {
     expect(APPLICATION_STATUS_TO_NOTIFICATION['test-task']).toBe('test_task')
   })
 })
+
+describe('deep links (startapp) — контракт для Mini App роутинга', () => {
+  function extractUrl(msg: ReturnType<typeof buildNotificationMessage>): string | undefined {
+    const options = msg.options as Record<string, unknown> | undefined
+    const markup = options?.['reply_markup'] as
+      | { inline_keyboard?: Array<Array<{ url?: string }>> }
+      | undefined
+    return markup?.inline_keyboard?.[0]?.[0]?.url
+  }
+
+  it('new_application → startapp=vacancy_{documentId}', () => {
+    const msg = buildNotificationMessage('new_application', {
+      vacancyId: 'abc123doc',
+      vacancyTitle: 'Frontend Dev',
+      candidateName: 'Иван',
+    })
+    expect(extractUrl(msg)).toMatch(/\?startapp=vacancy_abc123doc$/)
+  })
+
+  it('application_approved → startapp=application_{documentId}', () => {
+    const msg = buildNotificationMessage('application_approved', {
+      applicationId: 'xyz456doc',
+      vacancyTitle: 'Frontend Dev',
+    })
+    expect(extractUrl(msg)).toMatch(/\?startapp=application_xyz456doc$/)
+  })
+
+  it('offer_received → startapp=application_{documentId}', () => {
+    const msg = buildNotificationMessage('offer_received', {
+      applicationId: 'off789doc',
+      vacancyTitle: 'Frontend Dev',
+    })
+    expect(extractUrl(msg)).toMatch(/\?startapp=application_off789doc$/)
+  })
+
+  it('subscription_expired → startapp=subscription', () => {
+    const msg = buildNotificationMessage('subscription_expired', {})
+    expect(extractUrl(msg)).toMatch(/\?startapp=subscription$/)
+  })
+
+  it('deep link ведёт на t.me с BOT_USERNAME', () => {
+    const msg = buildNotificationMessage('new_application', {
+      vacancyId: 'abc',
+      vacancyTitle: 'X',
+      candidateName: 'Y',
+    })
+    expect(extractUrl(msg)).toMatch(/^https:\/\/t\.me\/[A-Za-z0-9_]+\/app\?startapp=/)
+  })
+})
