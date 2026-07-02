@@ -1,6 +1,10 @@
 import type { Core } from '@strapi/strapi'
 import { canTransitionTo } from '../services/application-utils'
-import { checkAndConsumeApplyCredit } from '../services/apply-credit-service'
+import {
+  checkAndConsumeApplyCredit,
+  refundApplyCredit,
+  type ConsumedApplySource,
+} from '../services/apply-credit-service'
 
 const APPLICATION_POPULATE = {
   vacancy: {
@@ -72,8 +76,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }
 
     // Check and consume apply credit
+    let consumedSource: ConsumedApplySource
     try {
-      await checkAndConsumeApplyCredit(strapi, user.id)
+      consumedSource = await checkAndConsumeApplyCredit(strapi, user.id)
     } catch (err: any) {
       if (err?.code === 'LIMIT_REACHED') {
         ctx.status = 403
@@ -88,16 +93,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       throw err
     }
 
-    const application = await (strapi.documents as any)('api::application.application').create({
-      data: {
-        vacancy: vacancyId as string,
-        resume: resumeId as string,
-        user: user.id,
-        coverLetter: coverLetter as string | undefined,
-        status: 'applied',
-      },
-      populate: APPLICATION_POPULATE as any,
-    })
+    let application: unknown
+    try {
+      application = await (strapi.documents as any)('api::application.application').create({
+        data: {
+          vacancy: vacancyId as string,
+          resume: resumeId as string,
+          user: user.id,
+          coverLetter: coverLetter as string | undefined,
+          status: 'applied',
+        },
+        populate: APPLICATION_POPULATE as any,
+      })
+    } catch (err) {
+      // The credit must not burn if the application row was never created
+      await refundApplyCredit(strapi, user.id, consumedSource).catch(() => {})
+      throw err
+    }
 
     // Increment applicationsCount directly — lifecycle result in Strapi 5
     // does not reliably populate relations, so we use the documentId we already have

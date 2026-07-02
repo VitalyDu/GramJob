@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "payments",
+  "info": {
+    "singularName": "payment",
+    "pluralName": "payments",
+    "displayName": "Payment"
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": {},
+  "attributes": {
+    "telegramChargeId": { "type": "string", "required": true, "unique": true },
+    "payloadType": {
+      "type": "enumeration",
+      "enum": ["subscription", "vacancy_pack", "apply_pack"],
+      "required": true
+    },
+    "planCode": { "type": "string" },
+    "packageId": { "type": "integer" },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "starsAmount": { "type": "integer" },
+    "status": {
+      "type": "enumeration",
+      "enum": ["processing", "completed", "failed"],
+      "default": "processing",
+      "required": true
+    }
+  }
+}

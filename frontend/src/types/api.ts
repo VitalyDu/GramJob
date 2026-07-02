@@ -10,6 +10,7 @@ export interface User {
   subscriptionExpiresAt: string | null
   vacancyCredits: number
   applyCredits: number
+  boostCredits: number
   isVip: boolean
   createdAt: string
 }

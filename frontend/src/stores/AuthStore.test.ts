@@ -1,14 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-vi.mock('@/services/api', () => ({
-  api: {
-    post: vi.fn(),
-    get: vi.fn(),
-  },
-  setAuthToken: vi.fn(),
-}))
+vi.mock('@/services/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/services/api')>()
+  return {
+    ApiClientError: actual.ApiClientError,
+    api: {
+      post: vi.fn(),
+      get: vi.fn(),
+    },
+    setAuthToken: vi.fn(),
+  }
+})
 
-import { api, setAuthToken } from '@/services/api'
+import { api, setAuthToken, ApiClientError } from '@/services/api'
 import { AuthStore } from './AuthStore'
 
 const localStorageMock = (() => {
@@ -122,12 +126,33 @@ describe('AuthStore', () => {
     expect(setAuthToken).toHaveBeenCalledWith('stored-jwt')
   })
 
-  it('init вызывает logout если /users/me возвращает ошибку', async () => {
+  it('init вызывает logout если /users/me возвращает 401', async () => {
     localStorageMock.setItem('gramjob_jwt', 'expired-jwt')
-    vi.mocked(api.get).mockRejectedValue(new Error('Unauthorized'))
+    vi.mocked(api.get).mockRejectedValue(new ApiClientError(401, {}, 'Unauthorized'))
 
     await store.init()
 
     expect(store.isAuthenticated).toBe(false)
+    expect(localStorageMock.getItem('gramjob_jwt')).toBeNull()
+  })
+
+  it('init сохраняет сессию при сетевой ошибке /users/me', async () => {
+    localStorageMock.setItem('gramjob_jwt', 'stored-jwt')
+    vi.mocked(api.get).mockRejectedValue(new Error('Network error'))
+
+    await store.init()
+
+    expect(store.jwt).toBe('stored-jwt')
+    expect(localStorageMock.getItem('gramjob_jwt')).toBe('stored-jwt')
+  })
+
+  it('init сохраняет сессию при 500 от /users/me', async () => {
+    localStorageMock.setItem('gramjob_jwt', 'stored-jwt')
+    vi.mocked(api.get).mockRejectedValue(new ApiClientError(500, {}, 'Internal Server Error'))
+
+    await store.init()
+
+    expect(store.jwt).toBe('stored-jwt')
+    expect(localStorageMock.getItem('gramjob_jwt')).toBe('stored-jwt')
   })
 })

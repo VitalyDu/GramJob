@@ -98,6 +98,7 @@ export class ResumeStore {
       this.isLoading = true
       this.error = null
       this.currentResume = null
+      this.accessDenied = false
     })
     try {
       const res = await api.get<{ data: Resume }>(`/resumes/${id}`)
@@ -105,6 +106,12 @@ export class ResumeStore {
         this.currentResume = res.data
       })
     } catch (e) {
+      if (e instanceof ApiClientError && (e.status === 401 || e.status === 403)) {
+        runInAction(() => {
+          this.accessDenied = true
+        })
+        return
+      }
       runInAction(() => {
         this.error = e instanceof Error ? e.message : 'Failed to fetch resume'
       })

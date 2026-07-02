@@ -14,10 +14,10 @@ export default async (
   const user = ctx.state.user as { id: number } | undefined
   if (!user) return false
 
-  const fullUser = (await strapi.documents('plugin::users-permissions.user').findOne({
-    documentId: String(user.id),
-    fields: ['id', 'subscriptionPlan'],
-  })) as unknown as UserWithPlan | null
+  const fullUser = (await strapi.db.query('plugin::users-permissions.user').findOne({
+    where: { id: user.id },
+    select: ['id', 'subscriptionPlan'],
+  })) as UserWithPlan | null
 
   if (!fullUser) return false
 

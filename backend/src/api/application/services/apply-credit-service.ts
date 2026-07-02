@@ -4,6 +4,7 @@ export const APPLY_PLAN_LIMITS = {
   free: { applicationsPerDay: 3 },
   pro: { applicationsPerDay: 10 },
   max: { applicationsPerDay: 50 },
+  vip: { applicationsPerDay: 50 },
 } as const
 
 type PlanCode = keyof typeof APPLY_PLAN_LIMITS
@@ -38,30 +39,53 @@ export function incrementApplyCount(userId: number): void {
   }
 }
 
+export function decrementApplyCount(userId: number): void {
+  const entry = dailyApplies.get(userId)
+  if (entry && entry.date === todayUTC() && entry.count > 0) {
+    entry.count--
+  }
+}
+
 type UserWithPlan = {
   subscriptionPlan: string
-  applyCredits: number
+}
+
+export type ConsumedApplySource = 'credit' | 'plan'
+
+/** Refund a consumed apply credit when the application could not be created. */
+export async function refundApplyCredit(
+  strapi: Core.Strapi,
+  userId: number,
+  source: ConsumedApplySource
+): Promise<void> {
+  if (source === 'credit') {
+    await strapi.db.connection.raw(
+      `UPDATE up_users SET apply_credits = COALESCE(apply_credits, 0) + 1 WHERE id = ?`,
+      [userId]
+    )
+  } else {
+    decrementApplyCount(userId)
+  }
 }
 
 export async function checkAndConsumeApplyCredit(
   strapi: Core.Strapi,
   userId: number
-): Promise<void> {
-  const user = (await strapi.documents('plugin::users-permissions.user').findOne({
-    documentId: String(userId),
-    fields: ['id', 'subscriptionPlan', 'applyCredits'],
-  })) as unknown as UserWithPlan | null
+): Promise<ConsumedApplySource> {
+  const user = (await strapi.db.query('plugin::users-permissions.user').findOne({
+    where: { id: userId },
+    select: ['id', 'subscriptionPlan'],
+  })) as UserWithPlan | null
 
   if (!user) throw new Error('User not found')
 
-  // 1. Package credits take priority
-  if (user.applyCredits > 0) {
-    await strapi.db.query('plugin::users-permissions.user').update({
-      where: { id: userId },
-      data: { applyCredits: user.applyCredits - 1 },
-    })
-    return
-  }
+  // 1. Package credits take priority — atomic decrement guarded by the WHERE
+  // condition so concurrent applies cannot spend the same credit twice
+  const consumed = (await strapi.db.connection.raw(
+    `UPDATE up_users SET apply_credits = apply_credits - 1 WHERE id = ? AND apply_credits > 0`,
+    [userId]
+  )) as { rowCount?: number }
+  if ((consumed.rowCount ?? 0) > 0) return 'credit'
 
   // 2. Check plan daily limit
   const limit = getApplyLimitForPlan(user.subscriptionPlan)
@@ -76,4 +100,5 @@ export async function checkAndConsumeApplyCredit(
   }
 
   incrementApplyCount(userId)
+  return 'plan'
 }

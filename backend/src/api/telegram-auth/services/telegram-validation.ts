@@ -58,10 +58,18 @@ export function validateWebWidget(telegramData: Record<string, string>, botToken
   const computedHash = crypto.createHmac('sha256', secretKey).update(sortedString).digest('hex')
 
   try {
-    return crypto.timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(hash, 'hex'))
+    if (!crypto.timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(hash, 'hex'))) {
+      return false
+    }
   } catch {
     return false
   }
+
+  // Reject stale payloads — a valid signature can otherwise be replayed forever
+  const authDate = parseInt(data.auth_date ?? '0', 10)
+  if (Math.floor(Date.now() / 1000) - authDate > MAX_AGE_SECONDS) return false
+
+  return true
 }
 
 export type TelegramUser = {

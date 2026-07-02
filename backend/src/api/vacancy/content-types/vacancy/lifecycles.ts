@@ -14,7 +14,7 @@ type VacancyBeforeUpdateEvent = {
 
 type VacancyAfterEvent = {
   result: { documentId?: string; id?: number; status?: string; expiresAt?: string | null }
-  params: unknown
+  params: { data?: Record<string, unknown> }
 }
 
 function sanitizeJsonFields(data: Record<string, unknown>) {
@@ -29,6 +29,12 @@ export default {
   async beforeCreate(event: VacancyBeforeCreateEvent) {
     const { data } = event.params
     sanitizeJsonFields(data)
+
+    // boostedAt starts equal to creation time so that boostedAt:desc ordering
+    // matches createdAt:desc for never-boosted vacancies (no NULLs in sort)
+    if (!data.boostedAt) {
+      data.boostedAt = new Date().toISOString()
+    }
 
     const posterId = typeof data.postedBy === 'number' ? data.postedBy : null
     if (!posterId) return
@@ -62,19 +68,22 @@ export default {
     // No await: raw SQL runs after Strapi commits the transaction to avoid lock deadlock
     updateSearchVector(event.result.id)
 
-    if (event.result.status === 'published') {
+    // Only log when the update itself sets status=published (not on views++ of published vacancies)
+    if (event.params.data?.['status'] === 'published') {
       const s = globalThis.strapi
       s.log.info(`[vacancy] Vacancy ${event.result.documentId} published`)
-      // TODO Sprint 7: send Telegram notification to postedBy user
+      // TODO Sprint 8: send Telegram notification to postedBy user (moderation approval flow)
     }
   },
 }
 
-async function updateSearchVector(vacancyId: number | undefined) {
+const SEARCH_VECTOR_MAX_ATTEMPTS = 5
+
+async function updateSearchVector(vacancyId: number | undefined, attempt = 1) {
   if (!vacancyId) return
   const s = globalThis.strapi
   try {
-    await s.db.connection.raw(
+    const result = (await s.db.connection.raw(
       `UPDATE vacancies
        SET search_vector =
          setweight(to_tsvector('russian', coalesce(title, '')), 'A') ||
@@ -83,7 +92,17 @@ async function updateSearchVector(vacancyId: number | undefined) {
          setweight(to_tsvector('russian', coalesce(requirements, '')), 'C')
        WHERE id = ?`,
       [vacancyId]
-    )
+    )) as { rowCount?: number }
+
+    // afterCreate fires before the wrapping transaction commits, so this separate
+    // connection may not see the new row yet (0 rows updated) — retry with backoff
+    if ((result.rowCount ?? 0) === 0) {
+      if (attempt >= SEARCH_VECTOR_MAX_ATTEMPTS) {
+        s.log.warn(`[vacancy] search_vector not updated for id=${vacancyId}: row not visible`)
+        return
+      }
+      setTimeout(() => void updateSearchVector(vacancyId, attempt + 1), 200 * attempt)
+    }
   } catch {
     s.log.warn(`[vacancy] Failed to update search_vector for id=${vacancyId}`)
   }

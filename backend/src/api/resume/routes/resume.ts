@@ -24,12 +24,13 @@ export default {
       config: {},
     },
 
-    // Public detail by documentId (contacts masking done in controller)
+    // Detail by documentId: owner or Max/VIP plan (checked in controller),
+    // contacts masking done in controller
     {
       method: 'GET',
       path: '/resumes/:id',
       handler: 'resume.findOne',
-      config: { auth: false },
+      config: {},
     },
 
     // Owner-only via policy

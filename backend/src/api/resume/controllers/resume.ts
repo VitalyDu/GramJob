@@ -5,6 +5,7 @@ import {
   canArchiveResume,
   publishedTransitionsOnEditResume,
 } from '../services/resume-utils'
+import { checkIsMaxPlan } from '../policies/requires-max-plan'
 import type resumeServiceFactory from '../services/resume'
 
 type ResumeService = ReturnType<typeof resumeServiceFactory>
@@ -179,6 +180,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async findOne(ctx: any) {
       const requestUser = ctx.state.user as { id: number } | undefined
+      if (!requestUser) return ctx.unauthorized('Authentication required')
+
       const { id } = ctx.params as { id: string }
 
       const resume = await (strapi.documents as any)('api::resume.resume').findOne({
@@ -187,21 +190,50 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         populate: RESUME_POPULATE as any,
       })
 
-      if (!resume || resume.status !== 'published') {
+      if (!resume) {
         return ctx.notFound('Resume not found')
       }
 
-      const newViews = (resume.views ?? 0) + 1
-      await (strapi.documents as any)('api::resume.resume').update({
-        documentId: id,
-        data: { views: newViews },
-      })
-
       const resumeOwnerId = resume.user?.id
+      const isOwner = requestUser.id === resumeOwnerId
+
+      // Owner can open their own resume in any status (edit flow); others see only published
+      if (!isOwner && resume.status !== 'published') {
+        return ctx.notFound('Resume not found')
+      }
+
+      // Resume database is a Max/VIP feature — the detail card must not bypass the gate
+      if (!isOwner) {
+        const viewer = (await strapi.db.query('plugin::users-permissions.user').findOne({
+          where: { id: requestUser.id },
+          select: ['subscriptionPlan'],
+        })) as { subscriptionPlan: string } | null
+
+        if (!checkIsMaxPlan(viewer ?? { subscriptionPlan: 'free' })) {
+          ctx.status = 403
+          return ctx.send({
+            error: {
+              code: 'SUBSCRIPTION_REQUIRED',
+              message: 'Max subscription plan required to access resume database',
+            },
+          })
+        }
+      }
+
+      // Owner's own views must not inflate the counter
+      let newViews = resume.views ?? 0
+      if (!isOwner) {
+        newViews += 1
+        await (strapi.documents as any)('api::resume.resume').update({
+          documentId: id,
+          data: { views: newViews },
+        })
+      }
+
       let contacts: unknown = null
 
       if (requestUser) {
-        if (requestUser.id === resumeOwnerId) {
+        if (isOwner) {
           contacts = resume.contacts
         } else {
           // Raw SQL is used here because Strapi 5 Document Service does not reliably

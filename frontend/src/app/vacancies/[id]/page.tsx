@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:1337/api'}/vacancies/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:1337/api'}/vacancies/${id}?skipViewCount=true`,
       { next: { revalidate: 3600 } }
     )
     if (res.ok) {

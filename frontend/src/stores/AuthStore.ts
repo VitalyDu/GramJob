@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 import type { User, AuthResponse, TelegramAuthPayload } from '@/types/api'
-import { api, setAuthToken } from '@/services/api'
+import { api, setAuthToken, ApiClientError } from '@/services/api'
 
 const JWT_KEY = 'gramjob_jwt'
 
@@ -114,8 +114,12 @@ export class AuthStore {
       runInAction(() => {
         this.user = user
       })
-    } catch {
-      this.logout()
+    } catch (e) {
+      // Only an invalid/expired token warrants a logout — network errors and
+      // 5xx must not destroy the session on a flaky connection
+      if (e instanceof ApiClientError && (e.status === 401 || e.status === 403)) {
+        this.logout()
+      }
     }
   }
 

@@ -44,8 +44,13 @@ const AUTHENTICATED_PERMISSIONS = [
   'api::vacancy-package.vacancy-package.find',
   'api::apply-package.apply-package.find',
   'api::payment.payment.subscribe',
-  'api::payment.payment.buyVacancyPack',
-  'api::payment.payment.buyApplyPack',
+  'api::payment.payment.vacancyPack',
+  'api::payment.payment.applyPack',
+  'api::notification.notification.findMine',
+  'api::notification.notification.markRead',
+  'api::notification.notification.markAllRead',
+  'api::analytics.analytics.vacancyAnalytics',
+  'api::analytics.analytics.resumeAnalytics',
 ]
 
 const PUBLIC_PERMISSIONS = [
@@ -63,8 +68,6 @@ const PUBLIC_PERMISSIONS = [
   'api::company.company.findBySlug',
   'api::vacancy.vacancy.findPublished',
   'api::vacancy.vacancy.findOne',
-  'api::resume.resume.findPublic',
-  'api::resume.resume.findOne',
   'api::industry.industry.find',
   'api::industry.industry.findOne',
   'api::specialization.specialization.find',
@@ -74,6 +77,30 @@ const PUBLIC_PERMISSIONS = [
   'api::apply-package.apply-package.find',
   'api::payment.payment.handleWebhook',
 ]
+
+// Previously seeded permissions that must be revoked (renamed handlers, closed routes)
+const REMOVED_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
+  authenticated: ['api::payment.payment.buyVacancyPack', 'api::payment.payment.buyApplyPack'],
+  public: ['api::resume.resume.findPublic', 'api::resume.resume.findOne'],
+}
+
+async function removePermissions(
+  strapi: Core.Strapi,
+  roleId: number,
+  actions: string[]
+): Promise<number> {
+  if (actions.length === 0) return 0
+  const removed: Array<{ id: number }> = await strapi.db
+    .query('plugin::users-permissions.permission')
+    .findMany({ where: { role: roleId, action: { $in: actions } }, select: ['id'] })
+
+  for (const perm of removed) {
+    await strapi.db.query('plugin::users-permissions.permission').delete({
+      where: { id: perm.id },
+    })
+  }
+  return removed.length
+}
 
 async function ensurePermissions(
   strapi: Core.Strapi,
@@ -124,8 +151,12 @@ export async function seedPermissions(strapi: Core.Strapi) {
     (await ensurePermissions(strapi, authenticatedRole.id, AUTHENTICATED_PERMISSIONS)) +
     (await ensurePermissions(strapi, publicRole.id, PUBLIC_PERMISSIONS))
 
-  if (total > 0) {
-    strapi.log.info(`[permissions] Seeded ${total} new permission(s)`)
+  const removed =
+    (await removePermissions(strapi, authenticatedRole.id, REMOVED_PERMISSIONS.authenticated)) +
+    (await removePermissions(strapi, publicRole.id, REMOVED_PERMISSIONS.public))
+
+  if (total > 0 || removed > 0) {
+    strapi.log.info(`[permissions] Seeded ${total}, removed ${removed} permission(s)`)
   } else {
     strapi.log.info('[permissions] Permissions already up to date')
   }

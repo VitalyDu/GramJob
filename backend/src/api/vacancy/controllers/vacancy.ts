@@ -257,7 +257,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         newest: 'createdAt:desc',
         salary_asc: 'salaryFrom:asc',
         salary_desc: 'salaryFrom:desc',
-        relevance: 'topPlacement:desc,createdAt:desc',
+        relevance: 'topPlacement:desc,boostedAt:desc,createdAt:desc',
       }
       const strapiSort = sortMap[sort] ?? sortMap.relevance
 
@@ -445,6 +445,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (!vacancy) return ctx.notFound('Vacancy not found')
 
+      // Server-side fetches (e.g. generateMetadata for SEO) must not inflate view counters
+      if ((ctx.query as Record<string, string>).skipViewCount === 'true') {
+        return ctx.send({ data: vacancy })
+      }
+
+      // Owner's own views must not inflate the counter
+      const requestUser = ctx.state.user as { id: number } | undefined
+      if (requestUser && requestUser.id === (vacancy as any).postedBy?.id) {
+        return ctx.send({ data: vacancy })
+      }
+
       const unique = isUniqueView(id, ip)
       recordView(id, ip)
 
@@ -556,10 +567,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw err
       }
 
-      // Touch updatedAt to bump the vacancy in sort order
       await strapi.documents('api::vacancy.vacancy').update({
         documentId: id,
-        data: {},
+        data: { boostedAt: new Date().toISOString() },
       })
 
       return ctx.send({ data: { success: true, boostsRemaining } })

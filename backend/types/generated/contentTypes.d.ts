@@ -571,6 +571,56 @@ export interface ApiIndustryIndustry extends Struct.CollectionTypeSchema {
   }
 }
 
+export interface ApiNotificationNotification extends Struct.CollectionTypeSchema {
+  collectionName: 'notifications'
+  info: {
+    description: 'User notifications (applications, subscriptions, moderation, etc.)'
+    displayName: 'Notification'
+    pluralName: 'notifications'
+    singularName: 'notification'
+  }
+  options: {
+    draftAndPublish: false
+  }
+  attributes: {
+    body: Schema.Attribute.Text & Schema.Attribute.Required
+    createdAt: Schema.Attribute.DateTime
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
+    data: Schema.Attribute.JSON
+    isRead: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>
+    locale: Schema.Attribute.String & Schema.Attribute.Private
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::notification.notification'> &
+      Schema.Attribute.Private
+    publishedAt: Schema.Attribute.DateTime
+    title: Schema.Attribute.String & Schema.Attribute.Required
+    type: Schema.Attribute.Enumeration<
+      [
+        'new_application',
+        'application_approved',
+        'application_rejected',
+        'interview_invitation',
+        'test_task',
+        'offer_received',
+        'resume_viewed',
+        'vacancy_viewed',
+        'vacancy_expiring_soon',
+        'vacancy_expired',
+        'subscription_expiring',
+        'subscription_expired',
+        'limits_reached',
+        'saved_search_match',
+        'moderation_approved',
+        'moderation_rejected',
+      ]
+    > &
+      Schema.Attribute.Required
+    updatedAt: Schema.Attribute.DateTime
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
+    user: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'> &
+      Schema.Attribute.Required
+  }
+}
+
 export interface ApiReportReport extends Struct.CollectionTypeSchema {
   collectionName: 'reports'
   info: {
@@ -602,6 +652,37 @@ export interface ApiReportReport extends Struct.CollectionTypeSchema {
       Schema.Attribute.Required
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
+  }
+}
+
+export interface ApiResumeAnalyticsResumeAnalytics extends Struct.CollectionTypeSchema {
+  collectionName: 'resume_analytics'
+  info: {
+    description: 'Daily analytics snapshot per resume'
+    displayName: 'ResumeAnalytics'
+    pluralName: 'resume-analytics-entries'
+    singularName: 'resume-analytics'
+  }
+  options: {
+    draftAndPublish: false
+  }
+  attributes: {
+    createdAt: Schema.Attribute.DateTime
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
+    date: Schema.Attribute.Date & Schema.Attribute.Required
+    invitations: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
+    locale: Schema.Attribute.String & Schema.Attribute.Private
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::resume-analytics.resume-analytics'
+    > &
+      Schema.Attribute.Private
+    publishedAt: Schema.Attribute.DateTime
+    resume: Schema.Attribute.Relation<'manyToOne', 'api::resume.resume'>
+    uniqueViews: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
+    updatedAt: Schema.Attribute.DateTime
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
+    views: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
   }
 }
 
@@ -750,6 +831,38 @@ export interface ApiSubscriptionPlanSubscriptionPlan extends Struct.CollectionTy
   }
 }
 
+export interface ApiVacancyAnalyticsVacancyAnalytics extends Struct.CollectionTypeSchema {
+  collectionName: 'vacancy_analytics'
+  info: {
+    description: 'Daily analytics snapshot per vacancy'
+    displayName: 'VacancyAnalytics'
+    pluralName: 'vacancy-analytics-entries'
+    singularName: 'vacancy-analytics'
+  }
+  options: {
+    draftAndPublish: false
+  }
+  attributes: {
+    applications: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
+    createdAt: Schema.Attribute.DateTime
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
+    ctr: Schema.Attribute.Float & Schema.Attribute.DefaultTo<0>
+    date: Schema.Attribute.Date & Schema.Attribute.Required
+    locale: Schema.Attribute.String & Schema.Attribute.Private
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::vacancy-analytics.vacancy-analytics'
+    > &
+      Schema.Attribute.Private
+    publishedAt: Schema.Attribute.DateTime
+    uniqueViews: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
+    updatedAt: Schema.Attribute.DateTime
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
+    vacancy: Schema.Attribute.Relation<'manyToOne', 'api::vacancy.vacancy'>
+    views: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
+  }
+}
+
 export interface ApiVacancyPackageVacancyPackage extends Struct.CollectionTypeSchema {
   collectionName: 'vacancy_packages'
   info: {
@@ -828,6 +941,7 @@ export interface ApiVacancyVacancy extends Struct.CollectionTypeSchema {
       ['full-time', 'part-time', 'contract', 'internship', 'freelance']
     > &
       Schema.Attribute.Required
+    boostedAt: Schema.Attribute.DateTime
     experienceYears: Schema.Attribute.Integer
     expiresAt: Schema.Attribute.DateTime
     highlighted: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>
@@ -1263,6 +1377,7 @@ export interface PluginUsersPermissionsUser extends Struct.CollectionTypeSchema 
     applyCredits: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
     avatar: Schema.Attribute.String
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>
+    boostCredits: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
     confirmationToken: Schema.Attribute.String & Schema.Attribute.Private
     confirmed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>
     createdAt: Schema.Attribute.DateTime
@@ -1319,11 +1434,14 @@ declare module '@strapi/strapi' {
       'api::company.company': ApiCompanyCompany
       'api::favorite.favorite': ApiFavoriteFavorite
       'api::industry.industry': ApiIndustryIndustry
+      'api::notification.notification': ApiNotificationNotification
       'api::report.report': ApiReportReport
+      'api::resume-analytics.resume-analytics': ApiResumeAnalyticsResumeAnalytics
       'api::resume.resume': ApiResumeResume
       'api::saved-search.saved-search': ApiSavedSearchSavedSearch
       'api::specialization.specialization': ApiSpecializationSpecialization
       'api::subscription-plan.subscription-plan': ApiSubscriptionPlanSubscriptionPlan
+      'api::vacancy-analytics.vacancy-analytics': ApiVacancyAnalyticsVacancyAnalytics
       'api::vacancy-package.vacancy-package': ApiVacancyPackageVacancyPackage
       'api::vacancy-source.vacancy-source': ApiVacancySourceVacancySource
       'api::vacancy.vacancy': ApiVacancyVacancy

@@ -32,6 +32,26 @@ describe('toSlug', () => {
   it('returns empty string for special-char-only input', () => {
     expect(toSlug('---')).toBe('')
   })
+
+  it('transliterates Russian cyrillic', () => {
+    expect(toSlug('Рога и Копыта')).toBe('roga-i-kopyta')
+  })
+
+  it('transliterates multi-letter cyrillic mappings', () => {
+    expect(toSlug('Жёлтый Щит')).toBe('zheltyy-shchit')
+  })
+
+  it('drops hard and soft signs', () => {
+    expect(toSlug('Объём')).toBe('obem')
+  })
+
+  it('transliterates Ukrainian letters', () => {
+    expect(toSlug('Київ Їжак Ґанок')).toBe('kiyiv-yizhak-ganok')
+  })
+
+  it('handles mixed cyrillic and latin', () => {
+    expect(toSlug('IT Компания 2024')).toBe('it-kompaniya-2024')
+  })
 })
 
 describe('canSubmit', () => {
@@ -47,8 +67,8 @@ describe('canSubmit', () => {
     expect(canSubmit('published')).toBe(false)
   })
 
-  it('blocks transition from rejected', () => {
-    expect(canSubmit('rejected')).toBe(false)
+  it('allows transition from rejected (re-submit after fixes)', () => {
+    expect(canSubmit('rejected')).toBe(true)
   })
 })
 

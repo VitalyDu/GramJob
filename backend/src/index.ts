@@ -14,6 +14,7 @@ async function setupVacancySearch(strapi: Core.Strapi) {
       CREATE INDEX IF NOT EXISTS vacancies_skills_idx ON vacancies USING GIN(skills jsonb_path_ops);
       CREATE INDEX IF NOT EXISTS vacancies_languages_idx ON vacancies USING GIN(languages jsonb_path_ops);
       CREATE INDEX IF NOT EXISTS vacancies_status_expires_idx ON vacancies (status, expires_at);
+      UPDATE vacancies SET boosted_at = created_at WHERE boosted_at IS NULL;
     `)
     strapi.log.info('[vacancy] Full-text search indexes ensured')
   } catch (err) {

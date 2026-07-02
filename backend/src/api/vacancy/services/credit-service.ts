@@ -4,6 +4,7 @@ export const PLAN_LIMITS = {
   free: { vacanciesPerMonth: 3, boostsPerDay: 3 },
   pro: { vacanciesPerMonth: 10, boostsPerDay: 10 },
   max: { vacanciesPerMonth: 50, boostsPerDay: 50 },
+  vip: { vacanciesPerMonth: 50, boostsPerDay: 50 },
 } as const
 
 type PlanCode = keyof typeof PLAN_LIMITS
@@ -41,28 +42,26 @@ export function incrementBoostCount(userId: number): void {
 
 type UserWithPlan = {
   subscriptionPlan: string
-  vacancyCredits: number
 }
 
 export async function checkAndConsumeVacancyCredit(
   strapi: Core.Strapi,
   userId: number
 ): Promise<void> {
-  const user = (await strapi.documents('plugin::users-permissions.user').findOne({
-    documentId: String(userId),
-    fields: ['id', 'subscriptionPlan', 'vacancyCredits'],
-  })) as unknown as UserWithPlan | null
+  const user = (await strapi.db.query('plugin::users-permissions.user').findOne({
+    where: { id: userId },
+    select: ['id', 'subscriptionPlan'],
+  })) as UserWithPlan | null
 
   if (!user) throw new Error('User not found')
 
-  // 1. Package credits take priority
-  if (user.vacancyCredits > 0) {
-    await strapi.db.query('plugin::users-permissions.user').update({
-      where: { id: userId },
-      data: { vacancyCredits: user.vacancyCredits - 1 },
-    })
-    return
-  }
+  // 1. Package credits take priority — atomic decrement guarded by the WHERE
+  // condition so concurrent publishes cannot spend the same credit twice
+  const consumed = (await strapi.db.connection.raw(
+    `UPDATE up_users SET vacancy_credits = vacancy_credits - 1 WHERE id = ? AND vacancy_credits > 0`,
+    [userId]
+  )) as { rowCount?: number }
+  if ((consumed.rowCount ?? 0) > 0) return
 
   // 2. Check plan monthly limit
   const monthStart = new Date()
@@ -92,16 +91,24 @@ export async function checkAndConsumeVacancyCredit(
 }
 
 export async function checkAndConsumeBoost(strapi: Core.Strapi, userId: number): Promise<number> {
-  const user = (await strapi.documents('plugin::users-permissions.user').findOne({
-    documentId: String(userId),
-    fields: ['id', 'subscriptionPlan'],
-  })) as unknown as { subscriptionPlan: string } | null
+  const user = (await strapi.db.query('plugin::users-permissions.user').findOne({
+    where: { id: userId },
+    select: ['id', 'subscriptionPlan'],
+  })) as { subscriptionPlan: string } | null
 
   if (!user) throw new Error('User not found')
 
   const limit = getBoostsLimitForPlan(user.subscriptionPlan)
   const used = getBoostsUsedToday(userId)
 
+  // 1. Package boost credits take priority over the daily plan limit (atomic decrement)
+  const consumed = (await strapi.db.connection.raw(
+    `UPDATE up_users SET boost_credits = boost_credits - 1 WHERE id = ? AND boost_credits > 0`,
+    [userId]
+  )) as { rowCount?: number }
+  if ((consumed.rowCount ?? 0) > 0) return Math.max(limit - used, 0)
+
+  // 2. Daily plan limit
   if (used >= limit) {
     throw Object.assign(new Error('LIMIT_REACHED'), {
       code: 'LIMIT_REACHED',

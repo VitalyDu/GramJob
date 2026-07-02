@@ -82,6 +82,10 @@
       "type": "integer",
       "default": 0
     },
+    "boostCredits": {
+      "type": "integer",
+      "default": 0
+    },
     "language": {
       "type": "enumeration",
       "enum": ["ru", "en"],

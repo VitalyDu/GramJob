@@ -28,6 +28,25 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
     return <p className="text-sm text-muted-foreground">Загрузка...</p>
   }
 
+  if (store.accessDenied) {
+    return (
+      <div className="py-16 text-center">
+        <p className="text-xl font-semibold text-gray-900">Просмотр резюме доступен на плане Max</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {auth.user
+            ? 'Оформите подписку Max или VIP, чтобы просматривать резюме кандидатов.'
+            : 'Войдите и оформите подписку Max или VIP, чтобы просматривать резюме кандидатов.'}
+        </p>
+        <Link
+          href={auth.user ? '/subscription' : '/login'}
+          className="mt-6 inline-flex items-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-medium text-white hover:bg-indigo-700"
+        >
+          {auth.user ? 'Перейти к подпискам →' : 'Войти →'}
+        </Link>
+      </div>
+    )
+  }
+
   if (!store.currentResume) {
     return (
       <div className="py-16 text-center">

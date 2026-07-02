@@ -14,6 +14,9 @@ export class ApiClientError extends Error {
 let authToken: string | null = null
 
 export function setAuthToken(token: string | null): void {
+  // Module-level state is shared across requests during SSR — a user's token
+  // must never leak into another user's server-rendered request
+  if (typeof window === 'undefined') return
   authToken = token
 }
 

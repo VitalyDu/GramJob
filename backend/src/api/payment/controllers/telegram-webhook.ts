@@ -33,15 +33,20 @@ type TelegramUpdate = {
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async handle(ctx: any) {
-    // Verify Telegram webhook secret
+    // Verify Telegram webhook secret (fail closed: without a configured
+    // secret anyone could forge successful_payment updates)
     const secret = process.env.TELEGRAM_WEBHOOK_SECRET
-    if (secret) {
-      const incoming = ctx.request.headers['x-telegram-bot-api-secret-token']
-      if (incoming !== secret) {
-        ctx.status = 403
-        ctx.body = { ok: false }
-        return
-      }
+    if (!secret) {
+      strapi.log.error('[webhook] TELEGRAM_WEBHOOK_SECRET is not configured, rejecting update')
+      ctx.status = 503
+      ctx.body = { ok: false }
+      return
+    }
+    const incoming = ctx.request.headers['x-telegram-bot-api-secret-token']
+    if (incoming !== secret) {
+      ctx.status = 403
+      ctx.body = { ok: false }
+      return
     }
 
     const update = ctx.request.body as TelegramUpdate
@@ -86,35 +91,74 @@ async function handleSuccessfulPayment(
     return
   }
 
+  // Idempotency: create the payment record first — the unique constraint on
+  // telegramChargeId rejects duplicate webhook deliveries before any crediting
+  let paymentRecord: { id: number }
+  try {
+    paymentRecord = (await strapi.db.query('api::payment.payment').create({
+      data: {
+        telegramChargeId: payment.telegram_payment_charge_id,
+        payloadType: data.type,
+        planCode: data.type === 'subscription' ? data.planCode : null,
+        packageId: data.type === 'subscription' ? null : data.packageId,
+        user: data.userId,
+        starsAmount: payment.total_amount,
+        status: 'processing',
+      },
+    })) as { id: number }
+  } catch (err) {
+    const duplicate = await strapi.db.query('api::payment.payment').findOne({
+      where: { telegramChargeId: payment.telegram_payment_charge_id },
+    })
+    if (duplicate) {
+      strapi.log.warn(
+        `[payment] Duplicate successful_payment ignored: charge=${payment.telegram_payment_charge_id}`
+      )
+      return
+    }
+    strapi.log.error('[payment] Failed to record payment:', err)
+    return
+  }
+
   try {
     if (data.type === 'subscription') {
       await activateSubscription(strapi, data.userId, data.planCode as any)
     } else if (data.type === 'vacancy_pack') {
       const pack = (await strapi.db.query('api::vacancy-package.vacancy-package').findOne({
         where: { id: data.packageId },
-      })) as { vacancyCredits: number } | null
+      })) as { vacancyCredits: number; boostCredits: number } | null
 
       if (!pack) {
-        strapi.log.error(`[payment] VacancyPackage id=${data.packageId} not found`)
-        return
+        throw new Error(`VacancyPackage id=${data.packageId} not found`)
       }
       await addCredits(strapi, data.userId, 'vacancy', pack.vacancyCredits)
+      if (pack.boostCredits > 0) {
+        await addCredits(strapi, data.userId, 'boost', pack.boostCredits)
+      }
     } else if (data.type === 'apply_pack') {
       const pack = (await strapi.db.query('api::apply-package.apply-package').findOne({
         where: { id: data.packageId },
       })) as { applyCredits: number } | null
 
       if (!pack) {
-        strapi.log.error(`[payment] ApplyPackage id=${data.packageId} not found`)
-        return
+        throw new Error(`ApplyPackage id=${data.packageId} not found`)
       }
       await addCredits(strapi, data.userId, 'apply', pack.applyCredits)
     }
+
+    await strapi.db.query('api::payment.payment').update({
+      where: { id: paymentRecord.id },
+      data: { status: 'completed' },
+    })
 
     strapi.log.info(
       `[payment] successful_payment processed: type=${data.type} userId=${data.userId} charge=${payment.telegram_payment_charge_id}`
     )
   } catch (err) {
     strapi.log.error('[payment] Failed to process successful_payment:', err)
+    await strapi.db
+      .query('api::payment.payment')
+      .update({ where: { id: paymentRecord.id }, data: { status: 'failed' } })
+      .catch(() => {})
   }
 }
