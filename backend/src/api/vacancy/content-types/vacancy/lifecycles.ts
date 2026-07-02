@@ -15,11 +15,26 @@ type VacancyBeforeUpdateEvent = {
     documentId?: string
     where?: Record<string, unknown>
   }
+  state: Record<string, unknown>
 }
 
 type VacancyAfterEvent = {
   result: { documentId?: string; id?: number; status?: string; expiresAt?: string | null }
   params: { data?: Record<string, unknown> }
+  state?: Record<string, unknown>
+}
+
+const MODERATION_STATUSES = ['moderation', 'published', 'rejected'] as const
+
+async function findPreviousStatus(
+  uid: string,
+  where: Record<string, unknown> | undefined
+): Promise<string | null> {
+  if (!where || Object.keys(where).length === 0) return null
+  const previous = (await (globalThis.strapi.db as any)
+    .query(uid)
+    .findOne({ where, select: ['status'] })) as { status?: string } | null
+  return previous?.status ?? null
 }
 
 function sanitizeJsonFields(data: Record<string, unknown>) {
@@ -57,7 +72,18 @@ export default {
     const { data } = event.params
     sanitizeJsonFields(data)
 
-    if (data?.status === 'published') {
+    const statusSet = data?.status as string | undefined
+    if (!MODERATION_STATUSES.includes(statusSet as (typeof MODERATION_STATUSES)[number])) {
+      return
+    }
+
+    // Content Manager saves send the whole document including an unchanged
+    // status — remember the previous one so afterUpdate reacts to real
+    // transitions only (no duplicate notifications / audit logs)
+    const previousStatus = await findPreviousStatus('api::vacancy.vacancy', event.params.where)
+    event.state['previousStatus'] = previousStatus
+
+    if (statusSet === 'published' && previousStatus !== 'published') {
       const expiresAt = new Date()
       expiresAt.setUTCDate(expiresAt.getUTCDate() + 60)
       data.expiresAt = expiresAt.toISOString()
@@ -75,6 +101,9 @@ export default {
 
     const statusSet = (event.params as any)?.data?.['status']
     if (statusSet !== 'moderation' && statusSet !== 'published' && statusSet !== 'rejected') {
+      return
+    }
+    if (event.state?.['previousStatus'] === statusSet) {
       return
     }
 
