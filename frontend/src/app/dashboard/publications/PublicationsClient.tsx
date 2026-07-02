@@ -64,7 +64,7 @@ export const PublicationsClient = observer(function PublicationsClient() {
       {isLoading && <p className="text-sm text-muted-foreground">{t('common.loading')}</p>}
 
       {isEmpty && (
-        <div className="rounded-xl border border-dashed border-gray-300 py-16 text-center">
+        <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-sm text-muted-foreground">{t('publications.empty')}</p>
         </div>
       )}
@@ -78,13 +78,15 @@ export const PublicationsClient = observer(function PublicationsClient() {
             </Link>
           </div>
           {vacancy.myVacancies.map((v) => (
-            <div key={v.documentId} className="rounded-xl border border-gray-200 bg-white p-4">
+            <div key={v.documentId} className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center gap-2">
-                <p className="truncate font-semibold text-gray-900">{v.title}</p>
+                <p className="truncate font-semibold text-card-foreground">{v.title}</p>
                 <VacancyStatusBadge status={v.status} />
               </div>
               {v.status !== 'rejected' && STATUS_HINT_KEYS[v.status] && (
-                <p className="mt-1 text-sm text-gray-500">{t(STATUS_HINT_KEYS[v.status]!)}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t(STATUS_HINT_KEYS[v.status]!)}
+                </p>
               )}
               {v.status === 'rejected' && (
                 <RejectionNotice
@@ -109,13 +111,15 @@ export const PublicationsClient = observer(function PublicationsClient() {
             </Link>
           </div>
           {resume.myResumes.map((r) => (
-            <div key={r.documentId} className="rounded-xl border border-gray-200 bg-white p-4">
+            <div key={r.documentId} className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center gap-2">
-                <p className="truncate font-semibold text-gray-900">{r.title}</p>
+                <p className="truncate font-semibold text-card-foreground">{r.title}</p>
                 <ResumeStatusBadge status={r.status} />
               </div>
               {r.status !== 'rejected' && STATUS_HINT_KEYS[r.status] && (
-                <p className="mt-1 text-sm text-gray-500">{t(STATUS_HINT_KEYS[r.status]!)}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t(STATUS_HINT_KEYS[r.status]!)}
+                </p>
               )}
               {r.status === 'rejected' && (
                 <RejectionNotice
@@ -140,13 +144,15 @@ export const PublicationsClient = observer(function PublicationsClient() {
             </Link>
           </div>
           {company.myCompanies.map((c) => (
-            <div key={c.documentId} className="rounded-xl border border-gray-200 bg-white p-4">
+            <div key={c.documentId} className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center gap-2">
-                <p className="truncate font-semibold text-gray-900">{c.name}</p>
+                <p className="truncate font-semibold text-card-foreground">{c.name}</p>
                 <StatusBadge status={c.status} />
               </div>
               {c.status !== 'rejected' && STATUS_HINT_KEYS[c.status] && (
-                <p className="mt-1 text-sm text-gray-500">{t(STATUS_HINT_KEYS[c.status]!)}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t(STATUS_HINT_KEYS[c.status]!)}
+                </p>
               )}
               {c.status === 'rejected' && (
                 <RejectionNotice

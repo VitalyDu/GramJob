@@ -369,7 +369,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
         <div className="flex items-end pb-1">
           <label className="flex cursor-pointer items-center gap-2">
             <input type="checkbox" {...register('urgent')} className="h-4 w-4" />
-            <span className="text-sm text-gray-700">🔥 Срочная вакансия</span>
+            <span className="text-sm text-foreground">🔥 Срочная вакансия</span>
           </label>
         </div>
       </div>

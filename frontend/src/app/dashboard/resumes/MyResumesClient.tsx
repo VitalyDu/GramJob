@@ -57,7 +57,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
         </Link>
       </div>
 
-      <div className="rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600">
+      <div className="rounded-lg bg-muted px-4 py-3 text-sm text-muted-foreground">
         Лимит откликов в день (план {plan}): {applyLimit}
       </div>
 
@@ -70,21 +70,21 @@ export const MyResumesClient = observer(function MyResumesClient() {
       )}
 
       {!store.isLoading && store.myResumes.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-gray-300 py-16 text-center">
+        <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-sm text-muted-foreground">У вас пока нет резюме.</p>
         </div>
       )}
 
       <div className="space-y-3">
         {store.myResumes.map((r) => (
-          <div key={r.documentId} className="rounded-xl border border-gray-200 bg-white p-4">
+          <div key={r.documentId} className="rounded-xl border border-border bg-card p-4">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="truncate font-semibold text-gray-900">{r.title}</p>
+                  <p className="truncate font-semibold text-card-foreground">{r.title}</p>
                   <ResumeStatusBadge status={r.status} />
                 </div>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-muted-foreground">
                   {r.firstName} {r.lastName} · {RESUME_WORK_FORMAT_LABELS[r.workFormat]} ·{' '}
                   {RESUME_EMPLOYMENT_TYPE_LABELS[r.employmentType]}
                 </p>
@@ -100,7 +100,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
                 {canEditResume(r.status) && (
                   <Link
                     href={`/dashboard/resumes/${r.documentId}/edit`}
-                    className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                    className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
                   >
                     Редактировать
                   </Link>
@@ -129,7 +129,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
               </div>
             </div>
 
-            <div className="mt-2 flex gap-4 text-xs text-gray-400">
+            <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
               <span>{r.views ?? 0} просмотров</span>
               {r.country && (
                 <span>

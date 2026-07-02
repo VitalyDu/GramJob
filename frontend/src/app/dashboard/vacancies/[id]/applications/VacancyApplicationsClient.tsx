@@ -54,7 +54,7 @@ export const VacancyApplicationsClient = observer(function VacancyApplicationsCl
       )}
 
       {!store.isLoading && store.vacancyApplications.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-gray-300 py-16 text-center">
+        <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-sm text-muted-foreground">Откликов пока нет.</p>
         </div>
       )}

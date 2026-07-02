@@ -49,9 +49,9 @@ export const MySavedSearchesClient = observer(function MySavedSearchesClient() {
       )}
 
       {!store.isLoading && store.searches.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-gray-300 py-16 text-center">
+        <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-sm text-muted-foreground">Нет сохранённых поисков.</p>
-          <p className="mt-2 text-xs text-gray-400">
+          <p className="mt-2 text-xs text-muted-foreground">
             Используйте кнопку «Сохранить поиск» на странице вакансий или резюме.
           </p>
         </div>
@@ -64,17 +64,19 @@ export const MySavedSearchesClient = observer(function MySavedSearchesClient() {
           const href = qs ? `${basePath}?${qs}` : basePath
 
           return (
-            <div key={s.documentId} className="rounded-xl border border-gray-200 bg-white p-4">
+            <div key={s.documentId} className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">
                       {TYPE_LABELS[s.type]}
                     </span>
-                    <p className="truncate font-medium text-gray-900">{s.name ?? 'Без названия'}</p>
+                    <p className="truncate font-medium text-card-foreground">
+                      {s.name ?? 'Без названия'}
+                    </p>
                   </div>
 
-                  <p className="mt-1 text-xs text-gray-400">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Создан {new Date(s.createdAt).toLocaleDateString('ru')}
                     {s.lastNotifiedAt &&
                       ` · последнее уведомление ${new Date(s.lastNotifiedAt).toLocaleDateString('ru')}`}

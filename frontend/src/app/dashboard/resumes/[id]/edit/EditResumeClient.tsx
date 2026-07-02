@@ -38,7 +38,7 @@ export const EditResumeClient = observer(function EditResumeClient({ id }: Props
   if (!store.currentResume) {
     return (
       <div className="py-16 text-center">
-        <p className="text-lg font-medium text-gray-900">Резюме не найдено</p>
+        <p className="text-lg font-medium text-card-foreground">Резюме не найдено</p>
         <Link
           href="/dashboard/resumes"
           className="mt-4 inline-block text-sm text-primary hover:underline"

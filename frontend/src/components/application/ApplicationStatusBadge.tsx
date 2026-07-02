@@ -2,7 +2,7 @@ import type { ApplicationStatusEnum } from '@/types/api'
 
 const STATUS_CONFIG: Record<ApplicationStatusEnum, { label: string; className: string }> = {
   applied: { label: 'Отправлен', className: 'bg-blue-100 text-blue-700' },
-  viewed: { label: 'Просмотрен', className: 'bg-gray-100 text-gray-600' },
+  viewed: { label: 'Просмотрен', className: 'bg-muted text-muted-foreground' },
   'in-review': { label: 'На рассмотрении', className: 'bg-yellow-100 text-yellow-700' },
   interview: { label: 'Собеседование', className: 'bg-indigo-100 text-indigo-700' },
   'test-task': { label: 'Тестовое', className: 'bg-purple-100 text-purple-700' },

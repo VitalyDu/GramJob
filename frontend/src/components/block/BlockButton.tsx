@@ -44,7 +44,9 @@ export const BlockButton = observer(function BlockButton({
       onClick={() => void handleBlock()}
       disabled={store.isLoading || isBlocked}
       className={`text-sm transition ${
-        isBlocked ? 'cursor-default text-gray-400' : 'text-gray-500 hover:text-red-500'
+        isBlocked
+          ? 'cursor-default text-muted-foreground'
+          : 'text-muted-foreground hover:text-red-500'
       }`}
     >
       {isBlocked ? 'Заблокирован' : 'Заблокировать'}

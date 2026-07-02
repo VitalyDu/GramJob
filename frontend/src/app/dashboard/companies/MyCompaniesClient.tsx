@@ -58,7 +58,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
       )}
 
       {!store.isLoading && store.myCompanies.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-gray-300 py-16 text-center">
+        <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-sm text-muted-foreground">У вас пока нет компаний.</p>
         </div>
       )}
@@ -68,12 +68,9 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
           const logoUrl = getMediaUrl(company.logo?.url)
 
           return (
-            <div
-              key={company.documentId}
-              className="rounded-xl border border-gray-200 bg-white p-4"
-            >
+            <div key={company.documentId} className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-100">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
                   {logoUrl ? (
                     <Image
                       src={logoUrl}
@@ -83,7 +80,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <span className="text-lg font-bold text-gray-400">
+                    <span className="text-lg font-bold text-muted-foreground">
                       {company.name.charAt(0).toUpperCase()}
                     </span>
                   )}
@@ -91,10 +88,10 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="truncate font-semibold text-gray-900">{company.name}</p>
+                    <p className="truncate font-semibold text-card-foreground">{company.name}</p>
                     <StatusBadge status={company.status} />
                   </div>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {company.country} · {COMPANY_SIZE_LABELS[company.companySize]}
                   </p>
                 </div>
@@ -102,7 +99,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
                 <div className="flex shrink-0 gap-2">
                   <Link
                     href={`/dashboard/companies/${company.documentId}/edit`}
-                    className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                    className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
                   >
                     Редактировать
                   </Link>

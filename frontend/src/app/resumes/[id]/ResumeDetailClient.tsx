@@ -31,7 +31,9 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
   if (store.accessDenied) {
     return (
       <div className="py-16 text-center">
-        <p className="text-xl font-semibold text-gray-900">Просмотр резюме доступен на плане Max</p>
+        <p className="text-xl font-semibold text-card-foreground">
+          Просмотр резюме доступен на плане Max
+        </p>
         <p className="mt-2 text-sm text-muted-foreground">
           {auth.user
             ? 'Оформите подписку Max или VIP, чтобы просматривать резюме кандидатов.'
@@ -50,7 +52,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
   if (!store.currentResume) {
     return (
       <div className="py-16 text-center">
-        <p className="text-lg font-medium text-gray-900">Резюме не найдено</p>
+        <p className="text-lg font-medium text-card-foreground">Резюме не найдено</p>
         {store.error && <p className="mt-1 text-sm text-muted-foreground">{store.error}</p>}
         <Link href="/resumes" className="mt-4 inline-block text-sm text-primary hover:underline">
           ← Все резюме
@@ -69,17 +71,17 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
     <div className="space-y-6">
       <div>
         <div className="flex items-start justify-between gap-3">
-          <h1 className="text-2xl font-bold text-gray-900">{r.title}</h1>
+          <h1 className="text-2xl font-bold text-card-foreground">{r.title}</h1>
           <ResumeStatusBadge status={r.status} />
         </div>
-        <p className="mt-1 text-base font-medium text-gray-700">{name}</p>
+        <p className="mt-1 text-base font-medium text-foreground">{name}</p>
 
         {auth.user && (
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <FavoriteButton type="resume" targetId={id} />
             <button
               onClick={() => setReportOpen(true)}
-              className="text-sm text-gray-500 hover:text-red-500"
+              className="text-sm text-muted-foreground hover:text-red-500"
             >
               Пожаловаться
             </button>
@@ -87,7 +89,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
           </div>
         )}
 
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-gray-500">
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
           <span>
             {r.country}
             {r.city ? `, ${r.city}` : ''}
@@ -100,7 +102,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
         </div>
 
         {r.desiredSalary && (
-          <p className="mt-3 text-lg font-semibold text-gray-900">
+          <p className="mt-3 text-lg font-semibold text-card-foreground">
             от {salarySymbol}
             {r.desiredSalary.toLocaleString('ru')}
           </p>
@@ -109,19 +111,19 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
 
       {r.about && (
         <div>
-          <h2 className="mb-2 text-base font-semibold text-gray-900">О себе</h2>
-          <p className="whitespace-pre-wrap text-sm text-gray-700">{r.about}</p>
+          <h2 className="mb-2 text-base font-semibold text-card-foreground">О себе</h2>
+          <p className="whitespace-pre-wrap text-sm text-foreground">{r.about}</p>
         </div>
       )}
 
       {r.skills && r.skills.length > 0 && (
         <div>
-          <h2 className="mb-2 text-base font-semibold text-gray-900">Навыки</h2>
+          <h2 className="mb-2 text-base font-semibold text-card-foreground">Навыки</h2>
           <div className="flex flex-wrap gap-2">
             {r.skills.map((skill) => (
               <span
                 key={skill}
-                className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700"
+                className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-foreground"
               >
                 {skill}
               </span>
@@ -132,16 +134,16 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
 
       {r.workExperience && r.workExperience.length > 0 && (
         <div>
-          <h2 className="mb-3 text-base font-semibold text-gray-900">Опыт работы</h2>
+          <h2 className="mb-3 text-base font-semibold text-card-foreground">Опыт работы</h2>
           <div className="space-y-4">
             {r.workExperience.map((w, i) => (
-              <div key={i} className="rounded-xl border border-gray-200 p-4">
-                <p className="font-medium text-gray-900">{w.position}</p>
-                <p className="text-sm text-gray-600">{w.company}</p>
-                <p className="mt-1 text-xs text-gray-400">
+              <div key={i} className="rounded-xl border border-border p-4">
+                <p className="font-medium text-card-foreground">{w.position}</p>
+                <p className="text-sm text-muted-foreground">{w.company}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
                   {w.startDate} — {w.current ? 'по настоящее время' : (w.endDate ?? '')}
                 </p>
-                {w.description && <p className="mt-2 text-sm text-gray-700">{w.description}</p>}
+                {w.description && <p className="mt-2 text-sm text-foreground">{w.description}</p>}
               </div>
             ))}
           </div>
@@ -150,15 +152,15 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
 
       {r.education && r.education.length > 0 && (
         <div>
-          <h2 className="mb-3 text-base font-semibold text-gray-900">Образование</h2>
+          <h2 className="mb-3 text-base font-semibold text-card-foreground">Образование</h2>
           <div className="space-y-4">
             {r.education.map((e, i) => (
-              <div key={i} className="rounded-xl border border-gray-200 p-4">
-                <p className="font-medium text-gray-900">
+              <div key={i} className="rounded-xl border border-border p-4">
+                <p className="font-medium text-card-foreground">
                   {e.degree} — {e.field}
                 </p>
-                <p className="text-sm text-gray-600">{e.institution}</p>
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="text-sm text-muted-foreground">{e.institution}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
                   {e.startDate} — {e.current ? 'по настоящее время' : (e.endDate ?? '')}
                 </p>
               </div>
@@ -169,8 +171,8 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
 
       {r.contacts && (
         <div>
-          <h2 className="mb-2 text-base font-semibold text-gray-900">Контакты</h2>
-          <div className="space-y-1 text-sm text-gray-700">
+          <h2 className="mb-2 text-base font-semibold text-card-foreground">Контакты</h2>
+          <div className="space-y-1 text-sm text-foreground">
             {r.contacts.telegram && (
               <p>
                 Telegram:{' '}

@@ -167,7 +167,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
       {/* Basic Info */}
       <section className="space-y-4">
-        <h2 className="text-base font-semibold text-gray-900">Основная информация</h2>
+        <h2 className="text-base font-semibold text-card-foreground">Основная информация</h2>
 
         <div>
           <Label htmlFor="title">Заголовок резюме *</Label>
@@ -301,7 +301,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
 
       {/* Contacts */}
       <section className="space-y-4">
-        <h2 className="text-base font-semibold text-gray-900">Контакты</h2>
+        <h2 className="text-base font-semibold text-card-foreground">Контакты</h2>
         <div className="grid grid-cols-3 gap-4">
           <div>
             <Label htmlFor="contactTelegram">Telegram</Label>
@@ -331,7 +331,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
       {/* Work Experience */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-gray-900">Опыт работы</h2>
+          <h2 className="text-base font-semibold text-card-foreground">Опыт работы</h2>
           <Button
             type="button"
             variant="outline"
@@ -352,9 +352,9 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
         </div>
 
         {workFields.map((field, index) => (
-          <div key={field.id} className="space-y-3 rounded-xl border border-gray-200 p-4">
+          <div key={field.id} className="space-y-3 rounded-xl border border-border p-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-gray-700">Место работы {index + 1}</p>
+              <p className="text-sm font-medium text-foreground">Место работы {index + 1}</p>
               <button
                 type="button"
                 onClick={() => removeWork(index)}
@@ -426,7 +426,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
       {/* Education */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-gray-900">Образование</h2>
+          <h2 className="text-base font-semibold text-card-foreground">Образование</h2>
           <Button
             type="button"
             variant="outline"
@@ -447,9 +447,9 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
         </div>
 
         {eduFields.map((field, index) => (
-          <div key={field.id} className="space-y-3 rounded-xl border border-gray-200 p-4">
+          <div key={field.id} className="space-y-3 rounded-xl border border-border p-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-gray-700">Образование {index + 1}</p>
+              <p className="text-sm font-medium text-foreground">Образование {index + 1}</p>
               <button
                 type="button"
                 onClick={() => removeEdu(index)}

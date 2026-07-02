@@ -46,7 +46,7 @@ export const SaveSearchButton = observer(function SaveSearchButton({ searchType,
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Название (необязательно)"
-            className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="rounded-md border border-border px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           <button
             onClick={() => void handleSave()}
@@ -60,7 +60,7 @@ export const SaveSearchButton = observer(function SaveSearchButton({ searchType,
               setShowForm(false)
               setName('')
             }}
-            className="text-sm text-gray-500 hover:text-gray-700"
+            className="text-sm text-muted-foreground hover:text-foreground"
           >
             Отмена
           </button>
@@ -73,7 +73,7 @@ export const SaveSearchButton = observer(function SaveSearchButton({ searchType,
   return (
     <button
       onClick={() => setShowForm(true)}
-      className="rounded-md border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+      className="rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted"
     >
       Сохранить поиск
     </button>

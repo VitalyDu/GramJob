@@ -30,7 +30,7 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
   if (store.error || !store.currentCompany) {
     return (
       <div className="py-16 text-center">
-        <p className="text-lg font-medium text-gray-900">Компания не найдена</p>
+        <p className="text-lg font-medium text-card-foreground">Компания не найдена</p>
         {store.error && <p className="mt-1 text-sm text-muted-foreground">{store.error}</p>}
         <Link href="/companies" className="mt-4 inline-block text-sm text-primary hover:underline">
           ← Все компании
@@ -46,13 +46,13 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
   return (
     <div className="space-y-6">
       {coverUrl && (
-        <div className="relative h-48 w-full overflow-hidden rounded-xl bg-gray-100">
+        <div className="relative h-48 w-full overflow-hidden rounded-xl bg-muted">
           <Image src={coverUrl} alt="" fill className="object-cover" />
         </div>
       )}
 
       <div className="flex items-start gap-5">
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-100">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted">
           {logoUrl ? (
             <Image
               src={logoUrl}
@@ -62,7 +62,7 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
               className="h-full w-full object-cover"
             />
           ) : (
-            <span className="text-3xl font-bold text-gray-400">
+            <span className="text-3xl font-bold text-muted-foreground">
               {company.name.charAt(0).toUpperCase()}
             </span>
           )}
@@ -70,10 +70,10 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
 
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">{company.name}</h1>
+            <h1 className="text-2xl font-bold text-card-foreground">{company.name}</h1>
             <StatusBadge status={company.status} />
           </div>
-          <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
+          <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
             <span>{company.country}</span>
             {company.city && <span>{company.city}</span>}
             <span>{COMPANY_SIZE_LABELS[company.companySize]}</span>
@@ -84,7 +84,7 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
               <FavoriteButton type="company" targetId={id} />
               <button
                 onClick={() => setReportOpen(true)}
-                className="text-sm text-gray-500 hover:text-red-500"
+                className="text-sm text-muted-foreground hover:text-red-500"
               >
                 Пожаловаться
               </button>
@@ -95,14 +95,14 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
 
       {company.description && (
         <div>
-          <h2 className="mb-2 text-base font-semibold text-gray-900">О компании</h2>
-          <p className="whitespace-pre-wrap text-sm text-gray-700">{company.description}</p>
+          <h2 className="mb-2 text-base font-semibold text-card-foreground">О компании</h2>
+          <p className="whitespace-pre-wrap text-sm text-foreground">{company.description}</p>
         </div>
       )}
 
       {(company.website || company.telegram || company.linkedin) && (
         <div>
-          <h2 className="mb-2 text-base font-semibold text-gray-900">Контакты</h2>
+          <h2 className="mb-2 text-base font-semibold text-card-foreground">Контакты</h2>
           <div className="flex flex-wrap gap-3">
             {company.website && (
               <a
@@ -114,7 +114,9 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
                 {company.website.replace(/^https?:\/\//, '')}
               </a>
             )}
-            {company.telegram && <span className="text-sm text-gray-600">{company.telegram}</span>}
+            {company.telegram && (
+              <span className="text-sm text-muted-foreground">{company.telegram}</span>
+            )}
             {company.linkedin && (
               <a
                 href={company.linkedin}

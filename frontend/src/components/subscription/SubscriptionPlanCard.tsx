@@ -16,7 +16,7 @@ export function SubscriptionPlanCard({ plan, currentPlan, canBuy, isBuying, onBu
 
   return (
     <div
-      className={`rounded-2xl border p-5 flex flex-col gap-4 ${isActive ? 'border-indigo-400 bg-indigo-50/50' : 'border-gray-200 bg-white'}`}
+      className={`rounded-2xl border p-5 flex flex-col gap-4 ${isActive ? 'border-indigo-400 bg-indigo-50/50' : 'border-border bg-card'}`}
     >
       <div className="flex items-start justify-between">
         <div>
@@ -25,29 +25,31 @@ export function SubscriptionPlanCard({ plan, currentPlan, canBuy, isBuying, onBu
           </span>
           {isActive && <span className="ml-2 text-xs text-indigo-600 font-medium">Активный</span>}
         </div>
-        <p className="text-base font-bold text-gray-900">{formatStarsPrice(plan.starsPrice)}</p>
+        <p className="text-base font-bold text-card-foreground">
+          {formatStarsPrice(plan.starsPrice)}
+        </p>
       </div>
 
-      <ul className="space-y-1.5 text-sm text-gray-600">
+      <ul className="space-y-1.5 text-sm text-muted-foreground">
         <li>
           Вакансий в месяц:{' '}
-          <span className="font-medium text-gray-900">{plan.vacanciesPerMonth}</span>
+          <span className="font-medium text-card-foreground">{plan.vacanciesPerMonth}</span>
         </li>
         <li>
           Активных вакансий:{' '}
-          <span className="font-medium text-gray-900">{plan.activeVacanciesLimit}</span>
+          <span className="font-medium text-card-foreground">{plan.activeVacanciesLimit}</span>
         </li>
         <li>
           Откликов в день:{' '}
-          <span className="font-medium text-gray-900">{plan.applicationsPerDay}</span>
+          <span className="font-medium text-card-foreground">{plan.applicationsPerDay}</span>
         </li>
         <li>
-          Резюме: <span className="font-medium text-gray-900">{plan.resumesLimit}</span>
+          Резюме: <span className="font-medium text-card-foreground">{plan.resumesLimit}</span>
         </li>
         <li>
           База резюме:{' '}
           <span
-            className={`font-medium ${plan.resumeDatabaseAccess ? 'text-green-600' : 'text-gray-400'}`}
+            className={`font-medium ${plan.resumeDatabaseAccess ? 'text-green-600' : 'text-muted-foreground'}`}
           >
             {plan.resumeDatabaseAccess ? '✓' : '✗'}
           </span>

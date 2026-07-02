@@ -33,7 +33,7 @@ export const MyApplicationsClient = observer(function MyApplicationsClient() {
       )}
 
       {!store.isLoading && store.applications.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-gray-300 py-16 text-center">
+        <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-sm text-muted-foreground">Вы ещё не откликались на вакансии.</p>
         </div>
       )}

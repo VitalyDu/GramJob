@@ -34,7 +34,7 @@ export function RejectionNotice({
       <div className="mt-2 flex gap-2">
         <Link
           href={editHref}
-          className="rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100"
+          className="rounded-md border border-red-300 bg-card px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100"
         >
           {t('moderation.fix')}
         </Link>

@@ -1,7 +1,7 @@
 import type { CompanyStatusEnum } from '@/types/api'
 
 const STATUS_CONFIG: Record<CompanyStatusEnum, { label: string; className: string }> = {
-  draft: { label: 'Черновик', className: 'bg-gray-100 text-gray-600' },
+  draft: { label: 'Черновик', className: 'bg-muted text-muted-foreground' },
   moderation: { label: 'На модерации', className: 'bg-yellow-100 text-yellow-700' },
   published: { label: 'Опубликована', className: 'bg-green-100 text-green-700' },
   rejected: { label: 'Отклонена', className: 'bg-red-100 text-red-700' },

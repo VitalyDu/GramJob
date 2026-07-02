@@ -54,7 +54,7 @@ export const MyFavoritesClient = observer(function MyFavoritesClient() {
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
               activeType === tab.value
                 ? 'bg-indigo-600 text-white'
-                : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
+                : 'border border-border text-muted-foreground hover:bg-muted'
             }`}
           >
             {tab.label}
@@ -71,7 +71,7 @@ export const MyFavoritesClient = observer(function MyFavoritesClient() {
       )}
 
       {!store.isLoading && store.favorites.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-gray-300 py-16 text-center">
+        <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-sm text-muted-foreground">В избранном пусто.</p>
         </div>
       )}
@@ -80,26 +80,26 @@ export const MyFavoritesClient = observer(function MyFavoritesClient() {
         {store.favorites.map((fav) => (
           <div
             key={fav.documentId}
-            className="relative rounded-xl border border-gray-200 bg-white p-4"
+            className="relative rounded-xl border border-border bg-card p-4"
           >
             <button
               onClick={() => handleRemove(fav.type, fav.targetId)}
               disabled={store.isLoading}
               title="Убрать из избранного"
-              className="absolute right-3 top-3 text-sm text-gray-400 hover:text-red-500 disabled:opacity-50"
+              className="absolute right-3 top-3 text-sm text-muted-foreground hover:text-red-500 disabled:opacity-50"
             >
               ✕
             </button>
 
             {fav.type === 'vacancy' && fav.entity ? (
               <Link href={`/vacancies/${fav.targetId}`} className="block pr-8">
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold text-card-foreground">
                   {(fav.entity as FavoriteVacancyCard).title}
                 </p>
-                <p className="mt-0.5 text-sm text-gray-500">
+                <p className="mt-0.5 text-sm text-muted-foreground">
                   {(fav.entity as FavoriteVacancyCard).company?.name}
                 </p>
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-muted-foreground">
                   {WORK_FORMAT_LABELS[(fav.entity as FavoriteVacancyCard).workFormat]} ·{' '}
                   {(fav.entity as FavoriteVacancyCard).country}
                   {(() => {
@@ -111,30 +111,30 @@ export const MyFavoritesClient = observer(function MyFavoritesClient() {
               </Link>
             ) : fav.type === 'resume' && fav.entity ? (
               <Link href={`/resumes/${fav.targetId}`} className="block pr-8">
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold text-card-foreground">
                   {(fav.entity as FavoriteResumeCard).title}
                 </p>
-                <p className="mt-0.5 text-sm text-gray-500">
+                <p className="mt-0.5 text-sm text-muted-foreground">
                   {(fav.entity as FavoriteResumeCard).firstName}{' '}
                   {(fav.entity as FavoriteResumeCard).lastName}
                 </p>
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-muted-foreground">
                   {RESUME_WORK_FORMAT_LABELS[(fav.entity as FavoriteResumeCard).workFormat]} ·{' '}
                   {(fav.entity as FavoriteResumeCard).country}
                 </p>
               </Link>
             ) : fav.type === 'company' && fav.entity ? (
               <Link href={`/companies/${fav.targetId}`} className="block pr-8">
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold text-card-foreground">
                   {(fav.entity as FavoriteCompanyCard).name}
                 </p>
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-muted-foreground">
                   {COMPANY_SIZE_LABELS[(fav.entity as FavoriteCompanyCard).companySize]} ·{' '}
                   {(fav.entity as FavoriteCompanyCard).country}
                 </p>
               </Link>
             ) : (
-              <p className="pr-8 text-sm text-gray-400">Элемент удалён или недоступен</p>
+              <p className="pr-8 text-sm text-muted-foreground">Элемент удалён или недоступен</p>
             )}
           </div>
         ))}

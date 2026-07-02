@@ -27,7 +27,7 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Заблокированные пользователи</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Контент заблокированных пользователей не отображается в результатах поиска.
         </p>
       </div>
@@ -41,7 +41,7 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
       )}
 
       {!store.isLoading && store.blocks.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-gray-300 py-16 text-center">
+        <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-sm text-muted-foreground">Нет заблокированных пользователей.</p>
         </div>
       )}
@@ -50,13 +50,13 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
         {store.blocks.map((b) => (
           <div
             key={b.documentId}
-            className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4"
+            className="flex items-center justify-between rounded-xl border border-border bg-card p-4"
           >
             <div>
-              <p className="font-medium text-gray-900">
+              <p className="font-medium text-card-foreground">
                 {TARGET_TYPE_LABELS[b.targetType]} #{b.targetId}
               </p>
-              <p className="mt-0.5 text-xs text-gray-400">
+              <p className="mt-0.5 text-xs text-muted-foreground">
                 Заблокирован {new Date(b.createdAt).toLocaleDateString('ru')}
               </p>
             </div>

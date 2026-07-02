@@ -50,7 +50,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
   if (!store.currentVacancy) {
     return (
       <div className="py-16 text-center">
-        <p className="text-lg font-medium text-gray-900">Вакансия не найдена</p>
+        <p className="text-lg font-medium text-card-foreground">Вакансия не найдена</p>
         {store.error && <p className="mt-1 text-sm text-muted-foreground">{store.error}</p>}
         <Link href="/vacancies" className="mt-4 inline-block text-sm text-primary hover:underline">
           ← Все вакансии
@@ -68,7 +68,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
     <div className="space-y-6">
       <div>
         <div className="flex items-start justify-between gap-3">
-          <h1 className="text-2xl font-bold text-gray-900">{v.title}</h1>
+          <h1 className="text-2xl font-bold text-card-foreground">{v.title}</h1>
           <VacancyStatusBadge status={v.status} />
         </div>
 
@@ -81,7 +81,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
           </Link>
         )}
 
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-gray-500">
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
           <span>
             {v.country}
             {v.city ? `, ${v.city}` : ''}
@@ -91,7 +91,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
           <span>{SENIORITY_LABELS[v.seniority]}</span>
         </div>
 
-        {salary && <p className="mt-3 text-lg font-semibold text-gray-900">{salary}</p>}
+        {salary && <p className="mt-3 text-lg font-semibold text-card-foreground">{salary}</p>}
 
         {v.urgent && (
           <span className="mt-2 inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700">
@@ -104,7 +104,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
             <FavoriteButton type="vacancy" targetId={id} />
             <button
               onClick={() => setReportOpen(true)}
-              className="text-sm text-gray-500 hover:text-red-500"
+              className="text-sm text-muted-foreground hover:text-red-500"
             >
               Пожаловаться
             </button>
@@ -115,40 +115,40 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
 
       {v.description && (
         <div>
-          <h2 className="mb-2 text-base font-semibold text-gray-900">Описание</h2>
-          <p className="whitespace-pre-wrap text-sm text-gray-700">{v.description}</p>
+          <h2 className="mb-2 text-base font-semibold text-card-foreground">Описание</h2>
+          <p className="whitespace-pre-wrap text-sm text-foreground">{v.description}</p>
         </div>
       )}
 
       {v.responsibilities && (
         <div>
-          <h2 className="mb-2 text-base font-semibold text-gray-900">Обязанности</h2>
-          <p className="whitespace-pre-wrap text-sm text-gray-700">{v.responsibilities}</p>
+          <h2 className="mb-2 text-base font-semibold text-card-foreground">Обязанности</h2>
+          <p className="whitespace-pre-wrap text-sm text-foreground">{v.responsibilities}</p>
         </div>
       )}
 
       {v.requirements && (
         <div>
-          <h2 className="mb-2 text-base font-semibold text-gray-900">Требования</h2>
-          <p className="whitespace-pre-wrap text-sm text-gray-700">{v.requirements}</p>
+          <h2 className="mb-2 text-base font-semibold text-card-foreground">Требования</h2>
+          <p className="whitespace-pre-wrap text-sm text-foreground">{v.requirements}</p>
         </div>
       )}
 
       {v.conditions && (
         <div>
-          <h2 className="mb-2 text-base font-semibold text-gray-900">Условия</h2>
-          <p className="whitespace-pre-wrap text-sm text-gray-700">{v.conditions}</p>
+          <h2 className="mb-2 text-base font-semibold text-card-foreground">Условия</h2>
+          <p className="whitespace-pre-wrap text-sm text-foreground">{v.conditions}</p>
         </div>
       )}
 
       {v.skills && v.skills.length > 0 && (
         <div>
-          <h2 className="mb-2 text-base font-semibold text-gray-900">Навыки</h2>
+          <h2 className="mb-2 text-base font-semibold text-card-foreground">Навыки</h2>
           <div className="flex flex-wrap gap-2">
             {v.skills.map((skill) => (
               <span
                 key={skill}
-                className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700"
+                className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-foreground"
               >
                 {skill}
               </span>

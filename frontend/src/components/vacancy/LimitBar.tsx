@@ -15,7 +15,7 @@ export function LimitBar({ used, limit }: Props) {
 
   return (
     <div>
-      <div className="mb-1 flex justify-between text-sm text-gray-600">
+      <div className="mb-1 flex justify-between text-sm text-muted-foreground">
         <span>
           {used} из {limit} вакансий
         </span>

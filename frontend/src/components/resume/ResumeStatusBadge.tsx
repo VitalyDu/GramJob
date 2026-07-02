@@ -1,7 +1,7 @@
 import type { ResumeStatusEnum } from '@/types/api'
 
 const STATUS_CONFIG: Record<ResumeStatusEnum, { label: string; className: string }> = {
-  draft: { label: 'Черновик', className: 'bg-gray-100 text-gray-600' },
+  draft: { label: 'Черновик', className: 'bg-muted text-muted-foreground' },
   moderation: { label: 'На модерации', className: 'bg-yellow-100 text-yellow-700' },
   published: { label: 'Опубликовано', className: 'bg-green-100 text-green-700' },
   rejected: { label: 'Отклонено', className: 'bg-red-100 text-red-700' },

@@ -56,9 +56,9 @@ export function ApplyDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <h2 className="text-lg font-semibold text-gray-900">Откликнуться</h2>
-        <p className="mt-1 text-sm text-gray-500">{vacancyTitle}</p>
+      <div className="relative z-10 w-full max-w-md rounded-2xl bg-card p-6 shadow-xl">
+        <h2 className="text-lg font-semibold text-card-foreground">Откликнуться</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{vacancyTitle}</p>
 
         {alreadyApplied && (
           <div className="mt-4 rounded-lg bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
@@ -77,7 +77,7 @@ export function ApplyDialog({
         {!alreadyApplied && !limitReached && (
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
             {resumes.length === 0 && !fetchError ? (
-              <div className="rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600">
+              <div className="rounded-lg bg-muted px-4 py-3 text-sm text-muted-foreground">
                 У вас нет опубликованных резюме.{' '}
                 <a href="/dashboard/resumes" className="text-primary hover:underline">
                   Создать резюме →

@@ -76,7 +76,7 @@ export const NotificationsClient = observer(function NotificationsClient() {
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
               isReadFilter === tab.value
                 ? 'bg-indigo-600 text-white'
-                : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
+                : 'border border-border text-muted-foreground hover:bg-muted'
             }`}
           >
             {tab.label}
@@ -93,7 +93,7 @@ export const NotificationsClient = observer(function NotificationsClient() {
       )}
 
       {!store.isLoading && store.notifications.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-gray-300 py-16 text-center">
+        <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-sm text-muted-foreground">Нет уведомлений.</p>
         </div>
       )}
@@ -103,7 +103,7 @@ export const NotificationsClient = observer(function NotificationsClient() {
           <div
             key={n.documentId}
             className={`relative rounded-xl border p-4 transition ${
-              n.isRead ? 'border-gray-200 bg-white' : 'border-indigo-200 bg-indigo-50'
+              n.isRead ? 'border-border bg-card' : 'border-indigo-200 bg-indigo-50'
             }`}
           >
             <div className="flex items-start gap-3">
@@ -111,9 +111,9 @@ export const NotificationsClient = observer(function NotificationsClient() {
                 {TYPE_ICONS[n.type] ?? '📢'}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm text-gray-900">{n.title}</p>
-                <p className="mt-0.5 text-sm text-gray-600">{n.body}</p>
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="font-semibold text-sm text-card-foreground">{n.title}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">{n.body}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
                   {new Date(n.createdAt).toLocaleString('ru-RU', {
                     day: 'numeric',
                     month: 'short',

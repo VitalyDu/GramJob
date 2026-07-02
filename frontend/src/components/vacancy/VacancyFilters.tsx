@@ -64,13 +64,13 @@ export function VacancyFilters({ params, onChange }: Props) {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <label className="flex flex-col gap-1 text-xs text-gray-500">
+        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
           <span>Формат</span>
           <select
             aria-label="Формат работы"
             value={workFormat}
             onChange={(e) => setWorkFormat(e.target.value as WorkFormatEnum | '')}
-            className="rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+            className="rounded-md border border-border px-2 py-1.5 text-sm"
           >
             <option value="">Все форматы</option>
             {(Object.entries(WORK_FORMAT_LABELS) as [WorkFormatEnum, string][]).map(([v, l]) => (
@@ -81,13 +81,13 @@ export function VacancyFilters({ params, onChange }: Props) {
           </select>
         </label>
 
-        <label className="flex flex-col gap-1 text-xs text-gray-500">
+        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
           <span>Занятость</span>
           <select
             aria-label="Занятость"
             value={employmentType}
             onChange={(e) => setEmploymentType(e.target.value as EmploymentTypeEnum | '')}
-            className="rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+            className="rounded-md border border-border px-2 py-1.5 text-sm"
           >
             <option value="">Все типы</option>
             {(Object.entries(EMPLOYMENT_TYPE_LABELS) as [EmploymentTypeEnum, string][]).map(
@@ -100,13 +100,13 @@ export function VacancyFilters({ params, onChange }: Props) {
           </select>
         </label>
 
-        <label className="flex flex-col gap-1 text-xs text-gray-500">
+        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
           <span>Уровень</span>
           <select
             aria-label="Уровень специалиста"
             value={seniority}
             onChange={(e) => setSeniority(e.target.value as SeniorityEnum | '')}
-            className="rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+            className="rounded-md border border-border px-2 py-1.5 text-sm"
           >
             <option value="">Все уровни</option>
             {(Object.entries(SENIORITY_LABELS) as [SeniorityEnum, string][]).map(([v, l]) => (
@@ -117,13 +117,13 @@ export function VacancyFilters({ params, onChange }: Props) {
           </select>
         </label>
 
-        <label className="flex flex-col gap-1 text-xs text-gray-500">
+        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
           <span>Сортировка</span>
           <select
             aria-label="Сортировка результатов"
             value={sort}
             onChange={(e) => setSort(e.target.value)}
-            className="rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+            className="rounded-md border border-border px-2 py-1.5 text-sm"
           >
             {SORT_OPTIONS.map(({ value, label }) => (
               <option key={value} value={value}>

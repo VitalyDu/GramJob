@@ -41,7 +41,7 @@ export const ResumesClient = observer(function ResumesClient() {
   if (!auth.user) {
     return (
       <div className="py-16 text-center">
-        <p className="text-lg font-medium text-gray-900">
+        <p className="text-lg font-medium text-card-foreground">
           Войдите, чтобы просматривать базу резюме
         </p>
         <Link href="/login" className="mt-4 inline-block text-sm text-primary hover:underline">
@@ -54,7 +54,9 @@ export const ResumesClient = observer(function ResumesClient() {
   if (store.accessDenied) {
     return (
       <div className="py-16 text-center">
-        <p className="text-xl font-semibold text-gray-900">База резюме доступна на плане Max</p>
+        <p className="text-xl font-semibold text-card-foreground">
+          База резюме доступна на плане Max
+        </p>
         <p className="mt-2 text-sm text-muted-foreground">
           Оформите подписку Max или VIP, чтобы искать кандидатов и просматривать их резюме.
         </p>
@@ -133,7 +135,7 @@ export const ResumesClient = observer(function ResumesClient() {
       )}
 
       {!store.isLoading && store.resumes.length === 0 && !store.error && !store.accessDenied && (
-        <div className="rounded-xl border border-dashed border-gray-300 py-16 text-center">
+        <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-sm text-muted-foreground">Резюме не найдены.</p>
         </div>
       )}

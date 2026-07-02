@@ -92,9 +92,9 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
     <div className="space-y-10">
       {/* Текущий план */}
       <section>
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Подписка</h1>
+        <h1 className="text-2xl font-bold text-card-foreground mb-4">Подписка</h1>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="rounded-2xl border border-border bg-card p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm text-muted-foreground mb-1">Ваш текущий план</p>
             <SubscriptionBadge
@@ -104,7 +104,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
             />
           </div>
 
-          <div className="flex flex-col gap-1 text-sm text-gray-600">
+          <div className="flex flex-col gap-1 text-sm text-muted-foreground">
             <span>
               Остаток кредитов вакансий: <strong>{user.vacancyCredits}</strong>
             </span>
@@ -151,7 +151,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
 
       {/* Планы подписки */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Планы подписки</h2>
+        <h2 className="text-lg font-semibold text-card-foreground mb-4">Планы подписки</h2>
 
         {payment.isLoading && payment.plans.length === 0 && (
           <p className="text-sm text-muted-foreground">Загрузка планов...</p>
@@ -175,7 +175,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
 
       {/* Пакеты вакансий */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 mb-1">Пакеты вакансий</h2>
+        <h2 className="text-lg font-semibold text-card-foreground mb-1">Пакеты вакансий</h2>
         <p className="text-sm text-muted-foreground mb-4">
           Дополнительные кредиты для публикации вакансий. Не сгорают при смене плана.
         </p>
@@ -197,7 +197,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
 
       {/* Пакеты откликов */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 mb-1">Пакеты откликов</h2>
+        <h2 className="text-lg font-semibold text-card-foreground mb-1">Пакеты откликов</h2>
         <p className="text-sm text-muted-foreground mb-4">
           Дополнительные отклики когда дневной лимит исчерпан.
         </p>

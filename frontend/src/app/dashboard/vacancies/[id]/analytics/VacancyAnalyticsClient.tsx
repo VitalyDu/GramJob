@@ -58,24 +58,24 @@ export const VacancyAnalyticsClient = observer(function VacancyAnalyticsClient({
 
       <div className="flex flex-wrap items-end gap-4">
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">С</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">С</label>
           <input
             type="date"
             value={from}
             max={to}
             onChange={(e) => setFrom(e.target.value)}
-            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+            className="rounded-md border border-border px-3 py-1.5 text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">По</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">По</label>
           <input
             type="date"
             value={to}
             min={from}
             max={defaultTo()}
             onChange={(e) => setTo(e.target.value)}
-            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+            className="rounded-md border border-border px-3 py-1.5 text-sm"
           />
         </div>
       </div>
@@ -98,17 +98,17 @@ export const VacancyAnalyticsClient = observer(function VacancyAnalyticsClient({
               { label: 'CTR', value: `${total.ctr}%` },
             ] as const
           ).map(({ label, value }) => (
-            <div key={label} className="rounded-xl border border-gray-200 bg-white p-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">{value}</p>
-              <p className="mt-1 text-xs text-gray-500">{label}</p>
+            <div key={label} className="rounded-xl border border-border bg-card p-4 text-center">
+              <p className="text-2xl font-bold text-card-foreground">{value}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{label}</p>
             </div>
           ))}
         </div>
       )}
 
       {daily.length > 0 ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-4">
-          <p className="mb-4 text-sm font-semibold text-gray-700">Просмотры по дням</p>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="mb-4 text-sm font-semibold text-foreground">Просмотры по дням</p>
           <ResponsiveContainer width="100%" height={260}>
             <AreaChart data={daily} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
               <defs>
@@ -162,7 +162,7 @@ export const VacancyAnalyticsClient = observer(function VacancyAnalyticsClient({
       ) : (
         !store.isLoading &&
         !store.error && (
-          <div className="rounded-xl border border-dashed border-gray-300 py-12 text-center">
+          <div className="rounded-xl border border-dashed border-border py-12 text-center">
             <p className="text-sm text-muted-foreground">Нет данных за выбранный период.</p>
           </div>
         )

@@ -27,13 +27,13 @@ export function PackageCard(props: Props) {
       : [`${props.pkg.applyCredits} откликов`]
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 flex flex-col gap-3">
+    <div className="rounded-2xl border border-border bg-card p-5 flex flex-col gap-3">
       <div className="flex items-start justify-between">
-        <p className="text-base font-semibold text-gray-900">{pkg.name}</p>
+        <p className="text-base font-semibold text-card-foreground">{pkg.name}</p>
         <p className="text-sm font-bold text-indigo-600">{formatStarsPrice(pkg.starsPrice)}</p>
       </div>
 
-      <ul className="space-y-1 text-sm text-gray-600">
+      <ul className="space-y-1 text-sm text-muted-foreground">
         {details.map((d, idx) => (
           <li key={idx}>• {d}</li>
         ))}

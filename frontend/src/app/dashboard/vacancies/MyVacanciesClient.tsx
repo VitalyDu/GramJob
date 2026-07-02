@@ -78,21 +78,21 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
       )}
 
       {!store.isLoading && store.myVacancies.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-gray-300 py-16 text-center">
+        <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-sm text-muted-foreground">У вас пока нет вакансий.</p>
         </div>
       )}
 
       <div className="space-y-3">
         {store.myVacancies.map((v) => (
-          <div key={v.documentId} className="rounded-xl border border-gray-200 bg-white p-4">
+          <div key={v.documentId} className="rounded-xl border border-border bg-card p-4">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="truncate font-semibold text-gray-900">{v.title}</p>
+                  <p className="truncate font-semibold text-card-foreground">{v.title}</p>
                   <VacancyStatusBadge status={v.status} />
                 </div>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-muted-foreground">
                   {v.company?.name} · {SENIORITY_LABELS[v.seniority]} ·{' '}
                   {WORK_FORMAT_LABELS[v.workFormat]}
                 </p>
@@ -102,7 +102,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                 {canEditVacancy(v.status) && (
                   <Link
                     href={`/dashboard/vacancies/${v.documentId}/edit`}
-                    className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                    className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
                   >
                     Редактировать
                   </Link>
@@ -150,7 +150,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
               </div>
             </div>
 
-            <div className="mt-2 flex gap-4 text-xs text-gray-400">
+            <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
               <span>{v.views ?? 0} просмотров</span>
               <span>{v.applicationsCount ?? 0} откликов</span>
               {v.expiresAt && (

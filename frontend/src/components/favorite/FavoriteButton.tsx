@@ -50,7 +50,7 @@ export const FavoriteButton = observer(function FavoriteButton({
       className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition disabled:opacity-50 ${
         isFavorited
           ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
-          : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+          : 'border-border text-muted-foreground hover:bg-muted'
       }`}
     >
       {isFavorited ? '★ В избранном' : '☆ В избранное'}
