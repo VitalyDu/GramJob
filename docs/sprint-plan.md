@@ -308,16 +308,16 @@
 
 ### Frontend
 
-- [ ] Контекст-детектор: `isTelegramMiniApp()` — разный layout и поведение
-- [ ] Адаптация layout: убрать браузерный header, добавить Mini App toolbar
-- [ ] `tg.MainButton` на всех экранах с основным действием
-- [ ] `tg.BackButton` на всех вложенных экранах (заменяет ← браузера)
-- [ ] `tg.HapticFeedback` на кнопках и успешных действиях
-- [ ] CSS: адаптация под `--tg-theme-*` переменные (light + dark)
-- [ ] Bottom navigation bar для Mini App (вакансии / избранное / отклики / профиль)
-- [ ] Платёжный флоу: `tg.openInvoice()` вместо window.open
-- [ ] QA: полный прогон всех флоу внутри Telegram (iOS + Android + Desktop)
-- [ ] `tg.setHeaderColor()` + `tg.setBackgroundColor()` для брендинга
+- [x] Контекст-детектор: `isTelegramMiniApp()` — разный layout и поведение
+- [x] Адаптация layout: убрать браузерный header, добавить Mini App toolbar
+- [x] `tg.MainButton` на всех экранах с основным действием
+- [x] `tg.BackButton` на всех вложенных экранах (заменяет ← браузера)
+- [x] `tg.HapticFeedback` на кнопках и успешных действиях
+- [x] CSS: адаптация под `--tg-theme-*` переменные (light + dark)
+- [x] Bottom navigation bar для Mini App (вакансии / избранное / отклики / профиль)
+- [x] Платёжный флоу: `tg.openInvoice()` вместо window.open
+- [ ] QA: полный прогон всех флоу внутри Telegram (iOS + Android + Desktop) — чеклист: `docs/qa/sprint9-miniapp-checklist.md`
+- [x] `tg.setHeaderColor()` + `tg.setBackgroundColor()` для брендинга
 
 ---
 

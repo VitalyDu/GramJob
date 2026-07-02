@@ -307,7 +307,23 @@
 - Integration-тесты: `/users/me` и `/vacancies/my` через initData без JWT, невалидный/незарегистрированный/заблокированный initData → 401, приоритет JWT над initData
 - Контрактные unit-тесты deep links: `startapp=vacancy_{documentId}`, `startapp=application_{documentId}`, `startapp=subscription` (реализация `buildDeepLink` существовала со Sprint 7)
 
-Текущий шаг — Sprint 9 (Telegram Mini App): backend завершён, остаётся frontend-часть.
+Выполнено (Sprint 9 Frontend — Telegram Mini App):
+
+- `layout.tsx` — подключён `telegram-web-app.js` (beforeInteractive); ранее `window.Telegram` не существовал и Mini App-режим не активировался
+- `lib/telegram.ts` — `parseStartParam` (deep links vacancy*/application*/subscription), haptic-хелперы (`hapticImpact`, `hapticNotify`, `hapticSelection`), `onEvent`/`offEvent` в типе TelegramWebApp
+- `lib/telegram-theme.ts` — `applyTelegramTheme`: маппинг `--tg-theme-*` → shadcn CSS-переменные, класс `.dark` по colorScheme, `setHeaderColor`/`setBackgroundColor`; подписка на `themeChanged` в `useTelegramInit`
+- Hardcoded-серая палитра (`bg-white`, `text-gray-*`, `border-gray-*`) заменена на семантические токены (`bg-card`, `text-muted-foreground`, `border-border`...) — тёмная тема Telegram работает; цветные бейджи остаются светлыми (известное ограничение)
+- `hooks/useTelegramBackButton.ts` — показывает нативный BackButton, `router.back()`; подключён точечно на 14 вложенных экранах
+- `hooks/useTelegramMainButton.ts` — нативный MainButton с `text/disabled/visible`, возвращает `isMiniApp` (форма скрывает свою submit-кнопку); подключён в CompanyForm, VacancyForm, ResumeForm, ApplyDialog
+- `components/layout/StartParamRouter.tsx` — обрабатывает `startapp=...` при запуске (router.replace), подключён в AppShell
+- HapticFeedback: FavoriteButton (selection), оплата/модерация/отклик (notification success)
+- Backend: `GET /applications/:id` (кандидат или владелец вакансии, `canViewApplication` в application-utils) — для deep link `application_{documentId}`
+- `stores/ApplicationStore.ts` — `currentApplication` + `fetchApplicationById`
+- `app/dashboard/applications/[id]/` — страница детали отклика (вакансия, резюме, статус, письмо)
+- `app/dashboard/profile/` — страница профиля для bottom nav (имя, план, навигация, выход); ранее вкладка вела на 404
+- QA-чеклист ручного прогона: `docs/qa/sprint9-miniapp-checklist.md` (iOS + Android + Desktop)
+
+Текущий шаг — Sprint 9 завершён (остался ручной QA-прогон по чеклисту). Следующий: Sprint 10 — SEO, Performance & Launch.
 Планы: `docs/superpowers/plans/`
 
 ---
