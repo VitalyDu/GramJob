@@ -268,7 +268,20 @@
 - Примечание: recharts v3 типизирует `labelFormatter` как ReactNode → используется inferred-параметр + `String(v)`
 - Итого: 288 тестов frontend, 0 ошибок TypeScript
 
-Текущий шаг — Sprint 8 (Moderation).
+Выполнено (Sprint 8 Backend — Moderation):
+
+- Content type: ModerationLog (audit log: entityType, entityDocumentId, action, reason, comment, moderatorId/Name)
+- Поля `rejectionReason` (8 причин) + `rejectionComment` добавлены в Vacancy, Resume, Company
+- Report status enum: pending/resolved/dismissed (было pending/reviewed/resolved)
+- `src/services/moderation-utils.ts` — причины отклонения, метки, `validateRejection`, `computeAvgProcessingHours` + тесты
+- `src/services/moderation.service.ts` — `approveEntity`, `rejectEntity`, `decideReport`, `getModerationStats`, `logModeration`
+- Admin-роуты (type: 'admin', policy `admin::isAuthenticatedAdmin`, регистрация в `src/index.ts` register): POST /moderation/:entityType/:documentId/approve|reject, POST /moderation/reports/:documentId/resolve|dismiss, GET /moderation/stats
+- Lifecycles (vacancy/resume/company): status=moderation → лог `submitted`; status=rejected → уведомление `moderation_rejected` с причиной; vacancy published → `moderation_approved` (закрыт TODO Sprint 8)
+- `buildNotificationData` — generic entityType/entityId для moderation\_\* уведомлений
+- Admin UI (`src/admin/app.tsx`): Document Actions «Одобрить»/«Отклонить» (модал с причиной) для vacancy/resume/company, «Жалоба подтверждена»/«Отклонить жалобу» для report, пункт меню «Модерация» со страницей статистики (очереди + среднее время обработки + решения за 7 дней)
+- Кредит при отклонении вакансии возвращается автоматически (лимит считает только moderation/published)
+
+Текущий шаг — Sprint 8 Frontend (Moderation).
 Планы: `docs/superpowers/plans/`
 
 ---

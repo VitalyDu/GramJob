@@ -279,13 +279,13 @@
 
 ### Backend (Strapi Admin)
 
-- [ ] Кастомный список «На модерации»: фильтр `status=moderation` для Vacancy/Resume/Company
-- [ ] Кастомные actions в Admin: «Одобрить» (→ published + set expiresAt для вакансий)
-- [ ] Кастомные actions в Admin: «Отклонить» (select причины → rejected + Notification)
-- [ ] При одобрении Vacancy: `expiresAt = now + 60 days`
-- [ ] Очередь жалоб: Report список в Admin с действиями (resolve/dismiss/take action)
-- [ ] Audit log: кто, когда, какое решение (через Strapi lifecycle + отдельная таблица или log)
-- [ ] Страница модератора: статистика (сколько в очереди, среднее время обработки)
+- [x] Кастомный список «На модерации»: фильтр `status=moderation` для Vacancy/Resume/Company
+- [x] Кастомные actions в Admin: «Одобрить» (→ published + set expiresAt для вакансий)
+- [x] Кастомные actions в Admin: «Отклонить» (select причины → rejected + Notification)
+- [x] При одобрении Vacancy: `expiresAt = now + 60 days`
+- [x] Очередь жалоб: Report список в Admin с действиями (resolve/dismiss/take action)
+- [x] Audit log: кто, когда, какое решение (через Strapi lifecycle + отдельная таблица или log)
+- [x] Страница модератора: статистика (сколько в очереди, среднее время обработки)
 
 ### Frontend
 
