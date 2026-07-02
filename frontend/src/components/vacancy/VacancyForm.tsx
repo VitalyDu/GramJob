@@ -19,6 +19,7 @@ import type {
   SalaryCurrencyEnum,
 } from '@/types/api'
 import { api } from '@/services/api'
+import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
 
 const schema = z.object({
   title: z.string().min(1, 'Название обязательно'),
@@ -148,6 +149,12 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
     }
     void onSubmit(input)
   }
+
+  const mainButtonActive = useTelegramMainButton({
+    text: isLoading ? 'Сохранение...' : 'Сохранить',
+    onClick: () => void handleSubmit(handleFormSubmit)(),
+    disabled: !!isLoading,
+  })
 
   const textareaClass =
     'w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring'
@@ -374,9 +381,11 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
         </div>
       </div>
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? 'Сохранение...' : 'Сохранить'}
-      </Button>
+      {!mainButtonActive && (
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? 'Сохранение...' : 'Сохранить'}
+        </Button>
+      )}
     </form>
   )
 }

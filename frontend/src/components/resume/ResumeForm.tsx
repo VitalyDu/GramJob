@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RESUME_WORK_FORMAT_LABELS, RESUME_EMPLOYMENT_TYPE_LABELS } from '@/lib/resume-utils'
 import type { ResumeCreateInput, ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
+import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
 
 const workExperienceSchema = z.object({
   company: z.string().min(1, 'Компания обязательна'),
@@ -160,6 +161,12 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
     } as ResumeCreateInput
     void onSubmit(payload)
   }
+
+  const mainButtonActive = useTelegramMainButton({
+    text: isLoading ? 'Сохранение...' : 'Сохранить',
+    onClick: () => void handleSubmit(handleFormSubmit)(),
+    disabled: !!isLoading,
+  })
 
   const watchWorkExperience = watch('workExperience')
 
@@ -508,9 +515,11 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
         ))}
       </section>
 
-      <Button type="submit" disabled={isLoading} className="w-full">
-        {isLoading ? 'Сохранение...' : 'Сохранить'}
-      </Button>
+      {!mainButtonActive && (
+        <Button type="submit" disabled={isLoading} className="w-full">
+          {isLoading ? 'Сохранение...' : 'Сохранить'}
+        </Button>
+      )}
     </form>
   )
 }

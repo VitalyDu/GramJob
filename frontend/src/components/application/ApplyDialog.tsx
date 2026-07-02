@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { api } from '@/services/api'
 import type { Resume } from '@/types/api'
+import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
 
 interface Props {
   isOpen: boolean
@@ -45,12 +46,23 @@ export function ApplyDialog({
       .catch(() => setFetchError('Не удалось загрузить резюме'))
   }, [isOpen])
 
+  const submit = async () => {
+    if (!resumeId) return
+    await onSubmit(resumeId, coverLetter)
+  }
+
+  const mainButtonActive = useTelegramMainButton({
+    text: isLoading ? 'Отправка...' : 'Откликнуться',
+    onClick: () => void submit(),
+    disabled: (isLoading ?? false) || !resumeId,
+    visible: isOpen && !(limitReached ?? false) && !(alreadyApplied ?? false) && !fetchError,
+  })
+
   if (!isOpen) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!resumeId) return
-    await onSubmit(resumeId, coverLetter)
+    await submit()
   }
 
   return (
@@ -115,9 +127,11 @@ export function ApplyDialog({
                 </div>
 
                 <div className="flex gap-3">
-                  <Button type="submit" disabled={isLoading ?? !resumeId} className="flex-1">
-                    {isLoading ? 'Отправка...' : 'Откликнуться'}
-                  </Button>
+                  {!mainButtonActive && (
+                    <Button type="submit" disabled={isLoading ?? !resumeId} className="flex-1">
+                      {isLoading ? 'Отправка...' : 'Откликнуться'}
+                    </Button>
+                  )}
                   <Button type="button" variant="outline" onClick={onClose}>
                     Отмена
                   </Button>

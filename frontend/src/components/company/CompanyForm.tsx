@@ -13,6 +13,7 @@ const COMPANY_SIZE_VALUES = Object.keys(COMPANY_SIZE_LABELS) as [
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
 
 const schema = z.object({
   name: z.string().min(1, 'Название обязательно'),
@@ -52,6 +53,12 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
       telegram: defaultValues?.telegram ?? '',
       linkedin: defaultValues?.linkedin ?? '',
     },
+  })
+
+  const mainButtonActive = useTelegramMainButton({
+    text: isLoading ? 'Сохранение...' : 'Сохранить',
+    onClick: () => void handleSubmit(onSubmit)(),
+    disabled: !!isLoading,
   })
 
   return (
@@ -127,9 +134,11 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
         </div>
       </div>
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? 'Сохранение...' : 'Сохранить'}
-      </Button>
+      {!mainButtonActive && (
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? 'Сохранение...' : 'Сохранить'}
+        </Button>
+      )}
     </form>
   )
 }
