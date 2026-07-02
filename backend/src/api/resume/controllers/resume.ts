@@ -40,6 +40,12 @@ const RESUME_CARD_FIELDS = [
 
 const RESUME_FULL_FIELDS = [...RESUME_CARD_FIELDS, 'about', 'contacts', 'invitations'] as const
 
+const RESUME_OWNER_CARD_FIELDS = [
+  ...RESUME_CARD_FIELDS,
+  'rejectionReason',
+  'rejectionComment',
+] as const
+
 const RESUME_POPULATE = {
   user: { fields: ['id', 'firstName', 'lastName'] },
   avatar: true,
@@ -356,7 +362,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const [resumes, total] = await Promise.all([
         (strapi.documents as any)('api::resume.resume').findMany({
           filters,
-          fields: RESUME_CARD_FIELDS as any,
+          fields: RESUME_OWNER_CARD_FIELDS as any,
           populate: { avatar: true } as any,
           start: (pageNum - 1) * pageSizeNum,
           limit: pageSizeNum,

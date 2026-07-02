@@ -70,6 +70,11 @@ const VACANCY_FULL_FIELDS = [
   'applicationsCount',
 ] as const
 
+const REJECTION_FIELDS = ['rejectionReason', 'rejectionComment'] as const
+
+const VACANCY_OWNER_CARD_FIELDS = [...VACANCY_CARD_FIELDS, ...REJECTION_FIELDS] as const
+const VACANCY_OWNER_FULL_FIELDS = [...VACANCY_FULL_FIELDS, ...REJECTION_FIELDS] as const
+
 const VACANCY_POPULATE = {
   industry: { fields: ['documentId', 'slug', 'name'] },
   specialization: { fields: ['documentId', 'slug', 'name'] },
@@ -612,7 +617,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           documentId: { $eq: id },
           postedBy: { id: { $eq: user.id } },
         },
-        fields: VACANCY_FULL_FIELDS as any,
+        fields: VACANCY_OWNER_FULL_FIELDS as any,
         populate: VACANCY_POPULATE as any,
       })
 
@@ -638,7 +643,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const [vacancies, total] = await Promise.all([
         strapi.documents('api::vacancy.vacancy').findMany({
           filters,
-          fields: VACANCY_CARD_FIELDS as any,
+          fields: VACANCY_OWNER_CARD_FIELDS as any,
           populate: VACANCY_POPULATE as any,
           start: (pageNum - 1) * pageSizeNum,
           limit: pageSizeNum,
