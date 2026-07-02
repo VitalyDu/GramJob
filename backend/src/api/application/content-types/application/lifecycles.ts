@@ -10,7 +10,7 @@ type ApplicationAfterEvent = {
     vacancy?: { id?: number; documentId?: string }
     user?: { id?: number }
   }
-  params: unknown
+  params: { data?: Record<string, unknown> }
 }
 
 export default {
@@ -53,7 +53,9 @@ export default {
 
   async afterUpdate(event: ApplicationAfterEvent) {
     const s = globalThis.strapi as Core.Strapi
-    const newStatus = event.result.status
+    // Only react when the update itself changes the status
+    const newStatus = event.params.data?.['status'] as string | undefined
+    if (!newStatus) return
 
     s.log.info(`[application] Application ${event.result.documentId} status → ${newStatus}`)
 

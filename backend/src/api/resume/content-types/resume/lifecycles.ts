@@ -3,14 +3,16 @@ import type { Core } from '@strapi/strapi'
 
 type ResumeAfterEvent = {
   result: { documentId?: string; status?: string; title?: string }
-  params: unknown
+  params: { data?: Record<string, unknown> }
 }
 
 export default {
   async afterUpdate(event: ResumeAfterEvent) {
     const s = globalThis.strapi as Core.Strapi
 
-    if (event.result.status !== 'published') return
+    // Only react when the update itself sets status=published (moderation approval).
+    // Counter updates (views++) on published resumes must not re-trigger this.
+    if (event.params.data?.['status'] !== 'published') return
 
     s.log.info(`[resume] Resume ${event.result.documentId} published`)
 

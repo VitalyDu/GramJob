@@ -63,10 +63,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const user = ctx.state.user as { id: number } | undefined
     if (!user) return ctx.unauthorized('Authentication required')
 
-    await strapi.db.query('api::notification.notification').updateMany({
+    // updateMany with a relation filter crashes in Strapi 5 (query-builder runSubQuery
+    // drops the update data), so resolve ids first and update by primary key
+    const unread = (await strapi.db.query('api::notification.notification').findMany({
       where: { user: { id: user.id }, isRead: false },
-      data: { isRead: true },
-    })
+      select: ['id'],
+    })) as Array<{ id: number }>
+
+    if (unread.length > 0) {
+      await strapi.db.query('api::notification.notification').updateMany({
+        where: { id: { $in: unread.map((n) => n.id) } },
+        data: { isRead: true },
+      })
+    }
 
     ctx.send({ ok: true })
   },

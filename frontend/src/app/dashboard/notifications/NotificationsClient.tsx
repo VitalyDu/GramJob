@@ -37,6 +37,8 @@ export const NotificationsClient = observer(function NotificationsClient() {
 
   useEffect(() => {
     void store.fetchNotifications(isReadFilter)
+    // WebHeader badge is absent in the Mini App, so load the unread count here too
+    void store.fetchUnreadCount()
   }, [store, isReadFilter])
 
   const handleMarkRead = (documentId: string) => {

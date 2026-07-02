@@ -1,4 +1,4 @@
-import { sendMessage, type TelegramMessage } from './telegram-bot'
+import { escapeHtml, sendMessage, type TelegramMessage } from './telegram-bot'
 
 export interface ParsedCommand {
   command: string
@@ -115,7 +115,7 @@ export async function handleBotCommand(strapi: any, chatId: string, text: string
       })
     } else {
       const lines = (notifications as Array<{ title: string; body: string }>)
-        .map((n) => `• <b>${n.title}</b>: ${n.body}`)
+        .map((n) => `• <b>${escapeHtml(n.title)}</b>: ${escapeHtml(n.body)}`)
         .join('\n\n')
       sendMessage(chatId, {
         text: `<b>Последние уведомления:</b>\n\n${lines}`,

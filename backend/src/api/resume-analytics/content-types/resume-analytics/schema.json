@@ -3,7 +3,7 @@
   "collectionName": "resume_analytics",
   "info": {
     "singularName": "resume-analytics",
-    "pluralName": "resume-analytics",
+    "pluralName": "resume-analytics-entries",
     "displayName": "ResumeAnalytics",
     "description": "Daily analytics snapshot per resume"
   },

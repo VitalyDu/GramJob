@@ -318,6 +318,7 @@ export default {
           fields: ['documentId', 'views', 'uniqueViews', 'applicationsCount'],
           limit: 10000,
         })) as Array<{
+          id: number
           documentId: string
           views: number
           uniqueViews: number
@@ -347,7 +348,8 @@ export default {
 
             await strapi.db.query('api::vacancy-analytics.vacancy-analytics').create({
               data: {
-                vacancy: { documentId: vacancy.documentId },
+                // DB-layer relations require numeric ids ({ documentId } is silently ignored)
+                vacancy: vacancy.id,
                 date,
                 views: deltaViews,
                 uniqueViews: deltaUnique,
@@ -365,7 +367,7 @@ export default {
           filters: { status: { $in: ['published', 'archived'] } },
           fields: ['documentId', 'views', 'invitations'],
           limit: 10000,
-        })) as Array<{ documentId: string; views: number; invitations: number }>
+        })) as Array<{ id: number; documentId: string; views: number; invitations: number }>
 
         for (const resume of resumes) {
           try {
@@ -386,7 +388,8 @@ export default {
 
             await strapi.db.query('api::resume-analytics.resume-analytics').create({
               data: {
-                resume: { documentId: resume.documentId },
+                // DB-layer relations require numeric ids ({ documentId } is silently ignored)
+                resume: resume.id,
                 date,
                 views: deltaViews,
                 uniqueViews: deltaViews,

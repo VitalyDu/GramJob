@@ -33,11 +33,26 @@ async function telegramCall<T>(method: string, params: Record<string, unknown>):
     body: JSON.stringify(params),
   })
 
-  const json = (await res.json()) as { ok: boolean; result: T; description?: string }
+  const json = (await res.json()) as {
+    ok: boolean
+    result: T
+    error_code?: number
+    description?: string
+  }
   if (!json.ok) {
-    throw new Error(`Telegram API error [${method}]: ${json.description ?? 'unknown error'}`)
+    // error_code is included so retry logic can match on 429/403
+    throw new Error(
+      `Telegram API error [${method}] ${json.error_code ?? res.status}: ${json.description ?? 'unknown error'}`
+    )
   }
   return json.result
+}
+
+export function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
 }
 
 export async function createInvoiceLink(params: {
@@ -181,12 +196,13 @@ export function buildNotificationMessage(
   const deepLink = buildDeepLink(type, data)
   const buttonText = BUTTON_TEXTS[type as NotificationType]
 
+  // No parse_mode: templates are plain text with user-provided values (titles, names).
+  // HTML mode would break delivery (or allow markup injection) on titles containing < & >.
   return {
     text,
     options:
       deepLink && buttonText
         ? {
-            parse_mode: 'HTML',
             reply_markup: {
               inline_keyboard: [
                 [
@@ -198,7 +214,7 @@ export function buildNotificationMessage(
               ],
             },
           }
-        : { parse_mode: 'HTML' },
+        : {},
   }
 }
 

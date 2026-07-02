@@ -7,12 +7,13 @@ type CompanyLifecycleEvent = {
     documentId?: string
     name?: string
   }
-  params: unknown
+  params: { data?: Record<string, unknown> }
 }
 
 export default {
   async afterUpdate(event: CompanyLifecycleEvent) {
-    if (event.result.status !== 'published') return
+    // Only react when the update itself sets status=published (moderation approval)
+    if (event.params.data?.['status'] !== 'published') return
 
     const s = globalThis.strapi as Core.Strapi
     s.log.info(`[company] Company ${event.result.documentId} published`)

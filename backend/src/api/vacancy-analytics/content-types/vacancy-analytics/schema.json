@@ -3,7 +3,7 @@
   "collectionName": "vacancy_analytics",
   "info": {
     "singularName": "vacancy-analytics",
-    "pluralName": "vacancy-analytics",
+    "pluralName": "vacancy-analytics-entries",
     "displayName": "VacancyAnalytics",
     "description": "Daily analytics snapshot per vacancy"
   },
