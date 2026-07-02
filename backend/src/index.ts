@@ -1,4 +1,3 @@
-import { apiRateLimit, authRateLimit } from './middlewares/rate-limit'
 import { seedIndustries } from './scripts/seed-industries'
 import { seedSubscriptionPlans } from './scripts/seed-subscription-plans'
 import { seedPackages } from './scripts/seed-packages'
@@ -48,21 +47,5 @@ export default {
         strapi.log.warn('[telegram] Failed to register webhook (bot may not be configured):', err)
       }
     }
-
-    const app = strapi.server.app
-
-    app.use(async (ctx, next) => {
-      if (ctx.path.startsWith('/api/auth/')) {
-        return authRateLimit(ctx, next)
-      }
-      return next()
-    })
-
-    app.use(async (ctx, next) => {
-      if (ctx.path.startsWith('/api/')) {
-        return apiRateLimit(ctx, next)
-      }
-      return next()
-    })
   },
 }

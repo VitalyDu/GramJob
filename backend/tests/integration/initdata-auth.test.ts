@@ -86,4 +86,39 @@ describe('initData auth on protected endpoints', () => {
     const res = await request(strapi.server.httpServer).get('/api/vacancies')
     expect(res.status).toBe(200)
   })
+
+  it('запрос с Authorization + initData — initData игнорируется, JWT имеет приоритет', async () => {
+    const registerRes = await request(strapi.server.httpServer)
+      .post('/api/auth/telegram')
+      .send({ initData: makeValidInitData(telegramUserId) })
+    expect(registerRes.status).toBe(200)
+    const jwt = registerRes.body.jwt as string
+
+    const res = await request(strapi.server.httpServer)
+      .get('/api/users/me')
+      .set('Authorization', `Bearer ${jwt}`)
+      .set('X-Telegram-Init-Data', 'user=%7B%7D&auth_date=1&hash=bad')
+
+    expect(res.status).toBe(200)
+    expect(res.body.telegramId).toBe(String(telegramUserId))
+  })
+
+  it('заблокированный пользователь с валидным initData → 401', async () => {
+    const blockedId = 444555666
+    const registerRes = await request(strapi.server.httpServer)
+      .post('/api/auth/telegram')
+      .send({ initData: makeValidInitData(blockedId) })
+    expect(registerRes.status).toBe(200)
+
+    await strapi.db.query('plugin::users-permissions.user').update({
+      where: { telegramId: String(blockedId) },
+      data: { blocked: true },
+    })
+
+    const res = await request(strapi.server.httpServer)
+      .get('/api/users/me')
+      .set('X-Telegram-Init-Data', makeValidInitData(blockedId))
+
+    expect(res.status).toBe(401)
+  })
 })

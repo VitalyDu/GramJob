@@ -34,6 +34,8 @@ const config: Core.Config.Middlewares = [
   'strapi::session',
   'strapi::favicon',
   'strapi::public',
+  'global::auth-rate-limit',
+  'global::api-rate-limit',
   'global::telegram-auth',
 ]
 
