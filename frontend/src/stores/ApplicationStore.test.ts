@@ -212,4 +212,26 @@ describe('ApplicationStore', () => {
       expect(store.vacancyPageCount).toBe(0)
     })
   })
+
+  describe('fetchApplicationById', () => {
+    it('загружает отклик в currentApplication', async () => {
+      const app = { id: 1, documentId: 'app1', status: 'applied' }
+      vi.mocked(api.get).mockResolvedValueOnce({ data: app })
+
+      await store.fetchApplicationById('app1')
+
+      expect(api.get).toHaveBeenCalledWith('/applications/app1')
+      expect(store.currentApplication).toEqual(app)
+      expect(store.error).toBeNull()
+    })
+
+    it('пишет ошибку и оставляет currentApplication=null при сбое', async () => {
+      vi.mocked(api.get).mockRejectedValueOnce(new Error('Not found'))
+
+      await store.fetchApplicationById('nope')
+
+      expect(store.currentApplication).toBeNull()
+      expect(store.error).toBe('Not found')
+    })
+  })
 })

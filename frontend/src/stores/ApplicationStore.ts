@@ -12,6 +12,7 @@ type AppMeta = {
 export class ApplicationStore {
   applications: Application[] = []
   vacancyApplications: Application[] = []
+  currentApplication: Application | null = null
   isLoading = false
   error: string | null = null
   // candidate view pagination
@@ -118,6 +119,28 @@ export class ApplicationStore {
     } catch (e) {
       runInAction(() => {
         this.error = e instanceof Error ? e.message : 'Failed to fetch vacancy applications'
+      })
+    } finally {
+      runInAction(() => {
+        this.isLoading = false
+      })
+    }
+  }
+
+  async fetchApplicationById(id: string): Promise<void> {
+    runInAction(() => {
+      this.isLoading = true
+      this.error = null
+      this.currentApplication = null
+    })
+    try {
+      const res = await api.get<{ data: Application }>(`/applications/${id}`)
+      runInAction(() => {
+        this.currentApplication = res.data
+      })
+    } catch (e) {
+      runInAction(() => {
+        this.error = e instanceof Error ? e.message : 'Failed to fetch application'
       })
     } finally {
       runInAction(() => {
