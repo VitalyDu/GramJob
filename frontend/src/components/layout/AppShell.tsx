@@ -1,6 +1,7 @@
 'use client'
 
 import { type ReactNode } from 'react'
+import { Toaster } from 'sonner'
 import { useTelegramInit } from '@/hooks/useTelegramInit'
 import { WebHeader } from './WebHeader'
 import { MiniAppBottomNav } from './MiniAppBottomNav'
@@ -15,6 +16,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="container mx-auto px-4 py-6">{children}</div>
       </main>
       {isMiniApp && <MiniAppBottomNav />}
+      <Toaster position="top-center" richColors closeButton />
     </div>
   )
 }
