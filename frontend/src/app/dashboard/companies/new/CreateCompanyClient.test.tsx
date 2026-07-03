@@ -8,6 +8,8 @@ vi.mock('@/stores/StoreProvider', () => ({
   useStores: vi.fn(),
 }))
 
+vi.mock('@/hooks/useRequireAuth', () => ({ useRequireAuth: () => true }))
+
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush }),
 }))

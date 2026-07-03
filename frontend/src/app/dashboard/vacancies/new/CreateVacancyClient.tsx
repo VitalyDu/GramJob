@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { VacancyForm } from '@/components/vacancy/VacancyForm'
 import { UpsellModal } from '@/components/vacancy/UpsellModal'
@@ -14,6 +15,7 @@ import type { VacancyCreateInput } from '@/types/api'
 export const CreateVacancyClient = observer(function CreateVacancyClient() {
   useTelegramBackButton()
   const { vacancy: vStore, company: cStore } = useStores()
+  const isAuthenticated = useRequireAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -33,6 +35,8 @@ export const CreateVacancyClient = observer(function CreateVacancyClient() {
       // error сохранён в vStore.error
     }
   }
+
+  if (!isAuthenticated) return null
 
   return (
     <div className="space-y-6">

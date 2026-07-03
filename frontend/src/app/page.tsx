@@ -8,15 +8,24 @@ import { getHomeStats, getLatestVacancies } from '@/lib/home-data'
 
 export const revalidate = 300
 
+function pluralizeRu(n: number, one: string, few: string, many: string): string {
+  const mod10 = n % 10
+  const mod100 = n % 100
+  if (mod100 >= 11 && mod100 <= 14) return many
+  if (mod10 === 1) return one
+  if (mod10 >= 2 && mod10 <= 4) return few
+  return many
+}
+
 function StatCard({
   icon: Icon,
   value,
-  label,
+  forms,
   delay,
 }: {
   icon: typeof Briefcase
   value: number
-  label: string
+  forms: [string, string, string]
   delay: string
 }) {
   return (
@@ -27,7 +36,7 @@ function StatCard({
         </div>
         <div>
           <p className="text-2xl font-bold tabular-nums">{value.toLocaleString('ru-RU')}</p>
-          <p className="text-sm text-muted-foreground">{label}</p>
+          <p className="text-sm text-muted-foreground">{pluralizeRu(value, ...forms)}</p>
         </div>
       </CardContent>
     </Card>
@@ -83,19 +92,19 @@ export default async function HomePage() {
         <StatCard
           icon={Briefcase}
           value={stats.vacancies}
-          label="Вакансий"
+          forms={['Вакансия', 'Вакансии', 'Вакансий']}
           delay="animation-delay-100"
         />
         <StatCard
           icon={Building2}
           value={stats.companies}
-          label="Компаний"
+          forms={['Компания', 'Компании', 'Компаний']}
           delay="animation-delay-200"
         />
         <StatCard
           icon={Layers}
           value={stats.industries}
-          label="Отраслей"
+          forms={['Отрасль', 'Отрасли', 'Отраслей']}
           delay="animation-delay-300"
         />
       </section>

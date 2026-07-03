@@ -14,6 +14,7 @@ import {
 } from 'recharts'
 import { BarChart2 } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageHeader } from '@/components/shared/PageHeader'
@@ -38,6 +39,7 @@ interface Props {
 export const ResumeAnalyticsClient = observer(function ResumeAnalyticsClient({ resumeId }: Props) {
   useTelegramBackButton()
   const { analytics: store } = useStores()
+  const isAuthenticated = useRequireAuth()
   const [from, setFrom] = useState(defaultFrom())
   const [to, setTo] = useState(defaultTo())
 
@@ -48,6 +50,8 @@ export const ResumeAnalyticsClient = observer(function ResumeAnalyticsClient({ r
   const data = store.resumeAnalytics
   const total = data?.total
   const daily = data?.daily ?? []
+
+  if (!isAuthenticated) return null
 
   return (
     <div className="space-y-6">

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { EditVacancyClient } from './EditVacancyClient'
 
+vi.mock('@/hooks/useRequireAuth', () => ({ useRequireAuth: () => true }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock('@/stores/StoreProvider', () => ({
   useStores: () => ({

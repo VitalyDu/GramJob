@@ -1,5 +1,16 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:1337/api'
 
+const API_ERROR_MESSAGES: Record<string, string> = {
+  Forbidden: 'Доступ запрещён',
+  Unauthorized: 'Необходима авторизация',
+  'Not Found': 'Не найдено',
+  'Bad Request': 'Неверный запрос',
+  'Internal Server Error': 'Ошибка сервера',
+  'Invalid identifier or password': 'Неверный email или пароль',
+  'Email already taken': 'Этот email уже зарегистрирован',
+  'Too Many Requests': 'Слишком много запросов. Попробуйте позже',
+}
+
 export class ApiClientError extends Error {
   constructor(
     public status: number,
@@ -34,8 +45,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}))
-    const message =
+    const raw =
       (data as { error?: { message?: string } } | undefined)?.error?.message ?? res.statusText
+    const message = API_ERROR_MESSAGES[raw] ?? raw
     throw new ApiClientError(res.status, data, message)
   }
 

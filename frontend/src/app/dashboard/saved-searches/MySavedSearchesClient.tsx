@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import { Search } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -37,6 +38,7 @@ function filtersToQueryString(
 
 export const MySavedSearchesClient = observer(function MySavedSearchesClient() {
   const { savedSearch: store } = useStores()
+  const isAuthenticated = useRequireAuth()
 
   useEffect(() => {
     void store.fetchSavedSearches()
@@ -50,6 +52,8 @@ export const MySavedSearchesClient = observer(function MySavedSearchesClient() {
   const handlePageChange = (page: number) => {
     void store.fetchSavedSearches(page)
   }
+
+  if (!isAuthenticated) return null
 
   return (
     <div className="space-y-6">

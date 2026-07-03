@@ -11,8 +11,12 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/stores/StoreProvider', () => ({
-  useStores: () => ({ auth: { user: mockUser, logout: mockLogout } }),
+  useStores: () => ({
+    auth: { user: mockUser, isAuthenticated: mockUser !== null, logout: mockLogout },
+  }),
 }))
+
+vi.mock('@/hooks/useRequireAuth', () => ({ useRequireAuth: () => mockUser !== null }))
 
 describe('ProfileClient', () => {
   it('показывает имя, email и план пользователя', () => {
@@ -43,9 +47,9 @@ describe('ProfileClient', () => {
     expect(mockPush).toHaveBeenCalledWith('/')
   })
 
-  it('без пользователя показывает приглашение войти', () => {
+  it('без пользователя ничего не рендерит (редирект на /login)', () => {
     mockUser = null
-    render(<ProfileClient />)
-    expect(screen.getByText('Войдите, чтобы открыть профиль.')).toBeInTheDocument()
+    const { container } = render(<ProfileClient />)
+    expect(container.firstChild).toBeNull()
   })
 })

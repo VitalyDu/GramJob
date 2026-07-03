@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { Send } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { ApplicationCard } from '@/components/application/ApplicationCard'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
@@ -13,6 +14,7 @@ import { PaginationBar } from '@/components/shared/PaginationBar'
 
 export const MyApplicationsClient = observer(function MyApplicationsClient() {
   const { application: store } = useStores()
+  const isAuthenticated = useRequireAuth()
 
   useEffect(() => {
     void store.fetchMyApplications()
@@ -21,6 +23,8 @@ export const MyApplicationsClient = observer(function MyApplicationsClient() {
   const handlePageChange = (page: number) => {
     void store.fetchMyApplications(page)
   }
+
+  if (!isAuthenticated) return null
 
   return (
     <div className="space-y-6">

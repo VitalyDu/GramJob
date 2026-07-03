@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ChevronRight } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -21,19 +22,11 @@ const LINKS = [
 
 export const ProfileClient = observer(function ProfileClient() {
   const { auth } = useStores()
+  useRequireAuth()
   const router = useRouter()
 
   const user = auth.user
-  if (!user) {
-    return (
-      <div className="py-16 text-center">
-        <p className="text-sm text-muted-foreground">Войдите, чтобы открыть профиль.</p>
-        <Button className="mt-4" onClick={() => router.push('/login')}>
-          Войти
-        </Button>
-      </div>
-    )
-  }
+  if (!user) return null
 
   return (
     <div className="space-y-6">

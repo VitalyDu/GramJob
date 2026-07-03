@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { ShieldOff } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -23,6 +24,7 @@ const TARGET_TYPE_LABELS = { employer: 'Работодатель', candidate: '�
 
 export const MyBlocksClient = observer(function MyBlocksClient() {
   const { block: store } = useStores()
+  const isAuthenticated = useRequireAuth()
 
   useEffect(() => {
     void store.fetchBlocks()
@@ -36,6 +38,8 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
   const handlePageChange = (page: number) => {
     void store.fetchBlocks(page)
   }
+
+  if (!isAuthenticated) return null
 
   return (
     <div className="space-y-6">

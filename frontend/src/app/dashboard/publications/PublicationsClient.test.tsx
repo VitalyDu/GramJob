@@ -31,6 +31,8 @@ vi.mock('@/stores/StoreProvider', () => ({
   useStores: () => ({ vacancy: vacancyStore, resume: resumeStore, company: companyStore }),
 }))
 
+vi.mock('@/hooks/useRequireAuth', () => ({ useRequireAuth: () => true }))
+
 import { PublicationsClient } from './PublicationsClient'
 
 describe('PublicationsClient', () => {

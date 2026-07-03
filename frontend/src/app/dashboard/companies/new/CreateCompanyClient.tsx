@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { CompanyForm } from '@/components/company/CompanyForm'
 import type { CompanyCreateInput } from '@/types/api'
@@ -11,6 +12,7 @@ import type { CompanyCreateInput } from '@/types/api'
 export const CreateCompanyClient = observer(function CreateCompanyClient() {
   useTelegramBackButton()
   const { company: store } = useStores()
+  const isAuthenticated = useRequireAuth()
   const router = useRouter()
 
   const handleSubmit = async (data: CompanyCreateInput) => {
@@ -21,6 +23,8 @@ export const CreateCompanyClient = observer(function CreateCompanyClient() {
       // error сохранён в store.error
     }
   }
+
+  if (!isAuthenticated) return null
 
   return (
     <div className="space-y-6">

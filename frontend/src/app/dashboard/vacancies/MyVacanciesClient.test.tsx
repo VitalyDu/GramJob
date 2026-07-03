@@ -19,12 +19,14 @@ const mockStore = {
     archiveVacancy: vi.fn(),
     clearLimitReached: vi.fn(),
   },
-  auth: { user: { subscriptionPlan: 'free', vacancyCredits: 0 } },
+  auth: { user: { subscriptionPlan: 'free', vacancyCredits: 0 }, isAuthenticated: true },
 }
 
 vi.mock('@/stores/StoreProvider', () => ({
   useStores: () => mockStore,
 }))
+
+vi.mock('@/hooks/useRequireAuth', () => ({ useRequireAuth: () => true }))
 
 vi.mock('next/link', () => ({
   default: ({

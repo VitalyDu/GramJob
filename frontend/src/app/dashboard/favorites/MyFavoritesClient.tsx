@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import { Star } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
@@ -30,6 +31,7 @@ const TABS: { label: string; value: string; type: FavoriteType | undefined }[] =
 
 export const MyFavoritesClient = observer(function MyFavoritesClient() {
   const { favorite: store } = useStores()
+  const isAuthenticated = useRequireAuth()
   const [activeType, setActiveType] = useState<FavoriteType | undefined>(undefined)
 
   useEffect(() => {
@@ -50,6 +52,8 @@ export const MyFavoritesClient = observer(function MyFavoritesClient() {
   }
 
   const activeValue = TABS.find((t) => t.type === activeType)?.value ?? 'all'
+
+  if (!isAuthenticated) return null
 
   return (
     <div className="space-y-6">

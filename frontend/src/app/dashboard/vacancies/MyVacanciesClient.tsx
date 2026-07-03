@@ -7,6 +7,7 @@ import { Briefcase } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { hapticNotify } from '@/lib/telegram'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
 import { LimitBar } from '@/components/vacancy/LimitBar'
@@ -32,6 +33,7 @@ import { PLAN_LIMITS } from './plan-limits'
 export const MyVacanciesClient = observer(function MyVacanciesClient() {
   const { t } = useTranslation()
   const { vacancy: store, auth } = useStores()
+  useRequireAuth()
 
   useEffect(() => {
     void store.fetchMyVacancies()
@@ -61,6 +63,8 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
   const handlePageChange = (page: number) => {
     void store.fetchMyVacancies(page)
   }
+
+  if (!auth.isAuthenticated) return null
 
   return (
     <div className="space-y-6">

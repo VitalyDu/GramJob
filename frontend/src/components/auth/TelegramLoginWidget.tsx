@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useStores } from '@/stores/StoreProvider'
 import type { TelegramWidgetUser } from '@/types/api'
@@ -20,8 +20,17 @@ export function TelegramLoginWidget({ redirectTo = '/' }: Props) {
   const { auth } = useStores()
   const router = useRouter()
   const botUsername = process.env.NEXT_PUBLIC_BOT_USERNAME ?? 'GramJobBot'
+  const [isLocalhost, setIsLocalhost] = useState(false)
 
   useEffect(() => {
+    setIsLocalhost(
+      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    )
+  }, [])
+
+  useEffect(() => {
+    if (isLocalhost) return
+
     window.onTelegramAuth = async (user: TelegramWidgetUser) => {
       try {
         await auth.loginWithTelegram({ telegramData: user })
@@ -48,7 +57,15 @@ export function TelegramLoginWidget({ redirectTo = '/' }: Props) {
         container.removeChild(script)
       }
     }
-  }, [auth, botUsername, redirectTo, router])
+  }, [auth, botUsername, isLocalhost, redirectTo, router])
+
+  if (isLocalhost) {
+    return (
+      <p className="text-center text-xs text-muted-foreground">
+        Telegram-вход недоступен на localhost
+      </p>
+    )
+  }
 
   return <div ref={containerRef} />
 }

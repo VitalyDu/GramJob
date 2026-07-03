@@ -13,6 +13,7 @@ import {
   Legend,
 } from 'recharts'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageHeader } from '@/components/shared/PageHeader'
@@ -40,6 +41,7 @@ export const VacancyAnalyticsClient = observer(function VacancyAnalyticsClient({
 }: Props) {
   useTelegramBackButton()
   const { analytics: store } = useStores()
+  const isAuthenticated = useRequireAuth()
   const [from, setFrom] = useState(defaultFrom())
   const [to, setTo] = useState(defaultTo())
 
@@ -50,6 +52,8 @@ export const VacancyAnalyticsClient = observer(function VacancyAnalyticsClient({
   const data = store.vacancyAnalytics
   const total = data?.total
   const daily = data?.daily ?? []
+
+  if (!isAuthenticated) return null
 
   return (
     <div className="space-y-6">

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import { useRouter } from 'next/navigation'
 import { useStores } from '@/stores/StoreProvider'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 import { SubscriptionPlanCard } from '@/components/subscription/SubscriptionPlanCard'
@@ -17,6 +18,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
   useTelegramBackButton()
   const { auth, payment } = useStores()
   const { openInvoice } = useTelegramPayment()
+  const router = useRouter()
 
   const [buyingPlan, setBuyingPlan] = useState<string | null>(null)
   const [buyingVacancyPack, setBuyingVacancyPack] = useState<number | null>(null)
@@ -32,6 +34,10 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
   }, [payment])
 
   const handleBuyPlan = async (planCode: string) => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
     setBuyingPlan(planCode)
     setShowRefreshHint(false)
     try {
@@ -49,6 +55,10 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
   }
 
   const handleBuyVacancyPack = async (packageId: number) => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
     setBuyingVacancyPack(packageId)
     setShowRefreshHint(false)
     try {
@@ -66,6 +76,10 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
   }
 
   const handleBuyApplyPack = async (packageId: number) => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
     setBuyingApplyPack(packageId)
     setShowRefreshHint(false)
     try {
@@ -82,14 +96,6 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
     }
   }
 
-  if (!user) {
-    return (
-      <div className="py-16 text-center">
-        <p className="text-sm text-muted-foreground">Войдите, чтобы управлять подпиской.</p>
-      </div>
-    )
-  }
-
   const paidPlans = payment.plans.filter((p) => p.code !== 'free')
 
   return (
@@ -97,29 +103,42 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
       <PageHeader title="Подписка" />
 
       {/* Текущий план */}
-      <section>
-        <Card>
-          <CardContent className="flex flex-col gap-3 pt-6 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="mb-1 text-sm text-muted-foreground">Ваш текущий план</p>
-              <SubscriptionBadge
-                plan={user.subscriptionPlan}
-                expiresAt={user.subscriptionExpiresAt}
-                showExpiry
-              />
-            </div>
+      {user ? (
+        <section>
+          <Card>
+            <CardContent className="flex flex-col gap-3 pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="mb-1 text-sm text-muted-foreground">Ваш текущий план</p>
+                <SubscriptionBadge
+                  plan={user.subscriptionPlan}
+                  expiresAt={user.subscriptionExpiresAt}
+                  showExpiry
+                />
+              </div>
 
-            <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-              <span>
-                Остаток кредитов вакансий: <strong>{user.vacancyCredits}</strong>
-              </span>
-              <span>
-                Остаток кредитов откликов: <strong>{user.applyCredits}</strong>
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+              <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+                <span>
+                  Остаток кредитов вакансий: <strong>{user.vacancyCredits}</strong>
+                </span>
+                <span>
+                  Остаток кредитов откликов: <strong>{user.applyCredits}</strong>
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      ) : (
+        <section>
+          <Card>
+            <CardContent className="flex items-center justify-between pt-6">
+              <p className="text-sm text-muted-foreground">
+                Войдите, чтобы управлять подпиской и покупать планы.
+              </p>
+              <Button onClick={() => router.push('/login')}>Войти</Button>
+            </CardContent>
+          </Card>
+        </section>
+      )}
 
       {/* Уведомление о необходимости обновить статус */}
       {showRefreshHint && (
@@ -165,22 +184,23 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
 
         {paidPlans.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-3">
-            {paidPlans.map((plan) => (
-              <div
-                key={plan.code}
-                className={
-                  plan.code === user.subscriptionPlan ? 'ring-2 ring-primary rounded-xl' : ''
-                }
-              >
-                <SubscriptionPlanCard
-                  plan={plan}
-                  currentPlan={user.subscriptionPlan}
-                  canBuy={canUpgradeToPlan(user.subscriptionPlan, plan.code)}
-                  isBuying={buyingPlan === plan.code}
-                  onBuy={handleBuyPlan}
-                />
-              </div>
-            ))}
+            {paidPlans.map((plan) => {
+              const currentPlan = user?.subscriptionPlan ?? 'free'
+              return (
+                <div
+                  key={plan.code}
+                  className={plan.code === currentPlan ? 'ring-2 ring-primary rounded-xl' : ''}
+                >
+                  <SubscriptionPlanCard
+                    plan={plan}
+                    currentPlan={currentPlan}
+                    canBuy={canUpgradeToPlan(currentPlan, plan.code)}
+                    isBuying={buyingPlan === plan.code}
+                    onBuy={handleBuyPlan}
+                  />
+                </div>
+              )
+            })}
           </div>
         )}
       </section>

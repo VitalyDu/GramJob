@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { observer } from 'mobx-react-lite'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { ApplicationStatusBadge } from '@/components/application/ApplicationStatusBadge'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { Card, CardContent } from '@/components/ui/card'
@@ -19,6 +20,7 @@ export const ApplicationDetailClient = observer(function ApplicationDetailClient
   documentId,
 }: Props) {
   const { application: store } = useStores()
+  const isAuthenticated = useRequireAuth()
   useTelegramBackButton()
 
   useEffect(() => {
@@ -37,6 +39,8 @@ export const ApplicationDetailClient = observer(function ApplicationDetailClient
       />
     )
   }
+
+  if (!isAuthenticated) return null
 
   const app = store.currentApplication
   if (!app) return null

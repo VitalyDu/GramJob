@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { CompanyForm } from '@/components/company/CompanyForm'
 import type { CompanyUpdateInput } from '@/types/api'
@@ -16,6 +17,7 @@ interface Props {
 export const EditCompanyClient = observer(function EditCompanyClient({ id }: Props) {
   useTelegramBackButton()
   const { company: store } = useStores()
+  const isAuthenticated = useRequireAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -30,6 +32,8 @@ export const EditCompanyClient = observer(function EditCompanyClient({ id }: Pro
       // error сохранён в store.error
     }
   }
+
+  if (!isAuthenticated) return null
 
   if (store.isLoading && !store.currentCompany) {
     return <p className="text-sm text-muted-foreground">Загрузка...</p>

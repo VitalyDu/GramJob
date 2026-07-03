@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { VacancyForm } from '@/components/vacancy/VacancyForm'
 import { UpsellModal } from '@/components/vacancy/UpsellModal'
@@ -18,12 +19,15 @@ interface Props {
 export const EditVacancyClient = observer(function EditVacancyClient({ id }: Props) {
   useTelegramBackButton()
   const { vacancy: vStore, company: cStore } = useStores()
+  const isAuthenticated = useRequireAuth()
   const router = useRouter()
 
   useEffect(() => {
     void vStore.fetchMyVacancyById(id)
     void cStore.fetchMyCompanies(1)
   }, [vStore, cStore, id])
+
+  if (!isAuthenticated) return null
 
   if (vStore.isLoading || !vStore.currentVacancy) {
     return <p className="text-sm text-muted-foreground">Загрузка...</p>

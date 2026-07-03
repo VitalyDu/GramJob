@@ -7,6 +7,7 @@ import { FileText } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { hapticNotify } from '@/lib/telegram'
 import { ResumeStatusBadge } from '@/components/resume/ResumeStatusBadge'
 import { Button } from '@/components/ui/button'
@@ -28,6 +29,7 @@ import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 export const MyResumesClient = observer(function MyResumesClient() {
   const { t } = useTranslation()
   const { resume: store, auth } = useStores()
+  useRequireAuth()
 
   useEffect(() => {
     void store.fetchMyResumes()
@@ -52,6 +54,8 @@ export const MyResumesClient = observer(function MyResumesClient() {
   const handlePageChange = (page: number) => {
     void store.fetchMyResumes(page)
   }
+
+  if (!auth.isAuthenticated) return null
 
   return (
     <div className="space-y-6">

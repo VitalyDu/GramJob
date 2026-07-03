@@ -13,6 +13,8 @@ vi.mock('@/stores/StoreProvider', () => ({
   useStores: () => ({ application: storeState }),
 }))
 
+vi.mock('@/hooks/useRequireAuth', () => ({ useRequireAuth: () => true }))
+
 function setStore(overrides: Record<string, unknown>) {
   for (const key of Object.keys(storeState)) delete storeState[key]
   Object.assign(

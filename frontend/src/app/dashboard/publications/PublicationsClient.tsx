@@ -7,6 +7,7 @@ import { FileText } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
 import { ResumeStatusBadge } from '@/components/resume/ResumeStatusBadge'
 import { StatusBadge } from '@/components/company/StatusBadge'
@@ -28,6 +29,7 @@ const STATUS_HINT_KEYS: Record<string, string> = {
 export const PublicationsClient = observer(function PublicationsClient() {
   const { t } = useTranslation()
   const { vacancy, resume, company } = useStores()
+  const isAuthenticated = useRequireAuth()
 
   useEffect(() => {
     void vacancy.fetchMyVacancies()
@@ -62,6 +64,8 @@ export const PublicationsClient = observer(function PublicationsClient() {
       toast.success(t('moderation.toasts.companySubmitted'))
     }
   }
+
+  if (!isAuthenticated) return null
 
   return (
     <div className="space-y-6">

@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { Users } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { ApplicationCard } from '@/components/application/ApplicationCard'
 import { PageHeader } from '@/components/shared/PageHeader'
@@ -22,6 +23,7 @@ export const VacancyApplicationsClient = observer(function VacancyApplicationsCl
 }: Props) {
   useTelegramBackButton()
   const { application: store } = useStores()
+  const isAuthenticated = useRequireAuth()
 
   useEffect(() => {
     void store.fetchVacancyApplications(vacancyId)
@@ -34,6 +36,8 @@ export const VacancyApplicationsClient = observer(function VacancyApplicationsCl
   const handlePageChange = (page: number) => {
     void store.fetchVacancyApplications(vacancyId, page)
   }
+
+  if (!isAuthenticated) return null
 
   return (
     <div className="space-y-6">

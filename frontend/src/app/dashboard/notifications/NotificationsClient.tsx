@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { Bell } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { PageHeader } from '@/components/shared/PageHeader'
@@ -42,6 +43,7 @@ const FILTER_TABS: { label: string; value: TabValue; isRead: boolean | undefined
 
 export const NotificationsClient = observer(function NotificationsClient() {
   const { notification: store } = useStores()
+  const isAuthenticated = useRequireAuth()
   const [activeTab, setActiveTab] = useState<TabValue>('all')
 
   const isReadFilter = FILTER_TABS.find((t) => t.value === activeTab)?.isRead
@@ -67,6 +69,8 @@ export const NotificationsClient = observer(function NotificationsClient() {
   const handleTabChange = (value: string) => {
     setActiveTab(value as TabValue)
   }
+
+  if (!isAuthenticated) return null
 
   return (
     <div className="space-y-6">

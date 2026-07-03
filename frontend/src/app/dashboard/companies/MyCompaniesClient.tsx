@@ -8,6 +8,7 @@ import { Building2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { hapticNotify } from '@/lib/telegram'
 import { StatusBadge } from '@/components/company/StatusBadge'
 import { COMPANY_SIZE_LABELS, canSubmitCompany, canDeleteCompany } from '@/lib/company-utils'
@@ -23,6 +24,7 @@ import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 export const MyCompaniesClient = observer(function MyCompaniesClient() {
   const { t } = useTranslation()
   const { company: store } = useStores()
+  const isAuthenticated = useRequireAuth()
 
   useEffect(() => {
     void store.fetchMyCompanies(1)
@@ -44,6 +46,8 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
   const handlePageChange = (page: number) => {
     void store.fetchMyCompanies(page)
   }
+
+  if (!isAuthenticated) return null
 
   return (
     <div className="space-y-6">
