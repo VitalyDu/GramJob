@@ -5,6 +5,7 @@ import { useStores } from '@/stores/StoreProvider'
 import { api } from '@/services/api'
 import type { ReportType, ReportReason } from '@/types/api'
 import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -102,17 +103,16 @@ export function ReportDialog({ type, targetId, isOpen, onClose }: Props) {
                 <label className="mb-1 block text-sm font-medium text-foreground">
                   Комментарий (необязательно)
                 </label>
-                <textarea
+                <Textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   rows={3}
-                  className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="Опишите проблему подробнее..."
                 />
               </div>
             </div>
 
-            {submitError && <p className="mt-3 text-sm text-red-600">{submitError}</p>}
+            {submitError && <p className="mt-3 text-sm text-destructive">{submitError}</p>}
 
             <div className="mt-5 flex gap-3">
               <Button onClick={() => void handleSubmit()} disabled={isLoading}>
