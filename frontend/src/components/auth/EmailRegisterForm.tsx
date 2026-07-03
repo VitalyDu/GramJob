@@ -51,37 +51,37 @@ export const EmailRegisterForm = observer(function EmailRegisterForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <Label htmlFor="firstName">{t('auth.firstName')}</Label>
           <Input id="firstName" {...register('firstName')} />
           {errors.firstName && (
-            <p className="text-xs text-destructive">{errors.firstName.message}</p>
+            <p className="text-sm text-destructive">{errors.firstName.message}</p>
           )}
         </div>
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <Label htmlFor="lastName">{t('auth.lastName')}</Label>
           <Input id="lastName" {...register('lastName')} />
-          {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
+          {errors.lastName && <p className="text-sm text-destructive">{errors.lastName.message}</p>}
         </div>
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         <Label htmlFor="email">{t('auth.email')}</Label>
         <Input id="email" type="email" {...register('email')} />
-        {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+        {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         <Label htmlFor="password">{t('auth.password')}</Label>
         <Input id="password" type="password" {...register('password')} />
-        {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+        {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         <Label htmlFor="confirmPassword">{t('auth.confirmPassword')}</Label>
         <Input id="confirmPassword" type="password" {...register('confirmPassword')} />
         {errors.confirmPassword && (
-          <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
+          <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
         )}
       </div>
 
