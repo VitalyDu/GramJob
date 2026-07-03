@@ -68,7 +68,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         views: 0,
         uniqueViews: 0,
         applicationsCount: 0,
-        status: 'draft',
+        // Спека redesign §8: вакансия сразу уходит на модерацию, минуя draft
+        status: 'moderation',
         postedBy: postedById,
         company: input.companyId ?? null,
       },

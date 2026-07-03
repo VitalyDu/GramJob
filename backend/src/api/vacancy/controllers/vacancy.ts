@@ -1,11 +1,5 @@
 import type { Core } from '@strapi/strapi'
-import {
-  canPublish,
-  canBoost,
-  canArchive,
-  canEdit,
-  publishedTransitionsOnEdit,
-} from '../services/vacancy-utils'
+import { canPublish, canBoost, canArchive, canEdit } from '../services/vacancy-utils'
 import { checkAndConsumeVacancyCredit, checkAndConsumeBoost } from '../services/credit-service'
 import { getBlockedUserIds } from '../../block/services/block-filter'
 import type vacancyServiceFactory from '../services/vacancy'
@@ -144,6 +138,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         if ((company as any).status !== 'published') {
           return ctx.badRequest('Company must be published to post vacancies')
         }
+      }
+
+      try {
+        await checkAndConsumeVacancyCredit(strapi, user.id)
+      } catch (err: any) {
+        if (err?.code === 'LIMIT_REACHED') {
+          ctx.status = 403
+          return ctx.send({
+            error: {
+              code: 'LIMIT_REACHED',
+              message: 'Vacancy limit reached',
+              details: err.details,
+            },
+          })
+        }
+        throw err
       }
 
       const vacancy = await svc().createVacancy(user.id, {
@@ -522,10 +532,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return ctx.badRequest('No updatable fields provided.')
       }
 
-      if (publishedTransitionsOnEdit(status)) {
-        updateData.status = 'draft'
-        updateData.expiresAt = null
-      }
+      // Спека redesign §9: любое редактирование возвращает вакансию на модерацию
+      updateData.status = 'moderation'
+      updateData.expiresAt = null
 
       const updated = await strapi.documents('api::vacancy.vacancy').update({
         documentId: id,
