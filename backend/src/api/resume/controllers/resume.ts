@@ -10,6 +10,12 @@ import type resumeServiceFactory from '../services/resume'
 
 type ResumeService = ReturnType<typeof resumeServiceFactory>
 
+function toArray(value: string | string[] | undefined): string[] {
+  if (!value) return []
+  if (Array.isArray(value)) return value.filter(Boolean)
+  return value ? [value] : []
+}
+
 const VALID_WORK_FORMATS = ['office', 'remote', 'hybrid', 'any'] as const
 const VALID_EMPLOYMENT_TYPES = [
   'full-time',
@@ -128,16 +134,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async findPublic(ctx: any) {
+      const rawQuery = ctx.query as Record<string, string | string[]>
       const {
         search,
         country,
         city,
-        workFormat,
-        employmentType,
         experienceYears,
         page = '1',
         pageSize = '20',
-      } = ctx.query as Record<string, string>
+      } = rawQuery as Record<string, string>
+
+      const workFormats = toArray(rawQuery.workFormat)
+      const employmentTypes = toArray(rawQuery.employmentType)
 
       const pageNum = Math.max(1, parseInt(page, 10) || 1)
       const pageSizeNum = Math.min(50, Math.max(1, parseInt(pageSize, 10) || 20))
@@ -146,8 +154,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (country) filters.country = { $eq: country }
       if (city) filters.city = { $containsi: city }
-      if (workFormat) filters.workFormat = { $eq: workFormat }
-      if (employmentType) filters.employmentType = { $eq: employmentType }
+      if (workFormats.length > 0) filters.workFormat = { $in: workFormats }
+      if (employmentTypes.length > 0) filters.employmentType = { $in: employmentTypes }
       if (experienceYears) {
         const years = parseInt(experienceYears, 10)
         if (!isNaN(years)) filters.experienceYears = { $lte: years }

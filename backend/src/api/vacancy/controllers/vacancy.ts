@@ -20,6 +20,12 @@ const VALID_EMPLOYMENT_TYPES = [
 const VALID_WORK_FORMATS = ['office', 'remote', 'hybrid'] as const
 const VALID_SENIORITIES = ['intern', 'junior', 'middle', 'senior', 'lead', 'principal'] as const
 
+function toArray(value: string | string[] | undefined): string[] {
+  if (!value) return []
+  if (Array.isArray(value)) return value.filter(Boolean)
+  return value ? [value] : []
+}
+
 // In-memory unique-view tracker (resets on restart — sufficient for MVP)
 const viewedIPs = new Map<string, Set<string>>()
 
@@ -255,15 +261,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async findPublished(ctx: any) {
+      const rawQuery = ctx.query as Record<string, string | string[]>
       const {
         search,
         industry,
         specialization,
         country,
         city,
-        workFormat,
-        employmentType,
-        seniority,
         salaryFrom,
         salaryTo,
         salaryCurrency,
@@ -273,7 +277,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         sort = 'relevance',
         page = '1',
         pageSize = '20',
-      } = ctx.query as Record<string, string>
+      } = rawQuery as Record<string, string>
+
+      const workFormats = toArray(rawQuery.workFormat)
+      const employmentTypes = toArray(rawQuery.employmentType)
+      const seniorities = toArray(rawQuery.seniority)
 
       const pageNum = Math.max(1, parseInt(page, 10) || 1)
       const pageSizeNum = Math.min(50, Math.max(1, parseInt(pageSize, 10) || 20))
@@ -328,9 +336,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         if (specialization) baseFilters.specialization = { documentId: { $eq: specialization } }
         if (country) baseFilters.country = { $eq: country }
         if (city) baseFilters.city = { $containsi: city }
-        if (workFormat) baseFilters.workFormat = { $eq: workFormat }
-        if (employmentType) baseFilters.employmentType = { $eq: employmentType }
-        if (seniority) baseFilters.seniority = { $eq: seniority }
+        if (workFormats.length > 0) baseFilters.workFormat = { $in: workFormats }
+        if (employmentTypes.length > 0) baseFilters.employmentType = { $in: employmentTypes }
+        if (seniorities.length > 0) baseFilters.seniority = { $in: seniorities }
         if (salaryCurrency) baseFilters.salaryCurrency = { $eq: salaryCurrency }
         if (salaryFrom) baseFilters.salaryTo = { $gte: parseInt(salaryFrom, 10) }
         if (salaryTo) baseFilters.salaryFrom = { $lte: parseInt(salaryTo, 10) }
@@ -425,9 +433,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (specialization) filters.specialization = { documentId: { $eq: specialization } }
       if (country) filters.country = { $eq: country }
       if (city) filters.city = { $containsi: city }
-      if (workFormat) filters.workFormat = { $eq: workFormat }
-      if (employmentType) filters.employmentType = { $eq: employmentType }
-      if (seniority) filters.seniority = { $eq: seniority }
+      if (workFormats.length > 0) filters.workFormat = { $in: workFormats }
+      if (employmentTypes.length > 0) filters.employmentType = { $in: employmentTypes }
+      if (seniorities.length > 0) filters.seniority = { $in: seniorities }
       if (salaryCurrency) filters.salaryCurrency = { $eq: salaryCurrency }
       if (salaryFrom) filters.salaryTo = { $gte: parseInt(salaryFrom, 10) }
       if (salaryTo) filters.salaryFrom = { $lte: parseInt(salaryTo, 10) }
