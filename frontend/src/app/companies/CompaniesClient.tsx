@@ -15,6 +15,13 @@ import {
   CardListSkeleton,
   PaginationBar,
 } from '@/components/shared'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import type { CompanySizeEnum } from '@/types/api'
 
 export const CompaniesClient = observer(function CompaniesClient() {
@@ -64,20 +71,24 @@ export const CompaniesClient = observer(function CompaniesClient() {
               value={country}
               onChange={(e) => setCountry(e.target.value)}
             />
-            <select
-              value={companySize}
-              onChange={(e) => setCompanySize(e.target.value as CompanySizeEnum | '')}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            <Select
+              value={companySize || '__all__'}
+              onValueChange={(v) => setCompanySize(v === '__all__' ? '' : (v as CompanySizeEnum))}
             >
-              <option value="">Любой размер</option>
-              {(Object.entries(COMPANY_SIZE_LABELS) as [CompanySizeEnum, string][]).map(
-                ([k, v]) => (
-                  <option key={k} value={k}>
-                    {v}
-                  </option>
-                )
-              )}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">Любой размер</SelectItem>
+                {(Object.entries(COMPANY_SIZE_LABELS) as [CompanySizeEnum, string][]).map(
+                  ([k, v]) => (
+                    <SelectItem key={k} value={k}>
+                      {v}
+                    </SelectItem>
+                  )
+                )}
+              </SelectContent>
+            </Select>
             <Button type="submit" className="w-full">
               Найти
             </Button>

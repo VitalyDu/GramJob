@@ -17,6 +17,13 @@ import {
   PaginationBar,
 } from '@/components/shared'
 import { RESUME_WORK_FORMAT_LABELS, RESUME_EMPLOYMENT_TYPE_LABELS } from '@/lib/resume-utils'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import type { ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 
 export const ResumesClient = observer(function ResumesClient() {
@@ -100,34 +107,46 @@ export const ResumesClient = observer(function ResumesClient() {
               value={country}
               onChange={(e) => setCountry(e.target.value)}
             />
-            <select
-              value={workFormat}
-              onChange={(e) => setWorkFormat(e.target.value as ResumeWorkFormatEnum | '')}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            <Select
+              value={workFormat || '__all__'}
+              onValueChange={(v) =>
+                setWorkFormat(v === '__all__' ? '' : (v as ResumeWorkFormatEnum))
+              }
             >
-              <option value="">Все форматы</option>
-              {(Object.entries(RESUME_WORK_FORMAT_LABELS) as [ResumeWorkFormatEnum, string][]).map(
-                ([k, v]) => (
-                  <option key={k} value={k}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">Все форматы</SelectItem>
+                {(
+                  Object.entries(RESUME_WORK_FORMAT_LABELS) as [ResumeWorkFormatEnum, string][]
+                ).map(([k, v]) => (
+                  <SelectItem key={k} value={k}>
                     {v}
-                  </option>
-                )
-              )}
-            </select>
-            <select
-              value={employmentType}
-              onChange={(e) => setEmploymentType(e.target.value as EmploymentTypeEnum | '')}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={employmentType || '__all__'}
+              onValueChange={(v) =>
+                setEmploymentType(v === '__all__' ? '' : (v as EmploymentTypeEnum))
+              }
             >
-              <option value="">Все типы занятости</option>
-              {(
-                Object.entries(RESUME_EMPLOYMENT_TYPE_LABELS) as [EmploymentTypeEnum, string][]
-              ).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">Все типы занятости</SelectItem>
+                {(
+                  Object.entries(RESUME_EMPLOYMENT_TYPE_LABELS) as [EmploymentTypeEnum, string][]
+                ).map(([k, v]) => (
+                  <SelectItem key={k} value={k}>
+                    {v}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="mt-3 hidden md:block">
             <SaveSearchButton

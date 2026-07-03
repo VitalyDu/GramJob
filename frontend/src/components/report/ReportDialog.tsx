@@ -5,6 +5,13 @@ import { useStores } from '@/stores/StoreProvider'
 import { api } from '@/services/api'
 import type { ReportType, ReportReason } from '@/types/api'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const REASON_LABELS: Record<ReportReason, string> = {
   spam: 'Спам',
@@ -77,17 +84,18 @@ export function ReportDialog({ type, targetId, isOpen, onClose }: Props) {
             <div className="mt-4 space-y-4">
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Причина</label>
-                <select
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value as ReportReason)}
-                  className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  {(Object.keys(REASON_LABELS) as ReportReason[]).map((r) => (
-                    <option key={r} value={r}>
-                      {REASON_LABELS[r]}
-                    </option>
-                  ))}
-                </select>
+                <Select value={reason} onValueChange={(v) => setReason(v as ReportReason)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(Object.keys(REASON_LABELS) as ReportReason[]).map((r) => (
+                      <SelectItem key={r} value={r}>
+                        {REASON_LABELS[r]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
