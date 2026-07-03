@@ -41,9 +41,13 @@ export class VacancyStore {
     })
     try {
       const query = new URLSearchParams()
-      const entries = Object.entries(params) as [string, string | number | boolean | undefined][]
-      for (const [key, value] of entries) {
-        if (value !== undefined && value !== null && value !== '') {
+      for (const [key, value] of Object.entries(params)) {
+        if (value === undefined || value === null || value === '') continue
+        if (Array.isArray(value)) {
+          for (const v of value) {
+            query.append(key, String(v))
+          }
+        } else {
           query.set(key, String(value))
         }
       }

@@ -222,9 +222,9 @@ export interface VacancyListParams {
   specialization?: string
   country?: string
   city?: string
-  workFormat?: WorkFormatEnum
-  employmentType?: EmploymentTypeEnum
-  seniority?: SeniorityEnum
+  workFormat?: WorkFormatEnum[]
+  employmentType?: EmploymentTypeEnum[]
+  seniority?: SeniorityEnum[]
   salaryFrom?: number
   salaryTo?: number
   salaryCurrency?: SalaryCurrencyEnum
@@ -345,8 +345,8 @@ export interface ResumeListParams {
   search?: string
   country?: string
   city?: string
-  workFormat?: ResumeWorkFormatEnum
-  employmentType?: EmploymentTypeEnum
+  workFormat?: ResumeWorkFormatEnum[]
+  employmentType?: EmploymentTypeEnum[]
   experienceYears?: number
   page?: number
   pageSize?: number

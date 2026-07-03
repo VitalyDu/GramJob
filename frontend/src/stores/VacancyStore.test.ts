@@ -90,7 +90,7 @@ describe('VacancyStore', () => {
         meta: { total: 0, page: 1, pageSize: 20, pageCount: 0 },
       })
 
-      await store.fetchVacancies({ search: 'react', country: 'RU', workFormat: 'remote' })
+      await store.fetchVacancies({ search: 'react', country: 'RU', workFormat: ['remote'] })
 
       const url = vi.mocked(api.get).mock.calls[0]?.[0] as string
       expect(url).toContain('search=react')
