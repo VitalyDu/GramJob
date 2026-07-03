@@ -53,9 +53,9 @@ describe('VacancyCard', () => {
     expect(screen.getByText('Senior')).toBeDefined()
   })
 
-  it('отображает страну', () => {
+  it('отображает страну и город вместе в Badge', () => {
     render(<VacancyCard vacancy={mockVacancy} />)
-    expect(screen.getByText('RU')).toBeDefined()
+    expect(screen.getByText('RU, Москва')).toBeDefined()
   })
 
   it('отображает VacancyStatusBadge', () => {
@@ -80,17 +80,45 @@ describe('VacancyCard', () => {
 
   it('отображает бейдж Urgent если urgent=true', () => {
     render(<VacancyCard vacancy={{ ...mockVacancy, urgent: true }} />)
-    expect(screen.getByText('Urgent')).toBeDefined()
+    expect(screen.getByText(/🔥 Urgent/)).toBeDefined()
   })
 
   it('не отображает бейдж Urgent если urgent=false', () => {
     render(<VacancyCard vacancy={mockVacancy} />)
-    expect(screen.queryByText('Urgent')).toBeNull()
+    expect(screen.queryByText(/🔥 Urgent/)).toBeNull()
   })
 
   it('рендерит ссылку на страницу вакансии', () => {
     const { container } = render(<VacancyCard vacancy={mockVacancy} />)
     const link = container.querySelector('a')
     expect(link?.getAttribute('href')).toBe('/vacancies/vac123')
+  })
+
+  it('показывает количество просмотров если views определено', () => {
+    render(<VacancyCard vacancy={{ ...mockVacancy, views: 128 }} />)
+    expect(screen.getByLabelText('Просмотры: 128')).toBeDefined()
+  })
+
+  it('не показывает счётчик просмотров если views отсутствует', () => {
+    render(<VacancyCard vacancy={mockVacancy} />)
+    expect(screen.queryByLabelText(/Просмотры/)).toBeNull()
+  })
+
+  it('показывает количество откликов если applicationsCount определено', () => {
+    render(<VacancyCard vacancy={{ ...mockVacancy, applicationsCount: 7 }} />)
+    expect(screen.getByLabelText('Отклики: 7')).toBeDefined()
+  })
+
+  it('не показывает счётчик откликов если applicationsCount отсутствует', () => {
+    render(<VacancyCard vacancy={mockVacancy} />)
+    expect(screen.queryByLabelText(/Отклики/)).toBeNull()
+  })
+
+  it('отображает фильтры как Badge компоненты', () => {
+    render(<VacancyCard vacancy={mockVacancy} />)
+    // Ищем по тексту, который должен быть в Badge
+    expect(screen.getByText('Удалённо')).toBeDefined()
+    expect(screen.getByText('Полная занятость')).toBeDefined()
+    expect(screen.getByText('Senior')).toBeDefined()
   })
 })
