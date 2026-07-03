@@ -1,13 +1,18 @@
 {
   "nav": {
     "vacancies": "Вакансии",
+    "resumes": "Резюме",
+    "companies": "Компании",
     "favorites": "Избранное",
     "applications": "Отклики",
     "profile": "Профиль",
     "publications": "Мои публикации",
     "dashboard": "Кабинет",
+    "subscription": "Подписка",
     "login": "Войти",
-    "main": "Основная навигация"
+    "main": "Основная навигация",
+    "home": "GramJob — на главную",
+    "userMenu": "Меню пользователя"
   },
   "auth": {
     "email": "Email",
