@@ -23,16 +23,15 @@ describe('StatusBadge', () => {
     expect(screen.getByText('Отклонена')).toBeDefined()
   })
 
-  it('применяет зелёный класс для published', () => {
+  it('применяет вариант bg-success для published', () => {
     const { container } = render(<StatusBadge status="published" />)
-    expect(container.firstChild?.toString()).not.toBe(null)
-    const span = container.querySelector('span')
-    expect(span?.className).toContain('green')
+    const badge = container.querySelector('[data-slot="badge"]')
+    expect(badge?.className).toContain('bg-success')
   })
 
-  it('применяет красный класс для rejected', () => {
+  it('применяет destructive вариант для rejected', () => {
     const { container } = render(<StatusBadge status="rejected" />)
-    const span = container.querySelector('span')
-    expect(span?.className).toContain('red')
+    const badge = container.querySelector('[data-slot="badge"]')
+    expect(badge?.getAttribute('data-variant')).toBe('destructive')
   })
 })

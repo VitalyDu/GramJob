@@ -142,7 +142,7 @@ export const ResumesClient = observer(function ResumesClient() {
 
       <div className="space-y-3">
         {store.resumes.map((r) => (
-          <ResumeCard key={r.documentId} resume={r} href={`/resumes/${r.documentId}`} />
+          <ResumeCard key={r.documentId} resume={r} />
         ))}
       </div>
 
