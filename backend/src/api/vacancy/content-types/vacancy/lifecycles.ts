@@ -93,6 +93,22 @@ export default {
   async afterCreate(event: VacancyAfterEvent) {
     // No await: raw SQL runs after Strapi commits the transaction to avoid lock deadlock
     updateSearchVector(event.result.id)
+
+    // Вакансии создаются сразу в status=moderation — audit-лог как при submit
+    if (event.result.status !== 'moderation') return
+    const s = globalThis.strapi as Core.Strapi
+    const documentId = event.result.documentId
+    if (!documentId) return
+    try {
+      await logModeration(s, {
+        entityType: 'vacancy',
+        entityDocumentId: documentId,
+        entityTitle: ((event.params.data?.['title'] as string) ?? '') || '',
+        action: 'submitted',
+      })
+    } catch (err) {
+      s.log.error('[vacancy] afterCreate moderation log failed', err)
+    }
   },
 
   async afterUpdate(event: VacancyAfterEvent) {
