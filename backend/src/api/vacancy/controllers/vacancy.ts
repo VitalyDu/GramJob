@@ -50,6 +50,8 @@ const VACANCY_CARD_FIELDS = [
   'status',
   'expiresAt',
   'createdAt',
+  'views',
+  'applicationsCount',
 ] as const
 
 const VACANCY_FULL_FIELDS = [
@@ -63,9 +65,7 @@ const VACANCY_FULL_FIELDS = [
   'experienceYears',
   'sourceName',
   'sourceUrl',
-  'views',
   'uniqueViews',
-  'applicationsCount',
 ] as const
 
 const REJECTION_FIELDS = ['rejectionReason', 'rejectionComment'] as const
