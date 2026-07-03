@@ -7,10 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default function CompaniesPage() {
-  return (
-    <div className="container px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold">Компании</h1>
-      <CompaniesClient />
-    </div>
-  )
+  return <CompaniesClient />
 }
