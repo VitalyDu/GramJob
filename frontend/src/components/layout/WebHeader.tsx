@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
 import { FileText, LayoutDashboard, LogOut, Star } from 'lucide-react'
@@ -30,6 +30,7 @@ const NAV_LINKS = [
 export const WebHeader = observer(function WebHeader() {
   const { t } = useTranslation()
   const pathname = usePathname()
+  const router = useRouter()
   const { auth } = useStores()
 
   const initial = auth.user?.firstName?.charAt(0) ?? auth.user?.email?.charAt(0) ?? '?'
@@ -42,8 +43,8 @@ export const WebHeader = observer(function WebHeader() {
             <Image
               src="/logo-horizontal.png"
               alt="GramJob"
-              width={140}
-              height={40}
+              width={80}
+              height={32}
               priority
               className="h-8 w-auto"
             />
@@ -80,6 +81,7 @@ export const WebHeader = observer(function WebHeader() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
+                  type="button"
                   aria-label={t('nav.userMenu')}
                   className="rounded-full outline-none ring-ring focus-visible:ring-2"
                 >
@@ -114,7 +116,12 @@ export const WebHeader = observer(function WebHeader() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => auth.logout()}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    auth.logout()
+                    router.push('/')
+                  }}
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   {t('auth.logout')}
                 </DropdownMenuItem>
