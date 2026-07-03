@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function VacanciesPage() {
   return (
-    <div className="container mx-auto max-w-5xl px-4 py-8">
+    <div className="container px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold">Вакансии</h1>
       <VacanciesClient />
     </div>
