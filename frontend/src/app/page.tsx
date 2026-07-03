@@ -1,50 +1,15 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, Briefcase, Building2, FileText, Layers, Search, Send } from 'lucide-react'
+import { ArrowRight, FileText, Search, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { VacancyCard } from '@/components/vacancy/VacancyCard'
-import { getHomeStats, getLatestVacancies } from '@/lib/home-data'
+import { getLatestVacancies } from '@/lib/home-data'
 
 export const revalidate = 300
 
-function pluralizeRu(n: number, one: string, few: string, many: string): string {
-  const mod10 = n % 10
-  const mod100 = n % 100
-  if (mod100 >= 11 && mod100 <= 14) return many
-  if (mod10 === 1) return one
-  if (mod10 >= 2 && mod10 <= 4) return few
-  return many
-}
-
-function StatCard({
-  icon: Icon,
-  value,
-  forms,
-  delay,
-}: {
-  icon: typeof Briefcase
-  value: number
-  forms: [string, string, string]
-  delay: string
-}) {
-  return (
-    <Card className={`animate-fade-in-up ${delay}`}>
-      <CardContent className="flex items-center gap-4 p-5">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-          <Icon className="h-5 w-5 text-primary" />
-        </div>
-        <div>
-          <p className="text-2xl font-bold tabular-nums">{value.toLocaleString('ru-RU')}</p>
-          <p className="text-sm text-muted-foreground">{pluralizeRu(value, ...forms)}</p>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
 export default async function HomePage() {
-  const [stats, latest] = await Promise.all([getHomeStats(), getLatestVacancies(6)])
+  const latest = await getLatestVacancies(6)
 
   return (
     <div className="space-y-16 pb-8">
@@ -85,28 +50,6 @@ export default async function HomePage() {
             </Button>
           </div>
         </div>
-      </section>
-
-      {/* Статистика */}
-      <section aria-label="Статистика сервиса" className="grid gap-4 sm:grid-cols-3">
-        <StatCard
-          icon={Briefcase}
-          value={stats.vacancies}
-          forms={['Вакансия', 'Вакансии', 'Вакансий']}
-          delay="animation-delay-100"
-        />
-        <StatCard
-          icon={Building2}
-          value={stats.companies}
-          forms={['Компания', 'Компании', 'Компаний']}
-          delay="animation-delay-200"
-        />
-        <StatCard
-          icon={Layers}
-          value={stats.industries}
-          forms={['Отрасль', 'Отрасли', 'Отраслей']}
-          delay="animation-delay-300"
-        />
       </section>
 
       {/* Свежие вакансии */}
