@@ -507,6 +507,19 @@ export interface ApiCompanyCompany extends Struct.CollectionTypeSchema {
     name: Schema.Attribute.String & Schema.Attribute.Required
     owner: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'>
     publishedAt: Schema.Attribute.DateTime
+    rejectionComment: Schema.Attribute.Text
+    rejectionReason: Schema.Attribute.Enumeration<
+      [
+        'spam',
+        'fake',
+        'inappropriate',
+        'incomplete',
+        'wrong_category',
+        'salary_mismatch',
+        'contact_info',
+        'other',
+      ]
+    >
     slug: Schema.Attribute.String & Schema.Attribute.Required & Schema.Attribute.Unique
     status: Schema.Attribute.Enumeration<['draft', 'moderation', 'published', 'rejected']> &
       Schema.Attribute.Required &
@@ -571,6 +584,52 @@ export interface ApiIndustryIndustry extends Struct.CollectionTypeSchema {
   }
 }
 
+export interface ApiModerationLogModerationLog extends Struct.CollectionTypeSchema {
+  collectionName: 'moderation_logs'
+  info: {
+    description: 'Audit log of moderation decisions (who, when, what)'
+    displayName: 'ModerationLog'
+    pluralName: 'moderation-logs'
+    singularName: 'moderation-log'
+  }
+  options: {
+    draftAndPublish: false
+  }
+  attributes: {
+    action: Schema.Attribute.Enumeration<
+      ['submitted', 'approved', 'rejected', 'report_resolved', 'report_dismissed']
+    > &
+      Schema.Attribute.Required
+    comment: Schema.Attribute.Text
+    createdAt: Schema.Attribute.DateTime
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
+    entityDocumentId: Schema.Attribute.String & Schema.Attribute.Required
+    entityTitle: Schema.Attribute.String
+    entityType: Schema.Attribute.Enumeration<['vacancy', 'resume', 'company', 'report']> &
+      Schema.Attribute.Required
+    locale: Schema.Attribute.String & Schema.Attribute.Private
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::moderation-log.moderation-log'> &
+      Schema.Attribute.Private
+    moderatorId: Schema.Attribute.Integer
+    moderatorName: Schema.Attribute.String
+    publishedAt: Schema.Attribute.DateTime
+    reason: Schema.Attribute.Enumeration<
+      [
+        'spam',
+        'fake',
+        'inappropriate',
+        'incomplete',
+        'wrong_category',
+        'salary_mismatch',
+        'contact_info',
+        'other',
+      ]
+    >
+    updatedAt: Schema.Attribute.DateTime
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
+  }
+}
+
 export interface ApiNotificationNotification extends Struct.CollectionTypeSchema {
   collectionName: 'notifications'
   info: {
@@ -621,6 +680,38 @@ export interface ApiNotificationNotification extends Struct.CollectionTypeSchema
   }
 }
 
+export interface ApiPaymentPayment extends Struct.CollectionTypeSchema {
+  collectionName: 'payments'
+  info: {
+    displayName: 'Payment'
+    pluralName: 'payments'
+    singularName: 'payment'
+  }
+  options: {
+    draftAndPublish: false
+  }
+  attributes: {
+    createdAt: Schema.Attribute.DateTime
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
+    locale: Schema.Attribute.String & Schema.Attribute.Private
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::payment.payment'> &
+      Schema.Attribute.Private
+    packageId: Schema.Attribute.Integer
+    payloadType: Schema.Attribute.Enumeration<['subscription', 'vacancy_pack', 'apply_pack']> &
+      Schema.Attribute.Required
+    planCode: Schema.Attribute.String
+    publishedAt: Schema.Attribute.DateTime
+    starsAmount: Schema.Attribute.Integer
+    status: Schema.Attribute.Enumeration<['processing', 'completed', 'failed']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'processing'>
+    telegramChargeId: Schema.Attribute.String & Schema.Attribute.Required & Schema.Attribute.Unique
+    updatedAt: Schema.Attribute.DateTime
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
+    user: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'>
+  }
+}
+
 export interface ApiReportReport extends Struct.CollectionTypeSchema {
   collectionName: 'reports'
   info: {
@@ -644,7 +735,7 @@ export interface ApiReportReport extends Struct.CollectionTypeSchema {
       Schema.Attribute.Required
     reporter: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'> &
       Schema.Attribute.Required
-    status: Schema.Attribute.Enumeration<['pending', 'reviewed', 'resolved']> &
+    status: Schema.Attribute.Enumeration<['pending', 'resolved', 'dismissed']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'pending'>
     targetId: Schema.Attribute.String & Schema.Attribute.Required
@@ -721,6 +812,19 @@ export interface ApiResumeResume extends Struct.CollectionTypeSchema {
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::resume.resume'> &
       Schema.Attribute.Private
     publishedAt: Schema.Attribute.DateTime
+    rejectionComment: Schema.Attribute.Text
+    rejectionReason: Schema.Attribute.Enumeration<
+      [
+        'spam',
+        'fake',
+        'inappropriate',
+        'incomplete',
+        'wrong_category',
+        'salary_mismatch',
+        'contact_info',
+        'other',
+      ]
+    >
     skills: Schema.Attribute.JSON
     status: Schema.Attribute.Enumeration<
       ['draft', 'moderation', 'published', 'rejected', 'archived']
@@ -930,6 +1034,7 @@ export interface ApiVacancyVacancy extends Struct.CollectionTypeSchema {
   }
   attributes: {
     applicationsCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
+    boostedAt: Schema.Attribute.DateTime
     city: Schema.Attribute.String
     company: Schema.Attribute.Relation<'manyToOne', 'api::company.company'>
     conditions: Schema.Attribute.RichText
@@ -941,7 +1046,6 @@ export interface ApiVacancyVacancy extends Struct.CollectionTypeSchema {
       ['full-time', 'part-time', 'contract', 'internship', 'freelance']
     > &
       Schema.Attribute.Required
-    boostedAt: Schema.Attribute.DateTime
     experienceYears: Schema.Attribute.Integer
     expiresAt: Schema.Attribute.DateTime
     highlighted: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>
@@ -954,6 +1058,19 @@ export interface ApiVacancyVacancy extends Struct.CollectionTypeSchema {
     postedBy: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'> &
       Schema.Attribute.Required
     publishedAt: Schema.Attribute.DateTime
+    rejectionComment: Schema.Attribute.Text
+    rejectionReason: Schema.Attribute.Enumeration<
+      [
+        'spam',
+        'fake',
+        'inappropriate',
+        'incomplete',
+        'wrong_category',
+        'salary_mismatch',
+        'contact_info',
+        'other',
+      ]
+    >
     requirements: Schema.Attribute.RichText & Schema.Attribute.Required
     responsibilities: Schema.Attribute.RichText & Schema.Attribute.Required
     salaryCurrency: Schema.Attribute.Enumeration<['USD', 'EUR', 'RUB', 'GBP']>
@@ -1434,7 +1551,9 @@ declare module '@strapi/strapi' {
       'api::company.company': ApiCompanyCompany
       'api::favorite.favorite': ApiFavoriteFavorite
       'api::industry.industry': ApiIndustryIndustry
+      'api::moderation-log.moderation-log': ApiModerationLogModerationLog
       'api::notification.notification': ApiNotificationNotification
+      'api::payment.payment': ApiPaymentPayment
       'api::report.report': ApiReportReport
       'api::resume-analytics.resume-analytics': ApiResumeAnalyticsResumeAnalytics
       'api::resume.resume': ApiResumeResume
