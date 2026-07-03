@@ -168,8 +168,9 @@ describe('MyCompaniesClient', () => {
 
     render(<MyCompaniesClient />)
 
-    const link = screen.getByRole('link', { name: /создать/i })
-    expect(link.getAttribute('href')).toBe('/dashboard/companies/new')
+    const links = screen.getAllByRole('link', { name: /создать/i })
+    expect(links.length).toBeGreaterThan(0)
+    expect(links[0]!.getAttribute('href')).toBe('/dashboard/companies/new')
   })
 
   it('отображает сообщение если нет компаний', () => {

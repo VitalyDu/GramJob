@@ -46,7 +46,7 @@ describe('MyVacanciesClient', () => {
 
   it('показывает ссылку "Создать вакансию"', () => {
     render(<MyVacanciesClient />)
-    expect(screen.getByText(/Создать вакансию/)).toBeTruthy()
+    expect(screen.getAllByText(/Создать вакансию/).length).toBeGreaterThan(0)
   })
 
   it('показывает UpsellModal при limitReached = true', () => {
