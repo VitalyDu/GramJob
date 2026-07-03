@@ -3,6 +3,10 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { VacancyFilters } from './VacancyFilters'
 
+vi.mock('@/services/api', () => ({
+  api: { get: vi.fn().mockResolvedValue([]) },
+}))
+
 describe('VacancyFilters', () => {
   it('рендерит кнопку «Фильтры» на мобильном (md:hidden)', () => {
     render(<VacancyFilters params={{}} onChange={vi.fn()} />)

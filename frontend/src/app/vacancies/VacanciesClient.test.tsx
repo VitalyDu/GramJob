@@ -6,6 +6,10 @@ vi.mock('@/stores/StoreProvider', () => ({
   useStores: vi.fn(),
 }))
 
+vi.mock('@/services/api', () => ({
+  api: { get: vi.fn().mockResolvedValue([]) },
+}))
+
 vi.mock('next/link', () => ({
   default: ({
     href,

@@ -1,17 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SlidersHorizontal } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type {
   VacancyListParams,
   WorkFormatEnum,
   EmploymentTypeEnum,
   SeniorityEnum,
+  Industry,
+  SalaryCurrencyEnum,
 } from '@/types/api'
 import { WORK_FORMAT_LABELS, EMPLOYMENT_TYPE_LABELS, SENIORITY_LABELS } from '@/lib/vacancy-utils'
+import { api } from '@/services/api'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -48,29 +53,57 @@ const SORT_OPTIONS = [
 
 type Draft = {
   country: string
+  industry: string
+  specialization: string
   workFormat: WorkFormatEnum[]
   employmentType: EmploymentTypeEnum[]
   seniority: SeniorityEnum[]
+  salaryFrom: string
+  salaryTo: string
+  salaryCurrency: string
   sort: string
 }
 
 function draftFromParams(params: VacancyListParams): Draft {
   return {
     country: params.country ?? '',
+    industry: params.industry ?? '',
+    specialization: params.specialization ?? '',
     workFormat: params.workFormat ?? [],
     employmentType: params.employmentType ?? [],
     seniority: params.seniority ?? [],
+    salaryFrom: params.salaryFrom != null ? String(params.salaryFrom) : '',
+    salaryTo: params.salaryTo != null ? String(params.salaryTo) : '',
+    salaryCurrency: params.salaryCurrency ?? '',
     sort: params.sort ?? '',
   }
 }
 
 function countActive(draft: Draft): number {
-  return [draft.country, ...draft.workFormat, ...draft.employmentType, ...draft.seniority].filter(
-    Boolean
-  ).length
+  return [
+    draft.country,
+    draft.industry,
+    draft.specialization,
+    draft.salaryFrom,
+    draft.salaryTo,
+    ...draft.workFormat,
+    ...draft.employmentType,
+    ...draft.seniority,
+  ].filter(Boolean).length
 }
 
-function FilterFields({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft) => void }) {
+function FilterFields({
+  draft,
+  setDraft,
+  industries,
+}: {
+  draft: Draft
+  setDraft: (d: Draft) => void
+  industries: Industry[]
+}) {
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'en' ? 'en' : 'ru'
+
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
@@ -80,6 +113,86 @@ function FilterFields({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft) 
           onChange={(v) => setDraft({ ...draft, country: v })}
           placeholder="Любая страна"
         />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Отрасль</Label>
+        <Select
+          value={draft.industry || ALL}
+          onValueChange={(v) =>
+            setDraft({ ...draft, industry: v === ALL ? '' : v, specialization: '' })
+          }
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Все отрасли</SelectItem>
+            {industries.map((ind) => (
+              <SelectItem key={ind.documentId} value={ind.documentId}>
+                {ind.name[lang]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-1.5">
+        <Label>Специализация</Label>
+        <Select
+          value={draft.specialization || ALL}
+          onValueChange={(v) => setDraft({ ...draft, specialization: v === ALL ? '' : v })}
+          disabled={!draft.industry}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Все специализации</SelectItem>
+            {(industries.find((i) => i.documentId === draft.industry)?.specializations ?? []).map(
+              (spec) => (
+                <SelectItem key={spec.documentId} value={spec.documentId}>
+                  {spec.name[lang]}
+                </SelectItem>
+              )
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-1.5">
+        <Label>Зарплата</Label>
+        <div className="flex gap-2">
+          <Input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            placeholder="От"
+            value={draft.salaryFrom}
+            onChange={(e) => setDraft({ ...draft, salaryFrom: e.target.value })}
+          />
+          <Input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            placeholder="До"
+            value={draft.salaryTo}
+            onChange={(e) => setDraft({ ...draft, salaryTo: e.target.value })}
+          />
+        </div>
+        <Select
+          value={draft.salaryCurrency || ALL}
+          onValueChange={(v) => setDraft({ ...draft, salaryCurrency: v === ALL ? '' : v })}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Любая валюта</SelectItem>
+            {(['USD', 'EUR', 'RUB', 'GBP'] as SalaryCurrencyEnum[]).map((c) => (
+              <SelectItem key={c} value={c}>
+                {c}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="space-y-1.5">
         <Label>Формат работы</Label>
@@ -139,6 +252,14 @@ function FilterFields({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft) 
 export function VacancyFilters({ params, onChange }: Props) {
   const [draft, setDraft] = useState<Draft>(draftFromParams(params))
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [industries, setIndustries] = useState<Industry[]>([])
+
+  useEffect(() => {
+    void api
+      .get<Industry[]>('/industries')
+      .then((res) => setIndustries(res))
+      .catch(() => {})
+  }, [])
 
   const activeCount = countActive(draftFromParams(params))
 
@@ -146,6 +267,11 @@ export function VacancyFilters({ params, onChange }: Props) {
     const next: VacancyListParams = { page: 1 }
     if (params.search) next.search = params.search
     if (d.country) next.country = d.country
+    if (d.industry) next.industry = d.industry
+    if (d.specialization) next.specialization = d.specialization
+    if (d.salaryFrom) next.salaryFrom = Number(d.salaryFrom)
+    if (d.salaryTo) next.salaryTo = Number(d.salaryTo)
+    if (d.salaryCurrency) next.salaryCurrency = d.salaryCurrency as SalaryCurrencyEnum
     if (d.workFormat.length > 0) next.workFormat = d.workFormat
     if (d.employmentType.length > 0) next.employmentType = d.employmentType
     if (d.seniority.length > 0) next.seniority = d.seniority
@@ -180,7 +306,7 @@ export function VacancyFilters({ params, onChange }: Props) {
               <SheetTitle>Фильтры</SheetTitle>
             </SheetHeader>
             <div className="px-4 pb-2">
-              <FilterFields draft={draft} setDraft={setDraft} />
+              <FilterFields draft={draft} setDraft={setDraft} industries={industries} />
             </div>
             <SheetFooter className="flex-row gap-2">
               <Button variant="outline" className="flex-1" onClick={reset}>
@@ -197,7 +323,7 @@ export function VacancyFilters({ params, onChange }: Props) {
       {/* Desktop-панель */}
       <Card className="hidden md:block">
         <CardContent>
-          <FilterFields draft={draft} setDraft={setDraft} />
+          <FilterFields draft={draft} setDraft={setDraft} industries={industries} />
           <div className="mt-4 flex gap-2">
             <Button size="sm" onClick={() => apply()}>
               Применить
