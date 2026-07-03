@@ -28,10 +28,10 @@ export const CreateCompanyClient = observer(function CreateCompanyClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="space-y-1">
         <Link
           href="/dashboard/companies"
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="inline-block text-sm text-muted-foreground hover:text-foreground"
         >
           ← Мои компании
         </Link>

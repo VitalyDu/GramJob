@@ -76,10 +76,10 @@ export const EditVacancyClient = observer(function EditVacancyClient({ id }: Pro
     <div className="space-y-6">
       <UpsellModal isOpen={vStore.limitReached} onClose={() => vStore.clearLimitReached()} />
 
-      <div className="flex items-center gap-4">
+      <div className="space-y-1">
         <Link
           href="/dashboard/vacancies"
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="inline-block text-sm text-muted-foreground hover:text-foreground"
         >
           ← Мои вакансии
         </Link>
