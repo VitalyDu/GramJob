@@ -40,9 +40,7 @@ export function MultiSelect<T extends string>({
   const labelText =
     value.length === 0
       ? label
-      : value.length === 1
-        ? (options.find((o) => o.value === value[0])?.label ?? label)
-        : `${label}: ${value.length}`
+      : value.map((v) => options.find((o) => o.value === v)?.label ?? v).join(', ')
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
