@@ -9,7 +9,6 @@ import type {
   SeniorityEnum,
 } from '@/types/api'
 import { WORK_FORMAT_LABELS, EMPLOYMENT_TYPE_LABELS, SENIORITY_LABELS } from '@/lib/vacancy-utils'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -29,6 +28,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import { CountrySelect } from '@/components/ui/country-select'
 
 interface Props {
   params: VacancyListParams
@@ -47,62 +47,66 @@ const SORT_OPTIONS = [
 
 type Draft = {
   country: string
-  workFormat: WorkFormatEnum | ''
-  employmentType: EmploymentTypeEnum | ''
-  seniority: SeniorityEnum | ''
+  workFormat: WorkFormatEnum[]
+  employmentType: EmploymentTypeEnum[]
+  seniority: SeniorityEnum[]
   sort: string
 }
 
 function draftFromParams(params: VacancyListParams): Draft {
   return {
     country: params.country ?? '',
-    workFormat: params.workFormat ?? '',
-    employmentType: params.employmentType ?? '',
-    seniority: params.seniority ?? '',
+    workFormat: params.workFormat ?? [],
+    employmentType: params.employmentType ?? [],
+    seniority: params.seniority ?? [],
     sort: params.sort ?? '',
   }
 }
 
 function countActive(draft: Draft): number {
-  return [draft.country, draft.workFormat, draft.employmentType, draft.seniority].filter(Boolean)
-    .length
+  return [draft.country, ...draft.workFormat, ...draft.employmentType, ...draft.seniority].filter(
+    Boolean
+  ).length
 }
 
 function FilterFields({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft) => void }) {
+  // Single-value select backed by array field (arrays → multi-select in Task 12)
   const enumSelect = <T extends string>(
     label: string,
-    value: T | '',
+    values: T[],
     labels: Record<T, string>,
     allLabel: string,
-    set: (v: T | '') => void
-  ) => (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      <Select value={value || ALL} onValueChange={(v) => set(v === ALL ? '' : (v as T))}>
-        <SelectTrigger className="w-full">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={ALL}>{allLabel}</SelectItem>
-          {(Object.entries(labels) as [T, string][]).map(([v, l]) => (
-            <SelectItem key={v} value={v}>
-              {l}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  )
+    set: (v: T[]) => void
+  ) => {
+    const current = values[0] ?? ''
+    return (
+      <div className="space-y-1.5">
+        <Label>{label}</Label>
+        <Select value={current || ALL} onValueChange={(v) => set(v === ALL ? [] : [v as T])}>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>{allLabel}</SelectItem>
+            {(Object.entries(labels) as [T, string][]).map(([v, l]) => (
+              <SelectItem key={v} value={v}>
+                {l}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
-        <Label htmlFor="filter-country">Страна</Label>
-        <Input
-          id="filter-country"
+        <Label>Страна</Label>
+        <CountrySelect
           value={draft.country}
-          onChange={(e) => setDraft({ ...draft, country: e.target.value })}
-          placeholder="RU, US..."
+          onChange={(v) => setDraft({ ...draft, country: v })}
+          placeholder="Любая страна"
         />
       </div>
       {enumSelect('Формат работы', draft.workFormat, WORK_FORMAT_LABELS, 'Все форматы', (v) =>
@@ -137,54 +141,37 @@ function FilterFields({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft) 
 }
 
 export function VacancyFilters({ params, onChange }: Props) {
-  const [search, setSearch] = useState(params.search ?? '')
   const [draft, setDraft] = useState<Draft>(draftFromParams(params))
   const [sheetOpen, setSheetOpen] = useState(false)
 
   const activeCount = countActive(draftFromParams(params))
 
-  const apply = () => {
+  const apply = (d: Draft = draft) => {
     const next: VacancyListParams = { page: 1 }
-    if (search) next.search = search
-    if (draft.country) next.country = draft.country
-    if (draft.workFormat) next.workFormat = draft.workFormat
-    if (draft.employmentType) next.employmentType = draft.employmentType
-    if (draft.seniority) next.seniority = draft.seniority
-    if (draft.sort) next.sort = draft.sort as NonNullable<VacancyListParams['sort']>
+    if (params.search) next.search = params.search
+    if (d.country) next.country = d.country
+    if (d.workFormat.length > 0) next.workFormat = d.workFormat
+    if (d.employmentType.length > 0) next.employmentType = d.employmentType
+    if (d.seniority.length > 0) next.seniority = d.seniority
+    if (d.sort) next.sort = d.sort as NonNullable<VacancyListParams['sort']>
     onChange(next)
     setSheetOpen(false)
   }
 
   const reset = () => {
-    setSearch('')
-    setDraft(draftFromParams({}))
+    const empty = draftFromParams({})
+    setDraft(empty)
     onChange({ page: 1 })
     setSheetOpen(false)
   }
 
   return (
-    <div className="space-y-3">
-      {/* Строка поиска + mobile-кнопка «Фильтры» */}
-      <form
-        role="search"
-        aria-label="Поиск вакансий"
-        className="flex gap-2"
-        onSubmit={(e) => {
-          e.preventDefault()
-          apply()
-        }}
-      >
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Поиск вакансий..."
-          className="flex-1"
-        />
-        <Button type="submit">Найти</Button>
-
+    <div>
+      {/* Mobile-кнопка «Фильтры» */}
+      <div className="mb-3 md:hidden">
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
-            <Button type="button" variant="outline" className="md:hidden">
+            <Button type="button" variant="outline" className="w-full">
               <SlidersHorizontal className="mr-1.5 h-4 w-4" />
               Фильтры
               {activeCount > 0 && (
@@ -203,15 +190,15 @@ export function VacancyFilters({ params, onChange }: Props) {
               <Button variant="outline" className="flex-1" onClick={reset}>
                 Сбросить
               </Button>
-              <Button className="flex-1" onClick={apply}>
-                Найти
+              <Button className="flex-1" onClick={() => apply()}>
+                Применить
               </Button>
             </SheetFooter>
           </SheetContent>
         </Sheet>
-      </form>
+      </div>
 
-      {/* Desktop-панель — всегда видима на md+ */}
+      {/* Desktop-панель */}
       <Card className="hidden md:block">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Фильтры</CardTitle>
@@ -219,8 +206,8 @@ export function VacancyFilters({ params, onChange }: Props) {
         <CardContent>
           <FilterFields draft={draft} setDraft={setDraft} />
           <div className="mt-4 flex gap-2">
-            <Button size="sm" onClick={apply}>
-              Найти
+            <Button size="sm" onClick={() => apply()}>
+              Применить
             </Button>
             <Button size="sm" variant="ghost" onClick={reset}>
               Сбросить

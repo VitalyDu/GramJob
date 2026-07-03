@@ -8,6 +8,7 @@ import { useStores } from '@/stores/StoreProvider'
 import { ResumeCard } from '@/components/resume/ResumeCard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { SaveSearchButton } from '@/components/saved-search/SaveSearchButton'
 import {
   PageHeader,
@@ -24,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { CountrySelect } from '@/components/ui/country-select'
 import type { ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 
 export const ResumesClient = observer(function ResumesClient() {
@@ -38,8 +40,8 @@ export const ResumesClient = observer(function ResumesClient() {
     void store.fetchResumes({
       search,
       country,
-      ...(workFormat ? { workFormat } : {}),
-      ...(employmentType ? { employmentType } : {}),
+      ...(workFormat ? { workFormat: [workFormat] } : {}),
+      ...(employmentType ? { employmentType: [employmentType] } : {}),
     })
   }, [store, auth.user, search, country, workFormat, employmentType])
 
@@ -47,8 +49,8 @@ export const ResumesClient = observer(function ResumesClient() {
     void store.fetchResumes({
       search,
       country,
-      ...(workFormat ? { workFormat } : {}),
-      ...(employmentType ? { employmentType } : {}),
+      ...(workFormat ? { workFormat: [workFormat] } : {}),
+      ...(employmentType ? { employmentType: [employmentType] } : {}),
       page,
     })
   }
@@ -93,20 +95,24 @@ export const ResumesClient = observer(function ResumesClient() {
     <div>
       <PageHeader title="Резюме" description="База специалистов" />
 
+      {/* Поиск — на всю ширину */}
+      <div className="mb-4">
+        <Input
+          placeholder="Поиск резюме..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          aria-label="Поиск резюме"
+        />
+      </div>
+
       <div className="md:grid md:grid-cols-[280px_1fr] md:items-start md:gap-6">
         <aside className="md:sticky md:top-20">
           <div className="space-y-3 rounded-xl border bg-card p-4">
             <p className="text-sm font-semibold text-card-foreground">Фильтры</p>
-            <Input
-              placeholder="Поиск..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <Input
-              placeholder="Страна (RU, US...)"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-            />
+            <div className="space-y-1.5">
+              <Label>Страна</Label>
+              <CountrySelect value={country} onChange={setCountry} placeholder="Любая страна" />
+            </div>
             <Select
               value={workFormat || '__all__'}
               onValueChange={(v) =>
@@ -183,8 +189,8 @@ export const ResumesClient = observer(function ResumesClient() {
                 void store.fetchResumes({
                   search,
                   country,
-                  ...(workFormat ? { workFormat } : {}),
-                  ...(employmentType ? { employmentType } : {}),
+                  ...(workFormat ? { workFormat: [workFormat] } : {}),
+                  ...(employmentType ? { employmentType: [employmentType] } : {}),
                 })
               }
             />

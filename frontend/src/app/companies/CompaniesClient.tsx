@@ -7,6 +7,7 @@ import { useStores } from '@/stores/StoreProvider'
 import { CompanyCard } from '@/components/company/CompanyCard'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
 import {
   PageHeader,
@@ -22,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { CountrySelect } from '@/components/ui/country-select'
 import type { CompanySizeEnum } from '@/types/api'
 
 export const CompaniesClient = observer(function CompaniesClient() {
@@ -57,20 +59,26 @@ export const CompaniesClient = observer(function CompaniesClient() {
     <div>
       <PageHeader title="Компании" description="Каталог работодателей" />
 
+      {/* Поиск — на всю ширину */}
+      <form onSubmit={handleSearch} className="mb-4 flex gap-2">
+        <Input
+          placeholder="Поиск компании..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1"
+          aria-label="Поиск компании"
+        />
+        <Button type="submit">Найти</Button>
+      </form>
+
       <div className="md:grid md:grid-cols-[280px_1fr] md:items-start md:gap-6">
         <aside className="md:sticky md:top-20">
-          <form onSubmit={handleSearch} className="space-y-3 rounded-xl border bg-card p-4">
+          <div className="space-y-3 rounded-xl border bg-card p-4">
             <p className="text-sm font-semibold text-card-foreground">Фильтры</p>
-            <Input
-              placeholder="Поиск компании..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <Input
-              placeholder="Страна (RU, US...)"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-            />
+            <div className="space-y-1.5">
+              <Label>Страна</Label>
+              <CountrySelect value={country} onChange={setCountry} placeholder="Любая страна" />
+            </div>
             <Select
               value={companySize || '__all__'}
               onValueChange={(v) => setCompanySize(v === '__all__' ? '' : (v as CompanySizeEnum))}
@@ -89,10 +97,7 @@ export const CompaniesClient = observer(function CompaniesClient() {
                 )}
               </SelectContent>
             </Select>
-            <Button type="submit" className="w-full">
-              Найти
-            </Button>
-          </form>
+          </div>
         </aside>
 
         <section className="mt-4 md:mt-0">
