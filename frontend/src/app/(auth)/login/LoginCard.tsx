@@ -1,0 +1,57 @@
+'use client'
+
+import Image from 'next/image'
+import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
+import { TelegramLoginWidget } from '@/components/auth/TelegramLoginWidget'
+import { EmailLoginForm } from '@/components/auth/EmailLoginForm'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card'
+
+export function LoginCard() {
+  const { t } = useTranslation()
+  return (
+    <Card className="w-full max-w-md">
+      <CardHeader className="items-center text-center">
+        <Image
+          src="/logo-vertical.png"
+          alt="GramJob"
+          width={120}
+          height={120}
+          priority
+          className="mx-auto"
+        />
+        <CardTitle className="mt-4 text-2xl">{t('auth.loginTitle')}</CardTitle>
+        <CardDescription>{t('auth.loginDescription')}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="flex justify-center">
+          <TelegramLoginWidget redirectTo="/" />
+        </div>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">{t('auth.orDivider')}</span>
+          </div>
+        </div>
+
+        <EmailLoginForm />
+      </CardContent>
+      <CardFooter className="justify-center text-sm text-muted-foreground">
+        {t('auth.noAccount')}{' '}
+        <Link href="/register" className="ml-1 underline hover:no-underline">
+          {t('auth.register')}
+        </Link>
+      </CardFooter>
+    </Card>
+  )
+}
