@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { VacancyForm } from '@/components/vacancy/VacancyForm'
+import { UpsellModal } from '@/components/vacancy/UpsellModal'
 import type { VacancyCreateInput } from '@/types/api'
 
 interface Props {
@@ -32,7 +33,11 @@ export const EditVacancyClient = observer(function EditVacancyClient({ id }: Pro
 
   const handleSubmit = async (data: VacancyCreateInput) => {
     try {
-      await vStore.updateVacancy(id, data)
+      const updated = await vStore.updateVacancy(id, data)
+      if (updated === null) {
+        // limitReached уже установлен в сторе, UpsellModal откроется
+        return
+      }
       toast.success('Изменения сохранены — вакансия отправлена на модерацию')
       router.push('/dashboard/vacancies')
     } catch {
@@ -65,6 +70,8 @@ export const EditVacancyClient = observer(function EditVacancyClient({ id }: Pro
 
   return (
     <div className="space-y-6">
+      <UpsellModal isOpen={vStore.limitReached} onClose={() => vStore.clearLimitReached()} />
+
       <div className="flex items-center gap-4">
         <Link
           href="/dashboard/vacancies"

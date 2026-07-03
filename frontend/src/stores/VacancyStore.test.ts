@@ -227,6 +227,18 @@ describe('VacancyStore', () => {
 
       expect(store.currentVacancy?.title).toBe('Updated')
     })
+
+    it('ставит limitReached=true при 403 LIMIT_REACHED и возвращает null', async () => {
+      vi.mocked(api.put).mockRejectedValue(
+        new ApiClientError(403, { error: { code: 'LIMIT_REACHED' } }, 'Vacancy limit reached')
+      )
+
+      const result = await store.updateVacancy('vac123', { title: 'Updated Title' })
+
+      expect(result).toBeNull()
+      expect(store.limitReached).toBe(true)
+      expect(store.error).toBeNull()
+    })
   })
 
   describe('deleteVacancy', () => {
