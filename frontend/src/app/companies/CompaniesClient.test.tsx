@@ -40,6 +40,7 @@ function makeStore(overrides = {}) {
     companies: [],
     isLoading: false,
     error: null,
+    total: 0,
     page: 1,
     pageCount: 1,
     fetchCompanies: vi.fn().mockResolvedValue(undefined),
@@ -66,7 +67,7 @@ describe('CompaniesClient', () => {
   })
 
   it('отображает компании из стора', () => {
-    const store = makeStore({ companies: [mockCompany] })
+    const store = makeStore({ companies: [mockCompany], total: 1 })
     vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
       typeof useStores
     >)
@@ -76,7 +77,7 @@ describe('CompaniesClient', () => {
     expect(screen.getByText('Acme Corp')).toBeDefined()
   })
 
-  it('отображает сообщение о загрузке', () => {
+  it('отображает skeleton во время загрузки', () => {
     const store = makeStore({ isLoading: true })
     vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
       typeof useStores
@@ -84,7 +85,7 @@ describe('CompaniesClient', () => {
 
     render(<CompaniesClient />)
 
-    expect(screen.getByText(/загрузка/i)).toBeDefined()
+    expect(screen.getAllByTestId('card-skeleton').length).toBeGreaterThan(0)
   })
 
   it('отображает ошибку из стора', () => {
@@ -137,18 +138,17 @@ describe('CompaniesClient', () => {
 
     render(<CompaniesClient />)
 
-    expect(screen.queryByText(/назад/i)).toBeNull()
+    expect(screen.queryByLabelText(/предыдущая страница/i)).toBeNull()
   })
 
   it('показывает пагинацию если pageCount > 1', () => {
-    const store = makeStore({ pageCount: 3, page: 2, companies: [mockCompany] })
+    const store = makeStore({ pageCount: 3, page: 2, companies: [mockCompany], total: 60 })
     vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
       typeof useStores
     >)
 
     render(<CompaniesClient />)
 
-    expect(screen.getByText(/назад/i)).toBeDefined()
-    expect(screen.getByText('2 / 3')).toBeDefined()
+    expect(screen.getByLabelText(/предыдущая страница/i)).toBeDefined()
   })
 })
