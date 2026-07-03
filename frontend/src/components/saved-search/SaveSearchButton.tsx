@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useStores } from '@/stores/StoreProvider'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import type { SavedSearchType, SavedSearchFilters } from '@/types/api'
 
 interface Props {
@@ -34,48 +36,41 @@ export const SaveSearchButton = observer(function SaveSearchButton({ searchType,
   }
 
   if (saved) {
-    return <span className="text-sm text-green-600">Поиск сохранён ✓</span>
+    return <span className="text-sm text-success">Поиск сохранён ✓</span>
   }
 
   if (showForm) {
     return (
       <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <input
-            type="text"
+          <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Название (необязательно)"
-            className="rounded-md border border-border px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="h-8 text-sm"
           />
-          <button
-            onClick={() => void handleSave()}
-            disabled={store.isLoading}
-            className="rounded-md bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-          >
+          <Button onClick={() => void handleSave()} disabled={store.isLoading} size="sm">
             {store.isLoading ? '...' : 'Сохранить'}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => {
               setShowForm(false)
               setName('')
             }}
-            className="text-sm text-muted-foreground hover:text-foreground"
           >
             Отмена
-          </button>
+          </Button>
         </div>
-        {store.error && <p className="text-xs text-red-600">{store.error}</p>}
+        {store.error && <p className="text-xs text-destructive">{store.error}</p>}
       </div>
     )
   }
 
   return (
-    <button
-      onClick={() => setShowForm(true)}
-      className="rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted"
-    >
+    <Button variant="outline" size="sm" onClick={() => setShowForm(true)}>
       Сохранить поиск
-    </button>
+    </Button>
   )
 })
