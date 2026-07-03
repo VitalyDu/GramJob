@@ -29,6 +29,27 @@ export const SENIORITY_LABELS: Record<SeniorityEnum, string> = {
   principal: 'Principal',
 }
 
+export const WORK_FORMAT_VALUES = [
+  'remote',
+  'office',
+  'hybrid',
+] as const satisfies readonly WorkFormatEnum[]
+export const EMPLOYMENT_TYPE_VALUES = [
+  'full-time',
+  'part-time',
+  'contract',
+  'freelance',
+  'internship',
+] as const satisfies readonly EmploymentTypeEnum[]
+export const SENIORITY_VALUES = [
+  'intern',
+  'junior',
+  'middle',
+  'senior',
+  'lead',
+  'principal',
+] as const satisfies readonly SeniorityEnum[]
+
 export const SALARY_CURRENCY_SYMBOLS: Record<SalaryCurrencyEnum, string> = {
   USD: '$',
   EUR: '€',

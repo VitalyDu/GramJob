@@ -76,5 +76,83 @@
       "expired": "Срок публикации истёк. Отправьте повторно, чтобы вернуть в поиск.",
       "archived": "В архиве — не отображается в поиске."
     }
+  },
+  "enums": {
+    "workFormat": {
+      "remote": "Удалённо",
+      "office": "Офис",
+      "hybrid": "Гибрид"
+    },
+    "employmentType": {
+      "full-time": "Полная занятость",
+      "part-time": "Частичная занятость",
+      "contract": "Контракт",
+      "freelance": "Фриланс",
+      "internship": "Стажировка"
+    },
+    "seniority": {
+      "intern": "Intern",
+      "junior": "Junior",
+      "middle": "Middle",
+      "senior": "Senior",
+      "lead": "Lead",
+      "principal": "Principal"
+    },
+    "companySize": {
+      "size_1_10": "1–10",
+      "size_11_50": "11–50",
+      "size_51_200": "51–200",
+      "size_201_500": "201–500",
+      "size_500_plus": "500+"
+    },
+    "resumeWorkFormat": {
+      "office": "Офис",
+      "remote": "Удалённо",
+      "hybrid": "Гибрид",
+      "any": "Любой"
+    },
+    "vacancyStatus": {
+      "draft": "Черновик",
+      "moderation": "На модерации",
+      "published": "Опубликована",
+      "rejected": "Отклонена",
+      "expired": "Истекла",
+      "archived": "В архиве"
+    },
+    "resumeStatus": {
+      "draft": "Черновик",
+      "moderation": "На модерации",
+      "published": "Опубликовано",
+      "rejected": "Отклонено",
+      "archived": "В архиве"
+    },
+    "companyStatus": {
+      "draft": "Черновик",
+      "moderation": "На модерации",
+      "published": "Опубликована",
+      "rejected": "Отклонена"
+    },
+    "applicationStatus": {
+      "applied": "Отклик отправлен",
+      "viewed": "Просмотрено",
+      "in_review": "На рассмотрении",
+      "interview": "Приглашение на интервью",
+      "test_task": "Тестовое задание",
+      "offer": "Оффер",
+      "hired": "Принят",
+      "rejected": "Отказ"
+    },
+    "salaryCurrency": {
+      "USD": "USD",
+      "EUR": "EUR",
+      "RUB": "RUB",
+      "GBP": "GBP"
+    },
+    "plan": {
+      "free": "Free",
+      "pro": "Pro",
+      "max": "Max",
+      "vip": "VIP"
+    }
   }
 }

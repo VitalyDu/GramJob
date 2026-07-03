@@ -76,5 +76,83 @@
       "expired": "Publication expired. Resubmit to return it to search.",
       "archived": "Archived — not shown in search."
     }
+  },
+  "enums": {
+    "workFormat": {
+      "remote": "Remote",
+      "office": "Office",
+      "hybrid": "Hybrid"
+    },
+    "employmentType": {
+      "full-time": "Full-time",
+      "part-time": "Part-time",
+      "contract": "Contract",
+      "freelance": "Freelance",
+      "internship": "Internship"
+    },
+    "seniority": {
+      "intern": "Intern",
+      "junior": "Junior",
+      "middle": "Middle",
+      "senior": "Senior",
+      "lead": "Lead",
+      "principal": "Principal"
+    },
+    "companySize": {
+      "size_1_10": "1–10",
+      "size_11_50": "11–50",
+      "size_51_200": "51–200",
+      "size_201_500": "201–500",
+      "size_500_plus": "500+"
+    },
+    "resumeWorkFormat": {
+      "office": "Office",
+      "remote": "Remote",
+      "hybrid": "Hybrid",
+      "any": "Any"
+    },
+    "vacancyStatus": {
+      "draft": "Draft",
+      "moderation": "Under review",
+      "published": "Published",
+      "rejected": "Rejected",
+      "expired": "Expired",
+      "archived": "Archived"
+    },
+    "resumeStatus": {
+      "draft": "Draft",
+      "moderation": "Under review",
+      "published": "Published",
+      "rejected": "Rejected",
+      "archived": "Archived"
+    },
+    "companyStatus": {
+      "draft": "Draft",
+      "moderation": "Under review",
+      "published": "Published",
+      "rejected": "Rejected"
+    },
+    "applicationStatus": {
+      "applied": "Applied",
+      "viewed": "Viewed",
+      "in_review": "In Review",
+      "interview": "Interview",
+      "test_task": "Test Task",
+      "offer": "Offer",
+      "hired": "Hired",
+      "rejected": "Rejected"
+    },
+    "salaryCurrency": {
+      "USD": "USD",
+      "EUR": "EUR",
+      "RUB": "RUB",
+      "GBP": "GBP"
+    },
+    "plan": {
+      "free": "Free",
+      "pro": "Pro",
+      "max": "Max",
+      "vip": "VIP"
+    }
   }
 }
