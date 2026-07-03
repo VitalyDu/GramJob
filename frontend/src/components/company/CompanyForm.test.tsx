@@ -2,6 +2,17 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { CompanyForm } from './CompanyForm'
 
+vi.mock('@/components/ui/country-select', () => ({
+  CountrySelect: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <input
+      aria-label="Страна"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      readOnly={false}
+    />
+  ),
+}))
+
 describe('CompanyForm', () => {
   it('отображает поле названия компании', () => {
     render(<CompanyForm onSubmit={vi.fn()} />)
@@ -15,7 +26,7 @@ describe('CompanyForm', () => {
 
   it('отображает поле страны', () => {
     render(<CompanyForm onSubmit={vi.fn()} />)
-    expect(screen.getByText('Выберите страну')).toBeDefined()
+    expect(screen.getByLabelText(/страна/i)).toBeDefined()
   })
 
   it('отображает поле размера компании', () => {
@@ -41,17 +52,21 @@ describe('CompanyForm', () => {
 
   it('вызывает onSubmit с корректными данными', async () => {
     const onSubmit = vi.fn()
-    render(<CompanyForm onSubmit={onSubmit} defaultValues={{ country: 'RU' }} />)
+    render(<CompanyForm onSubmit={onSubmit} />)
 
     fireEvent.change(screen.getByLabelText(/название/i), {
       target: { value: 'Test Corp' },
+    })
+
+    fireEvent.change(screen.getByLabelText(/страна/i), {
+      target: { value: 'DE' },
     })
 
     fireEvent.click(screen.getByRole('button', { name: /сохранить/i }))
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'Test Corp', country: 'RU' }),
+        expect.objectContaining({ name: 'Test Corp', country: 'DE' }),
         expect.anything()
       )
     })

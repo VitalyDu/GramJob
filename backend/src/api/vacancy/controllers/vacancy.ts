@@ -6,6 +6,7 @@ import {
   refundVacancyCredit,
 } from '../services/credit-service'
 import { getBlockedUserIds } from '../../block/services/block-filter'
+import { toArray } from '../../../utils/query'
 import type vacancyServiceFactory from '../services/vacancy'
 
 type VacancyService = ReturnType<typeof vacancyServiceFactory>
@@ -19,12 +20,6 @@ const VALID_EMPLOYMENT_TYPES = [
 ] as const
 const VALID_WORK_FORMATS = ['office', 'remote', 'hybrid'] as const
 const VALID_SENIORITIES = ['intern', 'junior', 'middle', 'senior', 'lead', 'principal'] as const
-
-function toArray(value: string | string[] | undefined): string[] {
-  if (!value) return []
-  if (Array.isArray(value)) return value.filter(Boolean)
-  return value ? [value] : []
-}
 
 // In-memory unique-view tracker (resets on restart — sufficient for MVP)
 const viewedIPs = new Map<string, Set<string>>()

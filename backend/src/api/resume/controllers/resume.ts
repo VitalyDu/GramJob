@@ -6,15 +6,10 @@ import {
   publishedTransitionsOnEditResume,
 } from '../services/resume-utils'
 import { checkIsMaxPlan } from '../policies/requires-max-plan'
+import { toArray } from '../../../utils/query'
 import type resumeServiceFactory from '../services/resume'
 
 type ResumeService = ReturnType<typeof resumeServiceFactory>
-
-function toArray(value: string | string[] | undefined): string[] {
-  if (!value) return []
-  if (Array.isArray(value)) return value.filter(Boolean)
-  return value ? [value] : []
-}
 
 const VALID_WORK_FORMATS = ['office', 'remote', 'hybrid', 'any'] as const
 const VALID_EMPLOYMENT_TYPES = [

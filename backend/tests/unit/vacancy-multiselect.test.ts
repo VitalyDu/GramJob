@@ -1,8 +1,4 @@
-function toArray(value: string | string[] | undefined): string[] {
-  if (!value) return []
-  if (Array.isArray(value)) return value.filter(Boolean)
-  return value ? [value] : []
-}
+import { toArray } from '../../src/utils/query'
 
 describe('toArray helper', () => {
   it('возвращает пустой массив для undefined', () => {

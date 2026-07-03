@@ -20,6 +20,7 @@ interface CountrySelectProps {
   onChange: (code: string) => void
   placeholder?: string
   className?: string
+  disabled?: boolean
 }
 
 export function CountrySelect({
@@ -27,6 +28,7 @@ export function CountrySelect({
   onChange,
   placeholder = 'Выберите страну',
   className,
+  disabled,
 }: CountrySelectProps) {
   const [open, setOpen] = useState(false)
 
@@ -37,6 +39,7 @@ export function CountrySelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          disabled={disabled}
           className={cn('w-full justify-between font-normal', className)}
         >
           {value ? getCountryName(value) : placeholder}
