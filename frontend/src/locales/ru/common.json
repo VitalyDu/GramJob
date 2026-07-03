@@ -34,7 +34,143 @@
     "save": "Сохранить",
     "cancel": "Отмена",
     "back": "Назад",
-    "reset": "Сбросить"
+    "reset": "Сбросить",
+    "search": "Найти",
+    "resetFilters": "Сбросить фильтры",
+    "found": "Найдено: {{count}}",
+    "close": "Закрыть",
+    "send": "Отправить",
+    "sending": "Отправка...",
+    "saveSearch": "Сохранить поиск",
+    "searchSaved": "Поиск сохранён ✓",
+    "optional": "(необязательно)"
+  },
+  "vacancies": {
+    "description": "Найдите работу мечты в Telegram-экосистеме",
+    "searchPlaceholder": "Поиск вакансий...",
+    "notFound": "Вакансии не найдены",
+    "notFoundHint": "Попробуйте изменить фильтры"
+  },
+  "resumes": {
+    "description": "База специалистов",
+    "searchPlaceholder": "Поиск резюме...",
+    "notFound": "Резюме не найдены",
+    "loginRequired": "Войдите в аккаунт",
+    "loginRequiredHint": "Войдите, чтобы просматривать базу резюме",
+    "accessDenied": "Доступ закрыт",
+    "accessDeniedHint": "База резюме доступна на подписке Max",
+    "subscribeMax": "Подписка Max",
+    "noPublished": "У вас нет опубликованных резюме.",
+    "createLink": "Создать резюме →",
+    "fetchError": "Не удалось загрузить резюме"
+  },
+  "companies": {
+    "description": "Каталог работодателей",
+    "searchPlaceholder": "Поиск компании...",
+    "notFound": "Компании не найдены"
+  },
+  "cards": {
+    "views": "Просмотры: {{count}}",
+    "applications": "Отклики: {{count}}"
+  },
+  "savedSearch": {
+    "namePlaceholder": "Название (необязательно)",
+    "saved": "Поиск сохранён ✓"
+  },
+  "report": {
+    "title": "Пожаловаться",
+    "reason": "Причина",
+    "comment": "Комментарий (необязательно)",
+    "commentPlaceholder": "Опишите проблему подробнее...",
+    "submit": "Отправить",
+    "sending": "Отправка...",
+    "sentTitle": "Жалоба отправлена",
+    "sentText": "Спасибо, мы рассмотрим жалобу в ближайшее время.",
+    "sendError": "Не удалось отправить жалобу. Попробуйте ещё раз.",
+    "reasons": {
+      "spam": "Спам",
+      "fraud": "Мошенничество",
+      "inappropriate": "Неприемлемый контент",
+      "other": "Другое"
+    }
+  },
+  "block": {
+    "block": "Заблокировать",
+    "blocked": "Заблокирован",
+    "confirm": "Заблокировать этого пользователя? Его контент больше не будет отображаться в результатах поиска."
+  },
+  "favorite": {
+    "add": "☆ В избранное",
+    "added": "★ В избранном",
+    "addTitle": "Добавить в избранное",
+    "removeTitle": "Убрать из избранного"
+  },
+  "apply": {
+    "title": "Откликнуться",
+    "resume": "Резюме",
+    "selectResume": "Выберите резюме",
+    "coverLetter": "Сопроводительное письмо (необязательно)",
+    "coverLetterPlaceholder": "Расскажите, почему вы подходите на эту позицию...",
+    "submit": "Откликнуться",
+    "sending": "Отправка...",
+    "alreadyApplied": "Вы уже откликались на эту вакансию.",
+    "limitReached": "Дневной лимит откликов исчерпан. Обновите план для большего количества откликов."
+  },
+  "applicationCard": {
+    "coverLetter": "Сопроводительное письмо",
+    "nextStatus": {
+      "viewed": "Просмотрен",
+      "in-review": "На рассмотрение",
+      "interview": "Собеседование",
+      "test-task": "Тест. задание",
+      "offer": "Оффер",
+      "hired": "Принят",
+      "rejected": "Отклонить"
+    }
+  },
+  "vacancyDetail": {
+    "apply": "Откликнуться",
+    "loginToApply": "Войдите, чтобы откликнуться",
+    "report": "Пожаловаться",
+    "reportTooltip": "Пожаловаться на вакансию",
+    "blockEmployer": "Заблокировать работодателя",
+    "externalTitle": "Внешняя вакансия",
+    "externalText": "Эта вакансия размещена на внешнем сайте.",
+    "applyOnSource": "Apply on Source →",
+    "description": "Описание",
+    "responsibilities": "Обязанности",
+    "requirements": "Требования",
+    "conditions": "Условия",
+    "skills": "Навыки",
+    "backToAll": "← Все вакансии",
+    "notFound": "Не удалось загрузить вакансию"
+  },
+  "resumeDetail": {
+    "salaryFrom": "от",
+    "experienceYears": "{{count}} лет опыта",
+    "report": "Пожаловаться",
+    "accessDeniedTitle": "Доступ закрыт",
+    "accessDeniedAuth": "Оформите подписку Max или VIP, чтобы просматривать резюме кандидатов.",
+    "accessDeniedNoAuth": "Войдите и оформите подписку Max или VIP, чтобы просматривать резюме кандидатов.",
+    "goToSubscriptions": "Перейти к подпискам",
+    "notFound": "Резюме не найдено",
+    "about": "О себе",
+    "workExperience": "Опыт работы",
+    "present": "по настоящее время",
+    "education": "Образование",
+    "skills": "Навыки",
+    "contacts": "Контакты",
+    "telegram": "Telegram",
+    "email": "Email",
+    "phone": "Телефон",
+    "contactsLocked": "Контакты доступны после одобрения отклика",
+    "backToAll": "← Все резюме"
+  },
+  "companyDetail": {
+    "report": "Пожаловаться",
+    "about": "О компании",
+    "backToAll": "← Все компании",
+    "notFound": "Компания не найдена"
   },
   "home": {
     "tagline": "Международная биржа вакансий в Telegram",
@@ -168,8 +304,10 @@
       "applied": "Отклик отправлен",
       "viewed": "Просмотрено",
       "in_review": "На рассмотрении",
+      "in-review": "На рассмотрении",
       "interview": "Приглашение на интервью",
       "test_task": "Тестовое задание",
+      "test-task": "Тестовое задание",
       "offer": "Оффер",
       "hired": "Принят",
       "rejected": "Отказ"

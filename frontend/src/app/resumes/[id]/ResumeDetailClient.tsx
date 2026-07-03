@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import { Lock } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { ResumeStatusBadge } from '@/components/resume/ResumeStatusBadge'
@@ -28,6 +29,7 @@ interface Props {
 export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: Props) {
   useTelegramBackButton()
   const { resume: store, auth } = useStores()
+  const { t } = useTranslation()
   const [reportOpen, setReportOpen] = useState(false)
 
   useEffect(() => {
@@ -42,16 +44,14 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
     return (
       <EmptyState
         icon={Lock}
-        title="Доступ закрыт"
+        title={t('resumeDetail.accessDeniedTitle')}
         description={
-          auth.user
-            ? 'Оформите подписку Max или VIP, чтобы просматривать резюме кандидатов.'
-            : 'Войдите и оформите подписку Max или VIP, чтобы просматривать резюме кандидатов.'
+          auth.user ? t('resumeDetail.accessDeniedAuth') : t('resumeDetail.accessDeniedNoAuth')
         }
         action={
           <Button asChild>
             <Link href={auth.user ? '/subscription' : '/login'}>
-              {auth.user ? 'Перейти к подпискам' : 'Войти'}
+              {auth.user ? t('resumeDetail.goToSubscriptions') : t('auth.login')}
             </Link>
           </Button>
         }
@@ -62,7 +62,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
   if (store.error || !store.currentResume) {
     return (
       <ErrorState
-        message={store.error ?? 'Резюме не найдено'}
+        message={store.error ?? t('resumeDetail.notFound')}
         onRetry={() => void store.fetchResumeById(id)}
       />
     )
@@ -93,7 +93,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
 
               {r.desiredSalary && (
                 <p className="mt-1 text-lg font-semibold text-card-foreground">
-                  от {salarySymbol}
+                  {t('resumeDetail.salaryFrom')} {salarySymbol}
                   {r.desiredSalary.toLocaleString('ru')}
                 </p>
               )}
@@ -108,7 +108,9 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
                 <Badge variant="secondary">{RESUME_WORK_FORMAT_LABELS[r.workFormat]}</Badge>
                 <Badge variant="secondary">{RESUME_EMPLOYMENT_TYPE_LABELS[r.employmentType]}</Badge>
                 {r.experienceYears !== null && r.experienceYears !== undefined && (
-                  <Badge variant="outline">{r.experienceYears} лет опыта</Badge>
+                  <Badge variant="outline">
+                    {t('resumeDetail.experienceYears', { count: r.experienceYears })}
+                  </Badge>
                 )}
               </div>
 
@@ -119,7 +121,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
                     onClick={() => setReportOpen(true)}
                     className="text-sm text-muted-foreground hover:text-destructive"
                   >
-                    Пожаловаться
+                    {t('resumeDetail.report')}
                   </button>
                   {r.user && <BlockButton targetType="candidate" targetId={r.user.id} />}
                 </div>
@@ -133,7 +135,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
       {r.about && (
         <Card>
           <CardHeader>
-            <CardTitle>О себе</CardTitle>
+            <CardTitle>{t('resumeDetail.about')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="whitespace-pre-wrap text-sm text-foreground">{r.about}</p>
@@ -145,7 +147,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
       {r.workExperience && r.workExperience.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Опыт работы</CardTitle>
+            <CardTitle>{t('resumeDetail.workExperience')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="border-l-2 border-border pl-4 space-y-5">
@@ -154,7 +156,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
                   <p className="font-semibold text-card-foreground">{w.position}</p>
                   <p className="text-sm text-muted-foreground">{w.company}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {w.startDate} — {w.current ? 'по настоящее время' : (w.endDate ?? '')}
+                    {w.startDate} — {w.current ? t('resumeDetail.present') : (w.endDate ?? '')}
                   </p>
                   {w.description && (
                     <p className="mt-1.5 text-sm text-foreground">{w.description}</p>
@@ -170,7 +172,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
       {r.education && r.education.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Образование</CardTitle>
+            <CardTitle>{t('resumeDetail.education')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="border-l-2 border-border pl-4 space-y-5">
@@ -181,7 +183,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
                   </p>
                   <p className="text-sm text-muted-foreground">{e.institution}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {e.startDate} — {e.current ? 'по настоящее время' : (e.endDate ?? '')}
+                    {e.startDate} — {e.current ? t('resumeDetail.present') : (e.endDate ?? '')}
                   </p>
                 </div>
               ))}
@@ -194,7 +196,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
       {r.skills && r.skills.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Навыки</CardTitle>
+            <CardTitle>{t('resumeDetail.skills')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
@@ -211,14 +213,14 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
       {/* Contacts */}
       <Card>
         <CardHeader>
-          <CardTitle>Контакты</CardTitle>
+          <CardTitle>{t('resumeDetail.contacts')}</CardTitle>
         </CardHeader>
         <CardContent>
           {r.contacts && (r.contacts.telegram || r.contacts.email || r.contacts.phone) ? (
             <div className="space-y-1.5 text-sm text-foreground">
               {r.contacts.telegram && (
                 <p>
-                  Telegram:{' '}
+                  {t('resumeDetail.telegram')}:{' '}
                   <a
                     href={`https://t.me/${r.contacts.telegram.replace('@', '')}`}
                     className="text-primary hover:underline"
@@ -229,17 +231,21 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
               )}
               {r.contacts.email && (
                 <p>
-                  Email:{' '}
+                  {t('resumeDetail.email')}:{' '}
                   <a href={`mailto:${r.contacts.email}`} className="text-primary hover:underline">
                     {r.contacts.email}
                   </a>
                 </p>
               )}
-              {r.contacts.phone && <p>Телефон: {r.contacts.phone}</p>}
+              {r.contacts.phone && (
+                <p>
+                  {t('resumeDetail.phone')}: {r.contacts.phone}
+                </p>
+              )}
             </div>
           ) : (
             <Alert>
-              <AlertDescription>Контакты доступны после одобрения отклика</AlertDescription>
+              <AlertDescription>{t('resumeDetail.contactsLocked')}</AlertDescription>
             </Alert>
           )}
         </CardContent>
@@ -247,7 +253,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
 
       <div className="border-t pt-4">
         <Link href="/resumes" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Все резюме
+          {t('resumeDetail.backToAll')}
         </Link>
       </div>
 

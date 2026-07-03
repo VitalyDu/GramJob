@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import type { Application, ApplicationStatusEnum } from '@/types/api'
 import { ApplicationStatusBadge } from './ApplicationStatusBadge'
 
@@ -11,16 +12,6 @@ const STATUS_TRANSITIONS: Record<ApplicationStatusEnum, ApplicationStatusEnum[]>
   offer: ['hired', 'rejected'],
   hired: [],
   rejected: [],
-}
-
-const NEXT_STATUS_LABELS: Partial<Record<ApplicationStatusEnum, string>> = {
-  viewed: 'Просмотрен',
-  'in-review': 'На рассмотрение',
-  interview: 'Собеседование',
-  'test-task': 'Тест. задание',
-  offer: 'Оффер',
-  hired: 'Принят',
-  rejected: 'Отклонить',
 }
 
 interface Props {
@@ -36,6 +27,7 @@ export function ApplicationCard({
   onStatusChange,
   isLoading,
 }: Props) {
+  const { t } = useTranslation()
   const nextStatuses = STATUS_TRANSITIONS[app.status] ?? []
 
   return (
@@ -93,7 +85,7 @@ export function ApplicationCard({
                     : 'border border-border text-foreground hover:bg-muted'
                 } disabled:opacity-50`}
               >
-                {NEXT_STATUS_LABELS[next] ?? next}
+                {t(`applicationCard.nextStatus.${next}`, { defaultValue: next })}
               </button>
             ))}
           </div>
@@ -102,7 +94,9 @@ export function ApplicationCard({
 
       {employerMode && app.coverLetter && (
         <div className="mt-3 rounded-lg bg-muted px-3 py-2">
-          <p className="text-xs font-medium text-muted-foreground">Сопроводительное письмо</p>
+          <p className="text-xs font-medium text-muted-foreground">
+            {t('applicationCard.coverLetter')}
+          </p>
           <p className="mt-1 text-sm text-foreground">{app.coverLetter}</p>
         </div>
       )}

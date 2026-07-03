@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ExternalLink, MessageCircle, Linkedin } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { StatusBadge } from '@/components/company/StatusBadge'
@@ -25,6 +26,7 @@ interface Props {
 export const CompanyDetailClient = observer(function CompanyDetailClient({ id }: Props) {
   useTelegramBackButton()
   const { company: store, auth } = useStores()
+  const { t } = useTranslation()
   const [reportOpen, setReportOpen] = useState(false)
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
   if (store.error || !store.currentCompany) {
     return (
       <ErrorState
-        message={store.error ?? 'Компания не найдена'}
+        message={store.error ?? t('companyDetail.notFound')}
         onRetry={() => void store.fetchCompanyById(id)}
       />
     )
@@ -129,7 +131,7 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
                     onClick={() => setReportOpen(true)}
                     className="text-sm text-muted-foreground hover:text-destructive"
                   >
-                    Пожаловаться
+                    {t('companyDetail.report')}
                   </button>
                 </div>
               )}
@@ -142,7 +144,7 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
       {company.description && (
         <Card>
           <CardHeader>
-            <CardTitle>О компании</CardTitle>
+            <CardTitle>{t('companyDetail.about')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="whitespace-pre-wrap text-sm text-foreground">{company.description}</p>
@@ -152,7 +154,7 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
 
       <div className="border-t pt-4">
         <Link href="/companies" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Все компании
+          {t('companyDetail.backToAll')}
         </Link>
       </div>
 

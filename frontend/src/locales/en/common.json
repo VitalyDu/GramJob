@@ -34,7 +34,143 @@
     "save": "Save",
     "cancel": "Cancel",
     "back": "Back",
-    "reset": "Reset"
+    "reset": "Reset",
+    "search": "Search",
+    "resetFilters": "Reset filters",
+    "found": "Found: {{count}}",
+    "close": "Close",
+    "send": "Send",
+    "sending": "Sending...",
+    "saveSearch": "Save search",
+    "searchSaved": "Search saved ✓",
+    "optional": "(optional)"
+  },
+  "vacancies": {
+    "description": "Find your dream job in the Telegram ecosystem",
+    "searchPlaceholder": "Search vacancies...",
+    "notFound": "No vacancies found",
+    "notFoundHint": "Try adjusting filters"
+  },
+  "resumes": {
+    "description": "Specialist database",
+    "searchPlaceholder": "Search resumes...",
+    "notFound": "No resumes found",
+    "loginRequired": "Sign in to your account",
+    "loginRequiredHint": "Sign in to browse the resume database",
+    "accessDenied": "Access denied",
+    "accessDeniedHint": "Resume database is available on the Max subscription",
+    "subscribeMax": "Max subscription",
+    "noPublished": "You have no published resumes.",
+    "createLink": "Create resume →",
+    "fetchError": "Failed to load resumes"
+  },
+  "companies": {
+    "description": "Employer catalogue",
+    "searchPlaceholder": "Search companies...",
+    "notFound": "No companies found"
+  },
+  "cards": {
+    "views": "Views: {{count}}",
+    "applications": "Applications: {{count}}"
+  },
+  "savedSearch": {
+    "namePlaceholder": "Name (optional)",
+    "saved": "Search saved ✓"
+  },
+  "report": {
+    "title": "Report",
+    "reason": "Reason",
+    "comment": "Comment (optional)",
+    "commentPlaceholder": "Describe the issue in more detail...",
+    "submit": "Submit",
+    "sending": "Sending...",
+    "sentTitle": "Report sent",
+    "sentText": "Thank you, we will review your report shortly.",
+    "sendError": "Failed to send report. Please try again.",
+    "reasons": {
+      "spam": "Spam",
+      "fraud": "Fraud",
+      "inappropriate": "Inappropriate content",
+      "other": "Other"
+    }
+  },
+  "block": {
+    "block": "Block",
+    "blocked": "Blocked",
+    "confirm": "Block this user? Their content will no longer appear in search results."
+  },
+  "favorite": {
+    "add": "☆ Favourite",
+    "added": "★ Favourited",
+    "addTitle": "Add to favourites",
+    "removeTitle": "Remove from favourites"
+  },
+  "apply": {
+    "title": "Apply",
+    "resume": "Resume",
+    "selectResume": "Select resume",
+    "coverLetter": "Cover letter (optional)",
+    "coverLetterPlaceholder": "Tell us why you are a great fit for this role...",
+    "submit": "Apply",
+    "sending": "Sending...",
+    "alreadyApplied": "You have already applied for this vacancy.",
+    "limitReached": "Daily application limit reached. Upgrade your plan to apply to more vacancies."
+  },
+  "applicationCard": {
+    "coverLetter": "Cover letter",
+    "nextStatus": {
+      "viewed": "Viewed",
+      "in-review": "In Review",
+      "interview": "Interview",
+      "test-task": "Test Task",
+      "offer": "Offer",
+      "hired": "Hired",
+      "rejected": "Reject"
+    }
+  },
+  "vacancyDetail": {
+    "apply": "Apply",
+    "loginToApply": "Sign in to apply",
+    "report": "Report",
+    "reportTooltip": "Report this vacancy",
+    "blockEmployer": "Block employer",
+    "externalTitle": "External vacancy",
+    "externalText": "This vacancy is hosted on an external site.",
+    "applyOnSource": "Apply on Source →",
+    "description": "Description",
+    "responsibilities": "Responsibilities",
+    "requirements": "Requirements",
+    "conditions": "Conditions",
+    "skills": "Skills",
+    "backToAll": "← All vacancies",
+    "notFound": "Failed to load vacancy"
+  },
+  "resumeDetail": {
+    "salaryFrom": "from",
+    "experienceYears": "{{count}} years experience",
+    "report": "Report",
+    "accessDeniedTitle": "Access denied",
+    "accessDeniedAuth": "Get a Max or VIP subscription to view candidate resumes.",
+    "accessDeniedNoAuth": "Sign in and get a Max or VIP subscription to view candidate resumes.",
+    "goToSubscriptions": "Go to subscriptions",
+    "notFound": "Resume not found",
+    "about": "About",
+    "workExperience": "Work experience",
+    "present": "present",
+    "education": "Education",
+    "skills": "Skills",
+    "contacts": "Contacts",
+    "telegram": "Telegram",
+    "email": "Email",
+    "phone": "Phone",
+    "contactsLocked": "Contacts are available after application approval",
+    "backToAll": "← All resumes"
+  },
+  "companyDetail": {
+    "report": "Report",
+    "about": "About company",
+    "backToAll": "← All companies",
+    "notFound": "Company not found"
   },
   "home": {
     "tagline": "International job board in Telegram",
@@ -168,8 +304,10 @@
       "applied": "Applied",
       "viewed": "Viewed",
       "in_review": "In Review",
+      "in-review": "In Review",
       "interview": "Interview",
       "test_task": "Test Task",
+      "test-task": "Test Task",
       "offer": "Offer",
       "hired": "Hired",
       "rejected": "Rejected"

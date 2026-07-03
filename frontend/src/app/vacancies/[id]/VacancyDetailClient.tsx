@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import { Eye, Send, ExternalLink } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { hapticNotify } from '@/lib/telegram'
@@ -34,6 +35,7 @@ interface Props {
 export const VacancyDetailClient = observer(function VacancyDetailClient({ id }: Props) {
   useTelegramBackButton()
   const { vacancy: store, application: appStore, auth } = useStores()
+  const { t } = useTranslation()
   const [applyOpen, setApplyOpen] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)
 
@@ -63,7 +65,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
   if (!store.currentVacancy) {
     return (
       <ErrorState
-        message="Не удалось загрузить вакансию"
+        message={t('vacancyDetail.notFound')}
         onRetry={() => void store.fetchVacancyById(id)}
       />
     )
@@ -146,12 +148,12 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
           <div className="mt-5 flex flex-wrap items-center gap-3">
             {isPublished && isInternal && auth.user && (
               <Button size="lg" onClick={() => setApplyOpen(true)}>
-                Откликнуться
+                {t('vacancyDetail.apply')}
               </Button>
             )}
             {isPublished && isInternal && !auth.user && (
               <Button size="lg" asChild>
-                <Link href="/login">Войдите, чтобы откликнуться</Link>
+                <Link href="/login">{t('vacancyDetail.loginToApply')}</Link>
               </Button>
             )}
             {auth.user && (
@@ -164,10 +166,10 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
                         onClick={() => setReportOpen(true)}
                         className="text-sm text-muted-foreground hover:text-destructive"
                       >
-                        Пожаловаться
+                        {t('vacancyDetail.report')}
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent>Пожаловаться на вакансию</TooltipContent>
+                    <TooltipContent>{t('vacancyDetail.reportTooltip')}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
                 {v.postedBy && (
@@ -178,7 +180,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
                           <BlockButton targetType="employer" targetId={v.postedBy.id} />
                         </span>
                       </TooltipTrigger>
-                      <TooltipContent>Заблокировать работодателя</TooltipContent>
+                      <TooltipContent>{t('vacancyDetail.blockEmployer')}</TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 )}
@@ -192,12 +194,12 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
       {v.sourceType === 'external' && v.sourceUrl && (
         <Alert>
           <ExternalLink className="h-4 w-4" />
-          <AlertTitle>Внешняя вакансия</AlertTitle>
+          <AlertTitle>{t('vacancyDetail.externalTitle')}</AlertTitle>
           <AlertDescription className="flex items-center gap-3">
-            <span>Эта вакансия размещена на внешнем сайте.</span>
+            <span>{t('vacancyDetail.externalText')}</span>
             <Button size="sm" asChild>
               <a href={v.sourceUrl} target="_blank" rel="noopener noreferrer">
-                Apply on Source →
+                {t('vacancyDetail.applyOnSource')}
               </a>
             </Button>
           </AlertDescription>
@@ -208,7 +210,9 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
       {v.description && (
         <Card>
           <CardContent className="pt-6">
-            <h2 className="mb-3 text-base font-semibold text-card-foreground">Описание</h2>
+            <h2 className="mb-3 text-base font-semibold text-card-foreground">
+              {t('vacancyDetail.description')}
+            </h2>
             <p className="whitespace-pre-wrap text-sm text-foreground">{v.description}</p>
           </CardContent>
         </Card>
@@ -218,7 +222,9 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
       {v.responsibilities && (
         <Card>
           <CardContent className="pt-6">
-            <h2 className="mb-3 text-base font-semibold text-card-foreground">Обязанности</h2>
+            <h2 className="mb-3 text-base font-semibold text-card-foreground">
+              {t('vacancyDetail.responsibilities')}
+            </h2>
             <p className="whitespace-pre-wrap text-sm text-foreground">{v.responsibilities}</p>
           </CardContent>
         </Card>
@@ -228,7 +234,9 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
       {v.requirements && (
         <Card>
           <CardContent className="pt-6">
-            <h2 className="mb-3 text-base font-semibold text-card-foreground">Требования</h2>
+            <h2 className="mb-3 text-base font-semibold text-card-foreground">
+              {t('vacancyDetail.requirements')}
+            </h2>
             <p className="whitespace-pre-wrap text-sm text-foreground">{v.requirements}</p>
           </CardContent>
         </Card>
@@ -238,7 +246,9 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
       {v.conditions && (
         <Card>
           <CardContent className="pt-6">
-            <h2 className="mb-3 text-base font-semibold text-card-foreground">Условия</h2>
+            <h2 className="mb-3 text-base font-semibold text-card-foreground">
+              {t('vacancyDetail.conditions')}
+            </h2>
             <p className="whitespace-pre-wrap text-sm text-foreground">{v.conditions}</p>
           </CardContent>
         </Card>
@@ -248,7 +258,9 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
       {v.skills && v.skills.length > 0 && (
         <Card>
           <CardContent className="pt-6">
-            <h2 className="mb-3 text-base font-semibold text-card-foreground">Навыки</h2>
+            <h2 className="mb-3 text-base font-semibold text-card-foreground">
+              {t('vacancyDetail.skills')}
+            </h2>
             <div className="flex flex-wrap gap-2">
               {v.skills.map((skill) => (
                 <Badge key={skill} variant="secondary">
@@ -262,7 +274,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
 
       <div className="border-t pt-4">
         <Link href="/vacancies" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Все вакансии
+          {t('vacancyDetail.backToAll')}
         </Link>
       </div>
 
