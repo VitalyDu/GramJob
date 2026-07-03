@@ -3,14 +3,22 @@
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
+import { Eye, Send, ExternalLink } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { hapticNotify } from '@/lib/telegram'
+import { getMediaUrl } from '@/lib/media'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
 import { ApplyDialog } from '@/components/application/ApplyDialog'
 import { FavoriteButton } from '@/components/favorite/FavoriteButton'
 import { ReportDialog } from '@/components/report/ReportDialog'
 import { BlockButton } from '@/components/block/BlockButton'
+import { CardListSkeleton, ErrorState } from '@/components/shared'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   WORK_FORMAT_LABELS,
   EMPLOYMENT_TYPE_LABELS,
@@ -48,18 +56,15 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
   }
 
   if (store.isLoading) {
-    return <p className="text-sm text-muted-foreground">Загрузка...</p>
+    return <CardListSkeleton count={3} />
   }
 
   if (!store.currentVacancy) {
     return (
-      <div className="py-16 text-center">
-        <p className="text-lg font-medium text-card-foreground">Вакансия не найдена</p>
-        {store.error && <p className="mt-1 text-sm text-muted-foreground">{store.error}</p>}
-        <Link href="/vacancies" className="mt-4 inline-block text-sm text-primary hover:underline">
-          ← Все вакансии
-        </Link>
-      </div>
+      <ErrorState
+        message="Не удалось загрузить вакансию"
+        onRetry={() => void store.fetchVacancyById(id)}
+      />
     )
   }
 
@@ -67,127 +72,191 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
   const salary = formatSalary(v.salaryFrom, v.salaryTo, v.salaryCurrency)
   const isInternal = v.sourceType === 'internal'
   const isPublished = v.status === 'published'
+  const logoUrl = v.company.logo ? getMediaUrl(v.company.logo.url) : null
 
   return (
-    <div className="space-y-6">
-      <div>
-        <div className="flex items-start justify-between gap-3">
-          <h1 className="text-2xl font-bold text-card-foreground">{v.title}</h1>
-          <VacancyStatusBadge status={v.status} />
-        </div>
-
-        {v.company && (
-          <Link
-            href={`/companies/${v.company.documentId}`}
-            className="mt-1 text-sm font-medium text-primary hover:underline"
-          >
-            {v.company.name}
-          </Link>
-        )}
-
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
-          <span>
-            {v.country}
-            {v.city ? `, ${v.city}` : ''}
-          </span>
-          <span>{WORK_FORMAT_LABELS[v.workFormat]}</span>
-          <span>{EMPLOYMENT_TYPE_LABELS[v.employmentType]}</span>
-          <span>{SENIORITY_LABELS[v.seniority]}</span>
-        </div>
-
-        {salary && <p className="mt-3 text-lg font-semibold text-card-foreground">{salary}</p>}
-
-        {v.urgent && (
-          <span className="mt-2 inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700">
-            🔥 Urgent
-          </span>
-        )}
-
-        {auth.user && (
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            <FavoriteButton type="vacancy" targetId={id} />
-            <button
-              onClick={() => setReportOpen(true)}
-              className="text-sm text-muted-foreground hover:text-red-500"
-            >
-              Пожаловаться
-            </button>
-            {v.postedBy && <BlockButton targetType="employer" targetId={v.postedBy.id} />}
+    <div className="space-y-4">
+      {/* Шапка */}
+      <Card>
+        <CardContent className="pt-6">
+          {/* Лого + название + статус */}
+          <div className="flex items-start gap-4">
+            {logoUrl && (
+              <img
+                src={logoUrl}
+                alt={v.company.name}
+                className="h-14 w-14 shrink-0 rounded-lg object-cover"
+              />
+            )}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start justify-between gap-3">
+                <h1 className="text-2xl font-bold text-card-foreground">{v.title}</h1>
+                <VacancyStatusBadge status={v.status} />
+              </div>
+              {v.company && (
+                <Link
+                  href={`/companies/${v.company.documentId}`}
+                  className="mt-1 text-sm font-medium text-primary hover:underline"
+                >
+                  {v.company.name}
+                </Link>
+              )}
+            </div>
           </div>
-        )}
-      </div>
 
-      {v.description && (
-        <div>
-          <h2 className="mb-2 text-base font-semibold text-card-foreground">Описание</h2>
-          <p className="whitespace-pre-wrap text-sm text-foreground">{v.description}</p>
-        </div>
-      )}
-
-      {v.responsibilities && (
-        <div>
-          <h2 className="mb-2 text-base font-semibold text-card-foreground">Обязанности</h2>
-          <p className="whitespace-pre-wrap text-sm text-foreground">{v.responsibilities}</p>
-        </div>
-      )}
-
-      {v.requirements && (
-        <div>
-          <h2 className="mb-2 text-base font-semibold text-card-foreground">Требования</h2>
-          <p className="whitespace-pre-wrap text-sm text-foreground">{v.requirements}</p>
-        </div>
-      )}
-
-      {v.conditions && (
-        <div>
-          <h2 className="mb-2 text-base font-semibold text-card-foreground">Условия</h2>
-          <p className="whitespace-pre-wrap text-sm text-foreground">{v.conditions}</p>
-        </div>
-      )}
-
-      {v.skills && v.skills.length > 0 && (
-        <div>
-          <h2 className="mb-2 text-base font-semibold text-card-foreground">Навыки</h2>
-          <div className="flex flex-wrap gap-2">
-            {v.skills.map((skill) => (
-              <span
-                key={skill}
-                className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-foreground"
-              >
-                {skill}
-              </span>
-            ))}
+          {/* Бейджи */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {(v.country || v.city) && (
+              <Badge variant="outline">
+                {v.country}
+                {v.city ? `, ${v.city}` : ''}
+              </Badge>
+            )}
+            <Badge variant="outline">{WORK_FORMAT_LABELS[v.workFormat]}</Badge>
+            <Badge variant="outline">{EMPLOYMENT_TYPE_LABELS[v.employmentType]}</Badge>
+            <Badge variant="outline">{SENIORITY_LABELS[v.seniority]}</Badge>
+            {v.urgent && (
+              <Badge className="bg-red-100 text-red-700 hover:bg-red-100">🔥 Urgent</Badge>
+            )}
           </div>
-        </div>
-      )}
 
-      {isPublished && isInternal && auth.user && (
-        <button
-          onClick={() => setApplyOpen(true)}
-          className="inline-flex items-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-medium text-white hover:bg-indigo-700"
-        >
-          Откликнуться
-        </button>
-      )}
+          {/* Зарплата */}
+          {salary && <p className="mt-3 text-lg font-semibold text-card-foreground">{salary}</p>}
 
-      {isPublished && isInternal && !auth.user && (
-        <Link
-          href="/login"
-          className="inline-flex items-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-medium text-white hover:bg-indigo-700"
-        >
-          Войдите, чтобы откликнуться
-        </Link>
-      )}
+          {/* Счётчики */}
+          {(v.views != null || v.applicationsCount != null) && (
+            <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
+              {v.views != null && (
+                <span className="flex items-center gap-1">
+                  <Eye className="h-4 w-4" />
+                  {v.views}
+                </span>
+              )}
+              {v.applicationsCount != null && (
+                <span className="flex items-center gap-1">
+                  <Send className="h-4 w-4" />
+                  {v.applicationsCount}
+                </span>
+              )}
+            </div>
+          )}
 
+          {/* Кнопки действий */}
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            {isPublished && isInternal && auth.user && (
+              <Button size="lg" onClick={() => setApplyOpen(true)}>
+                Откликнуться
+              </Button>
+            )}
+            {isPublished && isInternal && !auth.user && (
+              <Button size="lg" asChild>
+                <Link href="/login">Войдите, чтобы откликнуться</Link>
+              </Button>
+            )}
+            {auth.user && (
+              <>
+                <FavoriteButton type="vacancy" targetId={id} />
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setReportOpen(true)}
+                        className="text-sm text-muted-foreground hover:text-destructive"
+                      >
+                        Пожаловаться
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Пожаловаться на вакансию</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                {v.postedBy && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <BlockButton targetType="employer" targetId={v.postedBy.id} />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>Заблокировать работодателя</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* External-вакансия */}
       {v.sourceType === 'external' && v.sourceUrl && (
-        <a
-          href={v.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-medium text-white hover:bg-indigo-700"
-        >
-          Apply on Source →
-        </a>
+        <Alert>
+          <ExternalLink className="h-4 w-4" />
+          <AlertTitle>Внешняя вакансия</AlertTitle>
+          <AlertDescription className="flex items-center gap-3">
+            <span>Эта вакансия размещена на внешнем сайте.</span>
+            <Button size="sm" asChild>
+              <a href={v.sourceUrl} target="_blank" rel="noopener noreferrer">
+                Apply on Source →
+              </a>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Описание */}
+      {v.description && (
+        <Card>
+          <CardContent className="pt-6">
+            <h2 className="mb-3 text-base font-semibold text-card-foreground">Описание</h2>
+            <p className="whitespace-pre-wrap text-sm text-foreground">{v.description}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Обязанности */}
+      {v.responsibilities && (
+        <Card>
+          <CardContent className="pt-6">
+            <h2 className="mb-3 text-base font-semibold text-card-foreground">Обязанности</h2>
+            <p className="whitespace-pre-wrap text-sm text-foreground">{v.responsibilities}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Требования */}
+      {v.requirements && (
+        <Card>
+          <CardContent className="pt-6">
+            <h2 className="mb-3 text-base font-semibold text-card-foreground">Требования</h2>
+            <p className="whitespace-pre-wrap text-sm text-foreground">{v.requirements}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Условия */}
+      {v.conditions && (
+        <Card>
+          <CardContent className="pt-6">
+            <h2 className="mb-3 text-base font-semibold text-card-foreground">Условия</h2>
+            <p className="whitespace-pre-wrap text-sm text-foreground">{v.conditions}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Навыки */}
+      {v.skills && v.skills.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <h2 className="mb-3 text-base font-semibold text-card-foreground">Навыки</h2>
+            <div className="flex flex-wrap gap-2">
+              {v.skills.map((skill) => (
+                <Badge key={skill} variant="secondary">
+                  {skill}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       <div className="border-t pt-4">

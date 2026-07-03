@@ -101,20 +101,20 @@ describe('VacancyDetailClient', () => {
     })
   })
 
-  it('отображает загрузку', () => {
+  it('отображает скелетон загрузки', () => {
     vi.mocked(useStores).mockReturnValue(makeUseStoresReturn({ isLoading: true }))
 
     render(<VacancyDetailClient id="vac123" />)
 
-    expect(screen.getByText(/загрузка/i)).toBeDefined()
+    expect(screen.getAllByTestId('card-skeleton').length).toBeGreaterThan(0)
   })
 
-  it('отображает "не найдена" если currentVacancy=null и нет загрузки', () => {
+  it('отображает ErrorState если currentVacancy=null и нет загрузки', () => {
     vi.mocked(useStores).mockReturnValue(makeUseStoresReturn({ currentVacancy: null }))
 
     render(<VacancyDetailClient id="vac123" />)
 
-    expect(screen.getByText(/не найден/i)).toBeDefined()
+    expect(screen.getByText(/не удалось загрузить вакансию/i)).toBeDefined()
   })
 
   it('отображает название вакансии', () => {
