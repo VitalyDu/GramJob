@@ -6,6 +6,10 @@ import { observer } from 'mobx-react-lite'
 import { useStores } from '@/stores/StoreProvider'
 import { ApplicationStatusBadge } from '@/components/application/ApplicationStatusBadge'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
+import { Card, CardContent } from '@/components/ui/card'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
+import { ErrorState } from '@/components/shared/ErrorState'
 
 interface Props {
   documentId: string
@@ -22,14 +26,15 @@ export const ApplicationDetailClient = observer(function ApplicationDetailClient
   }, [store, documentId])
 
   if (store.isLoading) {
-    return <p className="text-sm text-muted-foreground">Загрузка...</p>
+    return <CardListSkeleton count={3} />
   }
 
   if (store.error) {
     return (
-      <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-        {store.error}
-      </p>
+      <ErrorState
+        message={store.error}
+        onRetry={() => void store.fetchApplicationById(documentId)}
+      />
     )
   }
 
@@ -38,46 +43,51 @@ export const ApplicationDetailClient = observer(function ApplicationDetailClient
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Отклик</h1>
-        <div className="mt-2 flex items-center gap-2">
-          <ApplicationStatusBadge status={app.status} />
-          <span className="text-xs text-muted-foreground">
-            {new Date(app.createdAt).toLocaleDateString('ru', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })}
-          </span>
-        </div>
+      <PageHeader title="Детали отклика" />
+
+      <div className="flex items-center gap-2">
+        <ApplicationStatusBadge status={app.status} />
+        <span className="text-xs text-muted-foreground">
+          {new Date(app.createdAt).toLocaleDateString('ru', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          })}
+        </span>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-4">
-        <p className="text-xs font-medium text-muted-foreground">Вакансия</p>
-        <Link
-          href={`/vacancies/${app.vacancy.documentId}`}
-          className="mt-1 block font-semibold hover:underline"
-        >
-          {app.vacancy.title}
-        </Link>
-        <p className="mt-0.5 text-sm text-muted-foreground">{app.vacancy.company.name}</p>
-      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-xs font-medium text-muted-foreground">Вакансия</p>
+          <Link
+            href={`/vacancies/${app.vacancy.documentId}`}
+            className="mt-1 block font-semibold hover:underline"
+          >
+            {app.vacancy.title}
+          </Link>
+          <p className="mt-0.5 text-sm text-muted-foreground">{app.vacancy.company.name}</p>
+        </CardContent>
+      </Card>
 
-      <div className="rounded-xl border border-border bg-card p-4">
-        <p className="text-xs font-medium text-muted-foreground">Резюме</p>
-        <Link
-          href={`/resumes/${app.resume.documentId}`}
-          className="mt-1 block font-semibold hover:underline"
-        >
-          {app.resume.title}
-        </Link>
-      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-xs font-medium text-muted-foreground">Резюме</p>
+          <Link
+            href={`/resumes/${app.resume.documentId}`}
+            className="mt-1 block font-semibold hover:underline"
+          >
+            {app.resume.title}
+          </Link>
+        </CardContent>
+      </Card>
 
       {app.coverLetter && (
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs font-medium text-muted-foreground">Сопроводительное письмо</p>
-          <p className="mt-1 text-sm whitespace-pre-wrap">{app.coverLetter}</p>
-        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-xs font-medium text-muted-foreground">Сопроводительное письмо</p>
+            <p className="mt-1 whitespace-pre-wrap text-sm">{app.coverLetter}</p>
+          </CardContent>
+        </Card>
       )}
     </div>
   )

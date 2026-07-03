@@ -2,10 +2,13 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { ChevronRight } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useStores } from '@/stores/StoreProvider'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { PageHeader } from '@/components/shared/PageHeader'
 
 const LINKS = [
   { href: '/dashboard/publications', label: 'Мои публикации' },
@@ -34,27 +37,35 @@ export const ProfileClient = observer(function ProfileClient() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">
-          {user.firstName} {user.lastName}
-        </h1>
-        <div className="mt-2">
+      <PageHeader title={`${user.firstName} ${user.lastName}`} />
+
+      <Card>
+        <CardContent className="pt-6 space-y-2">
           <SubscriptionBadge
             plan={user.subscriptionPlan}
             expiresAt={user.subscriptionExpiresAt}
             showExpiry
           />
-        </div>
-        {user.email && <p className="mt-1 text-sm text-muted-foreground">{user.email}</p>}
-      </div>
+          {user.email && <p className="text-sm text-muted-foreground">{user.email}</p>}
+        </CardContent>
+      </Card>
 
-      <nav className="divide-y divide-border rounded-xl border border-border bg-card">
-        {LINKS.map(({ href, label }) => (
-          <Link key={href} href={href} className="block px-4 py-3 text-sm hover:bg-muted">
-            {label}
-          </Link>
-        ))}
-      </nav>
+      <Card>
+        <CardContent className="p-0">
+          <nav className="divide-y divide-border">
+            {LINKS.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="flex items-center justify-between px-4 py-3 text-sm hover:bg-muted"
+              >
+                <span>{label}</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
+            ))}
+          </nav>
+        </CardContent>
+      </Card>
 
       <Button
         variant="outline"

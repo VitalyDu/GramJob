@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
-import Link from 'next/link'
 import {
   AreaChart,
   Area,
@@ -13,8 +12,14 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts'
+import { BarChart2 } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
+import { ErrorState } from '@/components/shared/ErrorState'
+import { EmptyState } from '@/components/shared/EmptyState'
 
 function defaultFrom(): string {
   const d = new Date()
@@ -46,49 +51,42 @@ export const ResumeAnalyticsClient = observer(function ResumeAnalyticsClient({ r
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link
-          href="/dashboard/resumes"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Мои резюме
-        </Link>
-        <h1 className="text-2xl font-bold">Аналитика резюме</h1>
-      </div>
+      <PageHeader title="Аналитика резюме" />
 
       <div className="flex flex-wrap items-end gap-4">
         <div>
-          <label className="block text-xs font-medium text-muted-foreground mb-1">С</label>
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">С</label>
           <input
             type="date"
             value={from}
             max={to}
             onChange={(e) => setFrom(e.target.value)}
-            className="rounded-md border border-border px-3 py-1.5 text-sm"
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-muted-foreground mb-1">По</label>
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">По</label>
           <input
             type="date"
             value={to}
             min={from}
             max={defaultTo()}
             onChange={(e) => setTo(e.target.value)}
-            className="rounded-md border border-border px-3 py-1.5 text-sm"
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm"
           />
         </div>
       </div>
 
-      {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
+      {store.isLoading && <CardListSkeleton count={3} />}
 
-      {store.error && (
-        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {store.error}
-        </p>
+      {store.error && !store.isLoading && (
+        <ErrorState
+          message={store.error}
+          onRetry={() => void store.fetchResumeAnalytics(resumeId, from, to)}
+        />
       )}
 
-      {total && (
+      {total && !store.isLoading && (
         <div className="grid grid-cols-3 gap-4">
           {(
             [
@@ -97,73 +95,81 @@ export const ResumeAnalyticsClient = observer(function ResumeAnalyticsClient({ r
               { label: 'Приглашения', value: total.invitations },
             ] as const
           ).map(({ label, value }) => (
-            <div key={label} className="rounded-xl border border-border bg-card p-4 text-center">
-              <p className="text-2xl font-bold text-card-foreground">{value}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{label}</p>
-            </div>
+            <Card key={label}>
+              <CardContent className="pt-6 text-center">
+                <p className="text-2xl font-bold text-card-foreground">{value}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{label}</p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
 
       {daily.length > 0 ? (
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="mb-4 text-sm font-semibold text-foreground">Просмотры по дням</p>
-          <ResponsiveContainer width="100%" height={260}>
-            <AreaChart data={daily} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="resumeViewsGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="invitationsGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis
-                dataKey="date"
-                tick={{ fontSize: 11 }}
-                tickFormatter={(v: string) =>
-                  new Date(v).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
-                }
-              />
-              <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-              <Tooltip
-                labelFormatter={(v) =>
-                  new Date(String(v)).toLocaleDateString('ru-RU', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })
-                }
-              />
-              <Legend />
-              <Area
-                type="monotone"
-                dataKey="views"
-                name="Просмотры"
-                stroke="#6366f1"
-                fill="url(#resumeViewsGrad)"
-                strokeWidth={2}
-              />
-              <Area
-                type="monotone"
-                dataKey="invitations"
-                name="Приглашения"
-                stroke="#f59e0b"
-                fill="url(#invitationsGrad)"
-                strokeWidth={2}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-semibold">Просмотры по дням</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={260}>
+              <AreaChart data={daily} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="resumeViewsGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="invitationsGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(v: string) =>
+                    new Date(v).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
+                  }
+                />
+                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                <Tooltip
+                  labelFormatter={(v) =>
+                    new Date(String(v)).toLocaleDateString('ru-RU', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })
+                  }
+                />
+                <Legend />
+                <Area
+                  type="monotone"
+                  dataKey="views"
+                  name="Просмотры"
+                  stroke="#6366f1"
+                  fill="url(#resumeViewsGrad)"
+                  strokeWidth={2}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="invitations"
+                  name="Приглашения"
+                  stroke="#f59e0b"
+                  fill="url(#invitationsGrad)"
+                  strokeWidth={2}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       ) : (
         !store.isLoading &&
         !store.error && (
-          <div className="rounded-xl border border-dashed border-border py-12 text-center">
-            <p className="text-sm text-muted-foreground">Нет данных за выбранный период.</p>
-          </div>
+          <EmptyState
+            icon={BarChart2}
+            title="Нет данных"
+            description="Нет данных за выбранный период"
+          />
         )
       )}
     </div>
