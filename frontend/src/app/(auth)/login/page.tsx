@@ -13,10 +13,17 @@ import {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-screen justify-center p-4 pt-12 sm:pt-16">
       <Card className="w-full max-w-md">
         <CardHeader className="items-center text-center">
-          <Image src="/logo-vertical.png" alt="GramJob" width={80} height={80} priority />
+          <Image
+            src="/logo-vertical.png"
+            alt="GramJob"
+            width={120}
+            height={120}
+            priority
+            className="mx-auto"
+          />
           <CardTitle className="mt-4 text-2xl">Вход</CardTitle>
           <CardDescription>Войдите через Telegram или email</CardDescription>
         </CardHeader>
