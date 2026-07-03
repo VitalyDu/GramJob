@@ -20,9 +20,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={inter.variable}>
-      <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
+    <html lang="ru" className={inter.variable} suppressHydrationWarning>
       <body className="font-sans antialiased">
+        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
         <I18nProvider>
           <StoreProvider>
             <AppShell>{children}</AppShell>
