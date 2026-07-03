@@ -2,11 +2,15 @@
 
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
-import Link from 'next/link'
+import { Users } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { ApplicationCard } from '@/components/application/ApplicationCard'
-import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
+import { EmptyState } from '@/components/shared/EmptyState'
+import { ErrorState } from '@/components/shared/ErrorState'
+import { PaginationBar } from '@/components/shared/PaginationBar'
 import type { ApplicationStatusEnum } from '@/types/api'
 
 interface Props {
@@ -33,32 +37,26 @@ export const VacancyApplicationsClient = observer(function VacancyApplicationsCl
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Link
-          href="/dashboard/vacancies"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Мои вакансии
-        </Link>
-        <h1 className="text-2xl font-bold">Отклики на вакансию</h1>
-      </div>
+      <PageHeader
+        title="Отклики на вакансию"
+        {...(store.vacancyTotal > 0 ? { description: `${store.vacancyTotal} откликов` } : {})}
+      />
 
-      {store.vacancyTotal > 0 && (
-        <p className="text-sm text-muted-foreground">{store.vacancyTotal} откликов</p>
-      )}
+      {store.isLoading && <CardListSkeleton count={6} />}
 
-      {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
-
-      {store.error && (
-        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {store.error}
-        </p>
+      {store.error && !store.isLoading && (
+        <ErrorState
+          message={store.error}
+          onRetry={() => void store.fetchVacancyApplications(vacancyId)}
+        />
       )}
 
       {!store.isLoading && store.vacancyApplications.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-border py-16 text-center">
-          <p className="text-sm text-muted-foreground">Откликов пока нет.</p>
-        </div>
+        <EmptyState
+          icon={Users}
+          title="Нет откликов"
+          description="На эту вакансию ещё никто не откликнулся"
+        />
       )}
 
       <div className="space-y-3">
@@ -73,29 +71,11 @@ export const VacancyApplicationsClient = observer(function VacancyApplicationsCl
         ))}
       </div>
 
-      {store.vacancyPageCount > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.vacancyPage <= 1}
-            onClick={() => handlePageChange(store.vacancyPage - 1)}
-          >
-            ← Назад
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {store.vacancyPage} / {store.vacancyPageCount}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.vacancyPage >= store.vacancyPageCount}
-            onClick={() => handlePageChange(store.vacancyPage + 1)}
-          >
-            Вперёд →
-          </Button>
-        </div>
-      )}
+      <PaginationBar
+        page={store.vacancyPage}
+        pageCount={store.vacancyPageCount}
+        onPageChange={handlePageChange}
+      />
     </div>
   )
 })

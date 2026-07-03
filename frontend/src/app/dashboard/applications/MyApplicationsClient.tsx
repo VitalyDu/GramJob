@@ -2,9 +2,14 @@
 
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
+import { Send } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { ApplicationCard } from '@/components/application/ApplicationCard'
-import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
+import { EmptyState } from '@/components/shared/EmptyState'
+import { ErrorState } from '@/components/shared/ErrorState'
+import { PaginationBar } from '@/components/shared/PaginationBar'
 
 export const MyApplicationsClient = observer(function MyApplicationsClient() {
   const { application: store } = useStores()
@@ -19,23 +24,23 @@ export const MyApplicationsClient = observer(function MyApplicationsClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Мои отклики</h1>
-        {store.total > 0 && <p className="text-sm text-muted-foreground">{store.total} откликов</p>}
-      </div>
+      <PageHeader
+        title="Мои отклики"
+        {...(store.total > 0 ? { description: `${store.total} откликов` } : {})}
+      />
 
-      {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
+      {store.isLoading && <CardListSkeleton count={6} />}
 
-      {store.error && (
-        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {store.error}
-        </p>
+      {store.error && !store.isLoading && (
+        <ErrorState message={store.error} onRetry={() => void store.fetchMyApplications()} />
       )}
 
       {!store.isLoading && store.applications.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-border py-16 text-center">
-          <p className="text-sm text-muted-foreground">Вы ещё не откликались на вакансии.</p>
-        </div>
+        <EmptyState
+          icon={Send}
+          title="Нет откликов"
+          description="Вы ещё не откликались на вакансии"
+        />
       )}
 
       <div className="space-y-3">
@@ -44,29 +49,11 @@ export const MyApplicationsClient = observer(function MyApplicationsClient() {
         ))}
       </div>
 
-      {store.pageCount > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page <= 1}
-            onClick={() => handlePageChange(store.page - 1)}
-          >
-            ← Назад
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {store.page} / {store.pageCount}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page >= store.pageCount}
-            onClick={() => handlePageChange(store.page + 1)}
-          >
-            Вперёд →
-          </Button>
-        </div>
-      )}
+      <PaginationBar
+        page={store.page}
+        pageCount={store.pageCount}
+        onPageChange={handlePageChange}
+      />
     </div>
   )
 })
