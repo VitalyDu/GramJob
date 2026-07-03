@@ -17,6 +17,7 @@ import {
   SelectItem,
 } from '@/components/ui/select'
 import { WORK_FORMAT_LABELS, EMPLOYMENT_TYPE_LABELS, SENIORITY_LABELS } from '@/lib/vacancy-utils'
+import { CountrySelect } from '@/components/ui/country-select'
 import type {
   VacancyCreateInput,
   Industry,
@@ -344,8 +345,14 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="country">Страна *</Label>
-              <Input id="country" {...register('country')} placeholder="RU" />
+              <Label>Страна *</Label>
+              <Controller
+                name="country"
+                control={control}
+                render={({ field }) => (
+                  <CountrySelect value={field.value} onChange={field.onChange} />
+                )}
+              />
               {errors.country && (
                 <p className="text-sm text-destructive">{errors.country.message}</p>
               )}

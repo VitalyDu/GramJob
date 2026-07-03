@@ -8,6 +8,12 @@ vi.mock('@/stores/StoreProvider', () => ({
   useStores: vi.fn(),
 }))
 
+vi.mock('@/components/ui/country-select', () => ({
+  CountrySelect: ({ value, onChange }: { value: string; onChange: (code: string) => void }) => (
+    <input aria-label="Страна" value={value} onChange={(e) => onChange(e.target.value)} />
+  ),
+}))
+
 vi.mock('@/hooks/useRequireAuth', () => ({ useRequireAuth: () => true }))
 
 vi.mock('next/navigation', () => ({

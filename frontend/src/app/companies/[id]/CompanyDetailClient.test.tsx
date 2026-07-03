@@ -136,7 +136,7 @@ describe('CompanyDetailClient', () => {
 
     render(<CompanyDetailClient id="abc123" />)
 
-    expect(screen.getByText('RU')).toBeDefined()
+    expect(screen.getByText('Россия')).toBeDefined()
     expect(screen.getByText('Москва')).toBeDefined()
   })
 

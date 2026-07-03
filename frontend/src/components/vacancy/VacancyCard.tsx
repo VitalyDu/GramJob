@@ -13,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { VacancyStatusBadge } from './VacancyStatusBadge'
+import { getCountryName } from '@/lib/countries'
 
 interface Props {
   vacancy: Vacancy
@@ -57,7 +58,9 @@ export function VacancyCard({ vacancy }: Props) {
 
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               <Badge variant="secondary">
-                {vacancy.city ? `${vacancy.country}, ${vacancy.city}` : vacancy.country}
+                {vacancy.city
+                  ? `${getCountryName(vacancy.country)}, ${vacancy.city}`
+                  : getCountryName(vacancy.country)}
               </Badge>
               <Badge variant="secondary">{WORK_FORMAT_LABELS[vacancy.workFormat]}</Badge>
               <Badge variant="secondary">{EMPLOYMENT_TYPE_LABELS[vacancy.employmentType]}</Badge>

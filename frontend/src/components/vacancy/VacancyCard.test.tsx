@@ -55,7 +55,7 @@ describe('VacancyCard', () => {
 
   it('отображает страну и город вместе в Badge', () => {
     render(<VacancyCard vacancy={mockVacancy} />)
-    expect(screen.getByText('RU, Москва')).toBeDefined()
+    expect(screen.getByText('Россия, Москва')).toBeDefined()
   })
 
   it('отображает VacancyStatusBadge', () => {

@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { RESUME_WORK_FORMAT_LABELS, RESUME_EMPLOYMENT_TYPE_LABELS } from '@/lib/resume-utils'
+import { getCountryName } from '@/lib/countries'
 import { ResumeStatusBadge } from './ResumeStatusBadge'
 
 interface Props {
@@ -44,7 +45,9 @@ export function ResumeCard({ resume }: Props) {
             <div className="mt-2 flex flex-wrap gap-1.5">
               {resume.country && (
                 <Badge variant="secondary">
-                  {resume.city ? `${resume.country}, ${resume.city}` : resume.country}
+                  {resume.city
+                    ? `${getCountryName(resume.country)}, ${resume.city}`
+                    : getCountryName(resume.country)}
                 </Badge>
               )}
               {resume.workFormat && (

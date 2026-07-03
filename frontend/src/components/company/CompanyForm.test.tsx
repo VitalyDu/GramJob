@@ -15,7 +15,7 @@ describe('CompanyForm', () => {
 
   it('отображает поле страны', () => {
     render(<CompanyForm onSubmit={vi.fn()} />)
-    expect(screen.getByLabelText(/страна/i)).toBeDefined()
+    expect(screen.getByText('Выберите страну')).toBeDefined()
   })
 
   it('отображает поле размера компании', () => {
@@ -41,13 +41,10 @@ describe('CompanyForm', () => {
 
   it('вызывает onSubmit с корректными данными', async () => {
     const onSubmit = vi.fn()
-    render(<CompanyForm onSubmit={onSubmit} />)
+    render(<CompanyForm onSubmit={onSubmit} defaultValues={{ country: 'RU' }} />)
 
     fireEvent.change(screen.getByLabelText(/название/i), {
       target: { value: 'Test Corp' },
-    })
-    fireEvent.change(screen.getByLabelText(/страна/i), {
-      target: { value: 'RU' },
     })
 
     fireEvent.click(screen.getByRole('button', { name: /сохранить/i }))

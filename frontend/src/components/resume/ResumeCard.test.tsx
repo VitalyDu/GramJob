@@ -32,7 +32,7 @@ describe('ResumeCard', () => {
 
   it('отображает страну и город через запятую', () => {
     render(<ResumeCard resume={mockResume} />)
-    expect(screen.getByText('RU, Москва')).toBeDefined()
+    expect(screen.getByText('Россия, Москва')).toBeDefined()
   })
 
   it('отображает формат работы', () => {
@@ -80,7 +80,7 @@ describe('ResumeCard', () => {
   it('отображает только страну если город не задан', () => {
     const noCity: Resume = { ...mockResume, city: null }
     render(<ResumeCard resume={noCity} />)
-    expect(screen.getByText('RU')).toBeDefined()
+    expect(screen.getByText('Россия')).toBeDefined()
   })
 
   it('не падает если skills не заданы', () => {

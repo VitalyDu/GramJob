@@ -17,6 +17,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { CardListSkeleton, EmptyState, ErrorState } from '@/components/shared'
 import { RESUME_WORK_FORMAT_LABELS, RESUME_EMPLOYMENT_TYPE_LABELS } from '@/lib/resume-utils'
+import { getCountryName } from '@/lib/countries'
 import { SALARY_CURRENCY_SYMBOLS } from '@/lib/vacancy-utils'
 import type { SalaryCurrencyEnum } from '@/types/api'
 
@@ -100,7 +101,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
               <div className="mt-2 flex flex-wrap gap-2">
                 {r.country && (
                   <Badge variant="secondary">
-                    {r.country}
+                    {getCountryName(r.country)}
                     {r.city ? `, ${r.city}` : ''}
                   </Badge>
                 )}

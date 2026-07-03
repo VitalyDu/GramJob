@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CardListSkeleton, ErrorState } from '@/components/shared'
 import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
+import { getCountryName } from '@/lib/countries'
 import { getMediaUrl } from '@/lib/media'
 
 interface Props {
@@ -83,7 +84,9 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
               </div>
 
               <div className="mt-2 flex flex-wrap gap-2">
-                {company.country && <Badge variant="secondary">{company.country}</Badge>}
+                {company.country && (
+                  <Badge variant="secondary">{getCountryName(company.country)}</Badge>
+                )}
                 {company.city && <Badge variant="secondary">{company.city}</Badge>}
                 <Badge variant="outline">{COMPANY_SIZE_LABELS[company.companySize]}</Badge>
               </div>

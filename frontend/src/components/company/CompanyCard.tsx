@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { Company } from '@/types/api'
 import { getMediaUrl } from '@/lib/media'
 import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
+import { getCountryName } from '@/lib/countries'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
@@ -35,7 +36,9 @@ export function CompanyCard({ company }: Props) {
           <div className="min-w-0 flex-1">
             <p className="truncate font-semibold group-hover:text-primary">{company.name}</p>
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {company.country && <Badge variant="secondary">{company.country}</Badge>}
+              {company.country && (
+                <Badge variant="secondary">{getCountryName(company.country)}</Badge>
+              )}
               {company.companySize && (
                 <Badge variant="secondary">{COMPANY_SIZE_LABELS[company.companySize]}</Badge>
               )}

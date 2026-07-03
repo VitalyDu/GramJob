@@ -26,7 +26,7 @@ describe('CompanyCard', () => {
 
   it('отображает страну', () => {
     render(<CompanyCard company={mockCompany} />)
-    expect(screen.getByText('RU')).toBeDefined()
+    expect(screen.getByText('Россия')).toBeDefined()
   })
 
   it('отображает размер компании в читаемом формате', () => {

@@ -25,6 +25,7 @@ import {
   SENIORITY_LABELS,
   formatSalary,
 } from '@/lib/vacancy-utils'
+import { getCountryName } from '@/lib/countries'
 
 interface Props {
   id: string
@@ -108,7 +109,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
           <div className="mt-4 flex flex-wrap gap-2">
             {(v.country || v.city) && (
               <Badge variant="outline">
-                {v.country}
+                {v.country ? getCountryName(v.country) : ''}
                 {v.city ? `, ${v.city}` : ''}
               </Badge>
             )}
