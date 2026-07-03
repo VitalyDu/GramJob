@@ -14,7 +14,7 @@ type NavLink = {
 }
 
 export function BottomNav({ isMiniApp }: { isMiniApp: boolean }) {
-  const { t } = useTranslation()
+  const { t } = useTranslation('common')
   const pathname = usePathname()
 
   const links: NavLink[] = [
@@ -50,7 +50,7 @@ export function BottomNav({ isMiniApp }: { isMiniApp: boolean }) {
 
   return (
     <nav
-      aria-label="Основная навигация"
+      aria-label={t('nav.main')}
       className={cn(
         'fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80',
         !isMiniApp && 'md:hidden'

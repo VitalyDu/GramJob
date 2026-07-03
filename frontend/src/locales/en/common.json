@@ -6,7 +6,8 @@
     "profile": "Profile",
     "publications": "My postings",
     "dashboard": "Dashboard",
-    "login": "Sign In"
+    "login": "Sign In",
+    "main": "Main navigation"
   },
   "auth": {
     "email": "Email",

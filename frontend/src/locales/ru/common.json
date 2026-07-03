@@ -6,7 +6,8 @@
     "profile": "Профиль",
     "publications": "Мои публикации",
     "dashboard": "Кабинет",
-    "login": "Войти"
+    "login": "Войти",
+    "main": "Основная навигация"
   },
   "auth": {
     "email": "Email",
