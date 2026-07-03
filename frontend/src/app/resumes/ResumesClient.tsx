@@ -3,12 +3,20 @@
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
+import { FileText, Lock } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { ResumeCard } from '@/components/resume/ResumeCard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { RESUME_WORK_FORMAT_LABELS, RESUME_EMPLOYMENT_TYPE_LABELS } from '@/lib/resume-utils'
 import { SaveSearchButton } from '@/components/saved-search/SaveSearchButton'
+import {
+  PageHeader,
+  EmptyState,
+  ErrorState,
+  CardListSkeleton,
+  PaginationBar,
+} from '@/components/shared'
+import { RESUME_WORK_FORMAT_LABELS, RESUME_EMPLOYMENT_TYPE_LABELS } from '@/lib/resume-utils'
 import type { ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 
 export const ResumesClient = observer(function ResumesClient() {
@@ -40,135 +48,150 @@ export const ResumesClient = observer(function ResumesClient() {
 
   if (!auth.user) {
     return (
-      <div className="py-16 text-center">
-        <p className="text-lg font-medium text-card-foreground">
-          Войдите, чтобы просматривать базу резюме
-        </p>
-        <Link href="/login" className="mt-4 inline-block text-sm text-primary hover:underline">
-          Войти
-        </Link>
+      <div>
+        <PageHeader title="Резюме" description="База специалистов" />
+        <EmptyState
+          icon={Lock}
+          title="Войдите в аккаунт"
+          description="Войдите, чтобы просматривать базу резюме"
+          action={
+            <Button asChild>
+              <Link href="/login">Войти</Link>
+            </Button>
+          }
+        />
       </div>
     )
   }
 
   if (store.accessDenied) {
     return (
-      <div className="py-16 text-center">
-        <p className="text-xl font-semibold text-card-foreground">
-          База резюме доступна на плане Max
-        </p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Оформите подписку Max или VIP, чтобы искать кандидатов и просматривать их резюме.
-        </p>
-        <Link
-          href="/subscription"
-          className="mt-6 inline-flex items-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-medium text-white hover:bg-indigo-700"
-        >
-          Перейти к подпискам →
-        </Link>
+      <div>
+        <PageHeader title="Резюме" description="База специалистов" />
+        <EmptyState
+          icon={Lock}
+          title="Доступ закрыт"
+          description="База резюме доступна на подписке Max"
+          action={
+            <Button asChild>
+              <Link href="/subscription">Подписка Max</Link>
+            </Button>
+          }
+        />
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">База резюме</h1>
-        {store.total > 0 && <p className="text-sm text-muted-foreground">{store.total} резюме</p>}
-      </div>
+    <div>
+      <PageHeader title="Резюме" description="База специалистов" />
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Input placeholder="Поиск..." value={search} onChange={(e) => setSearch(e.target.value)} />
-        <Input
-          placeholder="Страна (RU, US...)"
-          value={country}
-          onChange={(e) => setCountry(e.target.value)}
-        />
-        <select
-          value={workFormat}
-          onChange={(e) => setWorkFormat(e.target.value as ResumeWorkFormatEnum | '')}
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-        >
-          <option value="">Все форматы</option>
-          {(Object.entries(RESUME_WORK_FORMAT_LABELS) as [ResumeWorkFormatEnum, string][]).map(
-            ([k, v]) => (
-              <option key={k} value={k}>
-                {v}
-              </option>
-            )
+      <div className="md:grid md:grid-cols-[280px_1fr] md:items-start md:gap-6">
+        <aside className="md:sticky md:top-20">
+          <div className="space-y-3 rounded-xl border bg-card p-4">
+            <p className="text-sm font-semibold text-card-foreground">Фильтры</p>
+            <Input
+              placeholder="Поиск..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <Input
+              placeholder="Страна (RU, US...)"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+            />
+            <select
+              value={workFormat}
+              onChange={(e) => setWorkFormat(e.target.value as ResumeWorkFormatEnum | '')}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="">Все форматы</option>
+              {(Object.entries(RESUME_WORK_FORMAT_LABELS) as [ResumeWorkFormatEnum, string][]).map(
+                ([k, v]) => (
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
+                )
+              )}
+            </select>
+            <select
+              value={employmentType}
+              onChange={(e) => setEmploymentType(e.target.value as EmploymentTypeEnum | '')}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="">Все типы занятости</option>
+              {(
+                Object.entries(RESUME_EMPLOYMENT_TYPE_LABELS) as [EmploymentTypeEnum, string][]
+              ).map(([k, v]) => (
+                <option key={k} value={k}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mt-3 hidden md:block">
+            <SaveSearchButton
+              searchType="resume"
+              filters={{
+                ...(search ? { search } : {}),
+                ...(country ? { country } : {}),
+                ...(workFormat ? { workFormat } : {}),
+                ...(employmentType ? { employmentType } : {}),
+              }}
+            />
+          </div>
+        </aside>
+
+        <section className="mt-4 md:mt-0">
+          <div className="mb-3 md:hidden">
+            <SaveSearchButton
+              searchType="resume"
+              filters={{
+                ...(search ? { search } : {}),
+                ...(country ? { country } : {}),
+                ...(workFormat ? { workFormat } : {}),
+                ...(employmentType ? { employmentType } : {}),
+              }}
+            />
+          </div>
+
+          {store.isLoading && <CardListSkeleton count={6} />}
+
+          {store.error && !store.isLoading && (
+            <ErrorState
+              message={store.error}
+              onRetry={() =>
+                void store.fetchResumes({
+                  search,
+                  country,
+                  ...(workFormat ? { workFormat } : {}),
+                  ...(employmentType ? { employmentType } : {}),
+                })
+              }
+            />
           )}
-        </select>
-        <select
-          value={employmentType}
-          onChange={(e) => setEmploymentType(e.target.value as EmploymentTypeEnum | '')}
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-        >
-          <option value="">Все типы занятости</option>
-          {(Object.entries(RESUME_EMPLOYMENT_TYPE_LABELS) as [EmploymentTypeEnum, string][]).map(
-            ([k, v]) => (
-              <option key={k} value={k}>
-                {v}
-              </option>
-            )
+
+          {!store.isLoading && !store.error && store.resumes.length === 0 && (
+            <EmptyState icon={FileText} title="Резюме не найдены" />
           )}
-        </select>
+
+          {!store.isLoading && store.resumes.length > 0 && (
+            <>
+              <p className="mb-3 text-sm text-muted-foreground">Найдено: {store.total}</p>
+              <div className="space-y-3">
+                {store.resumes.map((r) => (
+                  <ResumeCard key={r.documentId} resume={r} />
+                ))}
+              </div>
+              <PaginationBar
+                page={store.page}
+                pageCount={store.pageCount}
+                onPageChange={handlePageChange}
+              />
+            </>
+          )}
+        </section>
       </div>
-
-      <div className="flex items-center justify-end">
-        <SaveSearchButton
-          searchType="resume"
-          filters={{
-            ...(search ? { search } : {}),
-            ...(country ? { country } : {}),
-            ...(workFormat ? { workFormat } : {}),
-            ...(employmentType ? { employmentType } : {}),
-          }}
-        />
-      </div>
-
-      {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
-
-      {store.error && (
-        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {store.error}
-        </p>
-      )}
-
-      {!store.isLoading && store.resumes.length === 0 && !store.error && !store.accessDenied && (
-        <div className="rounded-xl border border-dashed border-border py-16 text-center">
-          <p className="text-sm text-muted-foreground">Резюме не найдены.</p>
-        </div>
-      )}
-
-      <div className="space-y-3">
-        {store.resumes.map((r) => (
-          <ResumeCard key={r.documentId} resume={r} />
-        ))}
-      </div>
-
-      {store.pageCount > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page <= 1}
-            onClick={() => handlePageChange(store.page - 1)}
-          >
-            ← Назад
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {store.page} / {store.pageCount}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page >= store.pageCount}
-            onClick={() => handlePageChange(store.page + 1)}
-          >
-            Вперёд →
-          </Button>
-        </div>
-      )}
     </div>
   )
 })
