@@ -19,10 +19,10 @@ export default async function HomePage() {
           <Image
             src="/logo-vertical.png"
             alt="GramJob"
-            width={140}
-            height={160}
+            width={180}
+            height={206}
             priority
-            className="animate-fade-in-up mb-6 h-auto w-28 rounded-2xl bg-white/95 p-3 sm:w-32"
+            className="animate-fade-in-up mb-6 h-auto w-36 rounded-2xl bg-white/95 p-3 sm:w-44"
           />
           <h1 className="animate-fade-in-up animation-delay-100 text-3xl font-bold tracking-tight sm:text-5xl">
             Работа мечты — прямо в Telegram
