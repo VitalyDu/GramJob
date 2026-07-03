@@ -4,9 +4,12 @@ import { initReactI18next } from 'react-i18next'
 import ruCommon from '@/locales/ru/common.json'
 import enCommon from '@/locales/en/common.json'
 
+const savedLang =
+  typeof window !== 'undefined' ? (localStorage.getItem('gramjob_lang') ?? 'ru') : 'ru'
+
 if (!i18next.isInitialized) {
   i18next.use(initReactI18next).init({
-    lng: 'ru',
+    lng: savedLang,
     fallbackLng: 'en',
     resources: {
       ru: { common: ruCommon },

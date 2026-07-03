@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
-import { FileText, LayoutDashboard, LogOut, Star } from 'lucide-react'
+import { Check, FileText, Globe, LayoutDashboard, LogOut, Star } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -20,12 +20,51 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 import { NotificationBadge } from '@/components/notification/NotificationBadge'
+import i18next from '@/lib/i18n'
 
 const NAV_LINKS = [
   { href: '/vacancies', key: 'nav.vacancies' },
   { href: '/resumes', key: 'nav.resumes' },
   { href: '/companies', key: 'nav.companies' },
 ] as const
+
+function LanguageSwitcher() {
+  const { i18n } = useTranslation()
+  const currentLang = i18n.language
+
+  const setLang = (lang: string) => {
+    void i18next.changeLanguage(lang)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('gramjob_lang', lang)
+    }
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label="Язык интерфейса" className="h-8 w-8">
+          <Globe className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-36">
+        <DropdownMenuItem
+          onClick={() => setLang('ru')}
+          className="flex items-center justify-between"
+        >
+          Русский
+          {currentLang === 'ru' && <Check className="h-4 w-4" />}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setLang('en')}
+          className="flex items-center justify-between"
+        >
+          English
+          {currentLang === 'en' && <Check className="h-4 w-4" />}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
 
 export const WebHeader = observer(function WebHeader() {
   const { t } = useTranslation()
@@ -77,6 +116,7 @@ export const WebHeader = observer(function WebHeader() {
             >
               <SubscriptionBadge plan={auth.user.subscriptionPlan} />
             </Link>
+            <LanguageSwitcher />
             <NotificationBadge />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -129,9 +169,12 @@ export const WebHeader = observer(function WebHeader() {
             </DropdownMenu>
           </div>
         ) : (
-          <Button asChild size="sm">
-            <Link href="/login">{t('nav.login')}</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <Button asChild size="sm">
+              <Link href="/login">{t('nav.login')}</Link>
+            </Button>
+          </div>
         )}
       </nav>
     </header>
