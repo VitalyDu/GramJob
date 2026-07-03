@@ -1,6 +1,7 @@
-import { formatStarsPrice, getPlanBadgeClasses } from '@/lib/subscription-utils'
+import { getPlanBadgeClasses } from '@/lib/subscription-utils'
 import type { SubscriptionPlan } from '@/types/api'
 import { Button } from '@/components/ui/button'
+import { StarsPrice } from '@/components/subscription/StarsPrice'
 
 interface Props {
   plan: SubscriptionPlan
@@ -26,7 +27,7 @@ export function SubscriptionPlanCard({ plan, currentPlan, canBuy, isBuying, onBu
           {isActive && <span className="ml-2 text-xs text-indigo-600 font-medium">Активный</span>}
         </div>
         <p className="text-base font-bold text-card-foreground">
-          {formatStarsPrice(plan.starsPrice)}
+          <StarsPrice price={plan.starsPrice} />
         </p>
       </div>
 
@@ -55,6 +56,15 @@ export function SubscriptionPlanCard({ plan, currentPlan, canBuy, isBuying, onBu
           </span>
         </li>
       </ul>
+
+      {plan.code === 'vip' && (
+        <ul className="space-y-1.5 border-t pt-3 text-sm text-muted-foreground">
+          <li>VIP-бейдж на компании и вакансиях</li>
+          <li>Блок «Рекомендуем» на главной</li>
+          <li>Ускоренная модерация (&lt; 4 ч)</li>
+          <li>Приоритет в поиске</li>
+        </ul>
+      )}
 
       {plan.code !== 'free' && (
         <Button

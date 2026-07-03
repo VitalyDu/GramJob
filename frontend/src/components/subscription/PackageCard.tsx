@@ -1,6 +1,6 @@
-import { formatStarsPrice } from '@/lib/subscription-utils'
 import { Button } from '@/components/ui/button'
 import type { VacancyPackage, ApplyPackage } from '@/types/api'
+import { StarsPrice } from '@/components/subscription/StarsPrice'
 
 interface VacancyPackageCardProps {
   type: 'vacancy'
@@ -30,7 +30,9 @@ export function PackageCard(props: Props) {
     <div className="rounded-2xl border border-border bg-card p-5 flex flex-col gap-3">
       <div className="flex items-start justify-between">
         <p className="text-base font-semibold text-card-foreground">{pkg.name}</p>
-        <p className="text-sm font-bold text-indigo-600">{formatStarsPrice(pkg.starsPrice)}</p>
+        <p className="text-sm font-bold text-indigo-600">
+          <StarsPrice price={pkg.starsPrice} />
+        </p>
       </div>
 
       <ul className="space-y-1 text-sm text-muted-foreground">

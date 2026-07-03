@@ -96,7 +96,10 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
     }
   }
 
-  const paidPlans = payment.plans.filter((p) => p.code !== 'free')
+  const PLAN_ORDER = ['free', 'pro', 'max', 'vip']
+  const orderedPlans = [...payment.plans].sort(
+    (a, b) => PLAN_ORDER.indexOf(a.code) - PLAN_ORDER.indexOf(b.code)
+  )
 
   return (
     <div className="space-y-10">
@@ -182,9 +185,9 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
           <p className="text-sm text-muted-foreground">Загрузка планов...</p>
         )}
 
-        {paidPlans.length > 0 && (
-          <div className="grid gap-4 sm:grid-cols-3">
-            {paidPlans.map((plan) => {
+        {orderedPlans.length > 0 && (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {orderedPlans.map((plan) => {
               const currentPlan = user?.subscriptionPlan ?? 'free'
               return (
                 <div

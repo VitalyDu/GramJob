@@ -12,6 +12,12 @@ export const PLAN_COLORS: Record<string, string> = {
   vip: 'yellow',
 }
 
+export function formatStarsAmount(price: number | null): string | null {
+  if (price === null || price === undefined) return null
+  return String(price)
+}
+
+/** @deprecated Use StarsPrice component for display. Kept for backward compatibility. */
 export function formatStarsPrice(price: number | null): string {
   if (price === null || price === undefined) return 'Бесплатно'
   return `${price} ★`
