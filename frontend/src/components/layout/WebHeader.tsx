@@ -123,13 +123,16 @@ export const WebHeader = observer(function WebHeader() {
                 <button
                   type="button"
                   aria-label={t('nav.userMenu')}
-                  className="rounded-full outline-none ring-ring focus-visible:ring-2"
+                  className="flex items-center gap-2 rounded-full outline-none ring-ring focus-visible:ring-2"
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
                       {initial.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
+                  <span className="hidden max-w-[140px] truncate text-sm font-medium sm:inline">
+                    {auth.user.firstName ?? auth.user.email}
+                  </span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
