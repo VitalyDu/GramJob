@@ -18,13 +18,7 @@ import {
   PaginationBar,
 } from '@/components/shared'
 import { RESUME_WORK_FORMAT_LABELS, RESUME_EMPLOYMENT_TYPE_LABELS } from '@/lib/resume-utils'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { MultiSelect } from '@/components/ui/multi-select'
 import { CountrySelect } from '@/components/ui/country-select'
 import type { ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 
@@ -32,25 +26,25 @@ export const ResumesClient = observer(function ResumesClient() {
   const { resume: store, auth } = useStores()
   const [search, setSearch] = useState('')
   const [country, setCountry] = useState('')
-  const [workFormat, setWorkFormat] = useState<ResumeWorkFormatEnum | ''>('')
-  const [employmentType, setEmploymentType] = useState<EmploymentTypeEnum | ''>('')
+  const [workFormats, setWorkFormats] = useState<ResumeWorkFormatEnum[]>([])
+  const [employmentTypes, setEmploymentTypes] = useState<EmploymentTypeEnum[]>([])
 
   useEffect(() => {
     if (!auth.user) return // don't fetch before auth is resolved; avoids spurious 403 → accessDenied
     void store.fetchResumes({
       search,
       country,
-      ...(workFormat ? { workFormat: [workFormat] } : {}),
-      ...(employmentType ? { employmentType: [employmentType] } : {}),
+      ...(workFormats.length > 0 ? { workFormat: workFormats } : {}),
+      ...(employmentTypes.length > 0 ? { employmentType: employmentTypes } : {}),
     })
-  }, [store, auth.user, search, country, workFormat, employmentType])
+  }, [store, auth.user, search, country, workFormats, employmentTypes])
 
   const handlePageChange = (page: number) => {
     void store.fetchResumes({
       search,
       country,
-      ...(workFormat ? { workFormat: [workFormat] } : {}),
-      ...(employmentType ? { employmentType: [employmentType] } : {}),
+      ...(workFormats.length > 0 ? { workFormat: workFormats } : {}),
+      ...(employmentTypes.length > 0 ? { employmentType: employmentTypes } : {}),
       page,
     })
   }
@@ -113,46 +107,22 @@ export const ResumesClient = observer(function ResumesClient() {
               <Label>Страна</Label>
               <CountrySelect value={country} onChange={setCountry} placeholder="Любая страна" />
             </div>
-            <Select
-              value={workFormat || '__all__'}
-              onValueChange={(v) =>
-                setWorkFormat(v === '__all__' ? '' : (v as ResumeWorkFormatEnum))
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">Все форматы</SelectItem>
-                {(
-                  Object.entries(RESUME_WORK_FORMAT_LABELS) as [ResumeWorkFormatEnum, string][]
-                ).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>
-                    {v}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={employmentType || '__all__'}
-              onValueChange={(v) =>
-                setEmploymentType(v === '__all__' ? '' : (v as EmploymentTypeEnum))
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">Все типы занятости</SelectItem>
-                {(
-                  Object.entries(RESUME_EMPLOYMENT_TYPE_LABELS) as [EmploymentTypeEnum, string][]
-                ).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>
-                    {v}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MultiSelect
+              label="Все форматы"
+              options={(
+                Object.entries(RESUME_WORK_FORMAT_LABELS) as [ResumeWorkFormatEnum, string][]
+              ).map(([value, label]) => ({ value, label }))}
+              value={workFormats}
+              onChange={setWorkFormats}
+            />
+            <MultiSelect
+              label="Все типы"
+              options={(
+                Object.entries(RESUME_EMPLOYMENT_TYPE_LABELS) as [EmploymentTypeEnum, string][]
+              ).map(([value, label]) => ({ value, label }))}
+              value={employmentTypes}
+              onChange={setEmploymentTypes}
+            />
           </div>
           <div className="mt-3 hidden md:block">
             <SaveSearchButton
@@ -160,8 +130,8 @@ export const ResumesClient = observer(function ResumesClient() {
               filters={{
                 ...(search ? { search } : {}),
                 ...(country ? { country } : {}),
-                ...(workFormat ? { workFormat } : {}),
-                ...(employmentType ? { employmentType } : {}),
+                ...(workFormats[0] ? { workFormat: workFormats[0] } : {}),
+                ...(employmentTypes[0] ? { employmentType: employmentTypes[0] } : {}),
               }}
             />
           </div>
@@ -174,8 +144,8 @@ export const ResumesClient = observer(function ResumesClient() {
               filters={{
                 ...(search ? { search } : {}),
                 ...(country ? { country } : {}),
-                ...(workFormat ? { workFormat } : {}),
-                ...(employmentType ? { employmentType } : {}),
+                ...(workFormats[0] ? { workFormat: workFormats[0] } : {}),
+                ...(employmentTypes[0] ? { employmentType: employmentTypes[0] } : {}),
               }}
             />
           </div>
@@ -189,8 +159,8 @@ export const ResumesClient = observer(function ResumesClient() {
                 void store.fetchResumes({
                   search,
                   country,
-                  ...(workFormat ? { workFormat: [workFormat] } : {}),
-                  ...(employmentType ? { employmentType: [employmentType] } : {}),
+                  ...(workFormats.length > 0 ? { workFormat: workFormats } : {}),
+                  ...(employmentTypes.length > 0 ? { employmentType: employmentTypes } : {}),
                 })
               }
             />

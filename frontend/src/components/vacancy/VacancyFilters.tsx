@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { MultiSelect } from '@/components/ui/multi-select'
 import {
   Sheet,
   SheetContent,
@@ -70,35 +71,6 @@ function countActive(draft: Draft): number {
 }
 
 function FilterFields({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft) => void }) {
-  // Single-value select backed by array field (arrays → multi-select in Task 12)
-  const enumSelect = <T extends string>(
-    label: string,
-    values: T[],
-    labels: Record<T, string>,
-    allLabel: string,
-    set: (v: T[]) => void
-  ) => {
-    const current = values[0] ?? ''
-    return (
-      <div className="space-y-1.5">
-        <Label>{label}</Label>
-        <Select value={current || ALL} onValueChange={(v) => set(v === ALL ? [] : [v as T])}>
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>{allLabel}</SelectItem>
-            {(Object.entries(labels) as [T, string][]).map(([v, l]) => (
-              <SelectItem key={v} value={v}>
-                {l}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
@@ -109,15 +81,39 @@ function FilterFields({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft) 
           placeholder="Любая страна"
         />
       </div>
-      {enumSelect('Формат работы', draft.workFormat, WORK_FORMAT_LABELS, 'Все форматы', (v) =>
-        setDraft({ ...draft, workFormat: v })
-      )}
-      {enumSelect('Занятость', draft.employmentType, EMPLOYMENT_TYPE_LABELS, 'Все типы', (v) =>
-        setDraft({ ...draft, employmentType: v })
-      )}
-      {enumSelect('Уровень', draft.seniority, SENIORITY_LABELS, 'Все уровни', (v) =>
-        setDraft({ ...draft, seniority: v })
-      )}
+      <div className="space-y-1.5">
+        <Label>Формат работы</Label>
+        <MultiSelect
+          label="Все форматы"
+          options={(Object.entries(WORK_FORMAT_LABELS) as [WorkFormatEnum, string][]).map(
+            ([value, label]) => ({ value, label })
+          )}
+          value={draft.workFormat}
+          onChange={(v) => setDraft({ ...draft, workFormat: v })}
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Занятость</Label>
+        <MultiSelect
+          label="Все типы"
+          options={(Object.entries(EMPLOYMENT_TYPE_LABELS) as [EmploymentTypeEnum, string][]).map(
+            ([value, label]) => ({ value, label })
+          )}
+          value={draft.employmentType}
+          onChange={(v) => setDraft({ ...draft, employmentType: v })}
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Уровень</Label>
+        <MultiSelect
+          label="Все уровни"
+          options={(Object.entries(SENIORITY_LABELS) as [SeniorityEnum, string][]).map(
+            ([value, label]) => ({ value, label })
+          )}
+          value={draft.seniority}
+          onChange={(v) => setDraft({ ...draft, seniority: v })}
+        />
+      </div>
       <div className="space-y-1.5">
         <Label>Сортировка</Label>
         <Select
