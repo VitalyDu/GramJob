@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { VacancyForm } from '@/components/vacancy/VacancyForm'
@@ -32,6 +33,7 @@ export const EditVacancyClient = observer(function EditVacancyClient({ id }: Pro
   const handleSubmit = async (data: VacancyCreateInput) => {
     try {
       await vStore.updateVacancy(id, data)
+      toast.success('Изменения сохранены — вакансия отправлена на модерацию')
       router.push('/dashboard/vacancies')
     } catch {
       // error в vStore.error

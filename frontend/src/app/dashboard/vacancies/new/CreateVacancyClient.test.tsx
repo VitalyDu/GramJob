@@ -5,7 +5,13 @@ import { CreateVacancyClient } from './CreateVacancyClient'
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock('@/stores/StoreProvider', () => ({
   useStores: () => ({
-    vacancy: { isLoading: false, error: null, createVacancy: vi.fn() },
+    vacancy: {
+      isLoading: false,
+      error: null,
+      limitReached: false,
+      createVacancy: vi.fn(),
+      clearLimitReached: vi.fn(),
+    },
     company: { myCompanies: [], isLoading: false, fetchMyCompanies: vi.fn() },
   }),
 }))
@@ -16,8 +22,8 @@ describe('CreateVacancyClient', () => {
     expect(screen.getByText(/Новая вакансия/)).toBeTruthy()
   })
 
-  it('содержит кнопку сохранения', () => {
+  it('содержит кнопку отправки на модерацию', () => {
     render(<CreateVacancyClient />)
-    expect(screen.getByText('Сохранить')).toBeTruthy()
+    expect(screen.getByText('Отправить на модерацию')).toBeTruthy()
   })
 })

@@ -182,6 +182,29 @@ describe('VacancyStore', () => {
 
       expect(store.error).toBe('Validation error')
     })
+
+    it('ставит limitReached=true при 403 LIMIT_REACHED и возвращает null', async () => {
+      vi.mocked(api.post).mockRejectedValue(
+        new ApiClientError(403, { error: { code: 'LIMIT_REACHED' } }, 'Vacancy limit reached')
+      )
+
+      const result = await store.createVacancy({
+        title: 'Senior Frontend Developer',
+        industryId: 'ind1',
+        specializationId: 'spec1',
+        employmentType: 'full-time',
+        workFormat: 'remote',
+        seniority: 'senior',
+        country: 'RU',
+        description: 'Description',
+        responsibilities: 'Responsibilities',
+        requirements: 'Requirements',
+      })
+
+      expect(result).toBeNull()
+      expect(store.limitReached).toBe(true)
+      expect(store.error).toBeNull()
+    })
   })
 
   describe('updateVacancy', () => {

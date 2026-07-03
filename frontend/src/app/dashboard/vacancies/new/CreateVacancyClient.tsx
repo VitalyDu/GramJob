@@ -4,9 +4,11 @@ import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { VacancyForm } from '@/components/vacancy/VacancyForm'
+import { UpsellModal } from '@/components/vacancy/UpsellModal'
 import type { VacancyCreateInput } from '@/types/api'
 
 export const CreateVacancyClient = observer(function CreateVacancyClient() {
@@ -20,7 +22,12 @@ export const CreateVacancyClient = observer(function CreateVacancyClient() {
 
   const handleSubmit = async (data: VacancyCreateInput) => {
     try {
-      await vStore.createVacancy(data)
+      const created = await vStore.createVacancy(data)
+      if (created === null) {
+        // limitReached уже установлен в сторе, UpsellModal откроется
+        return
+      }
+      toast.success('Вакансия отправлена на модерацию')
       router.push('/dashboard/vacancies')
     } catch {
       // error сохранён в vStore.error
@@ -29,6 +36,8 @@ export const CreateVacancyClient = observer(function CreateVacancyClient() {
 
   return (
     <div className="space-y-6">
+      <UpsellModal isOpen={vStore.limitReached} onClose={() => vStore.clearLimitReached()} />
+
       <div className="flex items-center gap-4">
         <Link
           href="/dashboard/vacancies"

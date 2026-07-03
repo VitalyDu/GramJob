@@ -150,8 +150,11 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
     void onSubmit(input)
   }
 
+  const isEditMode = defaultValues !== undefined
+  const submitLabel = isEditMode ? 'Сохранить и отправить на модерацию' : 'Отправить на модерацию'
+
   const mainButtonActive = useTelegramMainButton({
-    text: isLoading ? 'Сохранение...' : 'Сохранить',
+    text: isLoading ? 'Сохранение...' : submitLabel,
     onClick: () => void handleSubmit(handleFormSubmit)(),
     disabled: !!isLoading,
   })
@@ -383,7 +386,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
 
       {!mainButtonActive && (
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Сохранение...' : 'Сохранить'}
+          {isLoading ? 'Сохранение...' : submitLabel}
         </Button>
       )}
     </form>
