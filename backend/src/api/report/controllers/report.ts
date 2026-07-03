@@ -31,7 +31,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       fields: ['documentId', 'type', 'targetId', 'reason', 'comment', 'status', 'createdAt'],
     })
 
-    ctx.status = 201
-    return ctx.send({ data: report })
+    return ctx.send({ data: report }, 201)
   },
 })

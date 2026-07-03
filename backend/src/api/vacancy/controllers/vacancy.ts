@@ -150,14 +150,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         creditSource = result.source
       } catch (err: any) {
         if (err?.code === 'LIMIT_REACHED') {
-          ctx.status = 403
-          return ctx.send({
-            error: {
-              code: 'LIMIT_REACHED',
-              message: 'Vacancy limit reached',
-              details: err.details,
+          return ctx.send(
+            {
+              error: {
+                code: 'LIMIT_REACHED',
+                message: 'Vacancy limit reached',
+                details: err.details,
+              },
             },
-          })
+            403
+          )
         }
         throw err
       }
@@ -202,8 +204,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         populate: VACANCY_POPULATE as any,
       })
 
-      ctx.status = 201
-      return ctx.send({ data: populated })
+      return ctx.send({ data: populated }, 201)
     },
 
     async publish(ctx: any) {
@@ -229,14 +230,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         await checkAndConsumeVacancyCredit(strapi, user.id)
       } catch (err: any) {
         if (err?.code === 'LIMIT_REACHED') {
-          ctx.status = 403
-          return ctx.send({
-            error: {
-              code: 'LIMIT_REACHED',
-              message: 'Vacancy limit reached',
-              details: err.details,
+          return ctx.send(
+            {
+              error: {
+                code: 'LIMIT_REACHED',
+                message: 'Vacancy limit reached',
+                details: err.details,
+              },
             },
-          })
+            403
+          )
         }
         throw err
       }
@@ -559,14 +562,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           updateCreditSource = result.source
         } catch (err: any) {
           if (err?.code === 'LIMIT_REACHED') {
-            ctx.status = 403
-            return ctx.send({
-              error: {
-                code: 'LIMIT_REACHED',
-                message: 'Vacancy limit reached',
-                details: err.details,
+            return ctx.send(
+              {
+                error: {
+                  code: 'LIMIT_REACHED',
+                  message: 'Vacancy limit reached',
+                  details: err.details,
+                },
               },
-            })
+              403
+            )
           }
           throw err
         }
@@ -613,14 +618,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         boostsRemaining = await checkAndConsumeBoost(strapi, user.id)
       } catch (err: any) {
         if (err?.code === 'LIMIT_REACHED') {
-          ctx.status = 403
-          return ctx.send({
-            error: {
-              code: 'LIMIT_REACHED',
-              message: 'Daily boost limit reached',
-              details: err.details,
+          return ctx.send(
+            {
+              error: {
+                code: 'LIMIT_REACHED',
+                message: 'Daily boost limit reached',
+                details: err.details,
+              },
             },
-          })
+            403
+          )
         }
         throw err
       }

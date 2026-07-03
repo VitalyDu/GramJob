@@ -44,8 +44,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         linkedin: body.linkedin as string | undefined,
       })
 
-      ctx.status = 201
-      return ctx.send({ data: company })
+      return ctx.send({ data: company }, 201)
     },
 
     async submit(ctx: any) {
