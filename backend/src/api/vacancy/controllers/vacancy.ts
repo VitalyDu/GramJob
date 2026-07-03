@@ -1,6 +1,10 @@
 import type { Core } from '@strapi/strapi'
 import { canPublish, canBoost, canArchive, canEdit } from '../services/vacancy-utils'
-import { checkAndConsumeVacancyCredit, checkAndConsumeBoost } from '../services/credit-service'
+import {
+  checkAndConsumeVacancyCredit,
+  checkAndConsumeBoost,
+  refundVacancyCredit,
+} from '../services/credit-service'
 import { getBlockedUserIds } from '../../block/services/block-filter'
 import type vacancyServiceFactory from '../services/vacancy'
 
@@ -140,8 +144,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         }
       }
 
+      let creditSource: 'plan' | 'package'
       try {
-        await checkAndConsumeVacancyCredit(strapi, user.id)
+        const result = await checkAndConsumeVacancyCredit(strapi, user.id)
+        creditSource = result.source
       } catch (err: any) {
         if (err?.code === 'LIMIT_REACHED') {
           ctx.status = 403
@@ -156,31 +162,39 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw err
       }
 
-      const vacancy = await svc().createVacancy(user.id, {
-        title: title as string,
-        industryId: industryId as string,
-        specializationId: specializationId as string,
-        employmentType: employmentType as string,
-        workFormat: workFormat as string,
-        seniority: seniority as string,
-        country: country as string,
-        city: body.city as string | undefined,
-        salaryFrom: body.salaryFrom as number | undefined,
-        salaryTo: body.salaryTo as number | undefined,
-        salaryCurrency: body.salaryCurrency as string | undefined,
-        description: description as string,
-        responsibilities: responsibilities as string,
-        requirements: requirements as string,
-        conditions: body.conditions as string | undefined,
-        skills: body.skills as string[] | undefined,
-        languages: body.languages as Array<{ lang: string; level: string }> | undefined,
-        experienceYears: body.experienceYears as number | undefined,
-        sourceType: (body.sourceType as 'internal' | 'external') ?? 'internal',
-        sourceName: body.sourceName as string | undefined,
-        sourceUrl: body.sourceUrl as string | undefined,
-        urgent: body.urgent as boolean | undefined,
-        companyId: body.companyId as string | undefined,
-      })
+      let vacancy: Awaited<ReturnType<VacancyService['createVacancy']>>
+      try {
+        vacancy = await svc().createVacancy(user.id, {
+          title: title as string,
+          industryId: industryId as string,
+          specializationId: specializationId as string,
+          employmentType: employmentType as string,
+          workFormat: workFormat as string,
+          seniority: seniority as string,
+          country: country as string,
+          city: body.city as string | undefined,
+          salaryFrom: body.salaryFrom as number | undefined,
+          salaryTo: body.salaryTo as number | undefined,
+          salaryCurrency: body.salaryCurrency as string | undefined,
+          description: description as string,
+          responsibilities: responsibilities as string,
+          requirements: requirements as string,
+          conditions: body.conditions as string | undefined,
+          skills: body.skills as string[] | undefined,
+          languages: body.languages as Array<{ lang: string; level: string }> | undefined,
+          experienceYears: body.experienceYears as number | undefined,
+          sourceType: (body.sourceType as 'internal' | 'external') ?? 'internal',
+          sourceName: body.sourceName as string | undefined,
+          sourceUrl: body.sourceUrl as string | undefined,
+          urgent: body.urgent as boolean | undefined,
+          companyId: body.companyId as string | undefined,
+        })
+      } catch (createErr: any) {
+        if (creditSource === 'package') {
+          await refundVacancyCredit(strapi, user.id)
+        }
+        throw createErr
+      }
 
       const populated = await strapi.documents('api::vacancy.vacancy').findOne({
         documentId: vacancy.documentId,
@@ -536,12 +550,42 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       updateData.status = 'moderation'
       updateData.expiresAt = null
 
-      const updated = await strapi.documents('api::vacancy.vacancy').update({
-        documentId: id,
-        data: updateData as any,
-        fields: VACANCY_FULL_FIELDS as any,
-        populate: VACANCY_POPULATE as any,
-      })
+      // For draft/rejected vacancies: they are not counted in the plan limit yet,
+      // so resubmitting via update would bypass the credit check — enforce it here.
+      let updateCreditSource: 'plan' | 'package' | null = null
+      if (status === 'draft' || status === 'rejected') {
+        try {
+          const result = await checkAndConsumeVacancyCredit(strapi, user.id)
+          updateCreditSource = result.source
+        } catch (err: any) {
+          if (err?.code === 'LIMIT_REACHED') {
+            ctx.status = 403
+            return ctx.send({
+              error: {
+                code: 'LIMIT_REACHED',
+                message: 'Vacancy limit reached',
+                details: err.details,
+              },
+            })
+          }
+          throw err
+        }
+      }
+
+      let updated: any
+      try {
+        updated = await strapi.documents('api::vacancy.vacancy').update({
+          documentId: id,
+          data: updateData as any,
+          fields: VACANCY_FULL_FIELDS as any,
+          populate: VACANCY_POPULATE as any,
+        })
+      } catch (updateErr: any) {
+        if (updateCreditSource === 'package') {
+          await refundVacancyCredit(strapi, user.id)
+        }
+        throw updateErr
+      }
 
       return ctx.send({ data: updated })
     },
