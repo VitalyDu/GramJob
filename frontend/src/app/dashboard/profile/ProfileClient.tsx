@@ -9,6 +9,7 @@ import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { PageHeader } from '@/components/shared/PageHeader'
 
 const LINKS = [
@@ -30,7 +31,14 @@ export const ProfileClient = observer(function ProfileClient() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={`${user.firstName} ${user.lastName}`} />
+      <div className="flex items-center gap-4">
+        <Avatar className="h-16 w-16">
+          <AvatarFallback className="bg-primary/10 text-xl font-semibold text-primary">
+            {(user.firstName?.charAt(0) ?? user.email?.charAt(0) ?? '?').toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <PageHeader title={`${user.firstName} ${user.lastName}`} />
+      </div>
 
       <Card>
         <CardContent className="pt-6 space-y-2">
