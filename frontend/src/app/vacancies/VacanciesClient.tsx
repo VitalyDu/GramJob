@@ -2,11 +2,19 @@
 
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import { Briefcase } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { VacancyCard } from '@/components/vacancy/VacancyCard'
 import { VacancyFilters } from '@/components/vacancy/VacancyFilters'
 import { Button } from '@/components/ui/button'
 import { SaveSearchButton } from '@/components/saved-search/SaveSearchButton'
+import {
+  PageHeader,
+  EmptyState,
+  ErrorState,
+  CardListSkeleton,
+  PaginationBar,
+} from '@/components/shared'
 import type { VacancyListParams } from '@/types/api'
 
 export const VacanciesClient = observer(function VacanciesClient() {
@@ -17,7 +25,7 @@ export const VacanciesClient = observer(function VacanciesClient() {
     void store.fetchVacancies({ page: 1 })
   }, [store])
 
-  const handleFiltersChange = (next: VacancyListParams) => {
+  const handleParamsChange = (next: VacancyListParams) => {
     setParams(next)
     void store.fetchVacancies(next)
   }
@@ -28,57 +36,66 @@ export const VacanciesClient = observer(function VacanciesClient() {
     void store.fetchVacancies(next)
   }
 
+  const handleReset = () => {
+    handleParamsChange({ page: 1 })
+  }
+
   return (
-    <div className="space-y-6">
-      <VacancyFilters params={params} onChange={handleFiltersChange} />
-      <div className="flex items-center justify-end">
-        <SaveSearchButton
-          searchType="vacancy"
-          filters={params as Record<string, string | number | boolean | undefined>}
-        />
+    <div>
+      <PageHeader title="Вакансии" description="Найдите работу мечты в Telegram-экосистеме" />
+
+      <div className="md:grid md:grid-cols-[280px_1fr] md:items-start md:gap-6">
+        <aside className="md:sticky md:top-20">
+          <VacancyFilters params={params} onChange={handleParamsChange} />
+          <div className="mt-3 hidden md:block">
+            <SaveSearchButton
+              searchType="vacancy"
+              filters={params as Record<string, string | number | boolean | undefined>}
+            />
+          </div>
+        </aside>
+
+        <section className="mt-4 md:mt-0">
+          {/* Mobile SaveSearchButton — shown below filters on small screens */}
+          <div className="mb-3 md:hidden">
+            <SaveSearchButton
+              searchType="vacancy"
+              filters={params as Record<string, string | number | boolean | undefined>}
+            />
+          </div>
+
+          {store.isLoading && <CardListSkeleton count={6} />}
+
+          {store.error && !store.isLoading && (
+            <ErrorState message={store.error} onRetry={() => void store.fetchVacancies(params)} />
+          )}
+
+          {!store.isLoading && !store.error && store.vacancies.length === 0 && (
+            <EmptyState
+              icon={Briefcase}
+              title="Вакансии не найдены"
+              description="Попробуйте изменить фильтры"
+              action={<Button onClick={handleReset}>Сбросить фильтры</Button>}
+            />
+          )}
+
+          {!store.isLoading && store.vacancies.length > 0 && (
+            <>
+              <p className="mb-3 text-sm text-muted-foreground">Найдено: {store.total}</p>
+              <div className="space-y-3">
+                {store.vacancies.map((v) => (
+                  <VacancyCard key={v.documentId} vacancy={v} />
+                ))}
+              </div>
+              <PaginationBar
+                page={store.page}
+                pageCount={store.pageCount}
+                onPageChange={handlePageChange}
+              />
+            </>
+          )}
+        </section>
       </div>
-
-      {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
-
-      {store.error && (
-        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {store.error}
-        </p>
-      )}
-
-      {!store.isLoading && store.vacancies.length === 0 && !store.error && (
-        <p className="text-sm text-muted-foreground">Вакансии не найдены.</p>
-      )}
-
-      <div className="grid gap-3">
-        {store.vacancies.map((v) => (
-          <VacancyCard key={v.documentId} vacancy={v} />
-        ))}
-      </div>
-
-      {store.pageCount > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page <= 1}
-            onClick={() => handlePageChange(store.page - 1)}
-          >
-            ← Назад
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {store.page} / {store.pageCount}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page >= store.pageCount}
-            onClick={() => handlePageChange(store.page + 1)}
-          >
-            Вперёд →
-          </Button>
-        </div>
-      )}
     </div>
   )
 })

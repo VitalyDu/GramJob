@@ -87,7 +87,7 @@ describe('VacanciesClient', () => {
     expect(screen.getByText('Senior Frontend Developer')).toBeDefined()
   })
 
-  it('отображает сообщение о загрузке', () => {
+  it('отображает скелетон при загрузке', () => {
     const store = makeStore({ isLoading: true })
     vi.mocked(useStores).mockReturnValue({
       vacancy: store,
@@ -96,7 +96,7 @@ describe('VacanciesClient', () => {
 
     render(<VacanciesClient />)
 
-    expect(screen.getByText(/загрузка/i)).toBeDefined()
+    expect(screen.getAllByTestId('card-skeleton').length).toBeGreaterThan(0)
   })
 
   it('отображает ошибку из стора', () => {
@@ -132,7 +132,7 @@ describe('VacanciesClient', () => {
 
     render(<VacanciesClient />)
 
-    expect(screen.queryByText(/назад/i)).toBeNull()
+    expect(screen.queryByRole('navigation', { name: /пагинация/i })).toBeNull()
   })
 
   it('показывает пагинацию если pageCount > 1', () => {
@@ -144,7 +144,7 @@ describe('VacanciesClient', () => {
 
     render(<VacanciesClient />)
 
-    expect(screen.getByText(/назад/i)).toBeDefined()
-    expect(screen.getByText('2 / 3')).toBeDefined()
+    expect(screen.getByRole('navigation', { name: /пагинация/i })).toBeDefined()
+    expect(screen.getByRole('button', { name: /предыдущая страница/i })).toBeDefined()
   })
 })
