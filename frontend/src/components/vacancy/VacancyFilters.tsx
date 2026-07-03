@@ -11,7 +11,7 @@ import type {
 import { WORK_FORMAT_LABELS, EMPLOYMENT_TYPE_LABELS, SENIORITY_LABELS } from '@/lib/vacancy-utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -196,9 +196,6 @@ export function VacancyFilters({ params, onChange }: Props) {
 
       {/* Desktop-панель */}
       <Card className="hidden md:block">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Фильтры</CardTitle>
-        </CardHeader>
         <CardContent>
           <FilterFields draft={draft} setDraft={setDraft} />
           <div className="mt-4 flex gap-2">

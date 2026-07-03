@@ -74,7 +74,6 @@ export const CompaniesClient = observer(function CompaniesClient() {
       <div className="md:grid md:grid-cols-[280px_1fr] md:items-start md:gap-6">
         <aside className="md:sticky md:top-20">
           <div className="space-y-3 rounded-xl border bg-card p-4">
-            <p className="text-sm font-semibold text-card-foreground">Фильтры</p>
             <div className="space-y-1.5">
               <Label>Страна</Label>
               <CountrySelect value={country} onChange={setCountry} placeholder="Любая страна" />
