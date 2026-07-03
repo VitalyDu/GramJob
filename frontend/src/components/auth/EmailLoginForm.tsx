@@ -42,18 +42,18 @@ export const EmailLoginForm = observer(function EmailLoginForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         <Label htmlFor="identifier">{t('auth.email')}</Label>
         <Input id="identifier" type="email" {...register('identifier')} />
         {errors.identifier && (
-          <p className="text-xs text-destructive">{errors.identifier.message}</p>
+          <p className="text-sm text-destructive">{errors.identifier.message}</p>
         )}
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         <Label htmlFor="password">{t('auth.password')}</Label>
         <Input id="password" type="password" {...register('password')} />
-        {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+        {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
       </div>
 
       {auth.error && (

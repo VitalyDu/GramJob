@@ -13,7 +13,3 @@ export function canArchive(status: string): boolean {
 export function canEdit(status: string): boolean {
   return ['draft', 'rejected', 'published'].includes(status)
 }
-
-export function publishedTransitionsOnEdit(status: string): boolean {
-  return status === 'published'
-}

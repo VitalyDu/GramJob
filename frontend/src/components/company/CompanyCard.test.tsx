@@ -34,11 +34,6 @@ describe('CompanyCard', () => {
     expect(screen.getByText('11–50')).toBeDefined()
   })
 
-  it('отображает StatusBadge со статусом', () => {
-    render(<CompanyCard company={mockCompany} />)
-    expect(screen.getByText('Опубликована')).toBeDefined()
-  })
-
   it('рендерит плейсхолдер если logo null', () => {
     const { container } = render(<CompanyCard company={mockCompany} />)
     const img = container.querySelector('img')
@@ -65,5 +60,11 @@ describe('CompanyCard', () => {
     const { container } = render(<CompanyCard company={mockCompany} />)
     const link = container.querySelector('a')
     expect(link?.getAttribute('href')).toBe('/companies/abc123')
+  })
+
+  it('рендерит карточку с hover-эффектом', () => {
+    const { container } = render(<CompanyCard company={mockCompany} />)
+    const link = container.querySelector('a')
+    expect(link?.className).toContain('group')
   })
 })

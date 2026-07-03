@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Building2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
@@ -12,6 +13,11 @@ import { StatusBadge } from '@/components/company/StatusBadge'
 import { COMPANY_SIZE_LABELS, canSubmitCompany, canDeleteCompany } from '@/lib/company-utils'
 import { getMediaUrl } from '@/lib/media'
 import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
+import { EmptyState } from '@/components/shared/EmptyState'
+import { ErrorState } from '@/components/shared/ErrorState'
+import { PaginationBar } from '@/components/shared/PaginationBar'
 import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 
 export const MyCompaniesClient = observer(function MyCompaniesClient() {
@@ -41,28 +47,32 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Мои компании</h1>
-        <Link
-          href="/dashboard/companies/new"
-          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          + Создать компанию
-        </Link>
-      </div>
+      <PageHeader
+        title="Мои компании"
+        actions={
+          <Button asChild>
+            <Link href="/dashboard/companies/new">+ Создать компанию</Link>
+          </Button>
+        }
+      />
 
-      {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
+      {store.isLoading && <CardListSkeleton count={6} />}
 
-      {store.error && (
-        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {store.error}
-        </p>
+      {store.error && !store.isLoading && (
+        <ErrorState message={store.error} onRetry={() => void store.fetchMyCompanies(1)} />
       )}
 
       {!store.isLoading && store.myCompanies.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-border py-16 text-center">
-          <p className="text-sm text-muted-foreground">У вас пока нет компаний.</p>
-        </div>
+        <EmptyState
+          icon={Building2}
+          title="У вас пока нет компаний"
+          description="Создайте профиль компании, чтобы публиковать вакансии"
+          action={
+            <Button asChild>
+              <Link href="/dashboard/companies/new">Создать компанию</Link>
+            </Button>
+          }
+        />
       )}
 
       <div className="space-y-3">
@@ -146,29 +156,11 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
         })}
       </div>
 
-      {store.pageCount > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page <= 1}
-            onClick={() => handlePageChange(store.page - 1)}
-          >
-            ← Назад
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {store.page} / {store.pageCount}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page >= store.pageCount}
-            onClick={() => handlePageChange(store.page + 1)}
-          >
-            Вперёд →
-          </Button>
-        </div>
-      )}
+      <PaginationBar
+        page={store.page}
+        pageCount={store.pageCount}
+        onPageChange={handlePageChange}
+      />
     </div>
   )
 })

@@ -3,6 +3,21 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
 import { api } from '@/services/api'
 import type { Resume } from '@/types/api'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
@@ -58,36 +73,35 @@ export function ApplyDialog({
     visible: isOpen && !(limitReached ?? false) && !(alreadyApplied ?? false) && !fetchError,
   })
 
-  if (!isOpen) return null
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     await submit()
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-md rounded-2xl bg-card p-6 shadow-xl">
-        <h2 className="text-lg font-semibold text-card-foreground">Откликнуться</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{vacancyTitle}</p>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent showCloseButton>
+        <DialogHeader>
+          <DialogTitle>Откликнуться</DialogTitle>
+          <p className="text-sm text-muted-foreground">{vacancyTitle}</p>
+        </DialogHeader>
 
         {alreadyApplied && (
-          <div className="mt-4 rounded-lg bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+          <div className="rounded-lg bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
             Вы уже откликались на эту вакансию.
           </div>
         )}
 
         {limitReached && (
-          <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+          <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
             Дневной лимит откликов исчерпан. Обновите план для большего количества откликов.
           </div>
         )}
 
-        {fetchError && <p className="mt-4 text-sm text-destructive">{fetchError}</p>}
+        {fetchError && <p className="text-sm text-destructive">{fetchError}</p>}
 
         {!alreadyApplied && !limitReached && (
-          <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {resumes.length === 0 && !fetchError ? (
               <div className="rounded-lg bg-muted px-4 py-3 text-sm text-muted-foreground">
                 У вас нет опубликованных резюме.{' '}
@@ -97,58 +111,56 @@ export function ApplyDialog({
               </div>
             ) : (
               <>
-                <div>
+                <div className="space-y-1.5">
                   <Label htmlFor="resumeId">Резюме</Label>
-                  <select
-                    id="resumeId"
-                    value={resumeId}
-                    onChange={(e) => setResumeId(e.target.value)}
-                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    required
-                  >
-                    {resumes.map((r) => (
-                      <option key={r.documentId} value={r.documentId}>
-                        {r.title}
-                      </option>
-                    ))}
-                  </select>
+                  <Select value={resumeId} onValueChange={setResumeId} required>
+                    <SelectTrigger id="resumeId" className="w-full">
+                      <SelectValue placeholder="Выберите резюме" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {resumes.map((r) => (
+                        <SelectItem key={r.documentId} value={r.documentId}>
+                          {r.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div>
+                <div className="space-y-1.5">
                   <Label htmlFor="coverLetter">Сопроводительное письмо (необязательно)</Label>
-                  <textarea
+                  <Textarea
                     id="coverLetter"
                     value={coverLetter}
                     onChange={(e) => setCoverLetter(e.target.value)}
                     rows={4}
-                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     placeholder="Расскажите, почему вы подходите на эту позицию..."
                   />
                 </div>
 
-                <div className="flex gap-3">
-                  {!mainButtonActive && (
-                    <Button type="submit" disabled={isLoading ?? !resumeId} className="flex-1">
-                      {isLoading ? 'Отправка...' : 'Откликнуться'}
-                    </Button>
-                  )}
+                <DialogFooter>
                   <Button type="button" variant="outline" onClick={onClose}>
                     Отмена
                   </Button>
-                </div>
+                  {!mainButtonActive && (
+                    <Button type="submit" disabled={isLoading ?? !resumeId}>
+                      {isLoading ? 'Отправка...' : 'Откликнуться'}
+                    </Button>
+                  )}
+                </DialogFooter>
               </>
             )}
           </form>
         )}
 
         {(alreadyApplied ?? limitReached) && (
-          <div className="mt-4 flex justify-end">
+          <DialogFooter>
             <Button variant="outline" onClick={onClose}>
               Закрыть
             </Button>
-          </div>
+          </DialogFooter>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

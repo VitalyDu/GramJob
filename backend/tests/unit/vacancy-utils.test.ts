@@ -3,7 +3,6 @@ import {
   canBoost,
   canArchive,
   canEdit,
-  publishedTransitionsOnEdit,
 } from '../../src/api/vacancy/services/vacancy-utils'
 
 describe('canPublish', () => {
@@ -107,15 +106,5 @@ describe('canEdit', () => {
 
   it('blocks edit for archived', () => {
     expect(canEdit('archived')).toBe(false)
-  })
-})
-
-describe('publishedTransitionsOnEdit', () => {
-  it('returns true for published status', () => {
-    expect(publishedTransitionsOnEdit('published')).toBe(true)
-  })
-
-  it('returns false for draft', () => {
-    expect(publishedTransitionsOnEdit('draft')).toBe(false)
   })
 })

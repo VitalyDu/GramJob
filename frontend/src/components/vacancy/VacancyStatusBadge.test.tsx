@@ -33,21 +33,21 @@ describe('VacancyStatusBadge', () => {
     expect(screen.getByText('В архиве')).toBeDefined()
   })
 
-  it('применяет зелёный класс для published', () => {
+  it('применяет вариант bg-success для published', () => {
     const { container } = render(<VacancyStatusBadge status="published" />)
-    const span = container.querySelector('span')
-    expect(span?.className).toContain('green')
+    const badge = container.querySelector('[data-slot="badge"]')
+    expect(badge?.className).toContain('bg-success')
   })
 
-  it('применяет красный класс для rejected', () => {
+  it('применяет destructive вариант для rejected', () => {
     const { container } = render(<VacancyStatusBadge status="rejected" />)
-    const span = container.querySelector('span')
-    expect(span?.className).toContain('red')
+    const badge = container.querySelector('[data-slot="badge"]')
+    expect(badge?.getAttribute('data-variant')).toBe('destructive')
   })
 
-  it('применяет оранжевый класс для expired', () => {
+  it('применяет outline вариант для expired', () => {
     const { container } = render(<VacancyStatusBadge status="expired" />)
-    const span = container.querySelector('span')
-    expect(span?.className).toContain('orange')
+    const badge = container.querySelector('[data-slot="badge"]')
+    expect(badge?.getAttribute('data-variant')).toBe('outline')
   })
 })

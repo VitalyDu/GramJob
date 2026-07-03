@@ -150,10 +150,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       },
     })
     if (existing) {
-      ctx.status = 409
-      return ctx.send({
-        error: { code: 'ALREADY_FAVORITED', message: 'Already in favorites' },
-      })
+      return ctx.send(
+        {
+          error: { code: 'ALREADY_FAVORITED', message: 'Already in favorites' },
+        },
+        409
+      )
     }
 
     const favorite = await (strapi.documents as any)('api::favorite.favorite').create({
@@ -165,8 +167,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       fields: ['documentId', 'type', 'targetId', 'createdAt'],
     })
 
-    ctx.status = 201
-    return ctx.send({ data: favorite })
+    return ctx.send({ data: favorite }, 201)
   },
 
   async remove(ctx: any) {
@@ -192,7 +193,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       documentId: favorite.documentId,
     })
 
-    ctx.status = 204
-    return ctx.send(null)
+    return ctx.send(null, 204)
   },
 })

@@ -1,64 +1,138 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
+import { FileText, LayoutDashboard, LogOut, Star } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 import { NotificationBadge } from '@/components/notification/NotificationBadge'
 
+const NAV_LINKS = [
+  { href: '/vacancies', key: 'nav.vacancies' },
+  { href: '/resumes', key: 'nav.resumes' },
+  { href: '/companies', key: 'nav.companies' },
+] as const
+
 export const WebHeader = observer(function WebHeader() {
   const { t } = useTranslation()
+  const pathname = usePathname()
+  const router = useRouter()
   const { auth } = useStores()
+
+  const initial = auth.user?.firstName?.charAt(0) ?? auth.user?.email?.charAt(0) ?? '?'
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <nav className="container mx-auto flex h-14 items-center justify-between px-4">
-        <Link href="/" className="font-bold text-lg text-primary">
-          GramJob
-        </Link>
-
+      <nav className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-6">
-          <Link
-            href="/vacancies"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {t('nav.vacancies')}
+          <Link href="/" aria-label={t('nav.home')} className="flex items-center">
+            <Image
+              src="/logo-horizontal.png"
+              alt="GramJob"
+              width={80}
+              height={32}
+              priority
+              className="h-8 w-auto"
+            />
           </Link>
 
-          {auth.isAuthenticated && auth.user ? (
-            <div className="flex items-center gap-2">
+          <div className="hidden items-center gap-1 md:flex">
+            {NAV_LINKS.map(({ href, key }) => (
               <Link
-                href="/subscription"
-                className="flex items-center"
-                aria-label="Управление подпиской"
+                key={href}
+                href={href}
+                className={cn(
+                  'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                  pathname.startsWith(href)
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                )}
               >
-                <SubscriptionBadge plan={auth.user.subscriptionPlan} />
+                {t(key)}
               </Link>
-              <NotificationBadge />
-              <Link
-                href="/dashboard/publications"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {t('nav.publications')}
-              </Link>
-              <Link
-                href="/dashboard"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {t('nav.dashboard')}
-              </Link>
-              <Button variant="ghost" size="sm" onClick={() => auth.logout()}>
-                {t('auth.logout')}
-              </Button>
-            </div>
-          ) : (
-            <Button asChild size="sm">
-              <Link href="/login">{t('nav.login')}</Link>
-            </Button>
-          )}
+            ))}
+          </div>
         </div>
+
+        {auth.isAuthenticated && auth.user ? (
+          <div className="flex items-center gap-2">
+            <Link
+              href="/subscription"
+              className="hidden md:flex"
+              aria-label={t('nav.subscription')}
+            >
+              <SubscriptionBadge plan={auth.user.subscriptionPlan} />
+            </Link>
+            <NotificationBadge />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label={t('nav.userMenu')}
+                  className="rounded-full outline-none ring-ring focus-visible:ring-2"
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
+                      {initial.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="truncate">
+                  {auth.user.firstName ?? auth.user.email}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    {t('nav.dashboard')}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/publications">
+                    <FileText className="mr-2 h-4 w-4" />
+                    {t('nav.publications')}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/subscription">
+                    <Star className="mr-2 h-4 w-4" />
+                    {t('nav.subscription')}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    auth.logout()
+                    router.push('/')
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  {t('auth.logout')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ) : (
+          <Button asChild size="sm">
+            <Link href="/login">{t('nav.login')}</Link>
+          </Button>
+        )}
       </nav>
     </header>
   )

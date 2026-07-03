@@ -18,6 +18,13 @@ vi.mock('next/link', () => ({
   ),
 }))
 
+vi.mock('next/image', () => ({
+  default: ({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt={alt} {...props} />
+  ),
+}))
+
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ back: vi.fn() }),
 }))
@@ -72,7 +79,7 @@ describe('CompanyDetailClient', () => {
     })
   })
 
-  it('отображает индикатор загрузки', () => {
+  it('отображает skeleton во время загрузки', () => {
     const store = makeStore({ isLoading: true })
     vi.mocked(useStores).mockReturnValue({
       company: store,
@@ -81,10 +88,10 @@ describe('CompanyDetailClient', () => {
 
     render(<CompanyDetailClient id="abc123" />)
 
-    expect(screen.getByText(/загрузка/i)).toBeDefined()
+    expect(screen.getAllByTestId('card-skeleton').length).toBeGreaterThan(0)
   })
 
-  it('отображает ошибку 404 если компания не найдена', () => {
+  it('отображает ошибку если компания не найдена', () => {
     const store = makeStore({ error: 'Not found', currentCompany: null })
     vi.mocked(useStores).mockReturnValue({
       company: store,
@@ -93,7 +100,7 @@ describe('CompanyDetailClient', () => {
 
     render(<CompanyDetailClient id="abc123" />)
 
-    expect(screen.getByText(/не найдена/i)).toBeDefined()
+    expect(screen.getByText('Not found')).toBeDefined()
   })
 
   it('отображает название компании', () => {
@@ -120,7 +127,7 @@ describe('CompanyDetailClient', () => {
     expect(screen.getByText('Мы делаем крутые продукты')).toBeDefined()
   })
 
-  it('отображает страну и город', () => {
+  it('отображает страну и город как Badge', () => {
     const store = makeStore({ currentCompany: mockCompany })
     vi.mocked(useStores).mockReturnValue({
       company: store,
@@ -145,7 +152,7 @@ describe('CompanyDetailClient', () => {
     expect(screen.getByText('51–200')).toBeDefined()
   })
 
-  it('отображает ссылку на сайт', () => {
+  it('отображает ссылку на сайт с иконкой', () => {
     const store = makeStore({ currentCompany: mockCompany })
     vi.mocked(useStores).mockReturnValue({
       company: store,

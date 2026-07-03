@@ -69,10 +69,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       },
     })
     if (existing) {
-      ctx.status = 409
-      return ctx.send({
-        error: { code: 'ALREADY_APPLIED', message: 'You have already applied to this vacancy' },
-      })
+      return ctx.send(
+        {
+          error: { code: 'ALREADY_APPLIED', message: 'You have already applied to this vacancy' },
+        },
+        409
+      )
     }
 
     // Check and consume apply credit
@@ -81,14 +83,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       consumedSource = await checkAndConsumeApplyCredit(strapi, user.id)
     } catch (err: any) {
       if (err?.code === 'LIMIT_REACHED') {
-        ctx.status = 403
-        return ctx.send({
-          error: {
-            code: 'LIMIT_REACHED',
-            message: 'Daily application limit reached',
-            details: err.details,
+        return ctx.send(
+          {
+            error: {
+              code: 'LIMIT_REACHED',
+              message: 'Daily application limit reached',
+              details: err.details,
+            },
           },
-        })
+          403
+        )
       }
       throw err
     }
@@ -124,8 +128,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       )
     }
 
-    ctx.status = 201
-    return ctx.send({ data: application })
+    return ctx.send({ data: application }, 201)
   },
 
   async findMine(ctx: any) {

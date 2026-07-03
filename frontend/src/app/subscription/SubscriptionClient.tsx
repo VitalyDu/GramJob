@@ -7,6 +7,8 @@ import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 import { SubscriptionPlanCard } from '@/components/subscription/SubscriptionPlanCard'
 import { PackageCard } from '@/components/subscription/PackageCard'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { PageHeader } from '@/components/shared/PageHeader'
 import { canUpgradeToPlan } from '@/lib/subscription-utils'
 import { useTelegramPayment } from '@/hooks/useTelegramPayment'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
@@ -92,34 +94,36 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
 
   return (
     <div className="space-y-10">
+      <PageHeader title="Подписка" />
+
       {/* Текущий план */}
       <section>
-        <h1 className="text-2xl font-bold text-card-foreground mb-4">Подписка</h1>
+        <Card>
+          <CardContent className="flex flex-col gap-3 pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="mb-1 text-sm text-muted-foreground">Ваш текущий план</p>
+              <SubscriptionBadge
+                plan={user.subscriptionPlan}
+                expiresAt={user.subscriptionExpiresAt}
+                showExpiry
+              />
+            </div>
 
-        <div className="rounded-2xl border border-border bg-card p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Ваш текущий план</p>
-            <SubscriptionBadge
-              plan={user.subscriptionPlan}
-              expiresAt={user.subscriptionExpiresAt}
-              showExpiry
-            />
-          </div>
-
-          <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-            <span>
-              Остаток кредитов вакансий: <strong>{user.vacancyCredits}</strong>
-            </span>
-            <span>
-              Остаток кредитов откликов: <strong>{user.applyCredits}</strong>
-            </span>
-          </div>
-        </div>
+            <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+              <span>
+                Остаток кредитов вакансий: <strong>{user.vacancyCredits}</strong>
+              </span>
+              <span>
+                Остаток кредитов откликов: <strong>{user.applyCredits}</strong>
+              </span>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
-      {/* Уведомление о необходимости обновить статус (в web) */}
+      {/* Уведомление о необходимости обновить статус */}
       {showRefreshHint && (
-        <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
           <p className="text-sm text-amber-800">
             После оплаты нажмите «Обновить статус», чтобы увидеть изменения.
           </p>
@@ -138,13 +142,13 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
 
       {/* Ошибка */}
       {payment.error && (
-        <div className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive flex items-center justify-between">
+        <div className="flex items-center justify-between rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
           <span>{payment.error}</span>
           <button
             onClick={() => {
               payment.clearError()
             }}
-            className="text-destructive hover:underline text-xs"
+            className="text-xs text-destructive hover:underline"
           >
             Закрыть
           </button>
@@ -152,8 +156,8 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
       )}
 
       {/* Планы подписки */}
-      <section>
-        <h2 className="text-lg font-semibold text-card-foreground mb-4">Планы подписки</h2>
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold">Планы подписки</h2>
 
         {payment.isLoading && payment.plans.length === 0 && (
           <p className="text-sm text-muted-foreground">Загрузка планов...</p>
@@ -162,28 +166,34 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
         {paidPlans.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-3">
             {paidPlans.map((plan) => (
-              <SubscriptionPlanCard
+              <div
                 key={plan.code}
-                plan={plan}
-                currentPlan={user.subscriptionPlan}
-                canBuy={canUpgradeToPlan(user.subscriptionPlan, plan.code)}
-                isBuying={buyingPlan === plan.code}
-                onBuy={handleBuyPlan}
-              />
+                className={
+                  plan.code === user.subscriptionPlan ? 'ring-2 ring-primary rounded-xl' : ''
+                }
+              >
+                <SubscriptionPlanCard
+                  plan={plan}
+                  currentPlan={user.subscriptionPlan}
+                  canBuy={canUpgradeToPlan(user.subscriptionPlan, plan.code)}
+                  isBuying={buyingPlan === plan.code}
+                  onBuy={handleBuyPlan}
+                />
+              </div>
             ))}
           </div>
         )}
       </section>
 
       {/* Пакеты вакансий */}
-      <section>
-        <h2 className="text-lg font-semibold text-card-foreground mb-1">Пакеты вакансий</h2>
-        <p className="text-sm text-muted-foreground mb-4">
+      <section className="space-y-2">
+        <h2 className="text-lg font-semibold">Пакеты вакансий</h2>
+        <p className="text-sm text-muted-foreground">
           Дополнительные кредиты для публикации вакансий. Не сгорают при смене плана.
         </p>
 
         {payment.vacancyPackages.length > 0 && (
-          <div className="grid gap-4 sm:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {payment.vacancyPackages.map((pkg) => (
               <PackageCard
                 key={pkg.id}
@@ -198,14 +208,14 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
       </section>
 
       {/* Пакеты откликов */}
-      <section>
-        <h2 className="text-lg font-semibold text-card-foreground mb-1">Пакеты откликов</h2>
-        <p className="text-sm text-muted-foreground mb-4">
+      <section className="space-y-2">
+        <h2 className="text-lg font-semibold">Пакеты откликов</h2>
+        <p className="text-sm text-muted-foreground">
           Дополнительные отклики когда дневной лимит исчерпан.
         </p>
 
         {payment.applyPackages.length > 0 && (
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {payment.applyPackages.map((pkg) => (
               <PackageCard
                 key={pkg.id}
@@ -220,7 +230,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
       </section>
 
       {/* Disclaimer */}
-      <p className="text-xs text-muted-foreground text-center pb-4">
+      <p className="pb-4 text-center text-xs text-muted-foreground">
         Оплата производится через Telegram Stars. Возврат Stars невозможен.
       </p>
     </div>

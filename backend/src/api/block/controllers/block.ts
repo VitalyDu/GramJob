@@ -64,10 +64,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       },
     })
     if (existing) {
-      ctx.status = 409
-      return ctx.send({
-        error: { code: 'ALREADY_BLOCKED', message: 'This user is already blocked' },
-      })
+      return ctx.send(
+        {
+          error: { code: 'ALREADY_BLOCKED', message: 'This user is already blocked' },
+        },
+        409
+      )
     }
 
     const block = await (strapi.documents as any)('api::block.block').create({
@@ -79,8 +81,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       fields: ['documentId', 'targetType', 'targetId', 'createdAt'],
     })
 
-    ctx.status = 201
-    return ctx.send({ data: block })
+    return ctx.send({ data: block }, 201)
   },
 
   async remove(ctx: any) {
@@ -96,7 +97,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     await (strapi.documents as any)('api::block.block').delete({ documentId: id })
 
-    ctx.status = 204
-    return ctx.send(null)
+    return ctx.send(null, 204)
   },
 })

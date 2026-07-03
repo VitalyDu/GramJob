@@ -44,10 +44,12 @@ type UserWithPlan = {
   subscriptionPlan: string
 }
 
+export type ConsumeVacancyCreditResult = { source: 'plan' | 'package' }
+
 export async function checkAndConsumeVacancyCredit(
   strapi: Core.Strapi,
   userId: number
-): Promise<void> {
+): Promise<ConsumeVacancyCreditResult> {
   const user = (await strapi.db.query('plugin::users-permissions.user').findOne({
     where: { id: userId },
     select: ['id', 'subscriptionPlan'],
@@ -61,7 +63,7 @@ export async function checkAndConsumeVacancyCredit(
     `UPDATE up_users SET vacancy_credits = vacancy_credits - 1 WHERE id = ? AND vacancy_credits > 0`,
     [userId]
   )) as { rowCount?: number }
-  if ((consumed.rowCount ?? 0) > 0) return
+  if ((consumed.rowCount ?? 0) > 0) return { source: 'package' }
 
   // 2. Check plan monthly limit
   const monthStart = new Date()
@@ -88,6 +90,15 @@ export async function checkAndConsumeVacancyCredit(
       details: { limit, used: usedThisMonth, resetAt: resetAt.toISOString() },
     })
   }
+
+  return { source: 'plan' }
+}
+
+export async function refundVacancyCredit(strapi: Core.Strapi, userId: number): Promise<void> {
+  await strapi.db.connection.raw(
+    `UPDATE up_users SET vacancy_credits = vacancy_credits + 1 WHERE id = ?`,
+    [userId]
+  )
 }
 
 export async function checkAndConsumeBoost(strapi: Core.Strapi, userId: number): Promise<number> {

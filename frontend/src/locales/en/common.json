@@ -1,12 +1,18 @@
 {
   "nav": {
     "vacancies": "Vacancies",
+    "resumes": "Resumes",
+    "companies": "Companies",
     "favorites": "Favorites",
     "applications": "Applications",
     "profile": "Profile",
     "publications": "My postings",
     "dashboard": "Dashboard",
-    "login": "Sign In"
+    "subscription": "Subscription",
+    "login": "Sign In",
+    "main": "Main navigation",
+    "home": "GramJob — home",
+    "userMenu": "User menu"
   },
   "auth": {
     "email": "Email",

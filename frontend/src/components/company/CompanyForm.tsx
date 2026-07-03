@@ -1,6 +1,6 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import type { CompanyCreateInput, CompanySizeEnum } from '@/types/api'
@@ -13,6 +13,15 @@ const COMPANY_SIZE_VALUES = Object.keys(COMPANY_SIZE_LABELS) as [
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
 
 const schema = z.object({
@@ -40,6 +49,7 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -62,77 +72,111 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
   })
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="space-y-1">
-        <Label htmlFor="name">Название *</Label>
-        <Input id="name" {...register('name')} placeholder="Название компании" />
-        {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
-      </div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Секция: Основное */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Основное</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="name">Название *</Label>
+            <Input id="name" {...register('name')} placeholder="Название компании" />
+            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+          </div>
 
-      <div className="space-y-1">
-        <Label htmlFor="description">Описание</Label>
-        <textarea
-          id="description"
-          {...register('description')}
-          placeholder="Расскажите о компании"
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-          rows={4}
-        />
-        {errors.description && (
-          <p className="text-xs text-destructive">{errors.description.message}</p>
-        )}
-      </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="description">Описание</Label>
+            <Textarea
+              id="description"
+              {...register('description')}
+              placeholder="Расскажите о компании"
+              rows={4}
+            />
+            {errors.description && (
+              <p className="text-sm text-destructive">{errors.description.message}</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="country">Страна *</Label>
-          <Input id="country" {...register('country')} placeholder="RU" />
-          {errors.country && <p className="text-xs text-destructive">{errors.country.message}</p>}
-        </div>
+      {/* Секция: Контакты */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Контакты</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="website">Сайт</Label>
+            <Input id="website" {...register('website')} placeholder="https://example.com" />
+            {errors.website && <p className="text-sm text-destructive">{errors.website.message}</p>}
+          </div>
 
-        <div className="space-y-1">
-          <Label htmlFor="city">Город</Label>
-          <Input id="city" {...register('city')} placeholder="Москва" />
-        </div>
-      </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="telegram">Telegram</Label>
+              <Input id="telegram" {...register('telegram')} placeholder="@company" />
+            </div>
 
-      <div className="space-y-1">
-        <Label htmlFor="companySize">Размер компании</Label>
-        <select
-          id="companySize"
-          {...register('companySize')}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-        >
-          {SIZE_OPTIONS.map(([value, label]) => (
-            <option key={value} value={value}>
-              {label} сотрудников
-            </option>
-          ))}
-        </select>
-      </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="linkedin">LinkedIn</Label>
+              <Input
+                id="linkedin"
+                {...register('linkedin')}
+                placeholder="https://linkedin.com/company/..."
+              />
+              {errors.linkedin && (
+                <p className="text-sm text-destructive">{errors.linkedin.message}</p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="space-y-1">
-        <Label htmlFor="website">Сайт</Label>
-        <Input id="website" {...register('website')} placeholder="https://example.com" />
-        {errors.website && <p className="text-xs text-destructive">{errors.website.message}</p>}
-      </div>
+      {/* Секция: Локация */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Локация</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="country">Страна *</Label>
+              <Input id="country" {...register('country')} placeholder="RU" />
+              {errors.country && (
+                <p className="text-sm text-destructive">{errors.country.message}</p>
+              )}
+            </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="telegram">Telegram</Label>
-          <Input id="telegram" {...register('telegram')} placeholder="@company" />
-        </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="city">Город</Label>
+              <Input id="city" {...register('city')} placeholder="Москва" />
+            </div>
+          </div>
 
-        <div className="space-y-1">
-          <Label htmlFor="linkedin">LinkedIn</Label>
-          <Input
-            id="linkedin"
-            {...register('linkedin')}
-            placeholder="https://linkedin.com/company/..."
-          />
-          {errors.linkedin && <p className="text-xs text-destructive">{errors.linkedin.message}</p>}
-        </div>
-      </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="companySize">Размер компании</Label>
+            <Controller
+              control={control}
+              name="companySize"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="companySize" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SIZE_OPTIONS.map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label} сотрудников
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {!mainButtonActive && (
         <Button type="submit" className="w-full" disabled={isLoading}>

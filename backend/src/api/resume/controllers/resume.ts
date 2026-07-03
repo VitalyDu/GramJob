@@ -96,8 +96,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         education: body.education as any,
       })
 
-      ctx.status = 201
-      return ctx.send({ data: resume })
+      return ctx.send({ data: resume }, 201)
     },
 
     async publish(ctx: any) {
@@ -216,13 +215,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         })) as { subscriptionPlan: string } | null
 
         if (!checkIsMaxPlan(viewer ?? { subscriptionPlan: 'free' })) {
-          ctx.status = 403
-          return ctx.send({
-            error: {
-              code: 'SUBSCRIPTION_REQUIRED',
-              message: 'Max subscription plan required to access resume database',
+          return ctx.send(
+            {
+              error: {
+                code: 'SUBSCRIPTION_REQUIRED',
+                message: 'Max subscription plan required to access resume database',
+              },
             },
-          })
+            403
+          )
         }
       }
 

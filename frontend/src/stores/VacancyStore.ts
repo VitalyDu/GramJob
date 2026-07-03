@@ -136,7 +136,7 @@ export class VacancyStore {
     }
   }
 
-  async createVacancy(data: VacancyCreateInput): Promise<Vacancy> {
+  async createVacancy(data: VacancyCreateInput): Promise<Vacancy | null> {
     runInAction(() => {
       this.isLoading = true
       this.error = null
@@ -148,6 +148,15 @@ export class VacancyStore {
       })
       return res.data
     } catch (e) {
+      if (e instanceof ApiClientError) {
+        const body = e.data as { error?: { code?: string } } | null
+        if (body?.error?.code === 'LIMIT_REACHED') {
+          runInAction(() => {
+            this.limitReached = true
+          })
+          return null
+        }
+      }
       runInAction(() => {
         this.error = e instanceof Error ? e.message : 'Failed to create vacancy'
       })
@@ -159,7 +168,7 @@ export class VacancyStore {
     }
   }
 
-  async updateVacancy(id: string, data: VacancyUpdateInput): Promise<Vacancy> {
+  async updateVacancy(id: string, data: VacancyUpdateInput): Promise<Vacancy | null> {
     runInAction(() => {
       this.isLoading = true
       this.error = null
@@ -173,6 +182,15 @@ export class VacancyStore {
       })
       return res.data
     } catch (e) {
+      if (e instanceof ApiClientError) {
+        const body = e.data as { error?: { code?: string } } | null
+        if (body?.error?.code === 'LIMIT_REACHED') {
+          runInAction(() => {
+            this.limitReached = true
+          })
+          return null
+        }
+      }
       runInAction(() => {
         this.error = e instanceof Error ? e.message : 'Failed to update vacancy'
       })

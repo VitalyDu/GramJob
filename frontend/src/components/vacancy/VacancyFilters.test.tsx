@@ -1,49 +1,40 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { describe, expect, it, vi } from 'vitest'
 import { VacancyFilters } from './VacancyFilters'
 
 describe('VacancyFilters', () => {
-  it('отображает поле поиска', () => {
+  it('рендерит строку поиска и кнопку «Фильтры» (mobile-триггер)', () => {
     render(<VacancyFilters params={{}} onChange={vi.fn()} />)
-    expect(screen.getByPlaceholderText(/поиск/i)).toBeDefined()
+    expect(screen.getByPlaceholderText(/поиск/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /фильтры/i })).toBeInTheDocument()
   })
 
-  it('отображает select для формата работы', () => {
-    render(<VacancyFilters params={{}} onChange={vi.fn()} />)
-    expect(screen.getByRole('combobox', { name: /формат/i })).toBeDefined()
-  })
-
-  it('отображает select для типа занятости', () => {
-    render(<VacancyFilters params={{}} onChange={vi.fn()} />)
-    expect(screen.getByRole('combobox', { name: /занятость/i })).toBeDefined()
-  })
-
-  it('отображает select для уровня', () => {
-    render(<VacancyFilters params={{}} onChange={vi.fn()} />)
-    expect(screen.getByRole('combobox', { name: /уровень/i })).toBeDefined()
-  })
-
-  it('отображает select для сортировки', () => {
-    render(<VacancyFilters params={{}} onChange={vi.fn()} />)
-    expect(screen.getByRole('combobox', { name: /сортировка/i })).toBeDefined()
-  })
-
-  it('вызывает onChange при сабмите формы', () => {
+  it('отправляет поиск через onChange с page: 1', async () => {
     const onChange = vi.fn()
     render(<VacancyFilters params={{}} onChange={onChange} />)
-    fireEvent.submit(screen.getByRole('form'))
-    expect(onChange).toHaveBeenCalledOnce()
+    await userEvent.type(screen.getByPlaceholderText(/поиск/i), 'react')
+    await userEvent.click(screen.getAllByRole('button', { name: /найти/i })[0]!)
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ search: 'react', page: 1 }))
+  })
+
+  it('показывает число активных фильтров на кнопке', () => {
+    render(
+      <VacancyFilters params={{ workFormat: 'remote', seniority: 'senior' }} onChange={vi.fn()} />
+    )
+    expect(screen.getByRole('button', { name: /фильтры/i })).toHaveTextContent('2')
+  })
+
+  it('кнопка «Сбросить» очищает фильтры', async () => {
+    const onChange = vi.fn()
+    render(<VacancyFilters params={{ workFormat: 'remote' }} onChange={onChange} />)
+    await userEvent.click(screen.getAllByRole('button', { name: /сбросить/i })[0]!)
+    expect(onChange).toHaveBeenCalledWith({ page: 1 })
   })
 
   it('отражает начальное значение search в инпуте', () => {
     render(<VacancyFilters params={{ search: 'react' }} onChange={vi.fn()} />)
     const input = screen.getByPlaceholderText(/поиск/i) as HTMLInputElement
     expect(input.value).toBe('react')
-  })
-
-  it('отражает начальное значение workFormat в select', () => {
-    render(<VacancyFilters params={{ workFormat: 'remote' }} onChange={vi.fn()} />)
-    const select = screen.getByRole('combobox', { name: /формат/i }) as HTMLSelectElement
-    expect(select.value).toBe('remote')
   })
 })

@@ -12,8 +12,10 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'GramJob — Биржа вакансий в Telegram',
-  description: 'Международная биржа вакансий и резюме в экосистеме Telegram',
+  title: 'GramJob — работа и вакансии в Telegram',
+  description:
+    'Международная биржа вакансий и резюме в экосистеме Telegram. Find opportunities. Build futures.',
+  icons: { icon: '/logo-vertical.png' },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -59,8 +59,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       fields: ['documentId', 'name', 'type', 'filters', 'lastNotifiedAt', 'createdAt'],
     })
 
-    ctx.status = 201
-    return ctx.send({ data: search })
+    return ctx.send({ data: search }, 201)
   },
 
   async remove(ctx: any) {
@@ -78,7 +77,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       documentId: id,
     })
 
-    ctx.status = 204
-    return ctx.send(null)
+    return ctx.send(null, 204)
   },
 })

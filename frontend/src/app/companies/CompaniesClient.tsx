@@ -2,15 +2,33 @@
 
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import { Building2 } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { CompanyCard } from '@/components/company/CompanyCard'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
+import {
+  PageHeader,
+  EmptyState,
+  ErrorState,
+  CardListSkeleton,
+  PaginationBar,
+} from '@/components/shared'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import type { CompanySizeEnum } from '@/types/api'
 
 export const CompaniesClient = observer(function CompaniesClient() {
   const { company: store } = useStores()
   const [search, setSearch] = useState('')
   const [country, setCountry] = useState('')
+  const [companySize, setCompanySize] = useState<CompanySizeEnum | ''>('')
 
   useEffect(() => {
     void store.fetchCompanies({ page: 1 })
@@ -18,74 +36,96 @@ export const CompaniesClient = observer(function CompaniesClient() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    const params = { page: 1, ...(search && { search }), ...(country && { country }) }
-    void store.fetchCompanies(params)
+    void store.fetchCompanies({
+      page: 1,
+      ...(search ? { search } : {}),
+      ...(country ? { country } : {}),
+      ...(companySize ? { companySize } : {}),
+    })
   }
 
   const handlePageChange = (page: number) => {
-    const params = { page, ...(search && { search }), ...(country && { country }) }
-    void store.fetchCompanies(params)
+    void store.fetchCompanies({
+      page,
+      ...(search ? { search } : {}),
+      ...(country ? { country } : {}),
+      ...(companySize ? { companySize } : {}),
+    })
   }
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleSearch} className="flex gap-3">
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Поиск компании..."
-          className="max-w-sm"
-        />
-        <Input
-          value={country}
-          onChange={(e) => setCountry(e.target.value)}
-          placeholder="Страна (RU, US...)"
-          className="max-w-[140px]"
-        />
-        <Button type="submit">Найти</Button>
-      </form>
+    <div>
+      <PageHeader title="Компании" description="Каталог работодателей" />
 
-      {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
+      <div className="md:grid md:grid-cols-[280px_1fr] md:items-start md:gap-6">
+        <aside className="md:sticky md:top-20">
+          <form onSubmit={handleSearch} className="space-y-3 rounded-xl border bg-card p-4">
+            <p className="text-sm font-semibold text-card-foreground">Фильтры</p>
+            <Input
+              placeholder="Поиск компании..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <Input
+              placeholder="Страна (RU, US...)"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+            />
+            <Select
+              value={companySize || '__all__'}
+              onValueChange={(v) => setCompanySize(v === '__all__' ? '' : (v as CompanySizeEnum))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">Любой размер</SelectItem>
+                {(Object.entries(COMPANY_SIZE_LABELS) as [CompanySizeEnum, string][]).map(
+                  ([k, v]) => (
+                    <SelectItem key={k} value={k}>
+                      {v}
+                    </SelectItem>
+                  )
+                )}
+              </SelectContent>
+            </Select>
+            <Button type="submit" className="w-full">
+              Найти
+            </Button>
+          </form>
+        </aside>
 
-      {store.error && (
-        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {store.error}
-        </p>
-      )}
+        <section className="mt-4 md:mt-0">
+          {store.isLoading && <CardListSkeleton count={6} />}
 
-      {!store.isLoading && store.companies.length === 0 && !store.error && (
-        <p className="text-sm text-muted-foreground">Компании не найдены.</p>
-      )}
+          {store.error && !store.isLoading && (
+            <ErrorState
+              message={store.error}
+              onRetry={() => void store.fetchCompanies({ page: 1 })}
+            />
+          )}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {store.companies.map((c) => (
-          <CompanyCard key={c.documentId} company={c} />
-        ))}
+          {!store.isLoading && !store.error && store.companies.length === 0 && (
+            <EmptyState icon={Building2} title="Компании не найдены" />
+          )}
+
+          {!store.isLoading && store.companies.length > 0 && (
+            <>
+              <p className="mb-3 text-sm text-muted-foreground">Найдено: {store.total}</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {store.companies.map((c) => (
+                  <CompanyCard key={c.documentId} company={c} />
+                ))}
+              </div>
+              <PaginationBar
+                page={store.page}
+                pageCount={store.pageCount}
+                onPageChange={handlePageChange}
+              />
+            </>
+          )}
+        </section>
       </div>
-
-      {store.pageCount > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page <= 1}
-            onClick={() => handlePageChange(store.page - 1)}
-          >
-            ← Назад
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {store.page} / {store.pageCount}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page >= store.pageCount}
-            onClick={() => handlePageChange(store.page + 1)}
-          >
-            Вперёд →
-          </Button>
-        </div>
-      )}
     </div>
   )
 })

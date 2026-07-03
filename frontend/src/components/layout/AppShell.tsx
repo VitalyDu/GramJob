@@ -4,7 +4,7 @@ import { type ReactNode } from 'react'
 import { Toaster } from 'sonner'
 import { useTelegramInit } from '@/hooks/useTelegramInit'
 import { WebHeader } from './WebHeader'
-import { MiniAppBottomNav } from './MiniAppBottomNav'
+import { BottomNav } from './BottomNav'
 import { ModerationToastWatcher } from '@/components/moderation/ModerationToastWatcher'
 import { StartParamRouter } from './StartParamRouter'
 
@@ -14,10 +14,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
       {!isMiniApp && <WebHeader />}
-      <main className={`flex-1 ${isMiniApp ? 'pb-16' : ''}`}>
-        <div className="container mx-auto px-4 py-6">{children}</div>
+      <main className={`flex-1 ${isMiniApp ? 'pb-20' : 'pb-20 md:pb-0'}`}>
+        <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
       </main>
-      {isMiniApp && <MiniAppBottomNav />}
+      <BottomNav isMiniApp={isMiniApp} />
       <StartParamRouter />
       <ModerationToastWatcher />
       <Toaster position="top-center" richColors closeButton />

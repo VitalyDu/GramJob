@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
+import { Briefcase } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
@@ -11,6 +12,12 @@ import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
 import { LimitBar } from '@/components/vacancy/LimitBar'
 import { UpsellModal } from '@/components/vacancy/UpsellModal'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
+import { EmptyState } from '@/components/shared/EmptyState'
+import { ErrorState } from '@/components/shared/ErrorState'
+import { PaginationBar } from '@/components/shared/PaginationBar'
 import {
   canPublishVacancy,
   canBoostVacancy,
@@ -59,30 +66,38 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
     <div className="space-y-6">
       <UpsellModal isOpen={store.limitReached} onClose={() => store.clearLimitReached()} />
 
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Мои вакансии</h1>
-        <Link
-          href="/dashboard/vacancies/new"
-          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          + Создать вакансию
-        </Link>
-      </div>
+      <PageHeader
+        title="Мои вакансии"
+        actions={
+          <Button asChild>
+            <Link href="/dashboard/vacancies/new">+ Создать вакансию</Link>
+          </Button>
+        }
+      />
 
-      <LimitBar used={used} limit={limit} />
+      <Card>
+        <CardContent className="pt-6">
+          <LimitBar used={used} limit={limit} />
+        </CardContent>
+      </Card>
 
-      {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
+      {store.isLoading && <CardListSkeleton count={6} />}
 
-      {store.error && (
-        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {store.error}
-        </p>
+      {store.error && !store.isLoading && (
+        <ErrorState message={store.error} onRetry={() => void store.fetchMyVacancies()} />
       )}
 
       {!store.isLoading && store.myVacancies.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-border py-16 text-center">
-          <p className="text-sm text-muted-foreground">У вас пока нет вакансий.</p>
-        </div>
+        <EmptyState
+          icon={Briefcase}
+          title="Нет вакансий"
+          description="Создайте первую вакансию, чтобы начать поиск кандидатов"
+          action={
+            <Button asChild>
+              <Link href="/dashboard/vacancies/new">Создать вакансию</Link>
+            </Button>
+          }
+        />
       )}
 
       <div className="space-y-3">
@@ -145,7 +160,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                 )}
                 <Link
                   href={`/dashboard/vacancies/${v.documentId}/analytics`}
-                  className="text-sm text-indigo-600 hover:underline"
+                  className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
                 >
                   Аналитика
                 </Link>
@@ -178,29 +193,11 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
         ))}
       </div>
 
-      {store.pageCount > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page <= 1}
-            onClick={() => handlePageChange(store.page - 1)}
-          >
-            ← Назад
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {store.page} / {store.pageCount}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page >= store.pageCount}
-            onClick={() => handlePageChange(store.page + 1)}
-          >
-            Вперёд →
-          </Button>
-        </div>
-      )}
+      <PaginationBar
+        page={store.page}
+        pageCount={store.pageCount}
+        onPageChange={handlePageChange}
+      />
     </div>
   )
 })

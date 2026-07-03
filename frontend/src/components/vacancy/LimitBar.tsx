@@ -26,7 +26,7 @@ export function LimitBar({ used, limit }: Props) {
         aria-valuenow={pct}
         aria-valuemin={0}
         aria-valuemax={100}
-        className="h-2 w-full overflow-hidden rounded-full bg-gray-200"
+        className="h-2 w-full overflow-hidden rounded-full bg-muted"
       >
         <div
           data-fill

@@ -1,11 +1,21 @@
 'use client'
 
-import { useFieldArray, useForm } from 'react-hook-form'
+import { useFieldArray, useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
 import { RESUME_WORK_FORMAT_LABELS, RESUME_EMPLOYMENT_TYPE_LABELS } from '@/lib/resume-utils'
 import type { ResumeCreateInput, ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
@@ -171,349 +181,371 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
   const watchWorkExperience = watch('workExperience')
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
-      {/* Basic Info */}
-      <section className="space-y-4">
-        <h2 className="text-base font-semibold text-card-foreground">Основная информация</h2>
-
-        <div>
-          <Label htmlFor="title">Заголовок резюме *</Label>
-          <Input
-            id="title"
-            {...register('title')}
-            placeholder="Senior Frontend Developer"
-            className="mt-1"
-          />
-          {errors.title && <p className="mt-1 text-xs text-destructive">{errors.title.message}</p>}
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="firstName">Имя *</Label>
-            <Input id="firstName" {...register('firstName')} className="mt-1" />
-            {errors.firstName && (
-              <p className="mt-1 text-xs text-destructive">{errors.firstName.message}</p>
-            )}
-          </div>
-          <div>
-            <Label htmlFor="lastName">Фамилия *</Label>
-            <Input id="lastName" {...register('lastName')} className="mt-1" />
-            {errors.lastName && (
-              <p className="mt-1 text-xs text-destructive">{errors.lastName.message}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="country">Страна *</Label>
-            <Input id="country" {...register('country')} placeholder="RU" className="mt-1" />
-            {errors.country && (
-              <p className="mt-1 text-xs text-destructive">{errors.country.message}</p>
-            )}
-          </div>
-          <div>
-            <Label htmlFor="city">Город</Label>
-            <Input id="city" {...register('city')} placeholder="Москва" className="mt-1" />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="workFormat">Формат работы *</Label>
-            <select
-              id="workFormat"
-              {...register('workFormat')}
-              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              {(Object.keys(RESUME_WORK_FORMAT_LABELS) as ResumeWorkFormatEnum[]).map((fmt) => (
-                <option key={fmt} value={fmt}>
-                  {RESUME_WORK_FORMAT_LABELS[fmt]}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <Label htmlFor="employmentType">Тип занятости *</Label>
-            <select
-              id="employmentType"
-              {...register('employmentType')}
-              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              {(Object.keys(RESUME_EMPLOYMENT_TYPE_LABELS) as EmploymentTypeEnum[]).map((t) => (
-                <option key={t} value={t}>
-                  {RESUME_EMPLOYMENT_TYPE_LABELS[t]}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <Label htmlFor="desiredSalary">Желаемая зарплата</Label>
-            <Input
-              id="desiredSalary"
-              type="number"
-              {...register('desiredSalary')}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label htmlFor="currency">Валюта</Label>
-            <select
-              id="currency"
-              {...register('currency')}
-              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              {['USD', 'EUR', 'RUB', 'GBP'].map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <Label htmlFor="experienceYears">Опыт (лет)</Label>
-            <Input
-              id="experienceYears"
-              type="number"
-              {...register('experienceYears')}
-              className="mt-1"
-            />
-          </div>
-        </div>
-
-        <div>
-          <Label htmlFor="about">О себе</Label>
-          <textarea
-            id="about"
-            {...register('about')}
-            rows={4}
-            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            placeholder="Кратко о себе, ключевые навыки и достижения..."
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="skills">Навыки (через запятую)</Label>
-          <Input
-            id="skills"
-            {...register('skills')}
-            placeholder="React, TypeScript, Node.js"
-            className="mt-1"
-          />
-        </div>
-      </section>
-
-      {/* Contacts */}
-      <section className="space-y-4">
-        <h2 className="text-base font-semibold text-card-foreground">Контакты</h2>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <Label htmlFor="contactTelegram">Telegram</Label>
-            <Input
-              id="contactTelegram"
-              {...register('contactTelegram')}
-              placeholder="@username"
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label htmlFor="contactEmail">Email</Label>
-            <Input id="contactEmail" type="email" {...register('contactEmail')} className="mt-1" />
-          </div>
-          <div>
-            <Label htmlFor="contactPhone">Телефон</Label>
-            <Input
-              id="contactPhone"
-              {...register('contactPhone')}
-              placeholder="+7..."
-              className="mt-1"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Work Experience */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-card-foreground">Опыт работы</h2>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              appendWork({
-                company: '',
-                position: '',
-                startDate: '',
-                endDate: '',
-                current: false,
-                description: '',
-              })
-            }
-          >
-            + Добавить
-          </Button>
-        </div>
-
-        {workFields.map((field, index) => (
-          <div key={field.id} className="space-y-3 rounded-xl border border-border p-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-foreground">Место работы {index + 1}</p>
-              <button
-                type="button"
-                onClick={() => removeWork(index)}
-                className="text-xs text-red-500 hover:text-red-700"
-              >
-                Удалить
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Компания *</Label>
-                <Input {...register(`workExperience.${index}.company`)} className="mt-1" />
-                {errors.workExperience?.[index]?.company && (
-                  <p className="mt-1 text-xs text-destructive">
-                    {errors.workExperience[index].company?.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <Label>Должность *</Label>
-                <Input {...register(`workExperience.${index}.position`)} className="mt-1" />
-                {errors.workExperience?.[index]?.position && (
-                  <p className="mt-1 text-xs text-destructive">
-                    {errors.workExperience[index].position?.message}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Начало *</Label>
-                <Input
-                  type="date"
-                  {...register(`workExperience.${index}.startDate`)}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label>Конец</Label>
-                <Input
-                  type="date"
-                  {...register(`workExperience.${index}.endDate`)}
-                  className="mt-1"
-                  disabled={watchWorkExperience[index]?.current}
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id={`current-work-${index}`}
-                {...register(`workExperience.${index}.current`)}
-                className="rounded"
-              />
-              <Label htmlFor={`current-work-${index}`}>Работаю сейчас</Label>
-            </div>
-            <div>
-              <Label>Описание</Label>
-              <textarea
-                {...register(`workExperience.${index}.description`)}
-                rows={2}
-                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-            </div>
-          </div>
-        ))}
-      </section>
-
-      {/* Education */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-card-foreground">Образование</h2>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              appendEdu({
-                institution: '',
-                degree: '',
-                field: '',
-                startDate: '',
-                endDate: '',
-                current: false,
-              })
-            }
-          >
-            + Добавить
-          </Button>
-        </div>
-
-        {eduFields.map((field, index) => (
-          <div key={field.id} className="space-y-3 rounded-xl border border-border p-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-foreground">Образование {index + 1}</p>
-              <button
-                type="button"
-                onClick={() => removeEdu(index)}
-                className="text-xs text-red-500 hover:text-red-700"
-              >
-                Удалить
-              </button>
-            </div>
-            <div>
-              <Label>Учебное заведение *</Label>
-              <Input {...register(`education.${index}.institution`)} className="mt-1" />
-              {errors.education?.[index]?.institution && (
-                <p className="mt-1 text-xs text-destructive">
-                  {errors.education[index].institution?.message}
-                </p>
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      {/* Секция: Личные данные */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Личные данные</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="firstName">Имя *</Label>
+              <Input id="firstName" {...register('firstName')} />
+              {errors.firstName && (
+                <p className="text-sm text-destructive">{errors.firstName.message}</p>
               )}
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Степень *</Label>
-                <Input
-                  {...register(`education.${index}.degree`)}
-                  placeholder="Бакалавр"
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label>Специальность *</Label>
-                <Input
-                  {...register(`education.${index}.field`)}
-                  placeholder="Информатика"
-                  className="mt-1"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Начало *</Label>
-                <Input type="date" {...register(`education.${index}.startDate`)} className="mt-1" />
-              </div>
-              <div>
-                <Label>Конец</Label>
-                <Input type="date" {...register(`education.${index}.endDate`)} className="mt-1" />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id={`current-edu-${index}`}
-                {...register(`education.${index}.current`)}
-                className="rounded"
-              />
-              <Label htmlFor={`current-edu-${index}`}>Учусь сейчас</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="lastName">Фамилия *</Label>
+              <Input id="lastName" {...register('lastName')} />
+              {errors.lastName && (
+                <p className="text-sm text-destructive">{errors.lastName.message}</p>
+              )}
             </div>
           </div>
-        ))}
-      </section>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="country">Страна *</Label>
+              <Input id="country" {...register('country')} placeholder="RU" />
+              {errors.country && (
+                <p className="text-sm text-destructive">{errors.country.message}</p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="city">Город</Label>
+              <Input id="city" {...register('city')} placeholder="Москва" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Секция: Пожелания */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Пожелания</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="title">Желаемая должность *</Label>
+            <Input id="title" {...register('title')} placeholder="Senior Frontend Developer" />
+            {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="workFormat">Формат работы *</Label>
+              <Controller
+                control={control}
+                name="workFormat"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="workFormat" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(Object.keys(RESUME_WORK_FORMAT_LABELS) as ResumeWorkFormatEnum[]).map(
+                        (fmt) => (
+                          <SelectItem key={fmt} value={fmt}>
+                            {RESUME_WORK_FORMAT_LABELS[fmt]}
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="employmentType">Тип занятости *</Label>
+              <Controller
+                control={control}
+                name="employmentType"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="employmentType" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(Object.keys(RESUME_EMPLOYMENT_TYPE_LABELS) as EmploymentTypeEnum[]).map(
+                        (t) => (
+                          <SelectItem key={t} value={t}>
+                            {RESUME_EMPLOYMENT_TYPE_LABELS[t]}
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="desiredSalary">Желаемая зарплата</Label>
+              <Input id="desiredSalary" type="number" {...register('desiredSalary')} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="currency">Валюта</Label>
+              <Controller
+                control={control}
+                name="currency"
+                render={({ field }) => (
+                  <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                    <SelectTrigger id="currency" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {['USD', 'EUR', 'RUB', 'GBP'].map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {c}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="experienceYears">Опыт (лет)</Label>
+              <Input id="experienceYears" type="number" {...register('experienceYears')} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Секция: О себе */}
+      <Card>
+        <CardHeader>
+          <CardTitle>О себе</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="about">О себе</Label>
+            <Textarea
+              id="about"
+              {...register('about')}
+              rows={4}
+              placeholder="Кратко о себе, ключевые навыки и достижения..."
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="skills">Навыки (через запятую)</Label>
+            <Input id="skills" {...register('skills')} placeholder="React, TypeScript, Node.js" />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Секция: Опыт работы */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Опыт работы</CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                appendWork({
+                  company: '',
+                  position: '',
+                  startDate: '',
+                  endDate: '',
+                  current: false,
+                  description: '',
+                })
+              }
+            >
+              + Добавить
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {workFields.map((field, index) => (
+            <Card key={field.id}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm">Место работы {index + 1}</CardTitle>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeWork(index)}
+                    aria-label="Удалить"
+                  >
+                    <Trash2 className="size-4 text-destructive" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label>Компания *</Label>
+                    <Input {...register(`workExperience.${index}.company`)} />
+                    {errors.workExperience?.[index]?.company && (
+                      <p className="text-sm text-destructive">
+                        {errors.workExperience[index].company?.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Должность *</Label>
+                    <Input {...register(`workExperience.${index}.position`)} />
+                    {errors.workExperience?.[index]?.position && (
+                      <p className="text-sm text-destructive">
+                        {errors.workExperience[index].position?.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label>Начало *</Label>
+                    <Input type="date" {...register(`workExperience.${index}.startDate`)} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Конец</Label>
+                    <Input
+                      type="date"
+                      {...register(`workExperience.${index}.endDate`)}
+                      disabled={watchWorkExperience[index]?.current}
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id={`current-work-${index}`}
+                    {...register(`workExperience.${index}.current`)}
+                    className="rounded"
+                  />
+                  <Label htmlFor={`current-work-${index}`}>Работаю сейчас</Label>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Описание</Label>
+                  <Textarea {...register(`workExperience.${index}.description`)} rows={2} />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Секция: Образование */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Образование</CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                appendEdu({
+                  institution: '',
+                  degree: '',
+                  field: '',
+                  startDate: '',
+                  endDate: '',
+                  current: false,
+                })
+              }
+            >
+              + Добавить
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {eduFields.map((field, index) => (
+            <Card key={field.id}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm">Образование {index + 1}</CardTitle>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeEdu(index)}
+                    aria-label="Удалить"
+                  >
+                    <Trash2 className="size-4 text-destructive" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-1.5">
+                  <Label>Учебное заведение *</Label>
+                  <Input {...register(`education.${index}.institution`)} />
+                  {errors.education?.[index]?.institution && (
+                    <p className="text-sm text-destructive">
+                      {errors.education[index].institution?.message}
+                    </p>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label>Степень *</Label>
+                    <Input {...register(`education.${index}.degree`)} placeholder="Бакалавр" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Специальность *</Label>
+                    <Input {...register(`education.${index}.field`)} placeholder="Информатика" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label>Начало *</Label>
+                    <Input type="date" {...register(`education.${index}.startDate`)} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Конец</Label>
+                    <Input type="date" {...register(`education.${index}.endDate`)} />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id={`current-edu-${index}`}
+                    {...register(`education.${index}.current`)}
+                    className="rounded"
+                  />
+                  <Label htmlFor={`current-edu-${index}`}>Учусь сейчас</Label>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Секция: Контакты */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Контакты</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="contactTelegram">Telegram</Label>
+              <Input
+                id="contactTelegram"
+                {...register('contactTelegram')}
+                placeholder="@username"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="contactEmail">Email</Label>
+              <Input id="contactEmail" type="email" {...register('contactEmail')} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="contactPhone">Телефон</Label>
+              <Input id="contactPhone" {...register('contactPhone')} placeholder="+7..." />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {!mainButtonActive && (
         <Button type="submit" disabled={isLoading} className="w-full">

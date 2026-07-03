@@ -1,17 +1,34 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { EmailRegisterForm } from '@/components/auth/EmailRegisterForm'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card'
 
 export default function RegisterPage() {
   return (
-    <div className="mx-auto mt-16 max-w-md px-4">
-      <h1 className="mb-8 text-center text-2xl font-bold">Создать аккаунт</h1>
-      <EmailRegisterForm />
-      <p className="mt-6 text-center text-sm text-muted-foreground">
-        Уже есть аккаунт?{' '}
-        <Link href="/login" className="text-primary hover:underline">
-          Войти
-        </Link>
-      </p>
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="items-center text-center">
+          <Image src="/logo-vertical.png" alt="GramJob" width={80} height={80} priority />
+          <CardTitle className="mt-4 text-2xl">Регистрация</CardTitle>
+          <CardDescription>Создайте аккаунт, чтобы начать</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <EmailRegisterForm />
+        </CardContent>
+        <CardFooter className="justify-center text-sm text-muted-foreground">
+          Уже есть аккаунт?{' '}
+          <Link href="/login" className="ml-1 underline hover:no-underline">
+            Войти
+          </Link>
+        </CardFooter>
+      </Card>
     </div>
   )
 }

@@ -3,12 +3,18 @@
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
+import { FileText } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
 import { hapticNotify } from '@/lib/telegram'
 import { ResumeStatusBadge } from '@/components/resume/ResumeStatusBadge'
 import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
+import { EmptyState } from '@/components/shared/EmptyState'
+import { ErrorState } from '@/components/shared/ErrorState'
+import { PaginationBar } from '@/components/shared/PaginationBar'
 import {
   canPublishResume,
   canEditResume,
@@ -49,32 +55,33 @@ export const MyResumesClient = observer(function MyResumesClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Мои резюме</h1>
-        <Link
-          href="/dashboard/resumes/new"
-          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          + Создать резюме
-        </Link>
-      </div>
+      <PageHeader
+        title="Мои резюме"
+        description={`Лимит откликов в день (план ${plan}): ${applyLimit}`}
+        actions={
+          <Button asChild>
+            <Link href="/dashboard/resumes/new">+ Создать резюме</Link>
+          </Button>
+        }
+      />
 
-      <div className="rounded-lg bg-muted px-4 py-3 text-sm text-muted-foreground">
-        Лимит откликов в день (план {plan}): {applyLimit}
-      </div>
+      {store.isLoading && <CardListSkeleton count={6} />}
 
-      {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
-
-      {store.error && (
-        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {store.error}
-        </p>
+      {store.error && !store.isLoading && (
+        <ErrorState message={store.error} onRetry={() => void store.fetchMyResumes()} />
       )}
 
       {!store.isLoading && store.myResumes.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-border py-16 text-center">
-          <p className="text-sm text-muted-foreground">У вас пока нет резюме.</p>
-        </div>
+        <EmptyState
+          icon={FileText}
+          title="Нет резюме"
+          description="Создайте резюме, чтобы откликаться на вакансии"
+          action={
+            <Button asChild>
+              <Link href="/dashboard/resumes/new">Создать резюме</Link>
+            </Button>
+          }
+        />
       )}
 
       <div className="space-y-3">
@@ -95,7 +102,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
               <div className="flex shrink-0 flex-wrap gap-2">
                 <Link
                   href={`/dashboard/resumes/${r.documentId}/analytics`}
-                  className="text-sm text-indigo-600 hover:underline"
+                  className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
                 >
                   Аналитика
                 </Link>
@@ -153,29 +160,11 @@ export const MyResumesClient = observer(function MyResumesClient() {
         ))}
       </div>
 
-      {store.pageCount > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page <= 1}
-            onClick={() => handlePageChange(store.page - 1)}
-          >
-            ← Назад
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {store.page} / {store.pageCount}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page >= store.pageCount}
-            onClick={() => handlePageChange(store.page + 1)}
-          >
-            Вперёд →
-          </Button>
-        </div>
-      )}
+      <PaginationBar
+        page={store.page}
+        pageCount={store.pageCount}
+        onPageChange={handlePageChange}
+      />
     </div>
   )
 })

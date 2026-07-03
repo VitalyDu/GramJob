@@ -1,12 +1,21 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
 import { WORK_FORMAT_LABELS, EMPLOYMENT_TYPE_LABELS, SENIORITY_LABELS } from '@/lib/vacancy-utils'
 import type {
   VacancyCreateInput,
@@ -70,6 +79,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -150,240 +160,336 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
     void onSubmit(input)
   }
 
+  const isEditMode = defaultValues !== undefined
+  const submitLabel = isEditMode ? 'Сохранить и отправить на модерацию' : 'Отправить на модерацию'
+
   const mainButtonActive = useTelegramMainButton({
-    text: isLoading ? 'Сохранение...' : 'Сохранить',
+    text: isLoading ? 'Сохранение...' : submitLabel,
     onClick: () => void handleSubmit(handleFormSubmit)(),
     disabled: !!isLoading,
   })
 
-  const textareaClass =
-    'w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring'
-
-  const selectClass =
-    'w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring'
-
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
-      {/* Название */}
-      <div className="space-y-1">
-        <Label htmlFor="title">Название вакансии *</Label>
-        <Input id="title" {...register('title')} placeholder="Frontend Developer" />
-        {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
-      </div>
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      {/* Секция: Основное */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Основное</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="title">Название вакансии *</Label>
+            <Input id="title" {...register('title')} placeholder="Frontend Developer" />
+            {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
+          </div>
 
-      {/* Компания */}
-      <div className="space-y-1">
-        <Label htmlFor="companyId">Компания</Label>
-        <select id="companyId" {...register('companyId')} className={selectClass}>
-          <option value="">Без компании (фриланс)</option>
-          {myCompanies
-            .filter((c) => c.status === 'published')
-            .map((c) => (
-              <option key={c.documentId} value={c.documentId}>
-                {c.name}
-              </option>
-            ))}
-        </select>
-      </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="companyId">Компания</Label>
+            <Controller
+              control={control}
+              name="companyId"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="companyId" className="w-full">
+                    <SelectValue placeholder="Без компании (фриланс)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Без компании (фриланс)</SelectItem>
+                    {myCompanies
+                      .filter((c) => c.status === 'published')
+                      .map((c) => (
+                        <SelectItem key={c.documentId} value={c.documentId}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
 
-      {/* Отрасль */}
-      <div className="space-y-1">
-        <Label htmlFor="industryId">Отрасль *</Label>
-        <select id="industryId" {...register('industryId')} className={selectClass}>
-          <option value="">Выберите отрасль</option>
-          {industries.map((i) => (
-            <option key={i.documentId} value={i.documentId}>
-              {i.name.ru}
-            </option>
-          ))}
-        </select>
-        {errors.industryId && (
-          <p className="text-xs text-destructive">{errors.industryId.message}</p>
-        )}
-      </div>
-
-      {/* Специализация */}
-      <div className="space-y-1">
-        <Label htmlFor="specializationId">Специализация *</Label>
-        <select
-          id="specializationId"
-          {...register('specializationId')}
-          className={selectClass}
-          disabled={!selectedIndustry}
-        >
-          <option value="">Выберите специализацию</option>
-          {specializations.map((s) => (
-            <option key={s.documentId} value={s.documentId}>
-              {s.name.ru}
-            </option>
-          ))}
-        </select>
-        {errors.specializationId && (
-          <p className="text-xs text-destructive">{errors.specializationId.message}</p>
-        )}
-      </div>
-
-      {/* Формат / Занятость / Уровень */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="space-y-1">
-          <Label htmlFor="workFormat">Формат *</Label>
-          <select id="workFormat" {...register('workFormat')} className={selectClass}>
-            {(Object.entries(WORK_FORMAT_LABELS) as [WorkFormatEnum, string][]).map(([v, l]) => (
-              <option key={v} value={v}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="employmentType">Занятость *</Label>
-          <select id="employmentType" {...register('employmentType')} className={selectClass}>
-            {(Object.entries(EMPLOYMENT_TYPE_LABELS) as [EmploymentTypeEnum, string][]).map(
-              ([v, l]) => (
-                <option key={v} value={v}>
-                  {l}
-                </option>
-              )
+          <div className="space-y-1.5">
+            <Label htmlFor="industryId">Отрасль *</Label>
+            <Controller
+              control={control}
+              name="industryId"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="industryId" className="w-full">
+                    <SelectValue placeholder="Выберите отрасль" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {industries.map((i) => (
+                      <SelectItem key={i.documentId} value={i.documentId}>
+                        {i.name.ru}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.industryId && (
+              <p className="text-sm text-destructive">{errors.industryId.message}</p>
             )}
-          </select>
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="seniority">Уровень *</Label>
-          <select id="seniority" {...register('seniority')} className={selectClass}>
-            {(Object.entries(SENIORITY_LABELS) as [SeniorityEnum, string][]).map(([v, l]) => (
-              <option key={v} value={v}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+          </div>
 
-      {/* Страна / Город */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="country">Страна *</Label>
-          <Input id="country" {...register('country')} placeholder="RU" />
-          {errors.country && <p className="text-xs text-destructive">{errors.country.message}</p>}
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="city">Город</Label>
-          <Input id="city" {...register('city')} placeholder="Москва" />
-        </div>
-      </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="specializationId">Специализация *</Label>
+            <Controller
+              control={control}
+              name="specializationId"
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={!selectedIndustry}
+                >
+                  <SelectTrigger id="specializationId" className="w-full">
+                    <SelectValue placeholder="Выберите специализацию" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {specializations.map((s) => (
+                      <SelectItem key={s.documentId} value={s.documentId}>
+                        {s.name.ru}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.specializationId && (
+              <p className="text-sm text-destructive">{errors.specializationId.message}</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Зарплата */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="salaryFrom">Зарплата от</Label>
-          <Input id="salaryFrom" type="number" {...register('salaryFrom')} placeholder="100000" />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="salaryTo">До</Label>
-          <Input id="salaryTo" type="number" {...register('salaryTo')} placeholder="200000" />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="salaryCurrency">Валюта</Label>
-          <select id="salaryCurrency" {...register('salaryCurrency')} className={selectClass}>
-            <option value="RUB">₽ RUB</option>
-            <option value="USD">$ USD</option>
-            <option value="EUR">€ EUR</option>
-            <option value="GBP">£ GBP</option>
-          </select>
-        </div>
-      </div>
+      {/* Секция: Условия */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Условия</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="employmentType">Занятость *</Label>
+              <Controller
+                control={control}
+                name="employmentType"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="employmentType" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(
+                        Object.entries(EMPLOYMENT_TYPE_LABELS) as [EmploymentTypeEnum, string][]
+                      ).map(([v, l]) => (
+                        <SelectItem key={v} value={v}>
+                          {l}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="workFormat">Формат *</Label>
+              <Controller
+                control={control}
+                name="workFormat"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="workFormat" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(Object.entries(WORK_FORMAT_LABELS) as [WorkFormatEnum, string][]).map(
+                        ([v, l]) => (
+                          <SelectItem key={v} value={v}>
+                            {l}
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="seniority">Уровень *</Label>
+              <Controller
+                control={control}
+                name="seniority"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="seniority" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(Object.entries(SENIORITY_LABELS) as [SeniorityEnum, string][]).map(
+                        ([v, l]) => (
+                          <SelectItem key={v} value={v}>
+                            {l}
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+          </div>
 
-      {/* Описание */}
-      <div className="space-y-1">
-        <Label htmlFor="description">Описание *</Label>
-        <textarea
-          id="description"
-          {...register('description')}
-          className={textareaClass}
-          rows={4}
-          placeholder="Чем занимается компания, над чем предстоит работать..."
-        />
-        {errors.description && (
-          <p className="text-xs text-destructive">{errors.description.message}</p>
-        )}
-      </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="country">Страна *</Label>
+              <Input id="country" {...register('country')} placeholder="RU" />
+              {errors.country && (
+                <p className="text-sm text-destructive">{errors.country.message}</p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="city">Город</Label>
+              <Input id="city" {...register('city')} placeholder="Москва" />
+            </div>
+          </div>
 
-      {/* Обязанности */}
-      <div className="space-y-1">
-        <Label htmlFor="responsibilities">Обязанности *</Label>
-        <textarea
-          id="responsibilities"
-          {...register('responsibilities')}
-          className={textareaClass}
-          rows={4}
-          placeholder="- Разработка..."
-        />
-        {errors.responsibilities && (
-          <p className="text-xs text-destructive">{errors.responsibilities.message}</p>
-        )}
-      </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="salaryFrom">Зарплата от</Label>
+              <Input
+                id="salaryFrom"
+                type="number"
+                {...register('salaryFrom')}
+                placeholder="100000"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="salaryTo">До</Label>
+              <Input id="salaryTo" type="number" {...register('salaryTo')} placeholder="200000" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="salaryCurrency">Валюта</Label>
+              <Controller
+                control={control}
+                name="salaryCurrency"
+                render={({ field }) => (
+                  <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                    <SelectTrigger id="salaryCurrency" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="RUB">₽ RUB</SelectItem>
+                      <SelectItem value="USD">$ USD</SelectItem>
+                      <SelectItem value="EUR">€ EUR</SelectItem>
+                      <SelectItem value="GBP">£ GBP</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Требования */}
-      <div className="space-y-1">
-        <Label htmlFor="requirements">Требования *</Label>
-        <textarea
-          id="requirements"
-          {...register('requirements')}
-          className={textareaClass}
-          rows={4}
-          placeholder="- Опыт от 3 лет..."
-        />
-        {errors.requirements && (
-          <p className="text-xs text-destructive">{errors.requirements.message}</p>
-        )}
-      </div>
+      {/* Секция: Описание */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Описание</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="description">Описание *</Label>
+            <Textarea
+              id="description"
+              {...register('description')}
+              rows={4}
+              placeholder="Чем занимается компания, над чем предстоит работать..."
+            />
+            {errors.description && (
+              <p className="text-sm text-destructive">{errors.description.message}</p>
+            )}
+          </div>
 
-      {/* Условия */}
-      <div className="space-y-1">
-        <Label htmlFor="conditions">Условия</Label>
-        <textarea
-          id="conditions"
-          {...register('conditions')}
-          className={textareaClass}
-          rows={3}
-          placeholder="- ДМС, удалёнка..."
-        />
-      </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="responsibilities">Обязанности *</Label>
+            <Textarea
+              id="responsibilities"
+              {...register('responsibilities')}
+              rows={4}
+              placeholder="- Разработка..."
+            />
+            {errors.responsibilities && (
+              <p className="text-sm text-destructive">{errors.responsibilities.message}</p>
+            )}
+          </div>
 
-      {/* Навыки */}
-      <div className="space-y-1">
-        <Label htmlFor="skills">Навыки (через запятую)</Label>
-        <Input id="skills" {...register('skills')} placeholder="React, TypeScript, Node.js" />
-      </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="requirements">Требования *</Label>
+            <Textarea
+              id="requirements"
+              {...register('requirements')}
+              rows={4}
+              placeholder="- Опыт от 3 лет..."
+            />
+            {errors.requirements && (
+              <p className="text-sm text-destructive">{errors.requirements.message}</p>
+            )}
+          </div>
 
-      {/* Языки */}
-      <div className="space-y-1">
-        <Label htmlFor="languages">Языки (через запятую)</Label>
-        <Input id="languages" {...register('languages')} placeholder="Русский, English" />
-      </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="conditions">Условия</Label>
+            <Textarea
+              id="conditions"
+              {...register('conditions')}
+              rows={3}
+              placeholder="- ДМС, удалёнка..."
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Опыт / Срочно */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="experienceYears">Опыт (лет)</Label>
-          <Input
-            id="experienceYears"
-            type="number"
-            {...register('experienceYears')}
-            placeholder="3"
-          />
-        </div>
-        <div className="flex items-end pb-1">
-          <label className="flex cursor-pointer items-center gap-2">
-            <input type="checkbox" {...register('urgent')} className="h-4 w-4" />
-            <span className="text-sm text-foreground">🔥 Срочная вакансия</span>
-          </label>
-        </div>
-      </div>
+      {/* Секция: Дополнительно */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Дополнительно</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="skills">Навыки (через запятую)</Label>
+            <Input id="skills" {...register('skills')} placeholder="React, TypeScript, Node.js" />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="languages">Языки (через запятую)</Label>
+            <Input id="languages" {...register('languages')} placeholder="Русский, English" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="experienceYears">Опыт (лет)</Label>
+              <Input
+                id="experienceYears"
+                type="number"
+                {...register('experienceYears')}
+                placeholder="3"
+              />
+            </div>
+            <div className="flex items-end pb-1">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input type="checkbox" {...register('urgent')} className="h-4 w-4" />
+                <span className="text-sm text-foreground">🔥 Срочная вакансия</span>
+              </label>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {!mainButtonActive && (
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Сохранение...' : 'Сохранить'}
+          {isLoading ? 'Сохранение...' : submitLabel}
         </Button>
       )}
     </form>
