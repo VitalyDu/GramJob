@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { SlidersHorizontal } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { CompanyListParams, CompanySizeEnum } from '@/types/api'
 import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
 import { Button } from '@/components/ui/button'
@@ -49,18 +50,20 @@ function countActive(draft: Draft): number {
 }
 
 function FilterFields({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft) => void }) {
+  const { t } = useTranslation()
+
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
-        <Label>Страна</Label>
+        <Label>{t('filters.country')}</Label>
         <CountrySelect
           value={draft.country}
           onChange={(v) => setDraft({ ...draft, country: v })}
-          placeholder="Любая страна"
+          placeholder={t('filters.anyCountry')}
         />
       </div>
       <div className="space-y-1.5">
-        <Label>Размер компании</Label>
+        <Label>{t('filters.companySize')}</Label>
         <Select
           value={draft.companySize || ALL}
           onValueChange={(v) =>
@@ -71,7 +74,7 @@ function FilterFields({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft) 
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>Любой размер</SelectItem>
+            <SelectItem value={ALL}>{t('filters.anySize')}</SelectItem>
             {(Object.entries(COMPANY_SIZE_LABELS) as [CompanySizeEnum, string][]).map(([k, v]) => (
               <SelectItem key={k} value={k}>
                 {v}
@@ -87,6 +90,7 @@ function FilterFields({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft) 
 export function CompanyFilters({ params, onChange }: Props) {
   const [draft, setDraft] = useState<Draft>(draftFromParams(params))
   const [sheetOpen, setSheetOpen] = useState(false)
+  const { t } = useTranslation()
 
   const activeCount = countActive(draftFromParams(params))
 
@@ -112,7 +116,7 @@ export function CompanyFilters({ params, onChange }: Props) {
           <SheetTrigger asChild>
             <Button type="button" variant="outline" className="w-full">
               <SlidersHorizontal className="mr-1.5 h-4 w-4" />
-              Фильтры
+              {t('filters.title')}
               {activeCount > 0 && (
                 <Badge className="ml-1.5 h-5 min-w-5 justify-center px-1">{activeCount}</Badge>
               )}
@@ -120,17 +124,17 @@ export function CompanyFilters({ params, onChange }: Props) {
           </SheetTrigger>
           <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-xl">
             <SheetHeader>
-              <SheetTitle>Фильтры</SheetTitle>
+              <SheetTitle>{t('filters.title')}</SheetTitle>
             </SheetHeader>
             <div className="px-4 pb-2">
               <FilterFields draft={draft} setDraft={setDraft} />
             </div>
             <SheetFooter className="flex-row gap-2">
               <Button variant="outline" className="flex-1" onClick={reset}>
-                Сбросить
+                {t('common.reset')}
               </Button>
               <Button className="flex-1" onClick={() => apply()}>
-                Применить
+                {t('filters.apply')}
               </Button>
             </SheetFooter>
           </SheetContent>
@@ -142,10 +146,10 @@ export function CompanyFilters({ params, onChange }: Props) {
           <FilterFields draft={draft} setDraft={setDraft} />
           <div className="mt-4 flex gap-2">
             <Button size="sm" onClick={() => apply()}>
-              Применить
+              {t('filters.apply')}
             </Button>
             <Button size="sm" variant="ghost" onClick={reset}>
-              Сбросить
+              {t('common.reset')}
             </Button>
           </div>
         </CardContent>

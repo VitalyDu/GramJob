@@ -43,12 +43,12 @@ interface Props {
 
 const ALL = '__all__'
 
-const SORT_OPTIONS = [
-  { value: ALL, label: 'По умолчанию' },
-  { value: 'newest', label: 'Сначала новые' },
-  { value: 'salary_desc', label: 'Зарплата ↓' },
-  { value: 'salary_asc', label: 'Зарплата ↑' },
-  { value: 'relevance', label: 'По релевантности' },
+const SORT_KEYS = [
+  { value: ALL, key: 'filters.sortDefault' },
+  { value: 'newest', key: 'filters.sortNewest' },
+  { value: 'salary_desc', key: 'filters.sortSalaryDesc' },
+  { value: 'salary_asc', key: 'filters.sortSalaryAsc' },
+  { value: 'relevance', key: 'filters.sortRelevance' },
 ] as const
 
 type Draft = {
@@ -101,21 +101,21 @@ function FilterFields({
   setDraft: (d: Draft) => void
   industries: Industry[]
 }) {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const lang = i18n.language === 'en' ? 'en' : 'ru'
 
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
-        <Label>Страна</Label>
+        <Label>{t('filters.country')}</Label>
         <CountrySelect
           value={draft.country}
           onChange={(v) => setDraft({ ...draft, country: v })}
-          placeholder="Любая страна"
+          placeholder={t('filters.anyCountry')}
         />
       </div>
       <div className="space-y-1.5">
-        <Label>Отрасль</Label>
+        <Label>{t('filters.industry')}</Label>
         <Select
           value={draft.industry || ALL}
           onValueChange={(v) =>
@@ -126,7 +126,7 @@ function FilterFields({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>Все отрасли</SelectItem>
+            <SelectItem value={ALL}>{t('filters.allIndustries')}</SelectItem>
             {industries.map((ind) => (
               <SelectItem key={ind.documentId} value={ind.documentId}>
                 {ind.name[lang]}
@@ -136,7 +136,7 @@ function FilterFields({
         </Select>
       </div>
       <div className="space-y-1.5">
-        <Label>Специализация</Label>
+        <Label>{t('filters.specialization')}</Label>
         <Select
           value={draft.specialization || ALL}
           onValueChange={(v) => setDraft({ ...draft, specialization: v === ALL ? '' : v })}
@@ -146,7 +146,7 @@ function FilterFields({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>Все специализации</SelectItem>
+            <SelectItem value={ALL}>{t('filters.allSpecializations')}</SelectItem>
             {(industries.find((i) => i.documentId === draft.industry)?.specializations ?? []).map(
               (spec) => (
                 <SelectItem key={spec.documentId} value={spec.documentId}>
@@ -158,13 +158,13 @@ function FilterFields({
         </Select>
       </div>
       <div className="space-y-1.5">
-        <Label>Зарплата</Label>
+        <Label>{t('filters.salary')}</Label>
         <div className="flex gap-2">
           <Input
             type="number"
             inputMode="numeric"
             min={0}
-            placeholder="От"
+            placeholder={t('filters.from')}
             value={draft.salaryFrom}
             onChange={(e) => setDraft({ ...draft, salaryFrom: e.target.value })}
           />
@@ -172,7 +172,7 @@ function FilterFields({
             type="number"
             inputMode="numeric"
             min={0}
-            placeholder="До"
+            placeholder={t('filters.to')}
             value={draft.salaryTo}
             onChange={(e) => setDraft({ ...draft, salaryTo: e.target.value })}
           />
@@ -185,7 +185,7 @@ function FilterFields({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>Любая валюта</SelectItem>
+            <SelectItem value={ALL}>{t('filters.anyCurrency')}</SelectItem>
             {(['USD', 'EUR', 'RUB', 'GBP'] as SalaryCurrencyEnum[]).map((c) => (
               <SelectItem key={c} value={c}>
                 {c}
@@ -195,9 +195,9 @@ function FilterFields({
         </Select>
       </div>
       <div className="space-y-1.5">
-        <Label>Формат работы</Label>
+        <Label>{t('filters.workFormat')}</Label>
         <MultiSelect
-          label="Все форматы"
+          label={t('filters.allFormats')}
           options={(Object.entries(WORK_FORMAT_LABELS) as [WorkFormatEnum, string][]).map(
             ([value, label]) => ({ value, label })
           )}
@@ -206,9 +206,9 @@ function FilterFields({
         />
       </div>
       <div className="space-y-1.5">
-        <Label>Занятость</Label>
+        <Label>{t('filters.employment')}</Label>
         <MultiSelect
-          label="Все типы"
+          label={t('filters.allTypes')}
           options={(Object.entries(EMPLOYMENT_TYPE_LABELS) as [EmploymentTypeEnum, string][]).map(
             ([value, label]) => ({ value, label })
           )}
@@ -217,9 +217,9 @@ function FilterFields({
         />
       </div>
       <div className="space-y-1.5">
-        <Label>Уровень</Label>
+        <Label>{t('filters.seniority')}</Label>
         <MultiSelect
-          label="Все уровни"
+          label={t('filters.allLevels')}
           options={(Object.entries(SENIORITY_LABELS) as [SeniorityEnum, string][]).map(
             ([value, label]) => ({ value, label })
           )}
@@ -228,7 +228,7 @@ function FilterFields({
         />
       </div>
       <div className="space-y-1.5">
-        <Label>Сортировка</Label>
+        <Label>{t('filters.sort')}</Label>
         <Select
           value={draft.sort || ALL}
           onValueChange={(v) => setDraft({ ...draft, sort: v === ALL ? '' : v })}
@@ -237,9 +237,9 @@ function FilterFields({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {SORT_OPTIONS.map(({ value, label }) => (
+            {SORT_KEYS.map(({ value, key }) => (
               <SelectItem key={value} value={value}>
-                {label}
+                {t(key)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -253,6 +253,7 @@ export function VacancyFilters({ params, onChange }: Props) {
   const [draft, setDraft] = useState<Draft>(draftFromParams(params))
   const [sheetOpen, setSheetOpen] = useState(false)
   const [industries, setIndustries] = useState<Industry[]>([])
+  const { t } = useTranslation()
 
   useEffect(() => {
     void api
@@ -295,7 +296,7 @@ export function VacancyFilters({ params, onChange }: Props) {
           <SheetTrigger asChild>
             <Button type="button" variant="outline" className="w-full">
               <SlidersHorizontal className="mr-1.5 h-4 w-4" />
-              Фильтры
+              {t('filters.title')}
               {activeCount > 0 && (
                 <Badge className="ml-1.5 h-5 min-w-5 justify-center px-1">{activeCount}</Badge>
               )}
@@ -303,17 +304,17 @@ export function VacancyFilters({ params, onChange }: Props) {
           </SheetTrigger>
           <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-xl">
             <SheetHeader>
-              <SheetTitle>Фильтры</SheetTitle>
+              <SheetTitle>{t('filters.title')}</SheetTitle>
             </SheetHeader>
             <div className="px-4 pb-2">
               <FilterFields draft={draft} setDraft={setDraft} industries={industries} />
             </div>
             <SheetFooter className="flex-row gap-2">
               <Button variant="outline" className="flex-1" onClick={reset}>
-                Сбросить
+                {t('common.reset')}
               </Button>
               <Button className="flex-1" onClick={() => apply()}>
-                Применить
+                {t('filters.apply')}
               </Button>
             </SheetFooter>
           </SheetContent>
@@ -326,10 +327,10 @@ export function VacancyFilters({ params, onChange }: Props) {
           <FilterFields draft={draft} setDraft={setDraft} industries={industries} />
           <div className="mt-4 flex gap-2">
             <Button size="sm" onClick={() => apply()}>
-              Применить
+              {t('filters.apply')}
             </Button>
             <Button size="sm" variant="ghost" onClick={reset}>
-              Сбросить
+              {t('common.reset')}
             </Button>
           </div>
         </CardContent>

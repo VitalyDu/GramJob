@@ -33,7 +33,8 @@
     "error": "Something went wrong",
     "save": "Save",
     "cancel": "Cancel",
-    "back": "Back"
+    "back": "Back",
+    "reset": "Reset"
   },
   "home": {
     "tagline": "International job board in Telegram",
@@ -76,6 +77,37 @@
       "expired": "Publication expired. Resubmit to return it to search.",
       "archived": "Archived — not shown in search."
     }
+  },
+  "notifications": {
+    "ariaLabel": "Notifications"
+  },
+  "filters": {
+    "title": "Filters",
+    "apply": "Apply",
+    "country": "Country",
+    "anyCountry": "Any country",
+    "industry": "Industry",
+    "allIndustries": "All industries",
+    "specialization": "Specialization",
+    "allSpecializations": "All specializations",
+    "salary": "Salary",
+    "from": "From",
+    "to": "To",
+    "anyCurrency": "Any currency",
+    "workFormat": "Work format",
+    "allFormats": "All formats",
+    "employment": "Employment",
+    "allTypes": "All types",
+    "seniority": "Seniority",
+    "allLevels": "All levels",
+    "sort": "Sort",
+    "sortDefault": "Default",
+    "sortNewest": "Newest first",
+    "sortSalaryDesc": "Salary ↓",
+    "sortSalaryAsc": "Salary ↑",
+    "sortRelevance": "By relevance",
+    "companySize": "Company size",
+    "anySize": "Any size"
   },
   "enums": {
     "workFormat": {

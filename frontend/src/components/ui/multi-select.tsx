@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -28,6 +29,7 @@ export function MultiSelect<T extends string>({
   className,
 }: MultiSelectProps<T>) {
   const [open, setOpen] = useState(false)
+  const { t } = useTranslation()
 
   const toggle = (v: T) => {
     if (value.includes(v)) {
@@ -69,7 +71,7 @@ export function MultiSelect<T extends string>({
             onClick={() => onChange([])}
             className="mb-1 w-full rounded px-2 py-1 text-left text-sm text-muted-foreground hover:bg-accent"
           >
-            Сбросить
+            {t('common.reset')}
           </button>
         )}
         {options.map((opt) => (
