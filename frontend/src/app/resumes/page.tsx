@@ -6,9 +6,5 @@ export const metadata = {
 }
 
 export default function ResumesPage() {
-  return (
-    <div className="container px-4 py-8">
-      <ResumesClient />
-    </div>
-  )
+  return <ResumesClient />
 }

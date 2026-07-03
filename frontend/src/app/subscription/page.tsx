@@ -5,9 +5,5 @@ export const metadata = {
 }
 
 export default function SubscriptionPage() {
-  return (
-    <div className="container px-4 py-8">
-      <SubscriptionClient />
-    </div>
-  )
+  return <SubscriptionClient />
 }

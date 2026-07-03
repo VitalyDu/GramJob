@@ -30,9 +30,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function VacancyPage({ params }: Props) {
   const { id } = await params
-  return (
-    <div className="container px-4 py-8">
-      <VacancyDetailClient id={id} />
-    </div>
-  )
+  return <VacancyDetailClient id={id} />
 }

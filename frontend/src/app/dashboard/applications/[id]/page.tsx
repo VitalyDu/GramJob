@@ -6,9 +6,5 @@ export default async function ApplicationDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  return (
-    <div className="container px-4 py-8">
-      <ApplicationDetailClient documentId={id} />
-    </div>
-  )
+  return <ApplicationDetailClient documentId={id} />
 }

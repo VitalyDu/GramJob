@@ -2,7 +2,7 @@ import { CreateVacancyClient } from './CreateVacancyClient'
 
 export default function CreateVacancyPage() {
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-8">
+    <div className="mx-auto w-full max-w-2xl">
       <CreateVacancyClient />
     </div>
   )

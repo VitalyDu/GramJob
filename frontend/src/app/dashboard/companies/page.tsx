@@ -6,9 +6,5 @@ export const metadata: Metadata = {
 }
 
 export default function MyCompaniesPage() {
-  return (
-    <div className="container px-4 py-8">
-      <MyCompaniesClient />
-    </div>
-  )
+  return <MyCompaniesClient />
 }

@@ -6,9 +6,5 @@ interface Props {
 
 export default async function ResumeDetailPage({ params }: Props) {
   const { id } = await params
-  return (
-    <div className="container px-4 py-8">
-      <ResumeDetailClient id={id} />
-    </div>
-  )
+  return <ResumeDetailClient id={id} />
 }
