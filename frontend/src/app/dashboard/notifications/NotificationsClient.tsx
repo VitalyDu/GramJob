@@ -2,8 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import { Bell } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
+import { EmptyState } from '@/components/shared/EmptyState'
+import { ErrorState } from '@/components/shared/ErrorState'
+import { PaginationBar } from '@/components/shared/PaginationBar'
 import type { NotificationType } from '@/types/api'
 
 const TYPE_ICONS: Partial<Record<NotificationType, string>> = {
@@ -25,15 +32,19 @@ const TYPE_ICONS: Partial<Record<NotificationType, string>> = {
   moderation_rejected: '❌',
 }
 
-const FILTER_TABS = [
-  { label: 'Все', value: undefined },
-  { label: 'Непрочитанные', value: false },
-  { label: 'Прочитанные', value: true },
-] as const
+type TabValue = 'all' | 'unread' | 'read'
+
+const FILTER_TABS: { label: string; value: TabValue; isRead: boolean | undefined }[] = [
+  { label: 'Все', value: 'all', isRead: undefined },
+  { label: 'Непрочитанные', value: 'unread', isRead: false },
+  { label: 'Прочитанные', value: 'read', isRead: true },
+]
 
 export const NotificationsClient = observer(function NotificationsClient() {
   const { notification: store } = useStores()
-  const [isReadFilter, setIsReadFilter] = useState<boolean | undefined>(undefined)
+  const [activeTab, setActiveTab] = useState<TabValue>('all')
+
+  const isReadFilter = FILTER_TABS.find((t) => t.value === activeTab)?.isRead
 
   useEffect(() => {
     void store.fetchNotifications(isReadFilter)
@@ -53,111 +64,92 @@ export const NotificationsClient = observer(function NotificationsClient() {
     void store.fetchNotifications(isReadFilter, page)
   }
 
-  const handleFilterChange = (value: boolean | undefined) => {
-    setIsReadFilter(value)
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as TabValue)
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Уведомления</h1>
-        {store.unreadCount > 0 && (
-          <Button variant="outline" size="sm" onClick={handleMarkAllRead}>
-            Прочитать все ({store.unreadCount})
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Уведомления"
+        actions={
+          store.unreadCount > 0 ? (
+            <Button variant="outline" size="sm" onClick={handleMarkAllRead}>
+              Прочитать все ({store.unreadCount})
+            </Button>
+          ) : undefined
+        }
+      />
 
-      <div className="flex flex-wrap gap-2">
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList>
+          {FILTER_TABS.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value}>
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
         {FILTER_TABS.map((tab) => (
-          <button
-            key={tab.label}
-            onClick={() => handleFilterChange(tab.value)}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
-              isReadFilter === tab.value
-                ? 'bg-indigo-600 text-white'
-                : 'border border-border text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+          <TabsContent key={tab.value} value={tab.value}>
+            {store.isLoading && <CardListSkeleton count={6} />}
 
-      {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
+            {store.error && !store.isLoading && (
+              <ErrorState
+                message={store.error}
+                onRetry={() => void store.fetchNotifications(isReadFilter)}
+              />
+            )}
 
-      {store.error && (
-        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {store.error}
-        </p>
-      )}
+            {!store.isLoading && store.notifications.length === 0 && !store.error && (
+              <EmptyState icon={Bell} title="Нет уведомлений" />
+            )}
 
-      {!store.isLoading && store.notifications.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-border py-16 text-center">
-          <p className="text-sm text-muted-foreground">Нет уведомлений.</p>
-        </div>
-      )}
-
-      <div className="space-y-2">
-        {store.notifications.map((n) => (
-          <div
-            key={n.documentId}
-            className={`relative rounded-xl border p-4 transition ${
-              n.isRead ? 'border-border bg-card' : 'border-indigo-200 bg-indigo-50'
-            }`}
-          >
-            <div className="flex items-start gap-3">
-              <span className="mt-0.5 text-xl" aria-hidden>
-                {TYPE_ICONS[n.type] ?? '📢'}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm text-card-foreground">{n.title}</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">{n.body}</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {new Date(n.createdAt).toLocaleString('ru-RU', {
-                    day: 'numeric',
-                    month: 'short',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </p>
-              </div>
-              {!n.isRead && (
-                <button
-                  onClick={() => handleMarkRead(n.documentId)}
-                  className="shrink-0 text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+            <div className="space-y-2">
+              {store.notifications.map((n) => (
+                <div
+                  key={n.documentId}
+                  className={`relative rounded-xl border p-4 transition ${
+                    n.isRead ? 'border-border bg-card' : 'border-border bg-accent/40'
+                  }`}
                 >
-                  Прочитано
-                </button>
-              )}
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 text-xl" aria-hidden>
+                      {TYPE_ICONS[n.type] ?? '📢'}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-card-foreground">{n.title}</p>
+                      <p className="mt-0.5 text-sm text-muted-foreground">{n.body}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {new Date(n.createdAt).toLocaleString('ru-RU', {
+                          day: 'numeric',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </div>
+                    {!n.isRead && (
+                      <button
+                        onClick={() => handleMarkRead(n.documentId)}
+                        className="shrink-0 text-xs font-medium text-primary hover:underline"
+                      >
+                        Прочитано
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        ))}
-      </div>
 
-      {store.pageCount > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page <= 1}
-            onClick={() => handlePageChange(store.page - 1)}
-          >
-            ← Назад
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {store.page} / {store.pageCount}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page >= store.pageCount}
-            onClick={() => handlePageChange(store.page + 1)}
-          >
-            Вперёд →
-          </Button>
-        </div>
-      )}
+            <PaginationBar
+              page={store.page}
+              pageCount={store.pageCount}
+              onPageChange={handlePageChange}
+            />
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   )
 })

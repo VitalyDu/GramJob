@@ -2,8 +2,22 @@
 
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
+import { ShieldOff } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { Button } from '@/components/ui/button'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
+import { EmptyState } from '@/components/shared/EmptyState'
+import { ErrorState } from '@/components/shared/ErrorState'
+import { PaginationBar } from '@/components/shared/PaginationBar'
 
 const TARGET_TYPE_LABELS = { employer: 'Работодатель', candidate: 'Кандидат' }
 
@@ -25,76 +39,96 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Заблокированные пользователи</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Контент заблокированных пользователей не отображается в результатах поиска.
-        </p>
-      </div>
+      <PageHeader
+        title="Заблокированные"
+        description="Контент заблокированных пользователей не отображается в результатах поиска"
+      />
 
-      {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
+      {store.isLoading && <CardListSkeleton count={6} />}
 
-      {store.error && (
-        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {store.error}
-        </p>
+      {store.error && !store.isLoading && (
+        <ErrorState message={store.error} onRetry={() => void store.fetchBlocks()} />
       )}
 
       {!store.isLoading && store.blocks.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-border py-16 text-center">
-          <p className="text-sm text-muted-foreground">Нет заблокированных пользователей.</p>
+        <EmptyState
+          icon={ShieldOff}
+          title="Нет заблокированных пользователей"
+          description="Заблокированные пользователи не будут показывать вам свой контент"
+        />
+      )}
+
+      {/* Desktop table */}
+      {store.blocks.length > 0 && (
+        <div className="hidden md:block rounded-xl border border-border overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Пользователь</TableHead>
+                <TableHead>Дата блокировки</TableHead>
+                <TableHead className="text-right">Действие</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {store.blocks.map((b) => (
+                <TableRow key={b.documentId}>
+                  <TableCell className="font-medium">
+                    {TARGET_TYPE_LABELS[b.targetType]} #{b.targetId}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {new Date(b.createdAt).toLocaleDateString('ru')}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleUnblock(b.documentId)}
+                      disabled={store.isLoading}
+                    >
+                      Разблокировать
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
 
-      <div className="space-y-3">
-        {store.blocks.map((b) => (
-          <div
-            key={b.documentId}
-            className="flex items-center justify-between rounded-xl border border-border bg-card p-4"
-          >
-            <div>
-              <p className="font-medium text-card-foreground">
-                {TARGET_TYPE_LABELS[b.targetType]} #{b.targetId}
-              </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Заблокирован {new Date(b.createdAt).toLocaleDateString('ru')}
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleUnblock(b.documentId)}
-              disabled={store.isLoading}
+      {/* Mobile card list */}
+      {store.blocks.length > 0 && (
+        <div className="space-y-3 md:hidden">
+          {store.blocks.map((b) => (
+            <div
+              key={b.documentId}
+              className="flex items-center justify-between rounded-xl border border-border bg-card p-4"
             >
-              Разблокировать
-            </Button>
-          </div>
-        ))}
-      </div>
-
-      {store.pageCount > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page <= 1}
-            onClick={() => handlePageChange(store.page - 1)}
-          >
-            ← Назад
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {store.page} / {store.pageCount}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page >= store.pageCount}
-            onClick={() => handlePageChange(store.page + 1)}
-          >
-            Вперёд →
-          </Button>
+              <div>
+                <p className="font-medium text-card-foreground">
+                  {TARGET_TYPE_LABELS[b.targetType]} #{b.targetId}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Заблокирован {new Date(b.createdAt).toLocaleDateString('ru')}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleUnblock(b.documentId)}
+                disabled={store.isLoading}
+              >
+                Разблокировать
+              </Button>
+            </div>
+          ))}
         </div>
       )}
+
+      <PaginationBar
+        page={store.page}
+        pageCount={store.pageCount}
+        onPageChange={handlePageChange}
+      />
     </div>
   )
 })

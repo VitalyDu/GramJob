@@ -3,8 +3,23 @@
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
+import { Search } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
+import { EmptyState } from '@/components/shared/EmptyState'
+import { ErrorState } from '@/components/shared/ErrorState'
+import { PaginationBar } from '@/components/shared/PaginationBar'
 
 const TYPE_LABELS = { vacancy: 'Вакансии', resume: 'Резюме' }
 
@@ -38,97 +53,131 @@ export const MySavedSearchesClient = observer(function MySavedSearchesClient() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Сохранённые поиски</h1>
+      <PageHeader
+        title="Сохранённые поиски"
+        description="Используйте кнопку «Сохранить поиск» на странице вакансий или резюме"
+      />
 
-      {store.isLoading && <p className="text-sm text-muted-foreground">Загрузка...</p>}
+      {store.isLoading && <CardListSkeleton count={6} />}
 
-      {store.error && (
-        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {store.error}
-        </p>
+      {store.error && !store.isLoading && (
+        <ErrorState message={store.error} onRetry={() => void store.fetchSavedSearches()} />
       )}
 
       {!store.isLoading && store.searches.length === 0 && !store.error && (
-        <div className="rounded-xl border border-dashed border-border py-16 text-center">
-          <p className="text-sm text-muted-foreground">Нет сохранённых поисков.</p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Используйте кнопку «Сохранить поиск» на странице вакансий или резюме.
-          </p>
+        <EmptyState
+          icon={Search}
+          title="Нет сохранённых поисков"
+          description="Используйте кнопку «Сохранить поиск» на странице вакансий или резюме"
+        />
+      )}
+
+      {/* Desktop table */}
+      {store.searches.length > 0 && (
+        <div className="hidden md:block rounded-xl border border-border overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Название</TableHead>
+                <TableHead>Тип</TableHead>
+                <TableHead>Дата создания</TableHead>
+                <TableHead className="text-right">Действия</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {store.searches.map((s) => {
+                const basePath = s.type === 'vacancy' ? '/vacancies' : '/resumes'
+                const qs = filtersToQueryString(s.filters)
+                const href = qs ? `${basePath}?${qs}` : basePath
+
+                return (
+                  <TableRow key={s.documentId}>
+                    <TableCell className="font-medium">{s.name ?? 'Без названия'}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{TYPE_LABELS[s.type]}</Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {new Date(s.createdAt).toLocaleDateString('ru')}
+                      {s.lastNotifiedAt && (
+                        <span className="block text-xs">
+                          уведомление: {new Date(s.lastNotifiedAt).toLocaleDateString('ru')}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button asChild variant="outline" size="sm">
+                          <Link href={href}>Открыть</Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10"
+                          onClick={() => handleRemove(s.documentId)}
+                          disabled={store.isLoading}
+                        >
+                          Удалить
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
         </div>
       )}
 
-      <div className="space-y-3">
-        {store.searches.map((s) => {
-          const basePath = s.type === 'vacancy' ? '/vacancies' : '/resumes'
-          const qs = filtersToQueryString(s.filters)
-          const href = qs ? `${basePath}?${qs}` : basePath
+      {/* Mobile card list */}
+      {store.searches.length > 0 && (
+        <div className="space-y-3 md:hidden">
+          {store.searches.map((s) => {
+            const basePath = s.type === 'vacancy' ? '/vacancies' : '/resumes'
+            const qs = filtersToQueryString(s.filters)
+            const href = qs ? `${basePath}?${qs}` : basePath
 
-          return (
-            <div key={s.documentId} className="rounded-xl border border-border bg-card p-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">
-                      {TYPE_LABELS[s.type]}
-                    </span>
-                    <p className="truncate font-medium text-card-foreground">
-                      {s.name ?? 'Без названия'}
+            return (
+              <div key={s.documentId} className="rounded-xl border border-border bg-card p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">{TYPE_LABELS[s.type]}</Badge>
+                      <p className="truncate font-medium text-card-foreground">
+                        {s.name ?? 'Без названия'}
+                      </p>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Создан {new Date(s.createdAt).toLocaleDateString('ru')}
+                      {s.lastNotifiedAt &&
+                        ` · уведомление ${new Date(s.lastNotifiedAt).toLocaleDateString('ru')}`}
                     </p>
                   </div>
-
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Создан {new Date(s.createdAt).toLocaleDateString('ru')}
-                    {s.lastNotifiedAt &&
-                      ` · последнее уведомление ${new Date(s.lastNotifiedAt).toLocaleDateString('ru')}`}
-                  </p>
-                </div>
-
-                <div className="flex shrink-0 items-center gap-2">
-                  <Link
-                    href={href}
-                    className="rounded-md border border-indigo-200 px-3 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-50"
-                  >
-                    Открыть
-                  </Link>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-destructive hover:bg-destructive/10"
-                    onClick={() => handleRemove(s.documentId)}
-                    disabled={store.isLoading}
-                  >
-                    Удалить
-                  </Button>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={href}>Открыть</Link>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive hover:bg-destructive/10"
+                      onClick={() => handleRemove(s.documentId)}
+                      disabled={store.isLoading}
+                    >
+                      Удалить
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )
-        })}
-      </div>
-
-      {store.pageCount > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page <= 1}
-            onClick={() => handlePageChange(store.page - 1)}
-          >
-            ← Назад
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {store.page} / {store.pageCount}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={store.page >= store.pageCount}
-            onClick={() => handlePageChange(store.page + 1)}
-          >
-            Вперёд →
-          </Button>
+            )
+          })}
         </div>
       )}
+
+      <PaginationBar
+        page={store.page}
+        pageCount={store.pageCount}
+        onPageChange={handlePageChange}
+      />
     </div>
   )
 })
