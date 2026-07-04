@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -31,15 +32,16 @@ import type {
 import { api } from '@/services/api'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
 
-const schema = z.object({
-  title: z.string().min(1, 'Название обязательно'),
+// Static schema for type inference only
+const _baseSchema = z.object({
+  title: z.string().min(1),
   companyId: z.string().optional().default(''),
-  industryId: z.string().min(1, 'Отрасль обязательна'),
-  specializationId: z.string().min(1, 'Специализация обязательна'),
+  industryId: z.string().min(1),
+  specializationId: z.string().min(1),
   workFormat: z.enum(['office', 'remote', 'hybrid']),
   employmentType: z.enum(['full-time', 'part-time', 'contract', 'internship', 'freelance']),
   seniority: z.enum(['intern', 'junior', 'middle', 'senior', 'lead', 'principal']),
-  country: z.string().min(1, 'Страна обязательна'),
+  country: z.string().min(1),
   city: z.string().optional().default(''),
   salaryFrom: z.preprocess(
     (v) => (v === '' || v === undefined ? undefined : Number(v)),
@@ -50,9 +52,9 @@ const schema = z.object({
     z.number().positive().optional()
   ),
   salaryCurrency: z.enum(['USD', 'EUR', 'RUB', 'GBP']).optional(),
-  description: z.string().min(1, 'Описание обязательно'),
-  responsibilities: z.string().min(1, 'Обязанности обязательны'),
-  requirements: z.string().min(1, 'Требования обязательны'),
+  description: z.string().min(1),
+  responsibilities: z.string().min(1),
+  requirements: z.string().min(1),
   conditions: z.string().optional().default(''),
   skills: z.string().optional().default(''),
   languages: z.string().optional().default(''),
@@ -63,7 +65,7 @@ const schema = z.object({
   urgent: z.boolean().default(false),
 })
 
-type FormData = z.infer<typeof schema>
+type FormData = z.infer<typeof _baseSchema>
 
 interface Props {
   myCompanies: Company[]
@@ -73,8 +75,45 @@ interface Props {
 }
 
 export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }: Props) {
+  const { t } = useTranslation()
   const [industries, setIndustries] = useState<Industry[]>([])
   const [specializations, setSpecializations] = useState<Specialization[]>([])
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        title: z.string().min(1, t('forms.vacancy.titleRequired')),
+        companyId: z.string().optional().default(''),
+        industryId: z.string().min(1, t('forms.vacancy.industryRequired')),
+        specializationId: z.string().min(1, t('forms.vacancy.specializationRequired')),
+        workFormat: z.enum(['office', 'remote', 'hybrid']),
+        employmentType: z.enum(['full-time', 'part-time', 'contract', 'internship', 'freelance']),
+        seniority: z.enum(['intern', 'junior', 'middle', 'senior', 'lead', 'principal']),
+        country: z.string().min(1, t('forms.vacancy.countryRequired')),
+        city: z.string().optional().default(''),
+        salaryFrom: z.preprocess(
+          (v) => (v === '' || v === undefined ? undefined : Number(v)),
+          z.number().positive().optional()
+        ),
+        salaryTo: z.preprocess(
+          (v) => (v === '' || v === undefined ? undefined : Number(v)),
+          z.number().positive().optional()
+        ),
+        salaryCurrency: z.enum(['USD', 'EUR', 'RUB', 'GBP']).optional(),
+        description: z.string().min(1, t('forms.vacancy.descriptionRequired')),
+        responsibilities: z.string().min(1, t('forms.vacancy.responsibilitiesRequired')),
+        requirements: z.string().min(1, t('forms.vacancy.requirementsRequired')),
+        conditions: z.string().optional().default(''),
+        skills: z.string().optional().default(''),
+        languages: z.string().optional().default(''),
+        experienceYears: z.preprocess(
+          (v) => (v === '' || v === undefined ? undefined : Number(v)),
+          z.number().int().nonnegative().optional()
+        ),
+        urgent: z.boolean().default(false),
+      }),
+    [t]
+  )
 
   const {
     register,
@@ -94,8 +133,8 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
       seniority: (defaultValues?.seniority as SeniorityEnum) ?? 'middle',
       country: defaultValues?.country ?? 'RU',
       city: defaultValues?.city ?? '',
-      salaryFrom: defaultValues?.salaryFrom,
-      salaryTo: defaultValues?.salaryTo,
+      ...(defaultValues?.salaryFrom !== undefined ? { salaryFrom: defaultValues.salaryFrom } : {}),
+      ...(defaultValues?.salaryTo !== undefined ? { salaryTo: defaultValues.salaryTo } : {}),
       salaryCurrency: (defaultValues?.salaryCurrency as SalaryCurrencyEnum) ?? 'RUB',
       description: defaultValues?.description ?? '',
       responsibilities: defaultValues?.responsibilities ?? '',
@@ -103,7 +142,9 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
       conditions: defaultValues?.conditions ?? '',
       skills: defaultValues?.skills?.join(', ') ?? '',
       languages: defaultValues?.languages?.join(', ') ?? '',
-      experienceYears: defaultValues?.experienceYears,
+      ...(defaultValues?.experienceYears !== undefined
+        ? { experienceYears: defaultValues.experienceYears }
+        : {}),
       urgent: defaultValues?.urgent ?? false,
     },
   })
@@ -162,10 +203,10 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
   }
 
   const isEditMode = defaultValues !== undefined
-  const submitLabel = isEditMode ? 'Сохранить и отправить на модерацию' : 'Отправить на модерацию'
+  const submitLabel = isEditMode ? t('forms.vacancy.submitEdit') : t('forms.vacancy.submitCreate')
 
   const mainButtonActive = useTelegramMainButton({
-    text: isLoading ? 'Сохранение...' : submitLabel,
+    text: isLoading ? t('forms.vacancy.saving') : submitLabel,
     onClick: () => void handleSubmit(handleFormSubmit)(),
     disabled: !!isLoading,
   })
@@ -175,27 +216,27 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
       {/* Секция: Основное */}
       <Card>
         <CardHeader>
-          <CardTitle>Основное</CardTitle>
+          <CardTitle>{t('forms.vacancy.sectionMain')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="title">Название вакансии *</Label>
+            <Label htmlFor="title">{t('forms.vacancy.titleLabel')} *</Label>
             <Input id="title" {...register('title')} placeholder="Frontend Developer" />
             {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="companyId">Компания</Label>
+            <Label htmlFor="companyId">{t('forms.vacancy.companyLabel')}</Label>
             <Controller
               control={control}
               name="companyId"
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger id="companyId" className="w-full">
-                    <SelectValue placeholder="Без компании (фриланс)" />
+                    <SelectValue placeholder={t('forms.vacancy.noCompany')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Без компании (фриланс)</SelectItem>
+                    <SelectItem value="">{t('forms.vacancy.noCompany')}</SelectItem>
                     {myCompanies
                       .filter((c) => c.status === 'published')
                       .map((c) => (
@@ -210,14 +251,14 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="industryId">Отрасль *</Label>
+            <Label htmlFor="industryId">{t('forms.vacancy.industryLabel')} *</Label>
             <Controller
               control={control}
               name="industryId"
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger id="industryId" className="w-full">
-                    <SelectValue placeholder="Выберите отрасль" />
+                    <SelectValue placeholder={t('forms.vacancy.industryPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {industries.map((i) => (
@@ -235,7 +276,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="specializationId">Специализация *</Label>
+            <Label htmlFor="specializationId">{t('forms.vacancy.specializationLabel')} *</Label>
             <Controller
               control={control}
               name="specializationId"
@@ -246,7 +287,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
                   disabled={!selectedIndustry}
                 >
                   <SelectTrigger id="specializationId" className="w-full">
-                    <SelectValue placeholder="Выберите специализацию" />
+                    <SelectValue placeholder={t('forms.vacancy.specializationPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {specializations.map((s) => (
@@ -268,12 +309,12 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
       {/* Секция: Условия */}
       <Card>
         <CardHeader>
-          <CardTitle>Условия</CardTitle>
+          <CardTitle>{t('forms.vacancy.sectionConditions')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
-              <Label htmlFor="employmentType">Занятость *</Label>
+              <Label htmlFor="employmentType">{t('forms.vacancy.employmentLabel')} *</Label>
               <Controller
                 control={control}
                 name="employmentType"
@@ -296,7 +337,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="workFormat">Формат *</Label>
+              <Label htmlFor="workFormat">{t('forms.vacancy.workFormatLabel')} *</Label>
               <Controller
                 control={control}
                 name="workFormat"
@@ -319,7 +360,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="seniority">Уровень *</Label>
+              <Label htmlFor="seniority">{t('forms.vacancy.seniorityLabel')} *</Label>
               <Controller
                 control={control}
                 name="seniority"
@@ -345,7 +386,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Страна *</Label>
+              <Label>{t('forms.vacancy.countryLabel')} *</Label>
               <Controller
                 name="country"
                 control={control}
@@ -358,14 +399,18 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
               )}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="city">Город</Label>
-              <Input id="city" {...register('city')} placeholder="Москва" />
+              <Label htmlFor="city">{t('forms.vacancy.cityLabel')}</Label>
+              <Input
+                id="city"
+                {...register('city')}
+                placeholder={t('forms.vacancy.cityPlaceholder')}
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="salaryFrom">Зарплата от</Label>
+              <Label htmlFor="salaryFrom">{t('forms.vacancy.salaryFromLabel')}</Label>
               <Input
                 id="salaryFrom"
                 type="number"
@@ -374,11 +419,11 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="salaryTo">До</Label>
+              <Label htmlFor="salaryTo">{t('forms.vacancy.salaryToLabel')}</Label>
               <Input id="salaryTo" type="number" {...register('salaryTo')} placeholder="200000" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="salaryCurrency">Валюта</Label>
+              <Label htmlFor="salaryCurrency">{t('forms.vacancy.currencyLabel')}</Label>
               <Controller
                 control={control}
                 name="salaryCurrency"
@@ -404,16 +449,16 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
       {/* Секция: Описание */}
       <Card>
         <CardHeader>
-          <CardTitle>Описание</CardTitle>
+          <CardTitle>{t('forms.vacancy.sectionDescription')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="description">Описание *</Label>
+            <Label htmlFor="description">{t('forms.vacancy.descriptionLabel')} *</Label>
             <Textarea
               id="description"
               {...register('description')}
               rows={4}
-              placeholder="Чем занимается компания, над чем предстоит работать..."
+              placeholder={t('forms.vacancy.descriptionPlaceholder')}
             />
             {errors.description && (
               <p className="text-sm text-destructive">{errors.description.message}</p>
@@ -421,12 +466,12 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="responsibilities">Обязанности *</Label>
+            <Label htmlFor="responsibilities">{t('forms.vacancy.responsibilitiesLabel')} *</Label>
             <Textarea
               id="responsibilities"
               {...register('responsibilities')}
               rows={4}
-              placeholder="- Разработка..."
+              placeholder={t('forms.vacancy.responsibilitiesPlaceholder')}
             />
             {errors.responsibilities && (
               <p className="text-sm text-destructive">{errors.responsibilities.message}</p>
@@ -434,12 +479,12 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="requirements">Требования *</Label>
+            <Label htmlFor="requirements">{t('forms.vacancy.requirementsLabel')} *</Label>
             <Textarea
               id="requirements"
               {...register('requirements')}
               rows={4}
-              placeholder="- Опыт от 3 лет..."
+              placeholder={t('forms.vacancy.requirementsPlaceholder')}
             />
             {errors.requirements && (
               <p className="text-sm text-destructive">{errors.requirements.message}</p>
@@ -447,12 +492,12 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="conditions">Условия</Label>
+            <Label htmlFor="conditions">{t('forms.vacancy.conditionsLabel')}</Label>
             <Textarea
               id="conditions"
               {...register('conditions')}
               rows={3}
-              placeholder="- ДМС, удалёнка..."
+              placeholder={t('forms.vacancy.conditionsPlaceholder')}
             />
           </div>
         </CardContent>
@@ -461,22 +506,26 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
       {/* Секция: Дополнительно */}
       <Card>
         <CardHeader>
-          <CardTitle>Дополнительно</CardTitle>
+          <CardTitle>{t('forms.vacancy.sectionExtra')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="skills">Навыки (через запятую)</Label>
+            <Label htmlFor="skills">{t('forms.vacancy.skillsLabel')}</Label>
             <Input id="skills" {...register('skills')} placeholder="React, TypeScript, Node.js" />
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="languages">Языки (через запятую)</Label>
-            <Input id="languages" {...register('languages')} placeholder="Русский, English" />
+            <Label htmlFor="languages">{t('forms.vacancy.languagesLabel')}</Label>
+            <Input
+              id="languages"
+              {...register('languages')}
+              placeholder={t('forms.vacancy.languagesPlaceholder')}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="experienceYears">Опыт (лет)</Label>
+              <Label htmlFor="experienceYears">{t('forms.vacancy.experienceLabel')}</Label>
               <Input
                 id="experienceYears"
                 type="number"
@@ -487,7 +536,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
             <div className="flex items-end pb-1">
               <label className="flex cursor-pointer items-center gap-2">
                 <input type="checkbox" {...register('urgent')} className="h-4 w-4" />
-                <span className="text-sm text-foreground">🔥 Срочная вакансия</span>
+                <span className="text-sm text-foreground">{t('forms.vacancy.urgentLabel')}</span>
               </label>
             </div>
           </div>
@@ -496,7 +545,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
 
       {!mainButtonActive && (
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Сохранение...' : submitLabel}
+          {isLoading ? t('forms.vacancy.saving') : submitLabel}
         </Button>
       )}
     </form>

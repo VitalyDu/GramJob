@@ -1,9 +1,11 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useFieldArray, useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -21,29 +23,30 @@ import { CountrySelect } from '@/components/ui/country-select'
 import type { ResumeCreateInput, ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
 
-const workExperienceSchema = z.object({
-  company: z.string().min(1, 'Компания обязательна'),
-  position: z.string().min(1, 'Должность обязательна'),
-  startDate: z.string().min(1, 'Дата начала обязательна'),
+// Static schemas for type inference only
+const _baseWorkExperienceSchema = z.object({
+  company: z.string().min(1),
+  position: z.string().min(1),
+  startDate: z.string().min(1),
   endDate: z.string().optional().default(''),
   current: z.boolean().default(false),
   description: z.string().optional().default(''),
 })
 
-const educationSchema = z.object({
-  institution: z.string().min(1, 'Учебное заведение обязательно'),
-  degree: z.string().min(1, 'Степень обязательна'),
-  field: z.string().min(1, 'Специальность обязательна'),
-  startDate: z.string().min(1, 'Дата начала обязательна'),
+const _baseEducationSchema = z.object({
+  institution: z.string().min(1),
+  degree: z.string().min(1),
+  field: z.string().min(1),
+  startDate: z.string().min(1),
   endDate: z.string().optional().default(''),
   current: z.boolean().default(false),
 })
 
-const schema = z.object({
-  title: z.string().min(1, 'Заголовок обязателен'),
-  firstName: z.string().min(1, 'Имя обязательно'),
-  lastName: z.string().min(1, 'Фамилия обязательна'),
-  country: z.string().min(1, 'Страна обязательна'),
+const _baseSchema = z.object({
+  title: z.string().min(1),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  country: z.string().min(1),
   city: z.string().optional().default(''),
   desiredSalary: z.preprocess(
     (v) => (v === '' || v === undefined ? undefined : Number(v)),
@@ -61,11 +64,11 @@ const schema = z.object({
   contactTelegram: z.string().optional().default(''),
   contactEmail: z.string().optional().default(''),
   contactPhone: z.string().optional().default(''),
-  workExperience: z.array(workExperienceSchema).default([]),
-  education: z.array(educationSchema).default([]),
+  workExperience: z.array(_baseWorkExperienceSchema).default([]),
+  education: z.array(_baseEducationSchema).default([]),
 })
 
-type FormData = z.infer<typeof schema>
+type FormData = z.infer<typeof _baseSchema>
 
 interface Props {
   defaultValues?: Partial<ResumeCreateInput>
@@ -74,6 +77,64 @@ interface Props {
 }
 
 export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
+  const { t } = useTranslation()
+
+  const workExperienceSchema = useMemo(
+    () =>
+      z.object({
+        company: z.string().min(1, t('forms.resume.companyRequired')),
+        position: z.string().min(1, t('forms.resume.positionRequired')),
+        startDate: z.string().min(1, t('forms.resume.startDateRequired')),
+        endDate: z.string().optional().default(''),
+        current: z.boolean().default(false),
+        description: z.string().optional().default(''),
+      }),
+    [t]
+  )
+
+  const educationSchema = useMemo(
+    () =>
+      z.object({
+        institution: z.string().min(1, t('forms.resume.institutionRequired')),
+        degree: z.string().min(1, t('forms.resume.degreeRequired')),
+        field: z.string().min(1, t('forms.resume.fieldRequired')),
+        startDate: z.string().min(1, t('forms.resume.startDateRequired')),
+        endDate: z.string().optional().default(''),
+        current: z.boolean().default(false),
+      }),
+    [t]
+  )
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        title: z.string().min(1, t('forms.resume.titleRequired')),
+        firstName: z.string().min(1, t('forms.resume.firstNameRequired')),
+        lastName: z.string().min(1, t('forms.resume.lastNameRequired')),
+        country: z.string().min(1, t('forms.resume.countryRequired')),
+        city: z.string().optional().default(''),
+        desiredSalary: z.preprocess(
+          (v) => (v === '' || v === undefined ? undefined : Number(v)),
+          z.number().positive().optional()
+        ),
+        currency: z.enum(['USD', 'EUR', 'RUB', 'GBP']).optional(),
+        workFormat: z.enum(['office', 'remote', 'hybrid', 'any']),
+        employmentType: z.enum(['full-time', 'part-time', 'contract', 'internship', 'freelance']),
+        experienceYears: z.preprocess(
+          (v) => (v === '' || v === undefined ? undefined : Number(v)),
+          z.number().int().nonnegative().optional()
+        ),
+        about: z.string().optional().default(''),
+        skills: z.string().optional().default(''),
+        contactTelegram: z.string().optional().default(''),
+        contactEmail: z.string().optional().default(''),
+        contactPhone: z.string().optional().default(''),
+        workExperience: z.array(workExperienceSchema).default([]),
+        education: z.array(educationSchema).default([]),
+      }),
+    [t, workExperienceSchema, educationSchema]
+  )
+
   const {
     register,
     handleSubmit,
@@ -88,11 +149,15 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
       lastName: defaultValues?.lastName ?? '',
       country: defaultValues?.country ?? '',
       city: defaultValues?.city ?? '',
-      desiredSalary: defaultValues?.desiredSalary,
+      ...(defaultValues?.desiredSalary !== undefined
+        ? { desiredSalary: defaultValues.desiredSalary }
+        : {}),
       currency: defaultValues?.currency ?? 'USD',
       workFormat: (defaultValues?.workFormat as ResumeWorkFormatEnum) ?? 'remote',
       employmentType: (defaultValues?.employmentType as EmploymentTypeEnum) ?? 'full-time',
-      experienceYears: defaultValues?.experienceYears,
+      ...(defaultValues?.experienceYears !== undefined
+        ? { experienceYears: defaultValues.experienceYears }
+        : {}),
       about: defaultValues?.about ?? '',
       skills: defaultValues?.skills?.join(', ') ?? '',
       contactTelegram: defaultValues?.contacts?.telegram ?? '',
@@ -174,7 +239,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
   }
 
   const mainButtonActive = useTelegramMainButton({
-    text: isLoading ? 'Сохранение...' : 'Сохранить',
+    text: isLoading ? t('forms.resume.saving') : t('forms.resume.save'),
     onClick: () => void handleSubmit(handleFormSubmit)(),
     disabled: !!isLoading,
   })
@@ -186,19 +251,19 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
       {/* Секция: Личные данные */}
       <Card>
         <CardHeader>
-          <CardTitle>Личные данные</CardTitle>
+          <CardTitle>{t('forms.resume.sectionPersonal')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="firstName">Имя *</Label>
+              <Label htmlFor="firstName">{t('forms.resume.firstNameLabel')} *</Label>
               <Input id="firstName" {...register('firstName')} />
               {errors.firstName && (
                 <p className="text-sm text-destructive">{errors.firstName.message}</p>
               )}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="lastName">Фамилия *</Label>
+              <Label htmlFor="lastName">{t('forms.resume.lastNameLabel')} *</Label>
               <Input id="lastName" {...register('lastName')} />
               {errors.lastName && (
                 <p className="text-sm text-destructive">{errors.lastName.message}</p>
@@ -208,7 +273,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Страна *</Label>
+              <Label>{t('forms.resume.countryLabel')} *</Label>
               <Controller
                 name="country"
                 control={control}
@@ -221,8 +286,12 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
               )}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="city">Город</Label>
-              <Input id="city" {...register('city')} placeholder="Москва" />
+              <Label htmlFor="city">{t('forms.resume.cityLabel')}</Label>
+              <Input
+                id="city"
+                {...register('city')}
+                placeholder={t('forms.resume.cityPlaceholder')}
+              />
             </div>
           </div>
         </CardContent>
@@ -231,18 +300,18 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
       {/* Секция: Пожелания */}
       <Card>
         <CardHeader>
-          <CardTitle>Пожелания</CardTitle>
+          <CardTitle>{t('forms.resume.sectionPreferences')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="title">Желаемая должность *</Label>
+            <Label htmlFor="title">{t('forms.resume.titleLabel')} *</Label>
             <Input id="title" {...register('title')} placeholder="Senior Frontend Developer" />
             {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="workFormat">Формат работы *</Label>
+              <Label htmlFor="workFormat">{t('forms.resume.workFormatLabel')} *</Label>
               <Controller
                 control={control}
                 name="workFormat"
@@ -265,7 +334,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="employmentType">Тип занятости *</Label>
+              <Label htmlFor="employmentType">{t('forms.resume.employmentTypeLabel')} *</Label>
               <Controller
                 control={control}
                 name="employmentType"
@@ -276,9 +345,9 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                     </SelectTrigger>
                     <SelectContent>
                       {(Object.keys(RESUME_EMPLOYMENT_TYPE_LABELS) as EmploymentTypeEnum[]).map(
-                        (t) => (
-                          <SelectItem key={t} value={t}>
-                            {RESUME_EMPLOYMENT_TYPE_LABELS[t]}
+                        (empType) => (
+                          <SelectItem key={empType} value={empType}>
+                            {RESUME_EMPLOYMENT_TYPE_LABELS[empType]}
                           </SelectItem>
                         )
                       )}
@@ -291,11 +360,11 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="desiredSalary">Желаемая зарплата</Label>
+              <Label htmlFor="desiredSalary">{t('forms.resume.salaryLabel')}</Label>
               <Input id="desiredSalary" type="number" {...register('desiredSalary')} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="currency">Валюта</Label>
+              <Label htmlFor="currency">{t('forms.resume.currencyLabel')}</Label>
               <Controller
                 control={control}
                 name="currency"
@@ -316,7 +385,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="experienceYears">Опыт (лет)</Label>
+              <Label htmlFor="experienceYears">{t('forms.resume.experienceLabel')}</Label>
               <Input id="experienceYears" type="number" {...register('experienceYears')} />
             </div>
           </div>
@@ -326,21 +395,21 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
       {/* Секция: О себе */}
       <Card>
         <CardHeader>
-          <CardTitle>О себе</CardTitle>
+          <CardTitle>{t('forms.resume.sectionAbout')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="about">О себе</Label>
+            <Label htmlFor="about">{t('forms.resume.aboutLabel')}</Label>
             <Textarea
               id="about"
               {...register('about')}
               rows={4}
-              placeholder="Кратко о себе, ключевые навыки и достижения..."
+              placeholder={t('forms.resume.aboutPlaceholder')}
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="skills">Навыки (через запятую)</Label>
+            <Label htmlFor="skills">{t('forms.resume.skillsLabel')}</Label>
             <Input id="skills" {...register('skills')} placeholder="React, TypeScript, Node.js" />
           </div>
         </CardContent>
@@ -350,7 +419,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Опыт работы</CardTitle>
+            <CardTitle>{t('forms.resume.sectionWorkExp')}</CardTitle>
             <Button
               type="button"
               variant="outline"
@@ -366,7 +435,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                 })
               }
             >
-              + Добавить
+              {t('forms.resume.addWorkExp')}
             </Button>
           </div>
         </CardHeader>
@@ -375,13 +444,15 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
             <Card key={field.id}>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm">Место работы {index + 1}</CardTitle>
+                  <CardTitle className="text-sm">
+                    {t('forms.resume.workExpEntry', { num: index + 1 })}
+                  </CardTitle>
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
                     onClick={() => removeWork(index)}
-                    aria-label="Удалить"
+                    aria-label={t('forms.resume.removeEntry')}
                   >
                     <Trash2 className="size-4 text-destructive" />
                   </Button>
@@ -390,7 +461,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label>Компания *</Label>
+                    <Label>{t('forms.resume.companyLabel')} *</Label>
                     <Input {...register(`workExperience.${index}.company`)} />
                     {errors.workExperience?.[index]?.company && (
                       <p className="text-sm text-destructive">
@@ -399,7 +470,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                     )}
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Должность *</Label>
+                    <Label>{t('forms.resume.positionLabel')} *</Label>
                     <Input {...register(`workExperience.${index}.position`)} />
                     {errors.workExperience?.[index]?.position && (
                       <p className="text-sm text-destructive">
@@ -410,11 +481,11 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label>Начало *</Label>
+                    <Label>{t('forms.resume.startDateLabel')} *</Label>
                     <Input type="date" {...register(`workExperience.${index}.startDate`)} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Конец</Label>
+                    <Label>{t('forms.resume.endDateLabel')}</Label>
                     <Input
                       type="date"
                       {...register(`workExperience.${index}.endDate`)}
@@ -429,10 +500,12 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                     {...register(`workExperience.${index}.current`)}
                     className="rounded"
                   />
-                  <Label htmlFor={`current-work-${index}`}>Работаю сейчас</Label>
+                  <Label htmlFor={`current-work-${index}`}>
+                    {t('forms.resume.currentlyWorking')}
+                  </Label>
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Описание</Label>
+                  <Label>{t('forms.resume.descriptionLabel')}</Label>
                   <Textarea {...register(`workExperience.${index}.description`)} rows={2} />
                 </div>
               </CardContent>
@@ -445,7 +518,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Образование</CardTitle>
+            <CardTitle>{t('forms.resume.sectionEducation')}</CardTitle>
             <Button
               type="button"
               variant="outline"
@@ -461,7 +534,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                 })
               }
             >
-              + Добавить
+              {t('forms.resume.addEducation')}
             </Button>
           </div>
         </CardHeader>
@@ -470,13 +543,15 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
             <Card key={field.id}>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm">Образование {index + 1}</CardTitle>
+                  <CardTitle className="text-sm">
+                    {t('forms.resume.educationEntry', { num: index + 1 })}
+                  </CardTitle>
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
                     onClick={() => removeEdu(index)}
-                    aria-label="Удалить"
+                    aria-label={t('forms.resume.removeEntry')}
                   >
                     <Trash2 className="size-4 text-destructive" />
                   </Button>
@@ -484,7 +559,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label>Учебное заведение *</Label>
+                  <Label>{t('forms.resume.institutionLabel')} *</Label>
                   <Input {...register(`education.${index}.institution`)} />
                   {errors.education?.[index]?.institution && (
                     <p className="text-sm text-destructive">
@@ -494,21 +569,27 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label>Степень *</Label>
-                    <Input {...register(`education.${index}.degree`)} placeholder="Бакалавр" />
+                    <Label>{t('forms.resume.degreeLabel')} *</Label>
+                    <Input
+                      {...register(`education.${index}.degree`)}
+                      placeholder={t('forms.resume.degreePlaceholder')}
+                    />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Специальность *</Label>
-                    <Input {...register(`education.${index}.field`)} placeholder="Информатика" />
+                    <Label>{t('forms.resume.fieldLabel')} *</Label>
+                    <Input
+                      {...register(`education.${index}.field`)}
+                      placeholder={t('forms.resume.fieldPlaceholder')}
+                    />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label>Начало *</Label>
+                    <Label>{t('forms.resume.startDateLabel')} *</Label>
                     <Input type="date" {...register(`education.${index}.startDate`)} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Конец</Label>
+                    <Label>{t('forms.resume.endDateLabel')}</Label>
                     <Input type="date" {...register(`education.${index}.endDate`)} />
                   </div>
                 </div>
@@ -519,7 +600,9 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                     {...register(`education.${index}.current`)}
                     className="rounded"
                   />
-                  <Label htmlFor={`current-edu-${index}`}>Учусь сейчас</Label>
+                  <Label htmlFor={`current-edu-${index}`}>
+                    {t('forms.resume.currentlyStudying')}
+                  </Label>
                 </div>
               </CardContent>
             </Card>
@@ -530,12 +613,12 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
       {/* Секция: Контакты */}
       <Card>
         <CardHeader>
-          <CardTitle>Контакты</CardTitle>
+          <CardTitle>{t('forms.resume.sectionContacts')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="contactTelegram">Telegram</Label>
+              <Label htmlFor="contactTelegram">{t('forms.resume.telegramLabel')}</Label>
               <Input
                 id="contactTelegram"
                 {...register('contactTelegram')}
@@ -543,11 +626,11 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="contactEmail">Email</Label>
+              <Label htmlFor="contactEmail">{t('forms.resume.emailLabel')}</Label>
               <Input id="contactEmail" type="email" {...register('contactEmail')} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="contactPhone">Телефон</Label>
+              <Label htmlFor="contactPhone">{t('forms.resume.phoneLabel')}</Label>
               <Input id="contactPhone" {...register('contactPhone')} placeholder="+7..." />
             </div>
           </div>
@@ -556,7 +639,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
 
       {!mainButtonActive && (
         <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading ? 'Сохранение...' : 'Сохранить'}
+          {isLoading ? t('forms.resume.saving') : t('forms.resume.save')}
         </Button>
       )}
     </form>

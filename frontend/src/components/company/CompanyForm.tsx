@@ -1,8 +1,10 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslation } from 'react-i18next'
 import type { CompanyCreateInput, CompanySizeEnum } from '@/types/api'
 import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
 
@@ -25,18 +27,19 @@ import {
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
 import { CountrySelect } from '@/components/ui/country-select'
 
-const schema = z.object({
-  name: z.string().min(1, 'Название обязательно'),
+// Static schema for type inference only
+const _baseSchema = z.object({
+  name: z.string().min(1),
   description: z.string().optional().default(''),
-  country: z.string().min(1, 'Страна обязательна'),
+  country: z.string().min(1),
   city: z.string().optional().default(''),
   companySize: z.enum(COMPANY_SIZE_VALUES),
-  website: z.string().url('Введите корректный URL').or(z.literal('')).optional().default(''),
+  website: z.string().url().or(z.literal('')).optional().default(''),
   telegram: z.string().optional().default(''),
-  linkedin: z.string().url('Введите корректный URL').or(z.literal('')).optional().default(''),
+  linkedin: z.string().url().or(z.literal('')).optional().default(''),
 })
 
-type FormData = z.infer<typeof schema>
+type FormData = z.infer<typeof _baseSchema>
 
 interface Props {
   onSubmit: (data: FormData, e?: React.BaseSyntheticEvent) => void | Promise<void>
@@ -47,6 +50,33 @@ interface Props {
 const SIZE_OPTIONS = Object.entries(COMPANY_SIZE_LABELS) as Array<[CompanySizeEnum, string]>
 
 export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
+  const { t } = useTranslation()
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        name: z.string().min(1, t('forms.company.nameRequired')),
+        description: z.string().optional().default(''),
+        country: z.string().min(1, t('forms.company.countryRequired')),
+        city: z.string().optional().default(''),
+        companySize: z.enum(COMPANY_SIZE_VALUES),
+        website: z
+          .string()
+          .url(t('forms.company.invalidUrl'))
+          .or(z.literal(''))
+          .optional()
+          .default(''),
+        telegram: z.string().optional().default(''),
+        linkedin: z
+          .string()
+          .url(t('forms.company.invalidUrl'))
+          .or(z.literal(''))
+          .optional()
+          .default(''),
+      }),
+    [t]
+  )
+
   const {
     register,
     handleSubmit,
@@ -67,7 +97,7 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
   })
 
   const mainButtonActive = useTelegramMainButton({
-    text: isLoading ? 'Сохранение...' : 'Сохранить',
+    text: isLoading ? t('forms.company.saving') : t('forms.company.save'),
     onClick: () => void handleSubmit(onSubmit)(),
     disabled: !!isLoading,
   })
@@ -77,21 +107,25 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
       {/* Секция: Основное */}
       <Card>
         <CardHeader>
-          <CardTitle>Основное</CardTitle>
+          <CardTitle>{t('forms.company.sectionMain')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="name">Название *</Label>
-            <Input id="name" {...register('name')} placeholder="Название компании" />
+            <Label htmlFor="name">{t('forms.company.nameLabel')} *</Label>
+            <Input
+              id="name"
+              {...register('name')}
+              placeholder={t('forms.company.namePlaceholder')}
+            />
             {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="description">Описание</Label>
+            <Label htmlFor="description">{t('forms.company.descriptionLabel')}</Label>
             <Textarea
               id="description"
               {...register('description')}
-              placeholder="Расскажите о компании"
+              placeholder={t('forms.company.descriptionPlaceholder')}
               rows={4}
             />
             {errors.description && (
@@ -104,23 +138,23 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
       {/* Секция: Контакты */}
       <Card>
         <CardHeader>
-          <CardTitle>Контакты</CardTitle>
+          <CardTitle>{t('forms.company.sectionContacts')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="website">Сайт</Label>
+            <Label htmlFor="website">{t('forms.company.websiteLabel')}</Label>
             <Input id="website" {...register('website')} placeholder="https://example.com" />
             {errors.website && <p className="text-sm text-destructive">{errors.website.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="telegram">Telegram</Label>
+              <Label htmlFor="telegram">{t('forms.company.telegramLabel')}</Label>
               <Input id="telegram" {...register('telegram')} placeholder="@company" />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="linkedin">LinkedIn</Label>
+              <Label htmlFor="linkedin">{t('forms.company.linkedinLabel')}</Label>
               <Input
                 id="linkedin"
                 {...register('linkedin')}
@@ -137,12 +171,12 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
       {/* Секция: Локация */}
       <Card>
         <CardHeader>
-          <CardTitle>Локация</CardTitle>
+          <CardTitle>{t('forms.company.sectionLocation')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Страна *</Label>
+              <Label>{t('forms.company.countryLabel')} *</Label>
               <Controller
                 name="country"
                 control={control}
@@ -156,13 +190,17 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="city">Город</Label>
-              <Input id="city" {...register('city')} placeholder="Москва" />
+              <Label htmlFor="city">{t('forms.company.cityLabel')}</Label>
+              <Input
+                id="city"
+                {...register('city')}
+                placeholder={t('forms.company.cityPlaceholder')}
+              />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="companySize">Размер компании</Label>
+            <Label htmlFor="companySize">{t('forms.company.companySizeLabel')}</Label>
             <Controller
               control={control}
               name="companySize"
@@ -174,7 +212,7 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
                   <SelectContent>
                     {SIZE_OPTIONS.map(([value, label]) => (
                       <SelectItem key={value} value={value}>
-                        {label} сотрудников
+                        {label} {t('forms.company.employees')}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -187,7 +225,7 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
 
       {!mainButtonActive && (
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Сохранение...' : 'Сохранить'}
+          {isLoading ? t('forms.company.saving') : t('forms.company.save')}
         </Button>
       )}
     </form>

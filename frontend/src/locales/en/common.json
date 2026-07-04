@@ -12,7 +12,8 @@
     "login": "Sign In",
     "main": "Main navigation",
     "home": "GramJob — home",
-    "userMenu": "User menu"
+    "userMenu": "User menu",
+    "languageSwitcher": "Interface language"
   },
   "auth": {
     "email": "Email",
@@ -30,7 +31,15 @@
     "loginTitle": "Sign In",
     "loginDescription": "Sign in with Telegram or email",
     "registerTitle": "Sign Up",
-    "registerDescription": "Create an account to get started"
+    "registerDescription": "Create an account to get started",
+    "telegramUnavailableLocalhost": "Telegram login is not available on localhost",
+    "validation": {
+      "invalidEmail": "Enter a valid email",
+      "minPassword": "At least 6 characters",
+      "enterFirstName": "Enter your first name",
+      "enterLastName": "Enter your last name",
+      "passwordsNotMatch": "Passwords do not match"
+    }
   },
   "common": {
     "loading": "Loading...",
@@ -490,6 +499,8 @@
       "urgentLabel": "🔥 Urgent vacancy",
       "submitCreate": "Submit for review",
       "submitEdit": "Save and submit for review",
+      "cityPlaceholder": "Moscow",
+      "languagesPlaceholder": "Russian, English",
       "saving": "Saving..."
     },
     "company": {
@@ -510,6 +521,7 @@
       "cityLabel": "City",
       "companySizeLabel": "Company size",
       "employees": "employees",
+      "cityPlaceholder": "Moscow",
       "save": "Save",
       "saving": "Saving..."
     },
@@ -626,6 +638,12 @@
       "vacanciesPerMonth": "{{count}} vacancies/month",
       "upgrade": "Upgrade plan"
     }
+  },
+  "countrySelect": {
+    "placeholder": "Select country",
+    "searchPlaceholder": "Search country...",
+    "notFound": "Not found",
+    "notSpecified": "— Not specified"
   },
   "shared": {
     "retry": "Retry",

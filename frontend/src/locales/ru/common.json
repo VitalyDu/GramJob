@@ -12,7 +12,8 @@
     "login": "Войти",
     "main": "Основная навигация",
     "home": "GramJob — на главную",
-    "userMenu": "Меню пользователя"
+    "userMenu": "Меню пользователя",
+    "languageSwitcher": "Язык интерфейса"
   },
   "auth": {
     "email": "Email",
@@ -30,7 +31,15 @@
     "loginTitle": "Вход",
     "loginDescription": "Войдите через Telegram или email",
     "registerTitle": "Регистрация",
-    "registerDescription": "Создайте аккаунт, чтобы начать"
+    "registerDescription": "Создайте аккаунт, чтобы начать",
+    "telegramUnavailableLocalhost": "Telegram-вход недоступен на localhost",
+    "validation": {
+      "invalidEmail": "Введите корректный email",
+      "minPassword": "Минимум 6 символов",
+      "enterFirstName": "Введите имя",
+      "enterLastName": "Введите фамилию",
+      "passwordsNotMatch": "Пароли не совпадают"
+    }
   },
   "common": {
     "loading": "Загрузка...",
@@ -487,6 +496,8 @@
       "urgentLabel": "🔥 Срочная вакансия",
       "submitCreate": "Отправить на модерацию",
       "submitEdit": "Сохранить и отправить на модерацию",
+      "cityPlaceholder": "Москва",
+      "languagesPlaceholder": "Русский, English",
       "saving": "Сохранение..."
     },
     "company": {
@@ -507,6 +518,7 @@
       "cityLabel": "Город",
       "companySizeLabel": "Размер компании",
       "employees": "сотрудников",
+      "cityPlaceholder": "Москва",
       "save": "Сохранить",
       "saving": "Сохранение..."
     },
@@ -623,6 +635,12 @@
       "vacanciesPerMonth": "{{count}} вакансий/мес",
       "upgrade": "Улучшить план"
     }
+  },
+  "countrySelect": {
+    "placeholder": "Выберите страну",
+    "searchPlaceholder": "Поиск страны...",
+    "notFound": "Не найдено",
+    "notSpecified": "— Не указана"
   },
   "shared": {
     "retry": "Повторить",
