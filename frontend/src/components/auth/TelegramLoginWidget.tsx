@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import type { TelegramWidgetUser } from '@/types/api'
 
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function TelegramLoginWidget({ redirectTo = '/' }: Props) {
+  const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const { auth } = useStores()
   const router = useRouter()
@@ -62,7 +64,7 @@ export function TelegramLoginWidget({ redirectTo = '/' }: Props) {
   if (isLocalhost) {
     return (
       <p className="text-center text-xs text-muted-foreground">
-        Telegram-вход недоступен на localhost
+        {t('auth.telegramUnavailableLocalhost')}
       </p>
     )
   }

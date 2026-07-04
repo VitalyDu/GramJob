@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -11,17 +12,27 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-const schema = z.object({
-  identifier: z.string().email('Введите корректный email'),
-  password: z.string().min(6, 'Минимум 6 символов'),
+// Static schema for type inference only
+const _baseSchema = z.object({
+  identifier: z.string().email(),
+  password: z.string().min(6),
 })
 
-type FormData = z.infer<typeof schema>
+type FormData = z.infer<typeof _baseSchema>
 
 export const EmailLoginForm = observer(function EmailLoginForm() {
   const { t } = useTranslation()
   const { auth } = useStores()
   const router = useRouter()
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        identifier: z.string().email(t('auth.validation.invalidEmail')),
+        password: z.string().min(6, t('auth.validation.minPassword')),
+      }),
+    [t]
+  )
 
   const {
     register,

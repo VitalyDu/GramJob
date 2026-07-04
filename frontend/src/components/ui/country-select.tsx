@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,11 +27,14 @@ interface CountrySelectProps {
 export function CountrySelect({
   value,
   onChange,
-  placeholder = 'Выберите страну',
+  placeholder,
   className,
   disabled,
 }: CountrySelectProps) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+
+  const defaultPlaceholder = placeholder ?? t('countrySelect.placeholder')
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -42,15 +46,15 @@ export function CountrySelect({
           disabled={disabled}
           className={cn('w-full justify-between font-normal', className)}
         >
-          {value ? getCountryName(value) : placeholder}
+          {value ? getCountryName(value) : defaultPlaceholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[280px] p-0" align="start">
         <Command>
-          <CommandInput placeholder="Поиск страны..." />
+          <CommandInput placeholder={t('countrySelect.searchPlaceholder')} />
           <CommandList>
-            <CommandEmpty>Не найдено</CommandEmpty>
+            <CommandEmpty>{t('countrySelect.notFound')}</CommandEmpty>
             <CommandGroup>
               {value && (
                 <CommandItem
@@ -60,7 +64,7 @@ export function CountrySelect({
                     setOpen(false)
                   }}
                 >
-                  <span className="text-muted-foreground">— Не указана</span>
+                  <span className="text-muted-foreground">{t('countrySelect.notSpecified')}</span>
                 </CommandItem>
               )}
               {COUNTRIES_LIST.map((country) => (

@@ -29,7 +29,7 @@ const NAV_LINKS = [
 ] as const
 
 function LanguageSwitcher() {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const currentLang = i18n.language
 
   const setLang = (lang: string) => {
@@ -42,7 +42,12 @@ function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Язык интерфейса" className="h-8 w-8">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={t('nav.languageSwitcher')}
+          className="h-8 w-8"
+        >
           <Globe className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>

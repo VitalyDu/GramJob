@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -11,25 +12,38 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-const schema = z
-  .object({
-    firstName: z.string().min(1, 'Введите имя'),
-    lastName: z.string().min(1, 'Введите фамилию'),
-    email: z.string().email('Введите корректный email'),
-    password: z.string().min(6, 'Минимум 6 символов'),
-    confirmPassword: z.string(),
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    message: 'Пароли не совпадают',
-    path: ['confirmPassword'],
-  })
+// Static schema for type inference only (without refine, which changes the type)
+const _baseSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  email: z.string().email(),
+  password: z.string().min(6),
+  confirmPassword: z.string(),
+})
 
-type FormData = z.infer<typeof schema>
+type FormData = z.infer<typeof _baseSchema>
 
 export const EmailRegisterForm = observer(function EmailRegisterForm() {
   const { t } = useTranslation()
   const { auth } = useStores()
   const router = useRouter()
+
+  const schema = useMemo(
+    () =>
+      z
+        .object({
+          firstName: z.string().min(1, t('auth.validation.enterFirstName')),
+          lastName: z.string().min(1, t('auth.validation.enterLastName')),
+          email: z.string().email(t('auth.validation.invalidEmail')),
+          password: z.string().min(6, t('auth.validation.minPassword')),
+          confirmPassword: z.string(),
+        })
+        .refine((d) => d.password === d.confirmPassword, {
+          message: t('auth.validation.passwordsNotMatch'),
+          path: ['confirmPassword'],
+        }),
+    [t]
+  )
 
   const {
     register,
