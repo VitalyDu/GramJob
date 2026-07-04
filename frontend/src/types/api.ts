@@ -212,7 +212,7 @@ export interface Vacancy {
   createdAt: string
   industry: IndustryRef
   specialization: SpecializationRef
-  company: VacancyCompanyRef
+  company: VacancyCompanyRef | null
   postedBy?: { id: number; firstName: string; lastName: string } | null
 }
 

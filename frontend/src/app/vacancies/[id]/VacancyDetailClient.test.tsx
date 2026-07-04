@@ -170,4 +170,13 @@ describe('VacancyDetailClient', () => {
     const link = screen.getByRole('link', { name: /apply on source/i })
     expect(link.getAttribute('href')).toBe('https://example.com/job')
   })
+
+  it('рендерится без падения, если company=null', () => {
+    const noCompanyVacancy = { ...mockVacancy, company: null }
+    vi.mocked(useStores).mockReturnValue(makeUseStoresReturn({ currentVacancy: noCompanyVacancy }))
+
+    render(<VacancyDetailClient id="vac123" />)
+
+    expect(screen.getByText('Senior Frontend Developer')).toBeDefined()
+  })
 })

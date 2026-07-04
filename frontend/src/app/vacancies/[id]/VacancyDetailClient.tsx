@@ -70,7 +70,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
   const salary = formatSalary(v.salaryFrom, v.salaryTo, v.salaryCurrency)
   const isInternal = v.sourceType === 'internal'
   const isPublished = v.status === 'published'
-  const logoUrl = v.company.logo ? getMediaUrl(v.company.logo.url) : null
+  const logoUrl = getMediaUrl(v.company?.logo?.url)
 
   return (
     <div className="space-y-4">
@@ -79,7 +79,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
         <CardContent className="pt-6">
           {/* Лого + название + статус */}
           <div className="flex items-start gap-4">
-            {logoUrl && (
+            {logoUrl && v.company && (
               <img
                 src={logoUrl}
                 alt={v.company.name}

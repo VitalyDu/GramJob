@@ -12,7 +12,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { isMiniApp } = useTelegramInit()
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-dvh flex-col">
       {!isMiniApp && <WebHeader />}
       <main className={`flex-1 ${isMiniApp ? 'pb-20' : 'pb-20 md:pb-0'}`}>
         <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
