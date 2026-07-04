@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { ShieldOff } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Button } from '@/components/ui/button'
@@ -20,9 +21,8 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { PaginationBar } from '@/components/shared/PaginationBar'
 
-const TARGET_TYPE_LABELS = { employer: 'Работодатель', candidate: 'Кандидат' }
-
 export const MyBlocksClient = observer(function MyBlocksClient() {
+  const { t } = useTranslation()
   const { block: store } = useStores()
   const isAuthenticated = useRequireAuth()
 
@@ -31,7 +31,7 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
   }, [store])
 
   const handleUnblock = (id: string) => {
-    if (!window.confirm('Разблокировать этого пользователя?')) return
+    if (!window.confirm(t('dashboard.blocks.confirmUnblock'))) return
     void store.removeBlock(id)
   }
 
@@ -44,8 +44,8 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Заблокированные"
-        description="Контент заблокированных пользователей не отображается в результатах поиска"
+        title={t('dashboard.blocks.title')}
+        description={t('dashboard.blocks.description')}
       />
 
       {store.isLoading && <CardListSkeleton count={6} />}
@@ -57,8 +57,8 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
       {!store.isLoading && store.blocks.length === 0 && !store.error && (
         <EmptyState
           icon={ShieldOff}
-          title="Нет заблокированных пользователей"
-          description="Заблокированные пользователи не будут показывать вам свой контент"
+          title={t('dashboard.blocks.empty')}
+          description={t('dashboard.blocks.emptyDesc')}
         />
       )}
 
@@ -68,16 +68,16 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Пользователь</TableHead>
-                <TableHead>Дата блокировки</TableHead>
-                <TableHead className="text-right">Действие</TableHead>
+                <TableHead>{t('dashboard.blocks.colUser')}</TableHead>
+                <TableHead>{t('dashboard.blocks.colDate')}</TableHead>
+                <TableHead className="text-right">{t('dashboard.blocks.colAction')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {store.blocks.map((b) => (
                 <TableRow key={b.documentId}>
                   <TableCell className="font-medium">
-                    {TARGET_TYPE_LABELS[b.targetType]} #{b.targetId}
+                    {t(`dashboard.blocks.targetTypes.${b.targetType}`)} #{b.targetId}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {new Date(b.createdAt).toLocaleDateString('ru')}
@@ -89,7 +89,7 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
                       onClick={() => handleUnblock(b.documentId)}
                       disabled={store.isLoading}
                     >
-                      Разблокировать
+                      {t('dashboard.blocks.unblock')}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -109,10 +109,10 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
             >
               <div>
                 <p className="font-medium text-card-foreground">
-                  {TARGET_TYPE_LABELS[b.targetType]} #{b.targetId}
+                  {t(`dashboard.blocks.targetTypes.${b.targetType}`)} #{b.targetId}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Заблокирован {new Date(b.createdAt).toLocaleDateString('ru')}
+                  {t('dashboard.blocks.blockedAt')} {new Date(b.createdAt).toLocaleDateString('ru')}
                 </p>
               </div>
               <Button
@@ -121,7 +121,7 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
                 onClick={() => handleUnblock(b.documentId)}
                 disabled={store.isLoading}
               >
-                Разблокировать
+                {t('dashboard.blocks.unblock')}
               </Button>
             </div>
           ))}

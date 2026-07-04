@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { ApplicationStatusBadge } from '@/components/application/ApplicationStatusBadge'
@@ -19,6 +20,7 @@ interface Props {
 export const ApplicationDetailClient = observer(function ApplicationDetailClient({
   documentId,
 }: Props) {
+  const { t } = useTranslation()
   const { application: store } = useStores()
   const isAuthenticated = useRequireAuth()
   useTelegramBackButton()
@@ -47,7 +49,7 @@ export const ApplicationDetailClient = observer(function ApplicationDetailClient
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Детали отклика" />
+      <PageHeader title={t('dashboard.applicationDetail.title')} />
 
       <div className="flex items-center gap-2">
         <ApplicationStatusBadge status={app.status} />
@@ -62,7 +64,9 @@ export const ApplicationDetailClient = observer(function ApplicationDetailClient
 
       <Card>
         <CardContent className="pt-6">
-          <p className="text-xs font-medium text-muted-foreground">Вакансия</p>
+          <p className="text-xs font-medium text-muted-foreground">
+            {t('dashboard.applicationDetail.vacancy')}
+          </p>
           <Link
             href={`/vacancies/${app.vacancy.documentId}`}
             className="mt-1 block font-semibold hover:underline"
@@ -75,7 +79,9 @@ export const ApplicationDetailClient = observer(function ApplicationDetailClient
 
       <Card>
         <CardContent className="pt-6">
-          <p className="text-xs font-medium text-muted-foreground">Резюме</p>
+          <p className="text-xs font-medium text-muted-foreground">
+            {t('dashboard.applicationDetail.resume')}
+          </p>
           <Link
             href={`/resumes/${app.resume.documentId}`}
             className="mt-1 block font-semibold hover:underline"
@@ -88,7 +94,9 @@ export const ApplicationDetailClient = observer(function ApplicationDetailClient
       {app.coverLetter && (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-xs font-medium text-muted-foreground">Сопроводительное письмо</p>
+            <p className="text-xs font-medium text-muted-foreground">
+              {t('dashboard.applicationDetail.coverLetter')}
+            </p>
             <p className="mt-1 whitespace-pre-wrap text-sm">{app.coverLetter}</p>
           </CardContent>
         </Card>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { ApplicationStatusEnum } from '@/types/api'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -5,27 +6,24 @@ import { cn } from '@/lib/utils'
 const STATUS_CONFIG: Record<
   ApplicationStatusEnum,
   {
-    label: string
     variant: 'default' | 'secondary' | 'destructive' | 'outline'
     className?: string
   }
 > = {
-  applied: { label: 'Отправлен', variant: 'secondary' },
-  viewed: { label: 'Просмотрен', variant: 'secondary' },
-  'in-review': { label: 'На рассмотрении', variant: 'secondary' },
-  interview: { label: 'Собеседование', variant: 'default' },
-  'test-task': { label: 'Тестовое', variant: 'default' },
+  applied: { variant: 'secondary' },
+  viewed: { variant: 'secondary' },
+  'in-review': { variant: 'secondary' },
+  interview: { variant: 'default' },
+  'test-task': { variant: 'default' },
   offer: {
-    label: 'Оффер',
     variant: 'default',
     className: 'bg-success text-white hover:bg-success/90',
   },
   hired: {
-    label: 'Принят',
     variant: 'default',
     className: 'bg-success text-white hover:bg-success/90',
   },
-  rejected: { label: 'Отклонён', variant: 'destructive' },
+  rejected: { variant: 'destructive' },
 }
 
 interface Props {
@@ -33,10 +31,11 @@ interface Props {
 }
 
 export function ApplicationStatusBadge({ status }: Props) {
+  const { t } = useTranslation()
   const config = STATUS_CONFIG[status]
   return (
     <Badge variant={config.variant} className={cn(config.className)}>
-      {config.label}
+      {t(`enums.applicationStatus.${status}`)}
     </Badge>
   )
 }

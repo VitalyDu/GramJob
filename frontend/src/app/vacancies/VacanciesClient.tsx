@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { Briefcase, Search } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { VacancyCard } from '@/components/vacancy/VacancyCard'
@@ -20,6 +21,7 @@ import type { VacancyListParams } from '@/types/api'
 
 export const VacanciesClient = observer(function VacanciesClient() {
   const { vacancy: store } = useStores()
+  const { t } = useTranslation()
   const [params, setParams] = useState<VacancyListParams>({ page: 1 })
   const [searchInput, setSearchInput] = useState('')
 
@@ -56,20 +58,20 @@ export const VacanciesClient = observer(function VacanciesClient() {
 
   return (
     <div>
-      <PageHeader title="Вакансии" description="Найдите работу мечты в Telegram-экосистеме" />
+      <PageHeader title={t('nav.vacancies')} description={t('vacancies.description')} />
 
       {/* Поиск — на всю ширину, над сеткой */}
       <form onSubmit={handleSearch} className="mb-4 flex gap-2">
         <Input
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          placeholder="Поиск вакансий..."
+          placeholder={t('vacancies.searchPlaceholder')}
           className="flex-1"
-          aria-label="Поиск вакансий"
+          aria-label={t('vacancies.searchPlaceholder')}
         />
         <Button type="submit">
           <Search className="mr-1.5 h-4 w-4" />
-          Найти
+          {t('common.search')}
         </Button>
       </form>
 
@@ -101,15 +103,17 @@ export const VacanciesClient = observer(function VacanciesClient() {
           {!store.isLoading && !store.error && store.vacancies.length === 0 && (
             <EmptyState
               icon={Briefcase}
-              title="Вакансии не найдены"
-              description="Попробуйте изменить фильтры"
-              action={<Button onClick={handleReset}>Сбросить фильтры</Button>}
+              title={t('vacancies.notFound')}
+              description={t('vacancies.notFoundHint')}
+              action={<Button onClick={handleReset}>{t('common.resetFilters')}</Button>}
             />
           )}
 
           {!store.isLoading && store.vacancies.length > 0 && (
             <>
-              <p className="mb-3 text-sm text-muted-foreground">Найдено: {store.total}</p>
+              <p className="mb-3 text-sm text-muted-foreground">
+                {t('common.found', { count: store.total })}
+              </p>
               <div className="space-y-3">
                 {store.vacancies.map((v) => (
                   <VacancyCard key={v.documentId} vacancy={v} />

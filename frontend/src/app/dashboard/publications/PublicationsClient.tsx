@@ -77,7 +77,7 @@ export const PublicationsClient = observer(function PublicationsClient() {
         <EmptyState
           icon={FileText}
           title={t('publications.empty')}
-          description="У вас ещё нет публикаций. Создайте вакансию, резюме или профиль компании."
+          description={t('dashboard.publications.emptyDesc')}
         />
       )}
 

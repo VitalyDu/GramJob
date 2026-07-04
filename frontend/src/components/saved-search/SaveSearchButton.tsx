@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,6 +15,7 @@ interface Props {
 
 export const SaveSearchButton = observer(function SaveSearchButton({ searchType, filters }: Props) {
   const { savedSearch: store, auth } = useStores()
+  const { t } = useTranslation()
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
   const [saved, setSaved] = useState(false)
@@ -36,7 +38,7 @@ export const SaveSearchButton = observer(function SaveSearchButton({ searchType,
   }
 
   if (saved) {
-    return <span className="text-sm text-success">Поиск сохранён ✓</span>
+    return <span className="text-sm text-success">{t('savedSearch.saved')}</span>
   }
 
   if (showForm) {
@@ -46,11 +48,11 @@ export const SaveSearchButton = observer(function SaveSearchButton({ searchType,
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Название (необязательно)"
+            placeholder={t('savedSearch.namePlaceholder')}
             className="h-8 text-sm"
           />
           <Button onClick={() => void handleSave()} disabled={store.isLoading} size="sm">
-            {store.isLoading ? '...' : 'Сохранить'}
+            {store.isLoading ? '...' : t('common.save')}
           </Button>
           <Button
             variant="ghost"
@@ -60,7 +62,7 @@ export const SaveSearchButton = observer(function SaveSearchButton({ searchType,
               setName('')
             }}
           >
-            Отмена
+            {t('common.cancel')}
           </Button>
         </div>
         {store.error && <p className="text-xs text-destructive">{store.error}</p>}
@@ -70,7 +72,7 @@ export const SaveSearchButton = observer(function SaveSearchButton({ searchType,
 
   return (
     <Button variant="outline" size="sm" onClick={() => setShowForm(true)}>
-      Сохранить поиск
+      {t('common.saveSearch')}
     </Button>
   )
 })

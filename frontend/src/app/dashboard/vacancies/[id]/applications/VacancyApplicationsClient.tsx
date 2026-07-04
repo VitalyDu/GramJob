@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { Users } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
@@ -22,6 +23,7 @@ export const VacancyApplicationsClient = observer(function VacancyApplicationsCl
   vacancyId,
 }: Props) {
   useTelegramBackButton()
+  const { t } = useTranslation()
   const { application: store } = useStores()
   const isAuthenticated = useRequireAuth()
 
@@ -42,8 +44,14 @@ export const VacancyApplicationsClient = observer(function VacancyApplicationsCl
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Отклики на вакансию"
-        {...(store.vacancyTotal > 0 ? { description: `${store.vacancyTotal} откликов` } : {})}
+        title={t('dashboard.vacancyApplications.title')}
+        {...(store.vacancyTotal > 0
+          ? {
+              description: t('dashboard.vacancyApplications.totalCount', {
+                count: store.vacancyTotal,
+              }),
+            }
+          : {})}
       />
 
       {store.isLoading && <CardListSkeleton count={6} />}
@@ -58,8 +66,8 @@ export const VacancyApplicationsClient = observer(function VacancyApplicationsCl
       {!store.isLoading && store.vacancyApplications.length === 0 && !store.error && (
         <EmptyState
           icon={Users}
-          title="Нет откликов"
-          description="На эту вакансию ещё никто не откликнулся"
+          title={t('dashboard.vacancyApplications.empty')}
+          description={t('dashboard.vacancyApplications.emptyDesc')}
         />
       )}
 

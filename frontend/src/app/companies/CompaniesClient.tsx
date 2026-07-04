@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { Building2 } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { CompanyCard } from '@/components/company/CompanyCard'
@@ -19,6 +20,7 @@ import type { CompanyListParams } from '@/types/api'
 
 export const CompaniesClient = observer(function CompaniesClient() {
   const { company: store } = useStores()
+  const { t } = useTranslation()
   const [params, setParams] = useState<CompanyListParams>({ page: 1 })
   const [searchInput, setSearchInput] = useState('')
 
@@ -51,18 +53,18 @@ export const CompaniesClient = observer(function CompaniesClient() {
 
   return (
     <div>
-      <PageHeader title="Компании" description="Каталог работодателей" />
+      <PageHeader title={t('nav.companies')} description={t('companies.description')} />
 
       {/* Поиск — на всю ширину */}
       <form onSubmit={handleSearch} className="mb-4 flex gap-2">
         <Input
-          placeholder="Поиск компании..."
+          placeholder={t('companies.searchPlaceholder')}
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           className="flex-1"
-          aria-label="Поиск компании"
+          aria-label={t('companies.searchPlaceholder')}
         />
-        <Button type="submit">Найти</Button>
+        <Button type="submit">{t('common.search')}</Button>
       </form>
 
       <div className="md:grid md:grid-cols-[280px_1fr] md:items-start md:gap-6">
@@ -81,12 +83,14 @@ export const CompaniesClient = observer(function CompaniesClient() {
           )}
 
           {!store.isLoading && !store.error && store.companies.length === 0 && (
-            <EmptyState icon={Building2} title="Компании не найдены" />
+            <EmptyState icon={Building2} title={t('companies.notFound')} />
           )}
 
           {!store.isLoading && store.companies.length > 0 && (
             <>
-              <p className="mb-3 text-sm text-muted-foreground">Найдено: {store.total}</p>
+              <p className="mb-3 text-sm text-muted-foreground">
+                {t('common.found', { count: store.total })}
+              </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {store.companies.map((c) => (
                   <CompanyCard key={c.documentId} company={c} />

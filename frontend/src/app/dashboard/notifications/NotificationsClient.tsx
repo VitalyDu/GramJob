@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { Bell } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Button } from '@/components/ui/button'
@@ -35,16 +36,17 @@ const TYPE_ICONS: Partial<Record<NotificationType, string>> = {
 
 type TabValue = 'all' | 'unread' | 'read'
 
-const FILTER_TABS: { label: string; value: TabValue; isRead: boolean | undefined }[] = [
-  { label: 'Все', value: 'all', isRead: undefined },
-  { label: 'Непрочитанные', value: 'unread', isRead: false },
-  { label: 'Прочитанные', value: 'read', isRead: true },
-]
-
 export const NotificationsClient = observer(function NotificationsClient() {
+  const { t } = useTranslation()
   const { notification: store } = useStores()
   const isAuthenticated = useRequireAuth()
   const [activeTab, setActiveTab] = useState<TabValue>('all')
+
+  const FILTER_TABS: { label: string; value: TabValue; isRead: boolean | undefined }[] = [
+    { label: t('dashboard.notifications.tabs.all'), value: 'all', isRead: undefined },
+    { label: t('dashboard.notifications.tabs.unread'), value: 'unread', isRead: false },
+    { label: t('dashboard.notifications.tabs.read'), value: 'read', isRead: true },
+  ]
 
   const isReadFilter = FILTER_TABS.find((t) => t.value === activeTab)?.isRead
 
@@ -75,11 +77,11 @@ export const NotificationsClient = observer(function NotificationsClient() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Уведомления"
+        title={t('dashboard.notifications.title')}
         actions={
           store.unreadCount > 0 ? (
             <Button variant="outline" size="sm" onClick={handleMarkAllRead}>
-              Прочитать все ({store.unreadCount})
+              {t('dashboard.notifications.markAllRead', { count: store.unreadCount })}
             </Button>
           ) : undefined
         }
@@ -106,7 +108,7 @@ export const NotificationsClient = observer(function NotificationsClient() {
             )}
 
             {!store.isLoading && store.notifications.length === 0 && !store.error && (
-              <EmptyState icon={Bell} title="Нет уведомлений" />
+              <EmptyState icon={Bell} title={t('dashboard.notifications.empty')} />
             )}
 
             <div className="space-y-2">
@@ -138,7 +140,7 @@ export const NotificationsClient = observer(function NotificationsClient() {
                         onClick={() => handleMarkRead(n.documentId)}
                         className="shrink-0 text-xs font-medium text-primary hover:underline"
                       >
-                        Прочитано
+                        {t('dashboard.notifications.markRead')}
                       </button>
                     )}
                   </div>

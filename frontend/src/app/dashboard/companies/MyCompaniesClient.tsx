@@ -39,7 +39,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
   }
 
   const handleDelete = (id: string) => {
-    if (!window.confirm('Удалить компанию? Это действие нельзя отменить.')) return
+    if (!window.confirm(t('dashboard.companies.confirmDelete'))) return
     void store.deleteCompany(id)
   }
 
@@ -52,10 +52,10 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Мои компании"
+        title={t('dashboard.companies.title')}
         actions={
           <Button asChild>
-            <Link href="/dashboard/companies/new">+ Создать компанию</Link>
+            <Link href="/dashboard/companies/new">{t('dashboard.companies.createNew')}</Link>
           </Button>
         }
       />
@@ -69,11 +69,11 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
       {!store.isLoading && store.myCompanies.length === 0 && !store.error && (
         <EmptyState
           icon={Building2}
-          title="У вас пока нет компаний"
-          description="Создайте профиль компании, чтобы публиковать вакансии"
+          title={t('dashboard.companies.empty')}
+          description={t('dashboard.companies.emptyDesc')}
           action={
             <Button asChild>
-              <Link href="/dashboard/companies/new">Создать компанию</Link>
+              <Link href="/dashboard/companies/new">{t('dashboard.companies.create')}</Link>
             </Button>
           }
         />
@@ -117,7 +117,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
                     href={`/dashboard/companies/${company.documentId}/edit`}
                     className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
                   >
-                    Редактировать
+                    {t('dashboard.companies.edit')}
                   </Link>
 
                   {canSubmitCompany(company.status) && (
@@ -127,7 +127,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
                       onClick={() => void handleSubmit(company.documentId)}
                       disabled={store.isLoading}
                     >
-                      На модерацию
+                      {t('dashboard.companies.toModeration')}
                     </Button>
                   )}
 
@@ -139,7 +139,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
                       onClick={() => handleDelete(company.documentId)}
                       disabled={store.isLoading}
                     >
-                      Удалить
+                      {t('dashboard.companies.delete')}
                     </Button>
                   )}
                 </div>

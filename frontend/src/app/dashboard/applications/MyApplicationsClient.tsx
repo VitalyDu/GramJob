@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { Send } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { ApplicationCard } from '@/components/application/ApplicationCard'
@@ -13,6 +14,7 @@ import { ErrorState } from '@/components/shared/ErrorState'
 import { PaginationBar } from '@/components/shared/PaginationBar'
 
 export const MyApplicationsClient = observer(function MyApplicationsClient() {
+  const { t } = useTranslation()
   const { application: store } = useStores()
   const isAuthenticated = useRequireAuth()
 
@@ -29,8 +31,10 @@ export const MyApplicationsClient = observer(function MyApplicationsClient() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Мои отклики"
-        {...(store.total > 0 ? { description: `${store.total} откликов` } : {})}
+        title={t('dashboard.applications.title')}
+        {...(store.total > 0
+          ? { description: t('dashboard.applications.totalCount', { count: store.total }) }
+          : {})}
       />
 
       {store.isLoading && <CardListSkeleton count={6} />}
@@ -42,8 +46,8 @@ export const MyApplicationsClient = observer(function MyApplicationsClient() {
       {!store.isLoading && store.applications.length === 0 && !store.error && (
         <EmptyState
           icon={Send}
-          title="Нет откликов"
-          description="Вы ещё не откликались на вакансии"
+          title={t('dashboard.applications.empty')}
+          description={t('dashboard.applications.emptyDesc')}
         />
       )}
 

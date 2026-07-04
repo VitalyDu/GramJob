@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChevronRight } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
@@ -12,19 +13,20 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { PageHeader } from '@/components/shared/PageHeader'
 
-const LINKS = [
-  { href: '/dashboard/publications', label: 'Мои публикации' },
-  { href: '/dashboard/notifications', label: 'Уведомления' },
-  { href: '/dashboard/favorites', label: 'Избранное' },
-  { href: '/dashboard/saved-searches', label: 'Сохранённые поиски' },
-  { href: '/dashboard/blocks', label: 'Блокировки' },
-  { href: '/subscription', label: 'Подписка' },
-]
-
 export const ProfileClient = observer(function ProfileClient() {
+  const { t } = useTranslation()
   const { auth } = useStores()
   useRequireAuth()
   const router = useRouter()
+
+  const LINKS = [
+    { href: '/dashboard/publications', label: t('dashboard.profile.links.publications') },
+    { href: '/dashboard/notifications', label: t('dashboard.profile.links.notifications') },
+    { href: '/dashboard/favorites', label: t('dashboard.profile.links.favorites') },
+    { href: '/dashboard/saved-searches', label: t('dashboard.profile.links.savedSearches') },
+    { href: '/dashboard/blocks', label: t('dashboard.profile.links.blocks') },
+    { href: '/subscription', label: t('dashboard.profile.links.subscription') },
+  ]
 
   const user = auth.user
   if (!user) return null
@@ -76,7 +78,7 @@ export const ProfileClient = observer(function ProfileClient() {
           router.push('/')
         }}
       >
-        Выйти
+        {t('dashboard.profile.logout')}
       </Button>
     </div>
   )

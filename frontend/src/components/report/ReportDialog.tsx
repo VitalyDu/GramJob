@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { api } from '@/services/api'
 import type { ReportType, ReportReason } from '@/types/api'
@@ -14,12 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-const REASON_LABELS: Record<ReportReason, string> = {
-  spam: 'Спам',
-  fraud: 'Мошенничество',
-  inappropriate: 'Неприемлемый контент',
-  other: 'Другое',
-}
+const REASON_KEYS: ReportReason[] = ['spam', 'fraud', 'inappropriate', 'other']
 
 interface Props {
   type: ReportType
@@ -30,6 +26,7 @@ interface Props {
 
 export function ReportDialog({ type, targetId, isOpen, onClose }: Props) {
   const { auth } = useStores()
+  const { t } = useTranslation()
   const [reason, setReason] = useState<ReportReason>('spam')
   const [comment, setComment] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -51,7 +48,7 @@ export function ReportDialog({ type, targetId, isOpen, onClose }: Props) {
       })
       setSent(true)
     } catch {
-      setSubmitError('Не удалось отправить жалобу. Попробуйте ещё раз.')
+      setSubmitError(t('report.sendError'))
     } finally {
       setIsLoading(false)
     }
@@ -70,29 +67,29 @@ export function ReportDialog({ type, targetId, isOpen, onClose }: Props) {
       <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-xl">
         {sent ? (
           <>
-            <h2 className="text-lg font-semibold text-card-foreground">Жалоба отправлена</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Спасибо, мы рассмотрим жалобу в ближайшее время.
-            </p>
+            <h2 className="text-lg font-semibold text-card-foreground">{t('report.sentTitle')}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{t('report.sentText')}</p>
             <Button className="mt-4" onClick={handleClose}>
-              Закрыть
+              {t('common.close')}
             </Button>
           </>
         ) : (
           <>
-            <h2 className="text-lg font-semibold text-card-foreground">Пожаловаться</h2>
+            <h2 className="text-lg font-semibold text-card-foreground">{t('report.title')}</h2>
 
             <div className="mt-4 space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Причина</label>
+                <label className="mb-1 block text-sm font-medium text-foreground">
+                  {t('report.reason')}
+                </label>
                 <Select value={reason} onValueChange={(v) => setReason(v as ReportReason)}>
                   <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(Object.keys(REASON_LABELS) as ReportReason[]).map((r) => (
+                    {REASON_KEYS.map((r) => (
                       <SelectItem key={r} value={r}>
-                        {REASON_LABELS[r]}
+                        {t(`report.reasons.${r}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -101,13 +98,13 @@ export function ReportDialog({ type, targetId, isOpen, onClose }: Props) {
 
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">
-                  Комментарий (необязательно)
+                  {t('report.comment')}
                 </label>
                 <Textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   rows={3}
-                  placeholder="Опишите проблему подробнее..."
+                  placeholder={t('report.commentPlaceholder')}
                 />
               </div>
             </div>
@@ -116,10 +113,10 @@ export function ReportDialog({ type, targetId, isOpen, onClose }: Props) {
 
             <div className="mt-5 flex gap-3">
               <Button onClick={() => void handleSubmit()} disabled={isLoading}>
-                {isLoading ? 'Отправка...' : 'Отправить'}
+                {isLoading ? t('report.sending') : t('report.submit')}
               </Button>
               <Button variant="outline" onClick={handleClose}>
-                Отмена
+                {t('common.cancel')}
               </Button>
             </div>
           </>

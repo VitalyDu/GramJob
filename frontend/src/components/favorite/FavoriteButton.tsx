@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { hapticSelection } from '@/lib/telegram'
 import type { FavoriteType } from '@/types/api'
@@ -18,6 +19,7 @@ export const FavoriteButton = observer(function FavoriteButton({
   initialIsFavorited = false,
 }: Props) {
   const { favorite: store, auth } = useStores()
+  const { t } = useTranslation()
   const [isFavorited, setIsFavorited] = useState(initialIsFavorited)
 
   if (!auth.user) return null
@@ -48,14 +50,14 @@ export const FavoriteButton = observer(function FavoriteButton({
     <button
       onClick={() => void handleToggle()}
       disabled={store.isLoading}
-      title={isFavorited ? 'Убрать из избранного' : 'Добавить в избранное'}
+      title={isFavorited ? t('favorite.removeTitle') : t('favorite.addTitle')}
       className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition disabled:opacity-50 ${
         isFavorited
           ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
           : 'border-border text-muted-foreground hover:bg-muted'
       }`}
     >
-      {isFavorited ? '★ В избранном' : '☆ В избранное'}
+      {isFavorited ? t('favorite.added') : t('favorite.add')}
     </button>
   )
 })

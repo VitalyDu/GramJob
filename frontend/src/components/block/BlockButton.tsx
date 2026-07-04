@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import type { BlockTargetType } from '@/types/api'
 
@@ -17,6 +18,7 @@ export const BlockButton = observer(function BlockButton({
   initialIsBlocked = false,
 }: Props) {
   const { block: store, auth } = useStores()
+  const { t } = useTranslation()
   const [isBlocked, setIsBlocked] = useState(initialIsBlocked)
 
   if (!auth.user) return null
@@ -24,12 +26,7 @@ export const BlockButton = observer(function BlockButton({
 
   const handleBlock = async () => {
     if (isBlocked) return
-    if (
-      !window.confirm(
-        'Заблокировать этого пользователя? Его контент больше не будет отображаться в результатах поиска.'
-      )
-    )
-      return
+    if (!window.confirm(t('block.confirm'))) return
     await store.createBlock({ targetType, targetId })
     if (!store.error) {
       setIsBlocked(true)
@@ -49,7 +46,7 @@ export const BlockButton = observer(function BlockButton({
           : 'text-muted-foreground hover:text-red-500'
       }`}
     >
-      {isBlocked ? 'Заблокирован' : 'Заблокировать'}
+      {isBlocked ? t('block.blocked') : t('block.block')}
     </button>
   )
 })

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -43,6 +44,7 @@ export function ApplyDialog({
   limitReached,
   alreadyApplied,
 }: Props) {
+  const { t } = useTranslation()
   const [resumes, setResumes] = useState<Resume[]>([])
   const [resumeId, setResumeId] = useState('')
   const [coverLetter, setCoverLetter] = useState('')
@@ -58,8 +60,8 @@ export function ApplyDialog({
         setResumes(published)
         if (published[0]) setResumeId(published[0].documentId)
       })
-      .catch(() => setFetchError('Не удалось загрузить резюме'))
-  }, [isOpen])
+      .catch(() => setFetchError(t('resumes.fetchError')))
+  }, [isOpen, t])
 
   const submit = async () => {
     if (!resumeId) return
@@ -67,7 +69,7 @@ export function ApplyDialog({
   }
 
   const mainButtonActive = useTelegramMainButton({
-    text: isLoading ? 'Отправка...' : 'Откликнуться',
+    text: isLoading ? t('apply.sending') : t('apply.submit'),
     onClick: () => void submit(),
     disabled: (isLoading ?? false) || !resumeId,
     visible: isOpen && !(limitReached ?? false) && !(alreadyApplied ?? false) && !fetchError,
@@ -82,19 +84,19 @@ export function ApplyDialog({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent showCloseButton>
         <DialogHeader>
-          <DialogTitle>Откликнуться</DialogTitle>
+          <DialogTitle>{t('apply.title')}</DialogTitle>
           <p className="text-sm text-muted-foreground">{vacancyTitle}</p>
         </DialogHeader>
 
         {alreadyApplied && (
           <div className="rounded-lg bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
-            Вы уже откликались на эту вакансию.
+            {t('apply.alreadyApplied')}
           </div>
         )}
 
         {limitReached && (
           <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
-            Дневной лимит откликов исчерпан. Обновите план для большего количества откликов.
+            {t('apply.limitReached')}
           </div>
         )}
 
@@ -104,18 +106,18 @@ export function ApplyDialog({
           <form onSubmit={handleSubmit} className="space-y-4">
             {resumes.length === 0 && !fetchError ? (
               <div className="rounded-lg bg-muted px-4 py-3 text-sm text-muted-foreground">
-                У вас нет опубликованных резюме.{' '}
+                {t('resumes.noPublished')}{' '}
                 <a href="/dashboard/resumes" className="text-primary hover:underline">
-                  Создать резюме →
+                  {t('resumes.createLink')}
                 </a>
               </div>
             ) : (
               <>
                 <div className="space-y-1.5">
-                  <Label htmlFor="resumeId">Резюме</Label>
+                  <Label htmlFor="resumeId">{t('apply.resume')}</Label>
                   <Select value={resumeId} onValueChange={setResumeId} required>
                     <SelectTrigger id="resumeId" className="w-full">
-                      <SelectValue placeholder="Выберите резюме" />
+                      <SelectValue placeholder={t('apply.selectResume')} />
                     </SelectTrigger>
                     <SelectContent>
                       {resumes.map((r) => (
@@ -128,23 +130,23 @@ export function ApplyDialog({
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="coverLetter">Сопроводительное письмо (необязательно)</Label>
+                  <Label htmlFor="coverLetter">{t('apply.coverLetter')}</Label>
                   <Textarea
                     id="coverLetter"
                     value={coverLetter}
                     onChange={(e) => setCoverLetter(e.target.value)}
                     rows={4}
-                    placeholder="Расскажите, почему вы подходите на эту позицию..."
+                    placeholder={t('apply.coverLetterPlaceholder')}
                   />
                 </div>
 
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={onClose}>
-                    Отмена
+                    {t('common.cancel')}
                   </Button>
                   {!mainButtonActive && (
                     <Button type="submit" disabled={isLoading ?? !resumeId}>
-                      {isLoading ? 'Отправка...' : 'Откликнуться'}
+                      {isLoading ? t('apply.sending') : t('apply.submit')}
                     </Button>
                   )}
                 </DialogFooter>
@@ -156,7 +158,7 @@ export function ApplyDialog({
         {(alreadyApplied ?? limitReached) && (
           <DialogFooter>
             <Button variant="outline" onClick={onClose}>
-              Закрыть
+              {t('common.close')}
             </Button>
           </DialogFooter>
         )}
