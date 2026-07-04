@@ -1,0 +1,41 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-backend:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    if: |
+      contains(toJson(github.event.commits.*.modified + github.event.commits.*.added + github.event.commits.*.removed), 'backend/')
+      || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added + github.event.commits.*.removed), 'pnpm-lock.yaml')
+
+    steps:
+      - name: Deploy to backend VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.BACKEND_HOST }}
+          username: root
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          timeout: 600s
+          script: bash /opt/gramjob/deploy-backend.sh
+
+  deploy-frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    if: |
+      contains(toJson(github.event.commits.*.modified + github.event.commits.*.added + github.event.commits.*.removed), 'frontend/')
+      || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added + github.event.commits.*.removed), 'pnpm-lock.yaml')
+
+    steps:
+      - name: Deploy to frontend VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.FRONTEND_HOST }}
+          username: root
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          timeout: 600s
+          script: bash /opt/gramjob/deploy-frontend.sh
