@@ -6,13 +6,30 @@ on:
       - main
 
 jobs:
+  changes:
+    name: Detect changed paths
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - 'pnpm-lock.yaml'
+            frontend:
+              - 'frontend/**'
+              - 'pnpm-lock.yaml'
+
   deploy-backend:
     name: Deploy Backend
     runs-on: ubuntu-latest
-    if: |
-      contains(toJson(github.event.commits.*.modified + github.event.commits.*.added + github.event.commits.*.removed), 'backend/')
-      || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added + github.event.commits.*.removed), 'pnpm-lock.yaml')
-
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     steps:
       - name: Deploy to backend VPS
         uses: appleboy/ssh-action@v1
@@ -26,10 +43,8 @@ jobs:
   deploy-frontend:
     name: Deploy Frontend
     runs-on: ubuntu-latest
-    if: |
-      contains(toJson(github.event.commits.*.modified + github.event.commits.*.added + github.event.commits.*.removed), 'frontend/')
-      || contains(toJson(github.event.commits.*.modified + github.event.commits.*.added + github.event.commits.*.removed), 'pnpm-lock.yaml')
-
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     steps:
       - name: Deploy to frontend VPS
         uses: appleboy/ssh-action@v1
