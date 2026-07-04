@@ -38,6 +38,22 @@ function pickFields<T extends Record<string, unknown>>(
 }
 
 export default (plugin: any) => {
+  // Override POST /auth/local/register — auto-set username from email, accept firstName/lastName
+  // plugin.controllers.auth is a factory ({ strapi }) => ({ register, ... }), so wrap the factory
+  const originalAuthFactory = plugin.controllers.auth
+  plugin.controllers.auth = (opts: any) => {
+    const controller = originalAuthFactory(opts)
+    const originalRegister = controller.register
+    controller.register = async (ctx: any) => {
+      const body = ctx.request.body ?? {}
+      if (!body.username && body.email) {
+        ctx.request.body = { ...body, username: (body.email as string).toLowerCase() }
+      }
+      return originalRegister(ctx)
+    }
+    return controller
+  }
+
   // Override GET /users/me — ensure custom fields are returned and sensitive ones stripped
   const originalMe = plugin.controllers.user.me
   plugin.controllers.user.me = async (ctx: any) => {

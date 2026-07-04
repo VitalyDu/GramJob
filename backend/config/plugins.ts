@@ -2,6 +2,13 @@
 import type { Core } from '@strapi/strapi'
 
 export default ({ env }: Core.Config.Shared.ConfigParams) => ({
+  'users-permissions': {
+    config: {
+      register: {
+        allowedFields: ['firstName', 'lastName'],
+      },
+    },
+  },
   upload: {
     config: {
       provider: '@strapi/provider-upload-aws-s3',
