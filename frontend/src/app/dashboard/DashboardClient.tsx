@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import {
   Bell,
   Briefcase,
@@ -24,64 +25,80 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 
-const SECTIONS = [
-  {
-    href: '/dashboard/vacancies',
-    icon: Briefcase,
-    label: 'Мои вакансии',
-    desc: 'Публикации, бусты, аналитика',
-  },
-  { href: '/dashboard/resumes', icon: FileText, label: 'Мои резюме', desc: 'Резюме и их статусы' },
-  {
-    href: '/dashboard/companies',
-    icon: Building2,
-    label: 'Мои компании',
-    desc: 'Профили компаний',
-  },
-  {
-    href: '/dashboard/applications',
-    icon: MessageSquare,
-    label: 'Отклики',
-    desc: 'Ваши отклики и их статусы',
-  },
-  {
-    href: '/dashboard/publications',
-    icon: ListChecks,
-    label: 'Мои публикации',
-    desc: 'Всё на модерации в одном месте',
-  },
-  {
-    href: '/dashboard/favorites',
-    icon: Heart,
-    label: 'Избранное',
-    desc: 'Сохранённые вакансии и резюме',
-  },
-  {
-    href: '/dashboard/saved-searches',
-    icon: Search,
-    label: 'Сохранённые поиски',
-    desc: 'Быстрый доступ к фильтрам',
-  },
-  {
-    href: '/dashboard/notifications',
-    icon: Bell,
-    label: 'Уведомления',
-    desc: 'События и модерация',
-    badge: 'unread' as const,
-  },
-  {
-    href: '/dashboard/blocks',
-    icon: Shield,
-    label: 'Блокировки',
-    desc: 'Скрытые работодатели и кандидаты',
-  },
-  { href: '/subscription', icon: Star, label: 'Подписка', desc: 'План, лимиты и пакеты' },
-  { href: '/dashboard/profile', icon: User, label: 'Профиль', desc: 'Личные данные и выход' },
-]
-
 export const DashboardClient = observer(function DashboardClient() {
   const router = useRouter()
   const { auth, notification } = useStores()
+  const { t } = useTranslation()
+
+  const SECTIONS = [
+    {
+      href: '/dashboard/vacancies',
+      icon: Briefcase,
+      label: t('dashboard.sections_list.vacancies.label'),
+      desc: t('dashboard.sections_list.vacancies.desc'),
+    },
+    {
+      href: '/dashboard/resumes',
+      icon: FileText,
+      label: t('dashboard.sections_list.resumes.label'),
+      desc: t('dashboard.sections_list.resumes.desc'),
+    },
+    {
+      href: '/dashboard/companies',
+      icon: Building2,
+      label: t('dashboard.sections_list.companies.label'),
+      desc: t('dashboard.sections_list.companies.desc'),
+    },
+    {
+      href: '/dashboard/applications',
+      icon: MessageSquare,
+      label: t('dashboard.sections_list.applications.label'),
+      desc: t('dashboard.sections_list.applications.desc'),
+    },
+    {
+      href: '/dashboard/publications',
+      icon: ListChecks,
+      label: t('dashboard.sections_list.publications.label'),
+      desc: t('dashboard.sections_list.publications.desc'),
+    },
+    {
+      href: '/dashboard/favorites',
+      icon: Heart,
+      label: t('dashboard.sections_list.favorites.label'),
+      desc: t('dashboard.sections_list.favorites.desc'),
+    },
+    {
+      href: '/dashboard/saved-searches',
+      icon: Search,
+      label: t('dashboard.sections_list.savedSearches.label'),
+      desc: t('dashboard.sections_list.savedSearches.desc'),
+    },
+    {
+      href: '/dashboard/notifications',
+      icon: Bell,
+      label: t('dashboard.sections_list.notifications.label'),
+      desc: t('dashboard.sections_list.notifications.desc'),
+      badge: 'unread' as const,
+    },
+    {
+      href: '/dashboard/blocks',
+      icon: Shield,
+      label: t('dashboard.sections_list.blocks.label'),
+      desc: t('dashboard.sections_list.blocks.desc'),
+    },
+    {
+      href: '/subscription',
+      icon: Star,
+      label: t('dashboard.sections_list.subscription.label'),
+      desc: t('dashboard.sections_list.subscription.desc'),
+    },
+    {
+      href: '/dashboard/profile',
+      icon: User,
+      label: t('dashboard.sections_list.profile.label'),
+      desc: t('dashboard.sections_list.profile.desc'),
+    },
+  ]
 
   useEffect(() => {
     if (!auth.isAuthenticated) router.replace('/login')
@@ -99,38 +116,41 @@ export const DashboardClient = observer(function DashboardClient() {
     <div className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Привет, {name}!</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Управляйте вакансиями, резюме и откликами из одного места
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            {t('dashboard.greeting', { name })}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t('dashboard.greetingDesc')}</p>
         </div>
-        <Link href="/subscription" aria-label="Управление подпиской">
+        <Link href="/subscription" aria-label={t('dashboard.manageSubscription')}>
           <SubscriptionBadge plan={auth.user.subscriptionPlan} />
         </Link>
       </div>
 
-      <section aria-label="Быстрые действия" className="flex flex-wrap gap-2">
+      <section aria-label={t('dashboard.quickActions')} className="flex flex-wrap gap-2">
         <Button asChild>
           <Link href="/dashboard/vacancies/new">
             <Plus className="mr-1.5 h-4 w-4" />
-            Создать вакансию
+            {t('dashboard.createVacancy')}
           </Link>
         </Button>
         <Button asChild variant="outline">
           <Link href="/dashboard/resumes/new">
             <Plus className="mr-1.5 h-4 w-4" />
-            Создать резюме
+            {t('dashboard.createResume')}
           </Link>
         </Button>
         <Button asChild variant="outline">
           <Link href="/dashboard/companies/new">
             <Plus className="mr-1.5 h-4 w-4" />
-            Добавить компанию
+            {t('dashboard.addCompany')}
           </Link>
         </Button>
       </section>
 
-      <section aria-label="Разделы кабинета" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <section
+        aria-label={t('dashboard.sections')}
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+      >
         {SECTIONS.map(({ href, icon: Icon, label, desc, ...rest }) => (
           <Link key={href} href={href} className="group">
             <Card className="h-full transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md">

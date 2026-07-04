@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
@@ -17,6 +18,7 @@ export const CreateVacancyClient = observer(function CreateVacancyClient() {
   const { vacancy: vStore, company: cStore } = useStores()
   const isAuthenticated = useRequireAuth()
   const router = useRouter()
+  const { t } = useTranslation()
 
   useEffect(() => {
     void cStore.fetchMyCompanies(1)
@@ -29,7 +31,7 @@ export const CreateVacancyClient = observer(function CreateVacancyClient() {
         // limitReached уже установлен в сторе, UpsellModal откроется
         return
       }
-      toast.success('Вакансия отправлена на модерацию')
+      toast.success(t('dashboard.vacancies.created'))
       router.push('/dashboard/vacancies')
     } catch {
       // error сохранён в vStore.error
@@ -47,9 +49,9 @@ export const CreateVacancyClient = observer(function CreateVacancyClient() {
           href="/dashboard/vacancies"
           className="inline-block text-sm text-muted-foreground hover:text-foreground"
         >
-          ← Мои вакансии
+          {t('dashboard.vacancies.backToList')}
         </Link>
-        <h1 className="text-2xl font-bold">Новая вакансия</h1>
+        <h1 className="text-2xl font-bold">{t('dashboard.vacancies.newTitle')}</h1>
       </div>
 
       {vStore.error && (

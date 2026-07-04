@@ -13,6 +13,7 @@ import {
   Legend,
 } from 'recharts'
 import { BarChart2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
@@ -38,6 +39,7 @@ interface Props {
 
 export const ResumeAnalyticsClient = observer(function ResumeAnalyticsClient({ resumeId }: Props) {
   useTelegramBackButton()
+  const { t } = useTranslation()
   const { analytics: store } = useStores()
   const isAuthenticated = useRequireAuth()
   const [from, setFrom] = useState(defaultFrom())
@@ -55,11 +57,13 @@ export const ResumeAnalyticsClient = observer(function ResumeAnalyticsClient({ r
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Аналитика резюме" />
+      <PageHeader title={t('dashboard.analytics.resumeTitle')} />
 
       <div className="flex flex-wrap items-end gap-4">
         <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">С</label>
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">
+            {t('dashboard.analytics.from')}
+          </label>
           <input
             type="date"
             value={from}
@@ -69,7 +73,9 @@ export const ResumeAnalyticsClient = observer(function ResumeAnalyticsClient({ r
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">По</label>
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">
+            {t('dashboard.analytics.to')}
+          </label>
           <input
             type="date"
             value={to}
@@ -94,9 +100,9 @@ export const ResumeAnalyticsClient = observer(function ResumeAnalyticsClient({ r
         <div className="grid grid-cols-3 gap-4">
           {(
             [
-              { label: 'Просмотры', value: total.views },
-              { label: 'Уник. просмотры', value: total.uniqueViews },
-              { label: 'Приглашения', value: total.invitations },
+              { label: t('dashboard.analytics.stats.views'), value: total.views },
+              { label: t('dashboard.analytics.stats.uniqueViews'), value: total.uniqueViews },
+              { label: t('dashboard.analytics.stats.invitations'), value: total.invitations },
             ] as const
           ).map(({ label, value }) => (
             <Card key={label}>
@@ -112,7 +118,9 @@ export const ResumeAnalyticsClient = observer(function ResumeAnalyticsClient({ r
       {daily.length > 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-semibold">Просмотры по дням</CardTitle>
+            <CardTitle className="text-sm font-semibold">
+              {t('dashboard.analytics.chartTitle')}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={260}>
@@ -149,7 +157,7 @@ export const ResumeAnalyticsClient = observer(function ResumeAnalyticsClient({ r
                 <Area
                   type="monotone"
                   dataKey="views"
-                  name="Просмотры"
+                  name={t('dashboard.analytics.series.views')}
                   stroke="#6366f1"
                   fill="url(#resumeViewsGrad)"
                   strokeWidth={2}
@@ -157,7 +165,7 @@ export const ResumeAnalyticsClient = observer(function ResumeAnalyticsClient({ r
                 <Area
                   type="monotone"
                   dataKey="invitations"
-                  name="Приглашения"
+                  name={t('dashboard.analytics.series.invitations')}
                   stroke="#f59e0b"
                   fill="url(#invitationsGrad)"
                   strokeWidth={2}
@@ -171,8 +179,8 @@ export const ResumeAnalyticsClient = observer(function ResumeAnalyticsClient({ r
         !store.error && (
           <EmptyState
             icon={BarChart2}
-            title="Нет данных"
-            description="Нет данных за выбранный период"
+            title={t('dashboard.analytics.noData')}
+            description={t('dashboard.analytics.noDataDesc')}
           />
         )
       )}

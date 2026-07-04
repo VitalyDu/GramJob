@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
@@ -15,6 +16,7 @@ export const CreateResumeClient = observer(function CreateResumeClient() {
   const { resume: store } = useStores()
   const isAuthenticated = useRequireAuth()
   const router = useRouter()
+  const { t } = useTranslation()
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const handleSubmit = async (data: ResumeCreateInput) => {
@@ -23,7 +25,7 @@ export const CreateResumeClient = observer(function CreateResumeClient() {
       await store.createResume(data)
       router.push('/dashboard/resumes')
     } catch {
-      setSubmitError(store.error ?? 'Не удалось создать резюме')
+      setSubmitError(store.error ?? t('dashboard.resumes.createError'))
     }
   }
 
@@ -36,9 +38,9 @@ export const CreateResumeClient = observer(function CreateResumeClient() {
           href="/dashboard/resumes"
           className="text-sm text-muted-foreground hover:text-foreground"
         >
-          ← Назад
+          {t('dashboard.resumes.backToList')}
         </Link>
-        <h1 className="text-2xl font-bold">Новое резюме</h1>
+        <h1 className="text-2xl font-bold">{t('dashboard.resumes.newTitle')}</h1>
       </div>
 
       {submitError && (

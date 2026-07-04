@@ -3,6 +3,7 @@
 import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
@@ -14,6 +15,7 @@ export const CreateCompanyClient = observer(function CreateCompanyClient() {
   const { company: store } = useStores()
   const isAuthenticated = useRequireAuth()
   const router = useRouter()
+  const { t } = useTranslation()
 
   const handleSubmit = async (data: CompanyCreateInput) => {
     try {
@@ -33,9 +35,9 @@ export const CreateCompanyClient = observer(function CreateCompanyClient() {
           href="/dashboard/companies"
           className="inline-block text-sm text-muted-foreground hover:text-foreground"
         >
-          ← Мои компании
+          {t('dashboard.companies.backToList')}
         </Link>
-        <h1 className="text-2xl font-bold">Новая компания</h1>
+        <h1 className="text-2xl font-bold">{t('dashboard.companies.newTitle')}</h1>
       </div>
 
       {store.error && (

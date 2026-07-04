@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
@@ -19,6 +20,7 @@ export const EditResumeClient = observer(function EditResumeClient({ id }: Props
   const { resume: store } = useStores()
   const isAuthenticated = useRequireAuth()
   const router = useRouter()
+  const { t } = useTranslation()
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -31,25 +33,27 @@ export const EditResumeClient = observer(function EditResumeClient({ id }: Props
       await store.updateResume(id, data)
       router.push('/dashboard/resumes')
     } catch {
-      setSubmitError(store.error ?? 'Не удалось обновить резюме')
+      setSubmitError(store.error ?? t('dashboard.resumes.updateError'))
     }
   }
 
   if (!isAuthenticated) return null
 
   if (store.isLoading && !store.currentResume) {
-    return <p className="text-sm text-muted-foreground">Загрузка...</p>
+    return <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
   }
 
   if (!store.currentResume) {
     return (
       <div className="py-16 text-center">
-        <p className="text-lg font-medium text-card-foreground">Резюме не найдено</p>
+        <p className="text-lg font-medium text-card-foreground">
+          {t('dashboard.resumes.notFound')}
+        </p>
         <Link
           href="/dashboard/resumes"
           className="mt-4 inline-block text-sm text-primary hover:underline"
         >
-          ← Мои резюме
+          {t('dashboard.resumes.backFromNotFound')}
         </Link>
       </div>
     )
@@ -64,9 +68,9 @@ export const EditResumeClient = observer(function EditResumeClient({ id }: Props
           href="/dashboard/resumes"
           className="text-sm text-muted-foreground hover:text-foreground"
         >
-          ← Назад
+          {t('dashboard.resumes.backToList')}
         </Link>
-        <h1 className="text-2xl font-bold">Редактировать резюме</h1>
+        <h1 className="text-2xl font-bold">{t('dashboard.resumes.editTitle')}</h1>
       </div>
 
       {submitError && (

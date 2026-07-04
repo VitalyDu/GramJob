@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
@@ -21,6 +22,7 @@ export const EditVacancyClient = observer(function EditVacancyClient({ id }: Pro
   const { vacancy: vStore, company: cStore } = useStores()
   const isAuthenticated = useRequireAuth()
   const router = useRouter()
+  const { t } = useTranslation()
 
   useEffect(() => {
     void vStore.fetchMyVacancyById(id)
@@ -30,7 +32,7 @@ export const EditVacancyClient = observer(function EditVacancyClient({ id }: Pro
   if (!isAuthenticated) return null
 
   if (vStore.isLoading || !vStore.currentVacancy) {
-    return <p className="text-sm text-muted-foreground">Загрузка...</p>
+    return <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
   }
 
   const v = vStore.currentVacancy
@@ -42,7 +44,7 @@ export const EditVacancyClient = observer(function EditVacancyClient({ id }: Pro
         // limitReached уже установлен в сторе, UpsellModal откроется
         return
       }
-      toast.success('Изменения сохранены — вакансия отправлена на модерацию')
+      toast.success(t('dashboard.vacancies.updated'))
       router.push('/dashboard/vacancies')
     } catch {
       // error в vStore.error
@@ -81,9 +83,9 @@ export const EditVacancyClient = observer(function EditVacancyClient({ id }: Pro
           href="/dashboard/vacancies"
           className="inline-block text-sm text-muted-foreground hover:text-foreground"
         >
-          ← Мои вакансии
+          {t('dashboard.vacancies.backToList')}
         </Link>
-        <h1 className="text-2xl font-bold">Редактировать вакансию</h1>
+        <h1 className="text-2xl font-bold">{t('dashboard.vacancies.editTitle')}</h1>
       </div>
 
       {vStore.error && (

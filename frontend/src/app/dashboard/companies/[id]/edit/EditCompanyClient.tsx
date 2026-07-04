@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
@@ -19,6 +20,7 @@ export const EditCompanyClient = observer(function EditCompanyClient({ id }: Pro
   const { company: store } = useStores()
   const isAuthenticated = useRequireAuth()
   const router = useRouter()
+  const { t } = useTranslation()
 
   useEffect(() => {
     void store.fetchMyCompanyById(id)
@@ -36,18 +38,18 @@ export const EditCompanyClient = observer(function EditCompanyClient({ id }: Pro
   if (!isAuthenticated) return null
 
   if (store.isLoading && !store.currentCompany) {
-    return <p className="text-sm text-muted-foreground">Загрузка...</p>
+    return <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
   }
 
   if (!store.currentCompany) {
     return (
       <div className="py-16 text-center">
-        <p className="text-sm text-muted-foreground">Компания не найдена.</p>
+        <p className="text-sm text-muted-foreground">{t('dashboard.companies.notFound')}</p>
         <Link
           href="/dashboard/companies"
           className="mt-3 inline-block text-sm text-primary hover:underline"
         >
-          ← Мои компании
+          {t('dashboard.companies.backFromNotFound')}
         </Link>
       </div>
     )
@@ -62,9 +64,11 @@ export const EditCompanyClient = observer(function EditCompanyClient({ id }: Pro
           href="/dashboard/companies"
           className="inline-block text-sm text-muted-foreground hover:text-foreground"
         >
-          ← Мои компании
+          {t('dashboard.companies.backToList')}
         </Link>
-        <h1 className="text-2xl font-bold">Редактировать: {company.name}</h1>
+        <h1 className="text-2xl font-bold">
+          {t('dashboard.companies.editTitle', { name: company.name })}
+        </h1>
       </div>
 
       {store.error && (
