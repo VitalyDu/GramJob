@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { getPlanBadgeClasses } from '@/lib/subscription-utils'
 import type { SubscriptionPlan } from '@/types/api'
 import { Button } from '@/components/ui/button'
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function SubscriptionPlanCard({ plan, currentPlan, canBuy, isBuying, onBuy }: Props) {
+  const { t } = useTranslation()
   const isActive = plan.code === currentPlan
   const badgeClasses = getPlanBadgeClasses(plan.code)
 
@@ -24,7 +26,11 @@ export function SubscriptionPlanCard({ plan, currentPlan, canBuy, isBuying, onBu
           <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${badgeClasses}`}>
             {plan.name}
           </span>
-          {isActive && <span className="ml-2 text-xs text-indigo-600 font-medium">Активный</span>}
+          {isActive && (
+            <span className="ml-2 text-xs text-indigo-600 font-medium">
+              {t('subscription.planCard.active')}
+            </span>
+          )}
         </div>
         <p className="text-base font-bold text-card-foreground">
           <StarsPrice price={plan.starsPrice} />
@@ -33,22 +39,23 @@ export function SubscriptionPlanCard({ plan, currentPlan, canBuy, isBuying, onBu
 
       <ul className="space-y-1.5 text-sm text-muted-foreground">
         <li>
-          Вакансий в месяц:{' '}
+          {t('subscription.planCard.vacanciesPerMonth')}{' '}
           <span className="font-medium text-card-foreground">{plan.vacanciesPerMonth}</span>
         </li>
         <li>
-          Активных вакансий:{' '}
+          {t('subscription.planCard.activeVacancies')}{' '}
           <span className="font-medium text-card-foreground">{plan.activeVacanciesLimit}</span>
         </li>
         <li>
-          Откликов в день:{' '}
+          {t('subscription.planCard.applicationsPerDay')}{' '}
           <span className="font-medium text-card-foreground">{plan.applicationsPerDay}</span>
         </li>
         <li>
-          Резюме: <span className="font-medium text-card-foreground">{plan.resumesLimit}</span>
+          {t('subscription.planCard.resumes')}{' '}
+          <span className="font-medium text-card-foreground">{plan.resumesLimit}</span>
         </li>
         <li>
-          База резюме:{' '}
+          {t('subscription.planCard.resumeDatabase')}{' '}
           <span
             className={`font-medium ${plan.resumeDatabaseAccess ? 'text-green-600' : 'text-muted-foreground'}`}
           >
@@ -59,10 +66,10 @@ export function SubscriptionPlanCard({ plan, currentPlan, canBuy, isBuying, onBu
 
       {plan.code === 'vip' && (
         <ul className="space-y-1.5 border-t pt-3 text-sm text-muted-foreground">
-          <li>VIP-бейдж на компании и вакансиях</li>
-          <li>Блок «Рекомендуем» на главной</li>
-          <li>Ускоренная модерация (&lt; 4 ч)</li>
-          <li>Приоритет в поиске</li>
+          <li>{t('subscription.planCard.vipBenefits.badge')}</li>
+          <li>{t('subscription.planCard.vipBenefits.featured')}</li>
+          <li>{t('subscription.planCard.vipBenefits.fastModeration')}</li>
+          <li>{t('subscription.planCard.vipBenefits.priority')}</li>
         </ul>
       )}
 
@@ -76,17 +83,19 @@ export function SubscriptionPlanCard({ plan, currentPlan, canBuy, isBuying, onBu
           }}
         >
           {isBuying
-            ? 'Создание счёта...'
+            ? t('subscription.planCard.creating')
             : isActive
-              ? 'Активный'
+              ? t('subscription.planCard.active')
               : canBuy
-                ? 'Купить'
-                : 'Недоступно'}
+                ? t('subscription.planCard.buy')
+                : t('subscription.planCard.unavailable')}
         </Button>
       )}
 
       {plan.code === 'vip' && !canBuy && (
-        <p className="text-xs text-muted-foreground text-center">Требует активный план Max</p>
+        <p className="text-xs text-muted-foreground text-center">
+          {t('subscription.planCard.requiresMax')}
+        </p>
       )}
     </div>
   )

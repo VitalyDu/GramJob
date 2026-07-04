@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 interface Props {
   isOpen: boolean
   onClose: () => void
@@ -9,6 +11,7 @@ const PLANS = [
 ]
 
 export function UpsellModal({ isOpen, onClose }: Props) {
+  const { t } = useTranslation()
   if (!isOpen) return null
 
   return (
@@ -16,26 +19,27 @@ export function UpsellModal({ isOpen, onClose }: Props) {
       <div data-overlay className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative z-10 w-full max-w-md rounded-2xl bg-card p-6 shadow-xl">
         <div className="mb-4 flex items-start justify-between">
-          <h2 className="text-lg font-semibold text-card-foreground">Лимит исчерпан</h2>
+          <h2 className="text-lg font-semibold text-card-foreground">
+            {t('subscription.upsell.title')}
+          </h2>
           <button
             onClick={onClose}
-            aria-label="Закрыть"
+            aria-label={t('subscription.upsell.close')}
             className="ml-4 rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-muted-foreground"
           >
             ✕
           </button>
         </div>
 
-        <p className="mb-6 text-sm text-muted-foreground">
-          Вы использовали все вакансии по текущему плану. Обновите подписку, чтобы продолжить
-          публикацию.
-        </p>
+        <p className="mb-6 text-sm text-muted-foreground">{t('subscription.upsell.body')}</p>
 
         <div className="mb-6 grid grid-cols-2 gap-3">
           {PLANS.map((plan) => (
             <div key={plan.name} className="rounded-xl border border-border p-4 text-center">
               <p className="text-base font-bold text-card-foreground">{plan.name}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{plan.vacancies} вакансий/мес</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t('subscription.upsell.vacanciesPerMonth', { count: plan.vacancies })}
+              </p>
               <p className="mt-2 text-sm font-medium text-indigo-600">{plan.price}</p>
             </div>
           ))}
@@ -45,7 +49,7 @@ export function UpsellModal({ isOpen, onClose }: Props) {
           href="/subscription"
           className="block w-full rounded-xl bg-indigo-600 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-700"
         >
-          Улучшить план
+          {t('subscription.upsell.upgrade')}
         </a>
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 import { SubscriptionPlanCard } from '@/components/subscription/SubscriptionPlanCard'
@@ -16,6 +17,7 @@ import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 
 export const SubscriptionClient = observer(function SubscriptionClient() {
   useTelegramBackButton()
+  const { t } = useTranslation()
   const { auth, payment } = useStores()
   const { openInvoice } = useTelegramPayment()
   const router = useRouter()
@@ -103,7 +105,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
 
   return (
     <div className="space-y-10">
-      <PageHeader title="Подписка" />
+      <PageHeader title={t('subscription.pageTitle')} />
 
       {/* Текущий план */}
       {user ? (
@@ -111,7 +113,9 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
           <Card>
             <CardContent className="flex flex-col gap-3 pt-6 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="mb-1 text-sm text-muted-foreground">Ваш текущий план</p>
+                <p className="mb-1 text-sm text-muted-foreground">
+                  {t('subscription.currentPlan')}
+                </p>
                 <SubscriptionBadge
                   plan={user.subscriptionPlan}
                   expiresAt={user.subscriptionExpiresAt}
@@ -121,10 +125,10 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
 
               <div className="flex flex-col gap-1 text-sm text-muted-foreground">
                 <span>
-                  Остаток кредитов вакансий: <strong>{user.vacancyCredits}</strong>
+                  {t('subscription.vacancyCreditsLeft')} <strong>{user.vacancyCredits}</strong>
                 </span>
                 <span>
-                  Остаток кредитов откликов: <strong>{user.applyCredits}</strong>
+                  {t('subscription.applyCreditsLeft')} <strong>{user.applyCredits}</strong>
                 </span>
               </div>
             </CardContent>
@@ -134,10 +138,8 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
         <section>
           <Card>
             <CardContent className="flex items-center justify-between pt-6">
-              <p className="text-sm text-muted-foreground">
-                Войдите, чтобы управлять подпиской и покупать планы.
-              </p>
-              <Button onClick={() => router.push('/login')}>Войти</Button>
+              <p className="text-sm text-muted-foreground">{t('subscription.loginPrompt')}</p>
+              <Button onClick={() => router.push('/login')}>{t('subscription.login')}</Button>
             </CardContent>
           </Card>
         </section>
@@ -146,9 +148,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
       {/* Уведомление о необходимости обновить статус */}
       {showRefreshHint && (
         <div className="flex items-center justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-          <p className="text-sm text-amber-800">
-            После оплаты нажмите «Обновить статус», чтобы увидеть изменения.
-          </p>
+          <p className="text-sm text-amber-800">{t('subscription.refreshHint')}</p>
           <Button
             size="sm"
             variant="outline"
@@ -157,7 +157,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
               setShowRefreshHint(false)
             }}
           >
-            Обновить статус
+            {t('subscription.refreshStatus')}
           </Button>
         </div>
       )}
@@ -172,17 +172,17 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
             }}
             className="text-xs text-destructive hover:underline"
           >
-            Закрыть
+            {t('subscription.close')}
           </button>
         </div>
       )}
 
       {/* Планы подписки */}
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold">Планы подписки</h2>
+        <h2 className="text-lg font-semibold">{t('subscription.plansTitle')}</h2>
 
         {payment.isLoading && payment.plans.length === 0 && (
-          <p className="text-sm text-muted-foreground">Загрузка планов...</p>
+          <p className="text-sm text-muted-foreground">{t('subscription.loadingPlans')}</p>
         )}
 
         {orderedPlans.length > 0 && (
@@ -210,10 +210,8 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
 
       {/* Пакеты вакансий */}
       <section className="space-y-2">
-        <h2 className="text-lg font-semibold">Пакеты вакансий</h2>
-        <p className="text-sm text-muted-foreground">
-          Дополнительные кредиты для публикации вакансий. Не сгорают при смене плана.
-        </p>
+        <h2 className="text-lg font-semibold">{t('subscription.vacancyPacksTitle')}</h2>
+        <p className="text-sm text-muted-foreground">{t('subscription.vacancyPacksDesc')}</p>
 
         {payment.vacancyPackages.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -232,10 +230,8 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
 
       {/* Пакеты откликов */}
       <section className="space-y-2">
-        <h2 className="text-lg font-semibold">Пакеты откликов</h2>
-        <p className="text-sm text-muted-foreground">
-          Дополнительные отклики когда дневной лимит исчерпан.
-        </p>
+        <h2 className="text-lg font-semibold">{t('subscription.applyPacksTitle')}</h2>
+        <p className="text-sm text-muted-foreground">{t('subscription.applyPacksDesc')}</p>
 
         {payment.applyPackages.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -254,7 +250,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
 
       {/* Disclaimer */}
       <p className="pb-4 text-center text-xs text-muted-foreground">
-        Оплата производится через Telegram Stars. Возврат Stars невозможен.
+        {t('subscription.disclaimer')}
       </p>
     </div>
   )

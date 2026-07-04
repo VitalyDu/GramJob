@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 interface Props {
   used: number
   limit: number
@@ -10,15 +12,14 @@ function getColorClass(pct: number): string {
 }
 
 export function LimitBar({ used, limit }: Props) {
+  const { t } = useTranslation()
   const pct = limit > 0 ? Math.min(Math.round((used / limit) * 100), 100) : 0
   const colorClass = getColorClass(pct)
 
   return (
     <div>
       <div className="mb-1 flex justify-between text-sm text-muted-foreground">
-        <span>
-          {used} из {limit} вакансий
-        </span>
+        <span>{t('subscription.limitBar.used', { used, limit })}</span>
         <span>{pct}%</span>
       </div>
       <div

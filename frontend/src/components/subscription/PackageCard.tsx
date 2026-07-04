@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import type { VacancyPackage, ApplyPackage } from '@/types/api'
 import { StarsPrice } from '@/components/subscription/StarsPrice'
@@ -19,12 +20,16 @@ interface ApplyPackageCardProps {
 type Props = VacancyPackageCardProps | ApplyPackageCardProps
 
 export function PackageCard(props: Props) {
+  const { t } = useTranslation()
   const { pkg, isBuying, onBuy } = props
 
   const details =
     props.type === 'vacancy'
-      ? [`${props.pkg.vacancyCredits} вакансий`, `${props.pkg.boostCredits} буст-кредитов`]
-      : [`${props.pkg.applyCredits} откликов`]
+      ? [
+          t('subscription.packageCard.vacancies', { count: props.pkg.vacancyCredits }),
+          t('subscription.packageCard.boosts', { count: props.pkg.boostCredits }),
+        ]
+      : [t('subscription.packageCard.applies', { count: props.pkg.applyCredits })]
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 flex flex-col gap-3">
@@ -48,7 +53,7 @@ export function PackageCard(props: Props) {
         disabled={isBuying}
         onClick={() => onBuy(pkg.id)}
       >
-        {isBuying ? 'Создание счёта...' : 'Купить'}
+        {isBuying ? t('subscription.packageCard.creating') : t('subscription.packageCard.buy')}
       </Button>
     </div>
   )
