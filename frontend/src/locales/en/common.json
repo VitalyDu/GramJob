@@ -187,7 +187,26 @@
   },
   "home": {
     "tagline": "International job board in Telegram",
-    "cta": "Get Started"
+    "cta": "Get Started",
+    "heroTitle": "Your dream job — right in Telegram",
+    "heroSubtitle": "International job and resume board. Find opportunities, build your future.",
+    "findJob": "Find a job",
+    "postVacancy": "Post a vacancy",
+    "latestVacancies": "Latest vacancies",
+    "allVacancies": "All vacancies",
+    "howItWorks": "How it works",
+    "step1Title": "Create your profile",
+    "step1Text": "Resume for candidates or company page for employers — in just a few minutes.",
+    "step2Title": "Find each other",
+    "step2Text": "Smart search by industry, work format, and seniority level.",
+    "step3Title": "Apply in one click",
+    "step3Text": "Notifications and application statuses — right in Telegram.",
+    "ctaCandidateTitle": "Looking for a job?",
+    "ctaCandidateText": "Create a resume and receive invitations from employers.",
+    "ctaCandidateButton": "Create resume",
+    "ctaEmployerTitle": "Looking for employees?",
+    "ctaEmployerText": "Post a vacancy — moderation takes just a few hours.",
+    "ctaEmployerButton": "Post a vacancy"
   },
   "moderation": {
     "reasons": {
