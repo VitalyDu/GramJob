@@ -17,8 +17,8 @@ describe('PLAN_LABELS', () => {
 })
 
 describe('PLAN_COLORS', () => {
-  it('free — серый', () => {
-    expect(PLAN_COLORS.free).toBe('gray')
+  it('free — зелёный', () => {
+    expect(PLAN_COLORS.free).toBe('green')
   })
   it('pro — синий', () => {
     expect(PLAN_COLORS.pro).toBe('blue')
@@ -70,9 +70,9 @@ describe('canUpgradeToPlan', () => {
 })
 
 describe('getPlanBadgeClasses', () => {
-  it('free — серые классы', () => {
+  it('free — зелёные классы', () => {
     const cls = getPlanBadgeClasses('free')
-    expect(cls).toContain('gray')
+    expect(cls).toBe('bg-green-100 text-green-700')
   })
   it('vip — жёлтые классы', () => {
     const cls = getPlanBadgeClasses('vip')

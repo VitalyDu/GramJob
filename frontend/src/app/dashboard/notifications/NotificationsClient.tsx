@@ -13,26 +13,11 @@ import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { PaginationBar } from '@/components/shared/PaginationBar'
-import type { NotificationType } from '@/types/api'
-
-const TYPE_ICONS: Partial<Record<NotificationType, string>> = {
-  new_application: '📩',
-  application_approved: '✅',
-  application_rejected: '❌',
-  interview_invitation: '📅',
-  test_task: '📝',
-  offer_received: '🎉',
-  resume_viewed: '👁',
-  vacancy_viewed: '👁',
-  vacancy_expiring_soon: '⏰',
-  vacancy_expired: '🔴',
-  subscription_expiring: '⚠️',
-  subscription_expired: '🔴',
-  limits_reached: '🚫',
-  saved_search_match: '🔔',
-  moderation_approved: '✅',
-  moderation_rejected: '❌',
-}
+import {
+  NOTIFICATION_TYPE_ICONS,
+  DEFAULT_NOTIFICATION_ICON,
+  stripLeadingEmoji,
+} from '@/lib/notification-utils'
 
 type TabValue = 'all' | 'unread' | 'read'
 
@@ -112,40 +97,48 @@ export const NotificationsClient = observer(function NotificationsClient() {
             )}
 
             <div className="space-y-2">
-              {store.notifications.map((n) => (
-                <div
-                  key={n.documentId}
-                  className={`relative rounded-xl border p-4 transition ${
-                    n.isRead ? 'border-border bg-card' : 'border-border bg-accent/40'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="mt-0.5 text-xl" aria-hidden>
-                      {TYPE_ICONS[n.type] ?? '📢'}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-card-foreground">{n.title}</p>
-                      <p className="mt-0.5 text-sm text-muted-foreground">{n.body}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {new Date(n.createdAt).toLocaleString('ru-RU', {
-                          day: 'numeric',
-                          month: 'short',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </p>
-                    </div>
-                    {!n.isRead && (
-                      <button
-                        onClick={() => handleMarkRead(n.documentId)}
-                        className="shrink-0 text-xs font-medium text-primary hover:underline"
+              {store.notifications.map((n) => {
+                const Icon = NOTIFICATION_TYPE_ICONS[n.type] ?? DEFAULT_NOTIFICATION_ICON
+                return (
+                  <div
+                    key={n.documentId}
+                    className={`relative rounded-xl border p-4 transition ${
+                      n.isRead ? 'border-border bg-card' : 'border-border bg-accent/40'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
+                        aria-hidden
                       >
-                        {t('dashboard.notifications.markRead')}
-                      </button>
-                    )}
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-card-foreground">{n.title}</p>
+                        <p className="mt-0.5 text-sm text-muted-foreground">
+                          {stripLeadingEmoji(n.body)}
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {new Date(n.createdAt).toLocaleString('ru-RU', {
+                            day: 'numeric',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                      {!n.isRead && (
+                        <button
+                          onClick={() => handleMarkRead(n.documentId)}
+                          className="shrink-0 text-xs font-medium text-primary hover:underline"
+                        >
+                          {t('dashboard.notifications.markRead')}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             <PaginationBar

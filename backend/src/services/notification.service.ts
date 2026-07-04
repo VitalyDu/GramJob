@@ -34,6 +34,10 @@ export function buildNotificationTitle(type: string): string {
   return NOTIFICATION_TITLES[type] ?? 'Уведомление'
 }
 
+export function stripLeadingEmoji(text: string): string {
+  return text.replace(/^[\p{Extended_Pictographic}️‍]+\s*/u, '')
+}
+
 type NotificationData = { entityType: string; entityId: string | number } | null
 
 export function buildNotificationData(
@@ -91,7 +95,7 @@ export async function sendNotification(
         user: userId,
         type,
         title: buildNotificationTitle(type),
-        body: message.text,
+        body: stripLeadingEmoji(message.text),
         isRead: false,
         data: buildNotificationData(type, templateData),
       },

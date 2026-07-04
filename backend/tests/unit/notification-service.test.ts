@@ -1,6 +1,7 @@
 import {
   buildNotificationTitle,
   buildNotificationData,
+  stripLeadingEmoji,
 } from '../../src/services/notification.service'
 
 describe('buildNotificationTitle', () => {
@@ -64,5 +65,17 @@ describe('buildNotificationData', () => {
     const d = buildNotificationData('moderation_approved', { resumeId: 'r1' })
     expect(d?.entityType).toBe('resume')
     expect(d?.entityId).toBe('r1')
+  })
+})
+
+describe('stripLeadingEmoji', () => {
+  it('срезает ведущее эмодзи из текста уведомления', () => {
+    expect(stripLeadingEmoji('📩 Новый отклик на «X» от Ивана')).toBe(
+      'Новый отклик на «X» от Ивана'
+    )
+  })
+
+  it('не трогает текст без эмодзи', () => {
+    expect(stripLeadingEmoji('Обычный текст')).toBe('Обычный текст')
   })
 })

@@ -190,18 +190,14 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
             {orderedPlans.map((plan) => {
               const currentPlan = user?.subscriptionPlan ?? 'free'
               return (
-                <div
+                <SubscriptionPlanCard
                   key={plan.code}
-                  className={plan.code === currentPlan ? 'ring-2 ring-primary rounded-xl' : ''}
-                >
-                  <SubscriptionPlanCard
-                    plan={plan}
-                    currentPlan={currentPlan}
-                    canBuy={canUpgradeToPlan(currentPlan, plan.code)}
-                    isBuying={buyingPlan === plan.code}
-                    onBuy={handleBuyPlan}
-                  />
-                </div>
+                  plan={plan}
+                  currentPlan={currentPlan}
+                  canBuy={canUpgradeToPlan(currentPlan, plan.code)}
+                  isBuying={buyingPlan === plan.code}
+                  onBuy={handleBuyPlan}
+                />
               )
             })}
           </div>

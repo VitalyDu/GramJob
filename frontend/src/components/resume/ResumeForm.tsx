@@ -441,10 +441,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
           {workFields.map((field, index) => (
             <Card key={field.id}>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm">
-                    {t('forms.resume.workExpEntry', { num: index + 1 })}
-                  </CardTitle>
+                <div className="flex items-center justify-end">
                   <Button
                     type="button"
                     variant="ghost"
