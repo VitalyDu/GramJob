@@ -33,7 +33,7 @@ export function UpsellModal({ isOpen, onClose }: Props) {
 
         <p className="mb-6 text-sm text-muted-foreground">{t('subscription.upsell.body')}</p>
 
-        <div className="mb-6 grid grid-cols-2 gap-3">
+        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {PLANS.map((plan) => (
             <div key={plan.name} className="rounded-xl border border-border p-4 text-center">
               <p className="text-base font-bold text-card-foreground">{plan.name}</p>

@@ -89,7 +89,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
       <div className="space-y-3">
         {store.myResumes.map((r) => (
           <div key={r.documentId} className="rounded-xl border border-border bg-card p-4">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="truncate font-semibold text-card-foreground">{r.title}</p>
@@ -101,7 +101,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
                 </p>
               </div>
 
-              <div className="flex shrink-0 flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 sm:shrink-0 sm:justify-end">
                 <Link
                   href={`/dashboard/resumes/${r.documentId}/analytics`}
                   className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
@@ -140,7 +140,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
               </div>
             </div>
 
-            <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
               <span>{t('dashboard.resumes.views', { count: r.views ?? 0 })}</span>
               {r.country && (
                 <span>

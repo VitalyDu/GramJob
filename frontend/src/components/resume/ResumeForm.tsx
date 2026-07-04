@@ -254,7 +254,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
           <CardTitle>{t('forms.resume.sectionPersonal')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="firstName">{t('forms.resume.firstNameLabel')} *</Label>
               <Input id="firstName" {...register('firstName')} />
@@ -271,7 +271,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label>{t('forms.resume.countryLabel')} *</Label>
               <Controller
@@ -309,7 +309,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
             {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="workFormat">{t('forms.resume.workFormatLabel')} *</Label>
               <Controller
@@ -356,7 +356,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
               <Label htmlFor="desiredSalary">{t('forms.resume.salaryLabel')}</Label>
               <Input id="desiredSalary" type="number" {...register('desiredSalary')} />
@@ -457,7 +457,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label>{t('forms.resume.companyLabel')} *</Label>
                     <Input {...register(`workExperience.${index}.company`)} />
@@ -477,15 +477,20 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                     )}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label>{t('forms.resume.startDateLabel')} *</Label>
-                    <Input type="date" {...register(`workExperience.${index}.startDate`)} />
+                    <Input
+                      type="date"
+                      className="min-w-0"
+                      {...register(`workExperience.${index}.startDate`)}
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <Label>{t('forms.resume.endDateLabel')}</Label>
                     <Input
                       type="date"
+                      className="min-w-0"
                       {...register(`workExperience.${index}.endDate`)}
                       disabled={watchWorkExperience[index]?.current}
                     />
@@ -565,7 +570,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                     </p>
                   )}
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label>{t('forms.resume.degreeLabel')} *</Label>
                     <Input
@@ -581,14 +586,22 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label>{t('forms.resume.startDateLabel')} *</Label>
-                    <Input type="date" {...register(`education.${index}.startDate`)} />
+                    <Input
+                      type="date"
+                      className="min-w-0"
+                      {...register(`education.${index}.startDate`)}
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <Label>{t('forms.resume.endDateLabel')}</Label>
-                    <Input type="date" {...register(`education.${index}.endDate`)} />
+                    <Input
+                      type="date"
+                      className="min-w-0"
+                      {...register(`education.${index}.endDate`)}
+                    />
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -614,7 +627,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
           <CardTitle>{t('forms.resume.sectionContacts')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
               <Label htmlFor="contactTelegram">{t('forms.resume.telegramLabel')}</Label>
               <Input

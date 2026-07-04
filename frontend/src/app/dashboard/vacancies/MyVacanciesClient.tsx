@@ -105,7 +105,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
       <div className="space-y-3">
         {store.myVacancies.map((v) => (
           <div key={v.documentId} className="rounded-xl border border-border bg-card p-4">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="truncate font-semibold text-card-foreground">{v.title}</p>
@@ -117,7 +117,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                 </p>
               </div>
 
-              <div className="flex shrink-0 flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 sm:shrink-0 sm:justify-end">
                 {canEditVacancy(v.status) && (
                   <Link
                     href={`/dashboard/vacancies/${v.documentId}/edit`}
@@ -169,7 +169,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
               </div>
             </div>
 
-            <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
               <span>{t('dashboard.vacancies.views', { count: v.views ?? 0 })}</span>
               <span>
                 {t('dashboard.vacancies.applications', { count: v.applicationsCount ?? 0 })}

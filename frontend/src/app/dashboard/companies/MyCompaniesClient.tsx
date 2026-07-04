@@ -85,34 +85,36 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
 
           return (
             <div key={company.documentId} className="rounded-xl border border-border bg-card p-4">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
-                  {logoUrl ? (
-                    <Image
-                      src={logoUrl}
-                      alt={company.name}
-                      width={48}
-                      height={48}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-lg font-bold text-muted-foreground">
-                      {company.name.charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate font-semibold text-card-foreground">{company.name}</p>
-                    <StatusBadge status={company.status} />
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                <div className="flex min-w-0 flex-1 items-center gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
+                    {logoUrl ? (
+                      <Image
+                        src={logoUrl}
+                        alt={company.name}
+                        width={48}
+                        height={48}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-lg font-bold text-muted-foreground">
+                        {company.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {company.country} · {COMPANY_SIZE_LABELS[company.companySize]}
-                  </p>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate font-semibold text-card-foreground">{company.name}</p>
+                      <StatusBadge status={company.status} />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {company.country} · {COMPANY_SIZE_LABELS[company.companySize]}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex shrink-0 gap-2">
+                <div className="flex flex-wrap gap-2 sm:shrink-0 sm:justify-end">
                   <Link
                     href={`/dashboard/companies/${company.documentId}/edit`}
                     className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"

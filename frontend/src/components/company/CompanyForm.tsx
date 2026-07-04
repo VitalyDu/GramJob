@@ -147,7 +147,7 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
             {errors.website && <p className="text-sm text-destructive">{errors.website.message}</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="telegram">{t('forms.company.telegramLabel')}</Label>
               <Input id="telegram" {...register('telegram')} placeholder="@company" />
@@ -174,7 +174,7 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
           <CardTitle>{t('forms.company.sectionLocation')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label>{t('forms.company.countryLabel')} *</Label>
               <Controller
