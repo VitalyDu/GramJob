@@ -1,9 +1,9 @@
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import type { Resume } from '@/types/api'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { RESUME_WORK_FORMAT_LABELS, RESUME_EMPLOYMENT_TYPE_LABELS } from '@/lib/resume-utils'
 import { getCountryName } from '@/lib/countries'
 import { ResumeStatusBadge } from './ResumeStatusBadge'
 
@@ -12,6 +12,7 @@ interface Props {
 }
 
 export function ResumeCard({ resume }: Props) {
+  const { t } = useTranslation()
   const initials =
     [resume.firstName, resume.lastName]
       .filter(Boolean)
@@ -51,11 +52,13 @@ export function ResumeCard({ resume }: Props) {
                 </Badge>
               )}
               {resume.workFormat && (
-                <Badge variant="secondary">{RESUME_WORK_FORMAT_LABELS[resume.workFormat]}</Badge>
+                <Badge variant="secondary">
+                  {t(`enums.resumeWorkFormat.${resume.workFormat}`)}
+                </Badge>
               )}
               {resume.employmentType && (
                 <Badge variant="secondary">
-                  {RESUME_EMPLOYMENT_TYPE_LABELS[resume.employmentType]}
+                  {t(`enums.employmentType.${resume.employmentType}`)}
                 </Badge>
               )}
               {visibleSkills.map((skill) => (

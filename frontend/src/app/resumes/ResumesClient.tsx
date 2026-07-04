@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import { FileText, Lock } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { ResumeCard } from '@/components/resume/ResumeCard'
@@ -17,13 +18,14 @@ import {
   CardListSkeleton,
   PaginationBar,
 } from '@/components/shared'
-import { RESUME_WORK_FORMAT_LABELS, RESUME_EMPLOYMENT_TYPE_LABELS } from '@/lib/resume-utils'
+import { RESUME_WORK_FORMAT_VALUES, RESUME_EMPLOYMENT_TYPE_VALUES } from '@/lib/resume-utils'
 import { MultiSelect } from '@/components/ui/multi-select'
 import { CountrySelect } from '@/components/ui/country-select'
 import type { ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 
 export const ResumesClient = observer(function ResumesClient() {
   const { resume: store, auth } = useStores()
+  const { t } = useTranslation()
   const [search, setSearch] = useState('')
   const [country, setCountry] = useState('')
   const [workFormats, setWorkFormats] = useState<ResumeWorkFormatEnum[]>([])
@@ -52,14 +54,14 @@ export const ResumesClient = observer(function ResumesClient() {
   if (!auth.user) {
     return (
       <div>
-        <PageHeader title="Резюме" description="База специалистов" />
+        <PageHeader title={t('nav.resumes')} description={t('resumes.description')} />
         <EmptyState
           icon={Lock}
-          title="Войдите в аккаунт"
-          description="Войдите, чтобы просматривать базу резюме"
+          title={t('resumes.loginRequired')}
+          description={t('resumes.loginRequiredHint')}
           action={
             <Button asChild>
-              <Link href="/login">Войти</Link>
+              <Link href="/login">{t('auth.login')}</Link>
             </Button>
           }
         />
@@ -70,14 +72,14 @@ export const ResumesClient = observer(function ResumesClient() {
   if (store.accessDenied) {
     return (
       <div>
-        <PageHeader title="Резюме" description="База специалистов" />
+        <PageHeader title={t('nav.resumes')} description={t('resumes.description')} />
         <EmptyState
           icon={Lock}
-          title="Доступ закрыт"
-          description="База резюме доступна на подписке Max"
+          title={t('resumes.accessDenied')}
+          description={t('resumes.accessDeniedHint')}
           action={
             <Button asChild>
-              <Link href="/subscription">Подписка Max</Link>
+              <Link href="/subscription">{t('resumes.subscribeMax')}</Link>
             </Button>
           }
         />
@@ -87,15 +89,15 @@ export const ResumesClient = observer(function ResumesClient() {
 
   return (
     <div>
-      <PageHeader title="Резюме" description="База специалистов" />
+      <PageHeader title={t('nav.resumes')} description={t('resumes.description')} />
 
       {/* Поиск — на всю ширину */}
       <div className="mb-4">
         <Input
-          placeholder="Поиск резюме..."
+          placeholder={t('resumes.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          aria-label="Поиск резюме"
+          aria-label={t('resumes.searchPlaceholder')}
         />
       </div>
 
@@ -103,22 +105,26 @@ export const ResumesClient = observer(function ResumesClient() {
         <aside className="md:sticky md:top-20">
           <div className="space-y-3 rounded-xl border bg-card p-4">
             <div className="space-y-1.5">
-              <Label>Страна</Label>
-              <CountrySelect value={country} onChange={setCountry} placeholder="Любая страна" />
+              <Label>{t('filters.country')}</Label>
+              <CountrySelect
+                value={country}
+                onChange={setCountry}
+                placeholder={t('filters.anyCountry')}
+              />
             </div>
             <MultiSelect
-              label="Все форматы"
-              options={(
-                Object.entries(RESUME_WORK_FORMAT_LABELS) as [ResumeWorkFormatEnum, string][]
-              ).map(([value, label]) => ({ value, label }))}
+              label={t('filters.allFormats')}
+              options={(RESUME_WORK_FORMAT_VALUES as readonly ResumeWorkFormatEnum[]).map(
+                (value) => ({ value, label: t(`enums.resumeWorkFormat.${value}`) })
+              )}
               value={workFormats}
               onChange={setWorkFormats}
             />
             <MultiSelect
-              label="Все типы"
-              options={(
-                Object.entries(RESUME_EMPLOYMENT_TYPE_LABELS) as [EmploymentTypeEnum, string][]
-              ).map(([value, label]) => ({ value, label }))}
+              label={t('filters.allTypes')}
+              options={(RESUME_EMPLOYMENT_TYPE_VALUES as readonly EmploymentTypeEnum[]).map(
+                (value) => ({ value, label: t(`enums.employmentType.${value}`) })
+              )}
               value={employmentTypes}
               onChange={setEmploymentTypes}
             />
@@ -166,12 +172,14 @@ export const ResumesClient = observer(function ResumesClient() {
           )}
 
           {!store.isLoading && !store.error && store.resumes.length === 0 && (
-            <EmptyState icon={FileText} title="Резюме не найдены" />
+            <EmptyState icon={FileText} title={t('resumes.notFound')} />
           )}
 
           {!store.isLoading && store.resumes.length > 0 && (
             <>
-              <p className="mb-3 text-sm text-muted-foreground">Найдено: {store.total}</p>
+              <p className="mb-3 text-sm text-muted-foreground">
+                {t('common.found', { count: store.total })}
+              </p>
               <div className="space-y-3">
                 {store.resumes.map((r) => (
                   <ResumeCard key={r.documentId} resume={r} />

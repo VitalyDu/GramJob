@@ -1,14 +1,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import { Eye, Send } from 'lucide-react'
 import type { Vacancy } from '@/types/api'
 import { getMediaUrl } from '@/lib/media'
-import {
-  WORK_FORMAT_LABELS,
-  EMPLOYMENT_TYPE_LABELS,
-  SENIORITY_LABELS,
-  formatSalary,
-} from '@/lib/vacancy-utils'
+import { formatSalary } from '@/lib/vacancy-utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -20,6 +16,7 @@ interface Props {
 }
 
 export function VacancyCard({ vacancy }: Props) {
+  const { t } = useTranslation()
   const logoUrl = getMediaUrl(vacancy.company?.logo?.url)
   const salary = formatSalary(vacancy.salaryFrom, vacancy.salaryTo, vacancy.salaryCurrency)
 
@@ -62,9 +59,11 @@ export function VacancyCard({ vacancy }: Props) {
                   ? `${getCountryName(vacancy.country)}, ${vacancy.city}`
                   : getCountryName(vacancy.country)}
               </Badge>
-              <Badge variant="secondary">{WORK_FORMAT_LABELS[vacancy.workFormat]}</Badge>
-              <Badge variant="secondary">{EMPLOYMENT_TYPE_LABELS[vacancy.employmentType]}</Badge>
-              <Badge variant="secondary">{SENIORITY_LABELS[vacancy.seniority]}</Badge>
+              <Badge variant="secondary">{t(`enums.workFormat.${vacancy.workFormat}`)}</Badge>
+              <Badge variant="secondary">
+                {t(`enums.employmentType.${vacancy.employmentType}`)}
+              </Badge>
+              <Badge variant="secondary">{t(`enums.seniority.${vacancy.seniority}`)}</Badge>
               {vacancy.urgent && <Badge variant="destructive">🔥 Urgent</Badge>}
             </div>
 
@@ -77,7 +76,7 @@ export function VacancyCard({ vacancy }: Props) {
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 {typeof vacancy.views === 'number' && (
                   <span
-                    aria-label={`Просмотры: ${vacancy.views}`}
+                    aria-label={t('cards.views', { count: vacancy.views })}
                     className="flex items-center gap-1"
                   >
                     <Eye className="h-3.5 w-3.5" />
@@ -86,7 +85,7 @@ export function VacancyCard({ vacancy }: Props) {
                 )}
                 {typeof vacancy.applicationsCount === 'number' && (
                   <span
-                    aria-label={`Отклики: ${vacancy.applicationsCount}`}
+                    aria-label={t('cards.applications', { count: vacancy.applicationsCount })}
                     className="flex items-center gap-1"
                   >
                     <Send className="h-3.5 w-3.5" />

@@ -15,6 +15,21 @@ export const RESUME_EMPLOYMENT_TYPE_LABELS: Record<EmploymentTypeEnum, string> =
   freelance: 'Фриланс',
 }
 
+export const RESUME_WORK_FORMAT_VALUES = [
+  'office',
+  'remote',
+  'hybrid',
+  'any',
+] as const satisfies readonly ResumeWorkFormatEnum[]
+
+export const RESUME_EMPLOYMENT_TYPE_VALUES = [
+  'full-time',
+  'part-time',
+  'contract',
+  'freelance',
+  'internship',
+] as const satisfies readonly EmploymentTypeEnum[]
+
 export const APPLY_PLAN_LIMITS: Record<string, number> = {
   free: 3,
   pro: 10,

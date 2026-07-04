@@ -1,14 +1,17 @@
+import i18n from '@/lib/i18n'
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:1337/api'
 
-const API_ERROR_MESSAGES: Record<string, string> = {
-  Forbidden: 'Доступ запрещён',
-  Unauthorized: 'Необходима авторизация',
-  'Not Found': 'Не найдено',
-  'Bad Request': 'Неверный запрос',
-  'Internal Server Error': 'Ошибка сервера',
-  'Invalid identifier or password': 'Неверный email или пароль',
-  'Email already taken': 'Этот email уже зарегистрирован',
-  'Too Many Requests': 'Слишком много запросов. Попробуйте позже',
+/** Keys of API error messages that have i18n translations under `apiErrors.*` */
+const API_ERROR_I18N_KEYS: Record<string, string> = {
+  Forbidden: 'apiErrors.Forbidden',
+  Unauthorized: 'apiErrors.Unauthorized',
+  'Not Found': 'apiErrors.Not Found',
+  'Bad Request': 'apiErrors.Bad Request',
+  'Internal Server Error': 'apiErrors.Internal Server Error',
+  'Invalid identifier or password': 'apiErrors.Invalid identifier or password',
+  'Email already taken': 'apiErrors.Email already taken',
+  'Too Many Requests': 'apiErrors.Too Many Requests',
 }
 
 export class ApiClientError extends Error {
@@ -47,7 +50,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     const data = await res.json().catch(() => ({}))
     const raw =
       (data as { error?: { message?: string } } | undefined)?.error?.message ?? res.statusText
-    const message = API_ERROR_MESSAGES[raw] ?? raw
+    const i18nKey = API_ERROR_I18N_KEYS[raw]
+    const message = i18nKey ? i18n.t(i18nKey) : raw
     throw new ApiClientError(res.status, data, message)
   }
 

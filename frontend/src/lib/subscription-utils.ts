@@ -1,3 +1,5 @@
+import i18n from '@/lib/i18n'
+
 export const PLAN_LABELS: Record<string, string> = {
   free: 'Free',
   pro: 'Pro',
@@ -19,7 +21,7 @@ export function formatStarsAmount(price: number | null): string | null {
 
 /** @deprecated Use StarsPrice component for display. Kept for backward compatibility. */
 export function formatStarsPrice(price: number | null): string {
-  if (price === null || price === undefined) return 'Бесплатно'
+  if (price === null || price === undefined) return i18n.t('subscription.starsPrice.free')
   return `${price} ★`
 }
 

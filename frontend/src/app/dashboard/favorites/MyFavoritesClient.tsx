@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import { Star } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -18,21 +19,21 @@ import type {
   FavoriteResumeCard,
   FavoriteCompanyCard,
 } from '@/types/api'
-import { formatSalary, WORK_FORMAT_LABELS } from '@/lib/vacancy-utils'
+import { formatSalary } from '@/lib/vacancy-utils'
 import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
-import { RESUME_WORK_FORMAT_LABELS } from '@/lib/resume-utils'
-
-const TABS: { label: string; value: string; type: FavoriteType | undefined }[] = [
-  { label: 'Все', value: 'all', type: undefined },
-  { label: 'Вакансии', value: 'vacancy', type: 'vacancy' },
-  { label: 'Резюме', value: 'resume', type: 'resume' },
-  { label: 'Компании', value: 'company', type: 'company' },
-]
 
 export const MyFavoritesClient = observer(function MyFavoritesClient() {
+  const { t } = useTranslation()
   const { favorite: store } = useStores()
   const isAuthenticated = useRequireAuth()
   const [activeType, setActiveType] = useState<FavoriteType | undefined>(undefined)
+
+  const TABS: { label: string; value: string; type: FavoriteType | undefined }[] = [
+    { label: t('dashboard.favorites.tabs.all'), value: 'all', type: undefined },
+    { label: t('dashboard.favorites.tabs.vacancy'), value: 'vacancy', type: 'vacancy' },
+    { label: t('dashboard.favorites.tabs.resume'), value: 'resume', type: 'resume' },
+    { label: t('dashboard.favorites.tabs.company'), value: 'company', type: 'company' },
+  ]
 
   useEffect(() => {
     void store.fetchFavorites(activeType)
@@ -57,7 +58,7 @@ export const MyFavoritesClient = observer(function MyFavoritesClient() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Избранное" />
+      <PageHeader title={t('dashboard.favorites.title')} />
 
       <Tabs value={activeValue} onValueChange={handleTabChange}>
         <TabsList>
@@ -82,8 +83,8 @@ export const MyFavoritesClient = observer(function MyFavoritesClient() {
             {!store.isLoading && store.favorites.length === 0 && !store.error && (
               <EmptyState
                 icon={Star}
-                title="В избранном пусто"
-                description="Добавляйте вакансии, резюме и компании в избранное, чтобы быстро возвращаться к ним"
+                title={t('dashboard.favorites.empty')}
+                description={t('dashboard.favorites.emptyDesc')}
               />
             )}
 
@@ -96,7 +97,7 @@ export const MyFavoritesClient = observer(function MyFavoritesClient() {
                   <button
                     onClick={() => handleRemove(fav.type, fav.targetId)}
                     disabled={store.isLoading}
-                    title="Убрать из избранного"
+                    title={t('dashboard.favorites.removeTitle')}
                     className="absolute right-3 top-3 text-sm text-muted-foreground hover:text-destructive disabled:opacity-50"
                   >
                     ✕
@@ -111,7 +112,7 @@ export const MyFavoritesClient = observer(function MyFavoritesClient() {
                         {(fav.entity as FavoriteVacancyCard).company?.name}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {WORK_FORMAT_LABELS[(fav.entity as FavoriteVacancyCard).workFormat]} ·{' '}
+                        {t(`enums.workFormat.${(fav.entity as FavoriteVacancyCard).workFormat}`)} ·{' '}
                         {(fav.entity as FavoriteVacancyCard).country}
                         {(() => {
                           const e = fav.entity as FavoriteVacancyCard
@@ -130,8 +131,10 @@ export const MyFavoritesClient = observer(function MyFavoritesClient() {
                         {(fav.entity as FavoriteResumeCard).lastName}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {RESUME_WORK_FORMAT_LABELS[(fav.entity as FavoriteResumeCard).workFormat]} ·{' '}
-                        {(fav.entity as FavoriteResumeCard).country}
+                        {t(
+                          `enums.resumeWorkFormat.${(fav.entity as FavoriteResumeCard).workFormat}`
+                        )}{' '}
+                        · {(fav.entity as FavoriteResumeCard).country}
                       </p>
                     </Link>
                   ) : fav.type === 'company' && fav.entity ? (
@@ -146,7 +149,7 @@ export const MyFavoritesClient = observer(function MyFavoritesClient() {
                     </Link>
                   ) : (
                     <p className="pr-8 text-sm text-muted-foreground">
-                      Элемент удалён или недоступен
+                      {t('dashboard.favorites.deletedItem')}
                     </p>
                   )}
                 </div>

@@ -24,8 +24,6 @@ import {
   canBoostVacancy,
   canArchiveVacancy,
   canEditVacancy,
-  WORK_FORMAT_LABELS,
-  SENIORITY_LABELS,
 } from '@/lib/vacancy-utils'
 import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 import { PLAN_LIMITS } from './plan-limits'
@@ -56,7 +54,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
   }
 
   const handleArchive = (id: string) => {
-    if (!window.confirm('Архивировать вакансию?')) return
+    if (!window.confirm(t('dashboard.vacancies.confirmArchive'))) return
     void store.archiveVacancy(id)
   }
 
@@ -71,10 +69,10 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
       <UpsellModal isOpen={store.limitReached} onClose={() => store.clearLimitReached()} />
 
       <PageHeader
-        title="Мои вакансии"
+        title={t('dashboard.vacancies.title')}
         actions={
           <Button asChild>
-            <Link href="/dashboard/vacancies/new">+ Создать вакансию</Link>
+            <Link href="/dashboard/vacancies/new">{t('dashboard.vacancies.createNew')}</Link>
           </Button>
         }
       />
@@ -94,11 +92,11 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
       {!store.isLoading && store.myVacancies.length === 0 && !store.error && (
         <EmptyState
           icon={Briefcase}
-          title="Нет вакансий"
-          description="Создайте первую вакансию, чтобы начать поиск кандидатов"
+          title={t('dashboard.vacancies.empty')}
+          description={t('dashboard.vacancies.emptyDesc')}
           action={
             <Button asChild>
-              <Link href="/dashboard/vacancies/new">Создать вакансию</Link>
+              <Link href="/dashboard/vacancies/new">{t('dashboard.vacancies.create')}</Link>
             </Button>
           }
         />
@@ -114,8 +112,8 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                   <VacancyStatusBadge status={v.status} />
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {v.company?.name} · {SENIORITY_LABELS[v.seniority]} ·{' '}
-                  {WORK_FORMAT_LABELS[v.workFormat]}
+                  {v.company?.name} · {t(`enums.seniority.${v.seniority}`)} ·{' '}
+                  {t(`enums.workFormat.${v.workFormat}`)}
                 </p>
               </div>
 
@@ -125,7 +123,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                     href={`/dashboard/vacancies/${v.documentId}/edit`}
                     className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
                   >
-                    Редактировать
+                    {t('dashboard.vacancies.edit')}
                   </Link>
                 )}
                 {canPublishVacancy(v.status) && (
@@ -135,7 +133,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                     onClick={() => void handlePublish(v.documentId)}
                     disabled={store.isLoading}
                   >
-                    На модерацию
+                    {t('dashboard.vacancies.toModeration')}
                   </Button>
                 )}
                 {canBoostVacancy(v.status) && (
@@ -145,7 +143,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                     onClick={() => handleBoost(v.documentId)}
                     disabled={store.isLoading}
                   >
-                    ↑ Поднять
+                    {t('dashboard.vacancies.boost')}
                     {store.boostsRemaining !== null && (
                       <span className="ml-1 text-xs opacity-70">({store.boostsRemaining})</span>
                     )}
@@ -159,24 +157,26 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                     onClick={() => handleArchive(v.documentId)}
                     disabled={store.isLoading}
                   >
-                    В архив
+                    {t('dashboard.vacancies.archive')}
                   </Button>
                 )}
                 <Link
                   href={`/dashboard/vacancies/${v.documentId}/analytics`}
                   className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
                 >
-                  Аналитика
+                  {t('dashboard.vacancies.analytics')}
                 </Link>
               </div>
             </div>
 
             <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
-              <span>{v.views ?? 0} просмотров</span>
-              <span>{v.applicationsCount ?? 0} откликов</span>
+              <span>{t('dashboard.vacancies.views', { count: v.views ?? 0 })}</span>
+              <span>
+                {t('dashboard.vacancies.applications', { count: v.applicationsCount ?? 0 })}
+              </span>
               {v.expiresAt && (
                 <span>
-                  Истекает{' '}
+                  {t('dashboard.vacancies.expires')}{' '}
                   {new Date(v.expiresAt).toLocaleDateString('ru', {
                     day: 'numeric',
                     month: 'short',

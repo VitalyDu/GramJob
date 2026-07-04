@@ -17,7 +17,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select'
-import { WORK_FORMAT_LABELS, EMPLOYMENT_TYPE_LABELS, SENIORITY_LABELS } from '@/lib/vacancy-utils'
+import { WORK_FORMAT_VALUES, EMPLOYMENT_TYPE_VALUES, SENIORITY_VALUES } from '@/lib/vacancy-utils'
 import { CountrySelect } from '@/components/ui/country-select'
 import type {
   VacancyCreateInput,
@@ -324,11 +324,9 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {(
-                        Object.entries(EMPLOYMENT_TYPE_LABELS) as [EmploymentTypeEnum, string][]
-                      ).map(([v, l]) => (
+                      {(EMPLOYMENT_TYPE_VALUES as readonly EmploymentTypeEnum[]).map((v) => (
                         <SelectItem key={v} value={v}>
-                          {l}
+                          {t(`enums.employmentType.${v}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -347,13 +345,11 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {(Object.entries(WORK_FORMAT_LABELS) as [WorkFormatEnum, string][]).map(
-                        ([v, l]) => (
-                          <SelectItem key={v} value={v}>
-                            {l}
-                          </SelectItem>
-                        )
-                      )}
+                      {(WORK_FORMAT_VALUES as readonly WorkFormatEnum[]).map((v) => (
+                        <SelectItem key={v} value={v}>
+                          {t(`enums.workFormat.${v}`)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 )}
@@ -370,13 +366,11 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {(Object.entries(SENIORITY_LABELS) as [SeniorityEnum, string][]).map(
-                        ([v, l]) => (
-                          <SelectItem key={v} value={v}>
-                            {l}
-                          </SelectItem>
-                        )
-                      )}
+                      {(SENIORITY_VALUES as readonly SeniorityEnum[]).map((v) => (
+                        <SelectItem key={v} value={v}>
+                          {t(`enums.seniority.${v}`)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 )}

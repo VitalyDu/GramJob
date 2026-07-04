@@ -11,7 +11,7 @@ import type {
   Industry,
   SalaryCurrencyEnum,
 } from '@/types/api'
-import { WORK_FORMAT_LABELS, EMPLOYMENT_TYPE_LABELS, SENIORITY_LABELS } from '@/lib/vacancy-utils'
+import { WORK_FORMAT_VALUES, EMPLOYMENT_TYPE_VALUES, SENIORITY_VALUES } from '@/lib/vacancy-utils'
 import { api } from '@/services/api'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -198,9 +198,10 @@ function FilterFields({
         <Label>{t('filters.workFormat')}</Label>
         <MultiSelect
           label={t('filters.allFormats')}
-          options={(Object.entries(WORK_FORMAT_LABELS) as [WorkFormatEnum, string][]).map(
-            ([value, label]) => ({ value, label })
-          )}
+          options={(WORK_FORMAT_VALUES as readonly WorkFormatEnum[]).map((value) => ({
+            value,
+            label: t(`enums.workFormat.${value}`),
+          }))}
           value={draft.workFormat}
           onChange={(v) => setDraft({ ...draft, workFormat: v })}
         />
@@ -209,9 +210,10 @@ function FilterFields({
         <Label>{t('filters.employment')}</Label>
         <MultiSelect
           label={t('filters.allTypes')}
-          options={(Object.entries(EMPLOYMENT_TYPE_LABELS) as [EmploymentTypeEnum, string][]).map(
-            ([value, label]) => ({ value, label })
-          )}
+          options={(EMPLOYMENT_TYPE_VALUES as readonly EmploymentTypeEnum[]).map((value) => ({
+            value,
+            label: t(`enums.employmentType.${value}`),
+          }))}
           value={draft.employmentType}
           onChange={(v) => setDraft({ ...draft, employmentType: v })}
         />
@@ -220,9 +222,10 @@ function FilterFields({
         <Label>{t('filters.seniority')}</Label>
         <MultiSelect
           label={t('filters.allLevels')}
-          options={(Object.entries(SENIORITY_LABELS) as [SeniorityEnum, string][]).map(
-            ([value, label]) => ({ value, label })
-          )}
+          options={(SENIORITY_VALUES as readonly SeniorityEnum[]).map((value) => ({
+            value,
+            label: t(`enums.seniority.${value}`),
+          }))}
           value={draft.seniority}
           onChange={(v) => setDraft({ ...draft, seniority: v })}
         />

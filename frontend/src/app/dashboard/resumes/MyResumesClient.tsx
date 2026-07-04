@@ -21,8 +21,6 @@ import {
   canEditResume,
   canArchiveResume,
   APPLY_PLAN_LIMITS,
-  RESUME_WORK_FORMAT_LABELS,
-  RESUME_EMPLOYMENT_TYPE_LABELS,
 } from '@/lib/resume-utils'
 import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 
@@ -47,7 +45,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
   }
 
   const handleArchive = (id: string) => {
-    if (!window.confirm('Архивировать резюме?')) return
+    if (!window.confirm(t('dashboard.resumes.confirmArchive'))) return
     void store.archiveResume(id)
   }
 
@@ -60,11 +58,11 @@ export const MyResumesClient = observer(function MyResumesClient() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Мои резюме"
-        description={`Лимит откликов в день (план ${plan}): ${applyLimit}`}
+        title={t('dashboard.resumes.title')}
+        description={t('dashboard.resumes.applyLimitDesc', { plan, limit: applyLimit })}
         actions={
           <Button asChild>
-            <Link href="/dashboard/resumes/new">+ Создать резюме</Link>
+            <Link href="/dashboard/resumes/new">{t('dashboard.resumes.createNew')}</Link>
           </Button>
         }
       />
@@ -78,11 +76,11 @@ export const MyResumesClient = observer(function MyResumesClient() {
       {!store.isLoading && store.myResumes.length === 0 && !store.error && (
         <EmptyState
           icon={FileText}
-          title="Нет резюме"
-          description="Создайте резюме, чтобы откликаться на вакансии"
+          title={t('dashboard.resumes.empty')}
+          description={t('dashboard.resumes.emptyDesc')}
           action={
             <Button asChild>
-              <Link href="/dashboard/resumes/new">Создать резюме</Link>
+              <Link href="/dashboard/resumes/new">{t('dashboard.resumes.create')}</Link>
             </Button>
           }
         />
@@ -98,8 +96,8 @@ export const MyResumesClient = observer(function MyResumesClient() {
                   <ResumeStatusBadge status={r.status} />
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {r.firstName} {r.lastName} · {RESUME_WORK_FORMAT_LABELS[r.workFormat]} ·{' '}
-                  {RESUME_EMPLOYMENT_TYPE_LABELS[r.employmentType]}
+                  {r.firstName} {r.lastName} · {t(`enums.resumeWorkFormat.${r.workFormat}`)} ·{' '}
+                  {t(`enums.employmentType.${r.employmentType}`)}
                 </p>
               </div>
 
@@ -108,14 +106,14 @@ export const MyResumesClient = observer(function MyResumesClient() {
                   href={`/dashboard/resumes/${r.documentId}/analytics`}
                   className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
                 >
-                  Аналитика
+                  {t('dashboard.resumes.analytics')}
                 </Link>
                 {canEditResume(r.status) && (
                   <Link
                     href={`/dashboard/resumes/${r.documentId}/edit`}
                     className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
                   >
-                    Редактировать
+                    {t('dashboard.resumes.edit')}
                   </Link>
                 )}
                 {canPublishResume(r.status) && (
@@ -125,7 +123,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
                     onClick={() => void handlePublish(r.documentId)}
                     disabled={store.isLoading}
                   >
-                    На модерацию
+                    {t('dashboard.resumes.toModeration')}
                   </Button>
                 )}
                 {canArchiveResume(r.status) && (
@@ -136,14 +134,14 @@ export const MyResumesClient = observer(function MyResumesClient() {
                     onClick={() => handleArchive(r.documentId)}
                     disabled={store.isLoading}
                   >
-                    В архив
+                    {t('dashboard.resumes.archive')}
                   </Button>
                 )}
               </div>
             </div>
 
             <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
-              <span>{r.views ?? 0} просмотров</span>
+              <span>{t('dashboard.resumes.views', { count: r.views ?? 0 })}</span>
               {r.country && (
                 <span>
                   {r.country}

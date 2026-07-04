@@ -20,12 +20,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import {
-  WORK_FORMAT_LABELS,
-  EMPLOYMENT_TYPE_LABELS,
-  SENIORITY_LABELS,
-  formatSalary,
-} from '@/lib/vacancy-utils'
+import { formatSalary } from '@/lib/vacancy-utils'
 import { getCountryName } from '@/lib/countries'
 
 interface Props {
@@ -115,9 +110,9 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
                 {v.city ? `, ${v.city}` : ''}
               </Badge>
             )}
-            <Badge variant="outline">{WORK_FORMAT_LABELS[v.workFormat]}</Badge>
-            <Badge variant="outline">{EMPLOYMENT_TYPE_LABELS[v.employmentType]}</Badge>
-            <Badge variant="outline">{SENIORITY_LABELS[v.seniority]}</Badge>
+            <Badge variant="outline">{t(`enums.workFormat.${v.workFormat}`)}</Badge>
+            <Badge variant="outline">{t(`enums.employmentType.${v.employmentType}`)}</Badge>
+            <Badge variant="outline">{t(`enums.seniority.${v.seniority}`)}</Badge>
             {v.urgent && (
               <Badge className="bg-red-100 text-red-700 hover:bg-red-100">🔥 Urgent</Badge>
             )}

@@ -1,3 +1,4 @@
+import i18next from '@/lib/i18n'
 import type {
   VacancyStatusEnum,
   WorkFormatEnum,
@@ -84,7 +85,8 @@ export function formatSalary(
 ): string {
   if (!from && !to) return ''
   const sym = currency ? (SALARY_CURRENCY_SYMBOLS[currency] ?? '') : ''
-  if (from && to) return `${sym}${from.toLocaleString('ru')} — ${sym}${to.toLocaleString('ru')}`
-  if (from) return `от ${sym}${from.toLocaleString('ru')}`
-  return `до ${sym}${to!.toLocaleString('ru')}`
+  const locale = i18next.language === 'ru' ? 'ru' : 'en'
+  if (from && to) return `${sym}${from.toLocaleString(locale)} — ${sym}${to.toLocaleString(locale)}`
+  if (from) return `${i18next.t('salary.from')} ${sym}${from.toLocaleString(locale)}`
+  return `${i18next.t('salary.to')} ${sym}${to!.toLocaleString(locale)}`
 }

@@ -18,7 +18,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select'
-import { RESUME_WORK_FORMAT_LABELS, RESUME_EMPLOYMENT_TYPE_LABELS } from '@/lib/resume-utils'
+import { RESUME_WORK_FORMAT_VALUES, RESUME_EMPLOYMENT_TYPE_VALUES } from '@/lib/resume-utils'
 import { CountrySelect } from '@/components/ui/country-select'
 import type { ResumeCreateInput, ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
@@ -321,13 +321,11 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {(Object.keys(RESUME_WORK_FORMAT_LABELS) as ResumeWorkFormatEnum[]).map(
-                        (fmt) => (
-                          <SelectItem key={fmt} value={fmt}>
-                            {RESUME_WORK_FORMAT_LABELS[fmt]}
-                          </SelectItem>
-                        )
-                      )}
+                      {(RESUME_WORK_FORMAT_VALUES as readonly ResumeWorkFormatEnum[]).map((fmt) => (
+                        <SelectItem key={fmt} value={fmt}>
+                          {t(`enums.resumeWorkFormat.${fmt}`)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 )}
@@ -344,10 +342,10 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {(Object.keys(RESUME_EMPLOYMENT_TYPE_LABELS) as EmploymentTypeEnum[]).map(
+                      {(RESUME_EMPLOYMENT_TYPE_VALUES as readonly EmploymentTypeEnum[]).map(
                         (empType) => (
                           <SelectItem key={empType} value={empType}>
-                            {RESUME_EMPLOYMENT_TYPE_LABELS[empType]}
+                            {t(`enums.employmentType.${empType}`)}
                           </SelectItem>
                         )
                       )}

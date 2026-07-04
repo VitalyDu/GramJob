@@ -17,7 +17,6 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { CardListSkeleton, EmptyState, ErrorState } from '@/components/shared'
-import { RESUME_WORK_FORMAT_LABELS, RESUME_EMPLOYMENT_TYPE_LABELS } from '@/lib/resume-utils'
 import { getCountryName } from '@/lib/countries'
 import { SALARY_CURRENCY_SYMBOLS } from '@/lib/vacancy-utils'
 import type { SalaryCurrencyEnum } from '@/types/api'
@@ -105,8 +104,8 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
                     {r.city ? `, ${r.city}` : ''}
                   </Badge>
                 )}
-                <Badge variant="secondary">{RESUME_WORK_FORMAT_LABELS[r.workFormat]}</Badge>
-                <Badge variant="secondary">{RESUME_EMPLOYMENT_TYPE_LABELS[r.employmentType]}</Badge>
+                <Badge variant="secondary">{t(`enums.resumeWorkFormat.${r.workFormat}`)}</Badge>
+                <Badge variant="secondary">{t(`enums.employmentType.${r.employmentType}`)}</Badge>
                 {r.experienceYears !== null && r.experienceYears !== undefined && (
                   <Badge variant="outline">
                     {t('resumeDetail.experienceYears', { count: r.experienceYears })}

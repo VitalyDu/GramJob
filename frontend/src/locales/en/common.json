@@ -658,6 +658,20 @@
       "upgrade": "Upgrade plan"
     }
   },
+  "salary": {
+    "from": "from",
+    "to": "up to"
+  },
+  "apiErrors": {
+    "Forbidden": "Access denied",
+    "Unauthorized": "Authentication required",
+    "Not Found": "Not found",
+    "Bad Request": "Bad request",
+    "Internal Server Error": "Server error",
+    "Invalid identifier or password": "Invalid email or password",
+    "Email already taken": "This email is already registered",
+    "Too Many Requests": "Too many requests. Please try again later"
+  },
   "countrySelect": {
     "placeholder": "Select country",
     "searchPlaceholder": "Search country...",
