@@ -33,10 +33,10 @@ export const CreateResumeClient = observer(function CreateResumeClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
+      <div className="space-y-1">
         <Link
           href="/dashboard/resumes"
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="inline-block text-sm text-muted-foreground hover:text-foreground"
         >
           {t('dashboard.resumes.backToList')}
         </Link>
