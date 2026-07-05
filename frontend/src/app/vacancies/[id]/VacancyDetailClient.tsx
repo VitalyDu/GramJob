@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Eye, Send, ExternalLink } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
@@ -85,9 +86,11 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({
           {/* Лого + название + статус */}
           <div className="flex items-start gap-4">
             {logoUrl && v.company && (
-              <img
+              <Image
                 src={logoUrl}
                 alt={v.company.name}
+                width={56}
+                height={56}
                 className="h-14 w-14 shrink-0 rounded-lg object-cover"
               />
             )}
