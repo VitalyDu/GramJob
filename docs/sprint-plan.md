@@ -327,26 +327,26 @@
 
 ### SEO & Performance
 
-- [ ] Metadata API: динамические title/description/OG для vacancy, company, resume страниц
-- [ ] ISR: `revalidate = 3600` для списков вакансий, `revalidate = 300` для карточек
-- [ ] `sitemap.xml`: динамический (published vacancies + companies)
-- [ ] `robots.txt`: закрыть dashboard/\*, открыть /vacancies, /companies
-- [ ] Lighthouse audit: добиться ≥ 90 по всем метрикам
-- [ ] `next/image` на всех изображениях (лого компаний, аватары)
-- [ ] Bundle analysis (`@next/bundle-analyzer`): устранить тяжёлые зависимости
-- [ ] Preload критических шрифтов (`next/font`)
+- [x] Metadata API: динамические title/description/OG для vacancy, company, resume страниц
+- [x] ISR: `revalidate = 3600` для списков вакансий, `revalidate = 300` для карточек
+- [x] `sitemap.xml`: динамический (published vacancies + companies)
+- [x] `robots.txt`: закрыть dashboard/\*, открыть /vacancies, /companies
+- [x] Lighthouse audit: добиться ≥ 90 по всем метрикам
+- [x] `next/image` на всех изображениях (лого компаний, аватары)
+- [x] Bundle analysis (`@next/bundle-analyzer`): устранить тяжёлые зависимости
+- [x] Preload критических шрифтов (`next/font`) — Inter с display: swap
 
 ### DevOps & Launch
 
-- [ ] Strapi: деплой на VPS (Hetzner CX21), PM2, systemd
-- [ ] Nginx: reverse proxy для api.gramjob.com + SSL (certbot)
-- [ ] Next.js: деплой на Vercel, production ENV variables
-- [ ] Cloudflare R2: настроить как production S3 (перенести медиа)
-- [ ] Telegram Bot: установить webhook на production URL
+- [x] Strapi: деплой на VPS (Hiddence), PM2, systemd
+- [x] Nginx: reverse proxy для api.gramjob.com + SSL (certbot)
+- [x] Next.js: деплой на VPS (Hiddence), production ENV variables
+- [ ] Cloudflare R2: настроить как production S3 (перенести медиа, сейчас MinIO)
+- [x] Telegram Bot: установить webhook на production URL (https://api.gramjob.com/api/telegram/webhook)
 - [ ] Sentry: подключить frontend (next.js) + backend (Strapi)
 - [ ] UptimeRobot: мониторинг api.gramjob.com + gramjob.com
 - [ ] PostgreSQL backup: ежедневный cron → R2
-- [ ] GitHub Actions: автодеплой backend (SSH) + frontend (Vercel trigger)
+- [x] GitHub Actions: автодеплой backend (SSH) + frontend (SSH)
 - [ ] Smoke tests: пройти все критические флоу в production
 
 ---
