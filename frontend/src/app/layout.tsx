@@ -5,17 +5,25 @@ import './globals.css'
 import { StoreProvider } from '@/stores/StoreProvider'
 import { I18nProvider } from '@/components/I18nProvider'
 import { AppShell } from '@/components/layout/AppShell'
+import { SITE_URL } from '@/lib/site'
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
   variable: '--font-inter',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: 'GramJob — работа и вакансии в Telegram',
   description:
     'Международная биржа вакансий и резюме в экосистеме Telegram. Find opportunities. Build futures.',
   icons: { icon: '/logo-vertical.png' },
+  openGraph: {
+    siteName: 'GramJob',
+    type: 'website',
+    locale: 'ru_RU',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
