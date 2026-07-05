@@ -289,10 +289,12 @@ export class VacancyStore {
       this.error = null
     })
     try {
-      const res = await api.post<{ data: Vacancy }>(`/vacancies/${id}/boost`, {})
+      const res = await api.post<{ data: { success: boolean; boostsRemaining: number } }>(
+        `/vacancies/${id}/boost`,
+        {}
+      )
       runInAction(() => {
-        const idx = this.myVacancies.findIndex((v) => v.documentId === id)
-        if (idx !== -1) this.myVacancies[idx] = res.data
+        this.boostsRemaining = res.data.boostsRemaining
       })
     } catch (e) {
       runInAction(() => {

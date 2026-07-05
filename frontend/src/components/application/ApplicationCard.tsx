@@ -52,7 +52,7 @@ export function ApplicationCard({
               >
                 {app.vacancy.title}
               </Link>
-              <p className="mt-0.5 text-sm text-muted-foreground">{app.vacancy.company.name}</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">{app.vacancy.company?.name}</p>
             </>
           )}
 

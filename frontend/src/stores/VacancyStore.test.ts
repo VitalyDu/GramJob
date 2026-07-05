@@ -295,4 +295,25 @@ describe('VacancyStore', () => {
       expect(store.myVacancies[0]?.status).toBe('archived')
     })
   })
+
+  describe('boostVacancy', () => {
+    it('обновляет boostsRemaining из ответа и не заменяет вакансию в myVacancies', async () => {
+      store.myVacancies = [mockVacancy]
+      vi.mocked(api.post).mockResolvedValue({ data: { success: true, boostsRemaining: 7 } })
+
+      await store.boostVacancy('vac123')
+
+      expect(api.post).toHaveBeenCalledWith('/vacancies/vac123/boost', {})
+      expect(store.boostsRemaining).toBe(7)
+      // вакансия в массиве должна остаться нетронутой
+      expect(store.myVacancies[0]).toEqual(mockVacancy)
+    })
+
+    it('устанавливает error при сетевой ошибке и выбрасывает', async () => {
+      vi.mocked(api.post).mockRejectedValue(new Error('Boost failed'))
+
+      await expect(store.boostVacancy('vac123')).rejects.toThrow('Boost failed')
+      expect(store.error).toBe('Boost failed')
+    })
+  })
 })

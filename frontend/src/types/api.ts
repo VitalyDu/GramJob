@@ -394,7 +394,7 @@ export interface ApplicationVacancyRef {
     documentId: string
     name: string
     slug: string
-  }
+  } | null
 }
 
 export interface ApplicationResumeRef {
