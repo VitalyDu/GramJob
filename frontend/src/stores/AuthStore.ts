@@ -8,6 +8,7 @@ export class AuthStore {
   user: User | null = null
   jwt: string | null = null
   isLoading = false
+  isInitializing = false
   error: string | null = null
 
   constructor() {
@@ -20,13 +21,16 @@ export class AuthStore {
   }
 
   // Reads JWT from localStorage synchronously so API calls made in child useEffect
-  // hooks don't fire without auth (child effects run before parent StoreProvider effect)
+  // hooks don't fire without auth (child effects run before parent StoreProvider effect).
+  // Sets isInitializing=true when a token exists so useRequireAuth doesn't redirect
+  // before fetchMe() completes (children effects run before the StoreProvider effect).
   private _syncToken(): void {
     if (typeof window === 'undefined') return
     const stored = localStorage.getItem(JWT_KEY)
     if (!stored) return
     this.jwt = stored
     setAuthToken(stored)
+    this.isInitializing = true
   }
 
   async init(): Promise<void> {
@@ -35,7 +39,13 @@ export class AuthStore {
     if (!stored) return
     this.jwt = stored
     setAuthToken(stored)
-    await this.fetchMe()
+    try {
+      await this.fetchMe()
+    } finally {
+      runInAction(() => {
+        this.isInitializing = false
+      })
+    }
   }
 
   async loginWithEmail(identifier: string, password: string): Promise<void> {

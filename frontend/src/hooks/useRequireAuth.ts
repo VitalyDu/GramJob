@@ -9,8 +9,9 @@ export function useRequireAuth() {
   const { auth } = useStores()
 
   useEffect(() => {
+    if (auth.isInitializing) return
     if (!auth.isAuthenticated) router.replace('/login')
-  }, [auth.isAuthenticated, router])
+  }, [auth.isAuthenticated, auth.isInitializing, router])
 
   return auth.isAuthenticated
 }
