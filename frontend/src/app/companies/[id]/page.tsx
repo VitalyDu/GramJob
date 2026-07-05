@@ -1,34 +1,40 @@
 import type { Metadata } from 'next'
+import { fetchCompanyServer } from '@/lib/server-api'
+import { getMediaUrl } from '@/lib/media'
 import { CompanyDetailClient } from './CompanyDetailClient'
 
 interface Props {
   params: Promise<{ id: string }>
 }
 
+export const revalidate = 300
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:1337/api'}/companies/${id}`,
-      { next: { revalidate: 3600 } }
-    )
-    if (res.ok) {
-      const json = (await res.json()) as { data?: { name?: string; description?: string } }
-      const company = json.data
-      if (company?.name) {
-        return {
-          title: `${company.name} | GramJob`,
-          description: company.description ?? `Профиль компании ${company.name} на GramJob`,
-        }
-      }
-    }
-  } catch {
-    // fallback below
+  const company = await fetchCompanyServer(id)
+  if (!company) return { title: 'Компания | GramJob' }
+
+  const description =
+    (company.description ?? '').replace(/\s+/g, ' ').trim().slice(0, 160) ||
+    `Профиль компании ${company.name} на GramJob`
+  const logoUrl = getMediaUrl(company.logo?.url)
+
+  return {
+    title: `${company.name} | GramJob`,
+    description,
+    alternates: { canonical: `/companies/${id}` },
+    openGraph: {
+      title: company.name,
+      description,
+      type: 'website',
+      url: `/companies/${id}`,
+      ...(logoUrl ? { images: [logoUrl] } : {}),
+    },
   }
-  return { title: 'Компания | GramJob' }
 }
 
 export default async function CompanyPage({ params }: Props) {
   const { id } = await params
-  return <CompanyDetailClient id={id} />
+  const company = await fetchCompanyServer(id)
+  return <CompanyDetailClient id={id} {...(company ? { initialCompany: company } : {})} />
 }

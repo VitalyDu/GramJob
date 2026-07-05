@@ -164,4 +164,16 @@ describe('CompanyDetailClient', () => {
     const link = screen.getByRole('link', { name: /acme\.com/i })
     expect(link.getAttribute('href')).toBe('https://acme.com')
   })
+
+  it('renders SSR initial company while store has no data', () => {
+    const store = makeStore({ currentCompany: null, isLoading: true, error: null })
+    vi.mocked(useStores).mockReturnValue({
+      company: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
+
+    render(<CompanyDetailClient id="comp1" initialCompany={mockCompany} />)
+
+    expect(screen.getByText(mockCompany.name)).toBeDefined()
+  })
 })

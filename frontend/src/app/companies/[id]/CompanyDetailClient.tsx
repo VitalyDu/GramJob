@@ -18,12 +18,17 @@ import { CardListSkeleton, ErrorState } from '@/components/shared'
 import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
 import { getCountryName } from '@/lib/countries'
 import { getMediaUrl } from '@/lib/media'
+import type { Company } from '@/types/api'
 
 interface Props {
   id: string
+  initialCompany?: Company
 }
 
-export const CompanyDetailClient = observer(function CompanyDetailClient({ id }: Props) {
+export const CompanyDetailClient = observer(function CompanyDetailClient({
+  id,
+  initialCompany,
+}: Props) {
   useTelegramBackButton()
   const { company: store, auth } = useStores()
   const { t } = useTranslation()
@@ -33,11 +38,13 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
     void store.fetchCompanyById(id)
   }, [store, id])
 
-  if (store.isLoading) {
+  const company = store.currentCompany ?? initialCompany ?? null
+
+  if (store.isLoading && !company) {
     return <CardListSkeleton count={3} />
   }
 
-  if (store.error || !store.currentCompany) {
+  if (!company) {
     return (
       <ErrorState
         message={store.error ?? t('companyDetail.notFound')}
@@ -45,8 +52,6 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({ id }:
       />
     )
   }
-
-  const company = store.currentCompany
   const logoUrl = getMediaUrl(company.logo?.url)
   const coverUrl = getMediaUrl(company.cover?.url)
 
