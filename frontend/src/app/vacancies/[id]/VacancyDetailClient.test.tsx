@@ -179,4 +179,14 @@ describe('VacancyDetailClient', () => {
 
     expect(screen.getByText('Senior Frontend Developer')).toBeDefined()
   })
+
+  it('renders SSR initial vacancy while store has no data', () => {
+    vi.mocked(useStores).mockReturnValue(
+      makeUseStoresReturn({ currentVacancy: null, isLoading: true })
+    )
+
+    render(<VacancyDetailClient id="vac123" initialVacancy={mockVacancy as never} />)
+
+    expect(screen.getByText(mockVacancy.title)).toBeDefined()
+  })
 })

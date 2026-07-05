@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Eye, Send, ExternalLink } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
+import type { Vacancy } from '@/types/api'
 import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { hapticNotify } from '@/lib/telegram'
 import { getMediaUrl } from '@/lib/media'
@@ -25,9 +26,13 @@ import { getCountryName } from '@/lib/countries'
 
 interface Props {
   id: string
+  initialVacancy?: Vacancy
 }
 
-export const VacancyDetailClient = observer(function VacancyDetailClient({ id }: Props) {
+export const VacancyDetailClient = observer(function VacancyDetailClient({
+  id,
+  initialVacancy,
+}: Props) {
   useTelegramBackButton()
   const { vacancy: store, application: appStore, auth } = useStores()
   const { t } = useTranslation()
@@ -53,11 +58,13 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
     }
   }
 
-  if (store.isLoading) {
+  const v = store.currentVacancy ?? initialVacancy ?? null
+
+  if (store.isLoading && !v) {
     return <CardListSkeleton count={3} />
   }
 
-  if (!store.currentVacancy) {
+  if (!v) {
     return (
       <ErrorState
         message={t('vacancyDetail.notFound')}
@@ -65,8 +72,6 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({ id }:
       />
     )
   }
-
-  const v = store.currentVacancy
   const salary = formatSalary(v.salaryFrom, v.salaryTo, v.salaryCurrency)
   const isInternal = v.sourceType === 'internal'
   const isPublished = v.status === 'published'
