@@ -151,4 +151,15 @@ describe('CompaniesClient', () => {
 
     expect(screen.getByLabelText(/предыдущая страница/i)).toBeDefined()
   })
+
+  it('renders SSR initial companies while store is loading', () => {
+    const store = makeStore({ isLoading: true, companies: [], total: 0 })
+    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
+      typeof useStores
+    >)
+
+    render(<CompaniesClient initialCompanies={[mockCompany]} initialTotal={1} />)
+
+    expect(screen.getByText('Acme Corp')).toBeDefined()
+  })
 })

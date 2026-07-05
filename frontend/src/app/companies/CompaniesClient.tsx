@@ -16,16 +16,25 @@ import {
   CardListSkeleton,
   PaginationBar,
 } from '@/components/shared'
-import type { CompanyListParams } from '@/types/api'
+import type { Company, CompanyListParams } from '@/types/api'
 
-export const CompaniesClient = observer(function CompaniesClient() {
+interface Props {
+  initialCompanies?: Company[]
+  initialTotal?: number
+}
+
+export const CompaniesClient = observer(function CompaniesClient({
+  initialCompanies,
+  initialTotal,
+}: Props) {
   const { company: store } = useStores()
   const { t } = useTranslation()
   const [params, setParams] = useState<CompanyListParams>({ page: 1 })
   const [searchInput, setSearchInput] = useState('')
+  const [loadedOnce, setLoadedOnce] = useState(false)
 
   useEffect(() => {
-    void store.fetchCompanies({ page: 1 })
+    void store.fetchCompanies({ page: 1 }).finally(() => setLoadedOnce(true))
   }, [store])
 
   const handleParamsChange = (next: CompanyListParams) => {
@@ -51,6 +60,14 @@ export const CompaniesClient = observer(function CompaniesClient() {
     void store.fetchCompanies(next)
   }
 
+  const useInitial =
+    !loadedOnce && store.companies.length === 0 && (initialCompanies?.length ?? 0) > 0
+  const items = useInitial ? (initialCompanies ?? []) : store.companies
+  const total = useInitial ? (initialTotal ?? 0) : store.total
+  const page = useInitial ? 1 : store.page
+  const pageCount = useInitial ? Math.ceil((initialTotal ?? 0) / 20) : store.pageCount
+  const showSkeleton = store.isLoading && items.length === 0
+
   return (
     <div>
       <PageHeader title={t('nav.companies')} description={t('companies.description')} />
@@ -73,7 +90,7 @@ export const CompaniesClient = observer(function CompaniesClient() {
         </aside>
 
         <section className="mt-4 md:mt-0">
-          {store.isLoading && <CardListSkeleton count={6} />}
+          {showSkeleton && <CardListSkeleton count={6} />}
 
           {store.error && !store.isLoading && (
             <ErrorState
@@ -82,25 +99,21 @@ export const CompaniesClient = observer(function CompaniesClient() {
             />
           )}
 
-          {!store.isLoading && !store.error && store.companies.length === 0 && (
+          {!store.isLoading && !store.error && items.length === 0 && (
             <EmptyState icon={Building2} title={t('companies.notFound')} />
           )}
 
-          {!store.isLoading && store.companies.length > 0 && (
+          {!showSkeleton && items.length > 0 && (
             <>
               <p className="mb-3 text-sm text-muted-foreground">
-                {t('common.found', { count: store.total })}
+                {t('common.found', { count: total })}
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
-                {store.companies.map((c) => (
+                {items.map((c) => (
                   <CompanyCard key={c.documentId} company={c} />
                 ))}
               </div>
-              <PaginationBar
-                page={store.page}
-                pageCount={store.pageCount}
-                onPageChange={handlePageChange}
-              />
+              <PaginationBar page={page} pageCount={pageCount} onPageChange={handlePageChange} />
             </>
           )}
         </section>

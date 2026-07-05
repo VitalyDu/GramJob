@@ -17,16 +17,25 @@ import {
   CardListSkeleton,
   PaginationBar,
 } from '@/components/shared'
-import type { VacancyListParams } from '@/types/api'
+import type { Vacancy, VacancyListParams } from '@/types/api'
 
-export const VacanciesClient = observer(function VacanciesClient() {
+interface Props {
+  initialVacancies?: Vacancy[]
+  initialTotal?: number
+}
+
+export const VacanciesClient = observer(function VacanciesClient({
+  initialVacancies,
+  initialTotal,
+}: Props) {
   const { vacancy: store } = useStores()
   const { t } = useTranslation()
   const [params, setParams] = useState<VacancyListParams>({ page: 1 })
   const [searchInput, setSearchInput] = useState('')
+  const [loadedOnce, setLoadedOnce] = useState(false)
 
   useEffect(() => {
-    void store.fetchVacancies({ page: 1 })
+    void store.fetchVacancies({ page: 1 }).finally(() => setLoadedOnce(true))
   }, [store])
 
   const handleParamsChange = (next: VacancyListParams) => {
@@ -55,6 +64,14 @@ export const VacanciesClient = observer(function VacanciesClient() {
     setParams(next)
     void store.fetchVacancies(next)
   }
+
+  const useInitial =
+    !loadedOnce && store.vacancies.length === 0 && (initialVacancies?.length ?? 0) > 0
+  const items = useInitial ? (initialVacancies ?? []) : store.vacancies
+  const total = useInitial ? (initialTotal ?? 0) : store.total
+  const page = useInitial ? 1 : store.page
+  const pageCount = useInitial ? Math.ceil((initialTotal ?? 0) / 20) : store.pageCount
+  const showSkeleton = store.isLoading && items.length === 0
 
   return (
     <div>
@@ -94,13 +111,13 @@ export const VacanciesClient = observer(function VacanciesClient() {
             />
           </div>
 
-          {store.isLoading && <CardListSkeleton count={6} />}
+          {showSkeleton && <CardListSkeleton count={6} />}
 
           {store.error && !store.isLoading && (
             <ErrorState message={store.error} onRetry={() => void store.fetchVacancies(params)} />
           )}
 
-          {!store.isLoading && !store.error && store.vacancies.length === 0 && (
+          {!store.isLoading && !store.error && items.length === 0 && (
             <EmptyState
               icon={Briefcase}
               title={t('vacancies.notFound')}
@@ -109,21 +126,17 @@ export const VacanciesClient = observer(function VacanciesClient() {
             />
           )}
 
-          {!store.isLoading && store.vacancies.length > 0 && (
+          {!showSkeleton && items.length > 0 && (
             <>
               <p className="mb-3 text-sm text-muted-foreground">
-                {t('common.found', { count: store.total })}
+                {t('common.found', { count: total })}
               </p>
               <div className="space-y-3">
-                {store.vacancies.map((v) => (
+                {items.map((v) => (
                   <VacancyCard key={v.documentId} vacancy={v} />
                 ))}
               </div>
-              <PaginationBar
-                page={store.page}
-                pageCount={store.pageCount}
-                onPageChange={handlePageChange}
-              />
+              <PaginationBar page={page} pageCount={pageCount} onPageChange={handlePageChange} />
             </>
           )}
         </section>

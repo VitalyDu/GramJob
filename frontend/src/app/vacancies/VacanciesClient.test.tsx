@@ -151,4 +151,16 @@ describe('VacanciesClient', () => {
     expect(screen.getByRole('navigation', { name: /пагинация/i })).toBeDefined()
     expect(screen.getByRole('button', { name: /предыдущая страница/i })).toBeDefined()
   })
+
+  it('renders SSR initial vacancies while store is loading', () => {
+    const store = makeStore({ isLoading: true, vacancies: [], total: 0 })
+    vi.mocked(useStores).mockReturnValue({
+      vacancy: store,
+      auth: { user: null },
+    } as unknown as ReturnType<typeof useStores>)
+
+    render(<VacanciesClient initialVacancies={[mockVacancy]} initialTotal={1} />)
+
+    expect(screen.getByText('Senior Frontend Developer')).toBeDefined()
+  })
 })
