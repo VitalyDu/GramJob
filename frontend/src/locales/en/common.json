@@ -13,7 +13,10 @@
     "main": "Main navigation",
     "home": "GramJob — home",
     "userMenu": "User menu",
-    "languageSwitcher": "Interface language"
+    "languageSwitcher": "Interface language",
+    "myResumes": "My resumes",
+    "resumeDatabase": "Resume database",
+    "notifications": "Notifications"
   },
   "auth": {
     "email": "Email",

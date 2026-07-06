@@ -13,7 +13,10 @@
     "main": "Основная навигация",
     "home": "GramJob — на главную",
     "userMenu": "Меню пользователя",
-    "languageSwitcher": "Язык интерфейса"
+    "languageSwitcher": "Язык интерфейса",
+    "myResumes": "Мои резюме",
+    "resumeDatabase": "База резюме",
+    "notifications": "Уведомления"
   },
   "auth": {
     "email": "Email",
