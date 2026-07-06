@@ -30,4 +30,14 @@ describe('BottomNav', () => {
     render(<BottomNav isMiniApp />)
     expect(screen.getByRole('navigation')).not.toHaveClass('md:hidden')
   })
+
+  it('в Mini App показывает пункт GramJob', () => {
+    render(<BottomNav isMiniApp={true} />)
+    expect(screen.getByText('GramJob')).toBeInTheDocument()
+  })
+
+  it('на вебе не показывает пункт GramJob', () => {
+    render(<BottomNav isMiniApp={false} />)
+    expect(screen.queryByText('GramJob')).not.toBeInTheDocument()
+  })
 })

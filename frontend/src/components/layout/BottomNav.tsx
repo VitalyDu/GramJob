@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { usePathname } from 'next/navigation'
-import { Briefcase, Heart, LayoutDashboard, MessageSquare } from 'lucide-react'
+import { Briefcase, Heart, Home, LayoutDashboard, MessageSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type NavLink = {
@@ -17,7 +17,7 @@ export function BottomNav({ isMiniApp }: { isMiniApp: boolean }) {
   const { t } = useTranslation('common')
   const pathname = usePathname()
 
-  const links: NavLink[] = [
+  const baseLinks: NavLink[] = [
     {
       href: '/vacancies',
       icon: Briefcase,
@@ -47,6 +47,15 @@ export function BottomNav({ isMiniApp }: { isMiniApp: boolean }) {
           !p.startsWith('/dashboard/favorites')),
     },
   ]
+
+  const gramJobLink: NavLink = {
+    href: '/',
+    icon: Home,
+    label: 'GramJob',
+    isActive: (p) => p === '/',
+  }
+
+  const links = isMiniApp ? [gramJobLink, ...baseLinks] : baseLinks
 
   return (
     <nav
