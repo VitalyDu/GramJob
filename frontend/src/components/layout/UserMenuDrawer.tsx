@@ -24,7 +24,8 @@ export const UserMenuDrawer = observer(function UserMenuDrawer({ open, onOpenCha
   if (!auth.isAuthenticated || !auth.user) return null
 
   const initial = auth.user.firstName?.charAt(0) ?? auth.user.email?.charAt(0) ?? '?'
-  const displayName = auth.user.firstName + (auth.user.lastName ? ` ${auth.user.lastName}` : '')
+  const displayName =
+    (auth.user.firstName || auth.user.email) + (auth.user.lastName ? ` ${auth.user.lastName}` : '')
 
   const close = () => onOpenChange(false)
 
