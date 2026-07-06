@@ -81,6 +81,20 @@ export const WebHeader = observer(function WebHeader() {
   const initial = auth.user?.firstName?.charAt(0) ?? auth.user?.email?.charAt(0) ?? '?'
   const [langDrawerOpen, setLangDrawerOpen] = useState(false)
 
+  const mobileGlobeButton = (
+    <div className="md:hidden">
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label={t('nav.languageSwitcher')}
+        className="h-8 w-8"
+        onClick={() => setLangDrawerOpen(true)}
+      >
+        <Globe className="h-4 w-4" />
+      </Button>
+    </div>
+  )
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <nav className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
@@ -144,17 +158,7 @@ export const WebHeader = observer(function WebHeader() {
         {auth.isAuthenticated && auth.user ? (
           <div className="flex items-center gap-2">
             {/* мобиль: Globe открывает Drawer */}
-            <div className="md:hidden">
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={t('nav.languageSwitcher')}
-                className="h-8 w-8"
-                onClick={() => setLangDrawerOpen(true)}
-              >
-                <Globe className="h-4 w-4" />
-              </Button>
-            </div>
+            {mobileGlobeButton}
             {/* десктоп: Globe открывает DropdownMenu */}
             <div className="hidden md:block">
               <LanguageSwitcher />
@@ -180,7 +184,7 @@ export const WebHeader = observer(function WebHeader() {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="flex items-center gap-2">
                   <User className="h-4 w-4 shrink-0" />
-                  <span className="truncate">
+                  <span className="min-w-0 truncate">
                     {auth.user.firstName ?? auth.user.email}
                     {auth.user.lastName ? ` ${auth.user.lastName}` : ''}
                   </span>
@@ -221,17 +225,7 @@ export const WebHeader = observer(function WebHeader() {
         ) : (
           <div className="flex items-center gap-2">
             {/* мобиль: Globe открывает Drawer */}
-            <div className="md:hidden">
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={t('nav.languageSwitcher')}
-                className="h-8 w-8"
-                onClick={() => setLangDrawerOpen(true)}
-              >
-                <Globe className="h-4 w-4" />
-              </Button>
-            </div>
+            {mobileGlobeButton}
             {/* десктоп: Globe открывает DropdownMenu */}
             <div className="hidden md:block">
               <LanguageSwitcher />
