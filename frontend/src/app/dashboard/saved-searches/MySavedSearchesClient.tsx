@@ -22,18 +22,7 @@ import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { PaginationBar } from '@/components/shared/PaginationBar'
-
-function filtersToQueryString(
-  filters: Record<string, string | number | boolean | undefined>
-): string {
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(filters)) {
-    if (value !== undefined && value !== null && value !== '') {
-      params.set(key, String(value))
-    }
-  }
-  return params.toString()
-}
+import { filtersToQueryString } from '@/lib/saved-search-utils'
 
 export const MySavedSearchesClient = observer(function MySavedSearchesClient() {
   const { t } = useTranslation()

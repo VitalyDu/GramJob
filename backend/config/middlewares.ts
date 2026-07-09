@@ -1,42 +1,47 @@
 import type { Core } from '@strapi/strapi'
 
-const config: Core.Config.Middlewares = [
-  'strapi::logger',
-  'strapi::errors',
-  {
-    name: 'strapi::security',
-    config: {
-      contentSecurityPolicy: {
-        useDefaults: true,
-        directives: {
-          'img-src': [
-            "'self'",
-            'data:',
-            'blob:',
-            'localhost:9000',
-            '*.gramjob.com',
-            'market-assets.strapi.io',
-          ],
+export default ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Middlewares => {
+  const s3PublicHostname = env('S3_PUBLIC_HOSTNAME', '')
+
+  const imgSrc = [
+    "'self'",
+    'data:',
+    'blob:',
+    '*.gramjob.com',
+    'market-assets.strapi.io',
+    ...(s3PublicHostname ? [s3PublicHostname] : []),
+  ]
+
+  return [
+    'strapi::logger',
+    'strapi::errors',
+    {
+      name: 'strapi::security',
+      config: {
+        contentSecurityPolicy: {
+          useDefaults: true,
+          directives: {
+            'img-src': imgSrc,
+            'media-src': imgSrc,
+          },
         },
       },
     },
-  },
-  {
-    name: 'strapi::cors',
-    config: {
-      enabled: true,
-      headers: ['Authorization', 'Content-Type', 'X-Telegram-Init-Data'],
-      origin: [process.env.FRONTEND_URL ?? 'http://localhost:3000', 'https://web.telegram.org'],
+    {
+      name: 'strapi::cors',
+      config: {
+        enabled: true,
+        headers: ['Authorization', 'Content-Type', 'X-Telegram-Init-Data'],
+        origin: [env('FRONTEND_URL', 'http://localhost:3000'), 'https://web.telegram.org'],
+      },
     },
-  },
-  'strapi::query',
-  'strapi::body',
-  'strapi::session',
-  'strapi::favicon',
-  'strapi::public',
-  'global::auth-rate-limit',
-  'global::api-rate-limit',
-  'global::telegram-auth',
-]
-
-export default config
+    'strapi::query',
+    'strapi::body',
+    'strapi::session',
+    'strapi::favicon',
+    'strapi::public',
+    'global::auth-rate-limit',
+    'global::api-rate-limit',
+    'global::telegram-auth',
+  ]
+}

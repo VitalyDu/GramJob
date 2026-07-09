@@ -97,6 +97,7 @@ export const EditResumeClient = observer(function EditResumeClient({ id }: Props
             contacts: r.contacts ?? undefined,
             workExperience: r.workExperience ?? undefined,
             education: r.education ?? undefined,
+            languages: r.languages ?? undefined,
           } as Partial<import('@/types/api').ResumeCreateInput>
         }
         isLoading={store.isLoading}

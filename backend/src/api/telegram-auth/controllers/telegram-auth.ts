@@ -18,6 +18,8 @@ const SAFE_USER_FIELDS = [
   'subscriptionExpiresAt',
   'vacancyCredits',
   'applyCredits',
+  'boostCredits',
+  'isVip',
   'createdAt',
 ] as const
 

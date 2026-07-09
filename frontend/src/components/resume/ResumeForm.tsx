@@ -42,6 +42,11 @@ const _baseEducationSchema = z.object({
   current: z.boolean().default(false),
 })
 
+const _baseLanguageSchema = z.object({
+  lang: z.string().default(''),
+  level: z.string().default(''),
+})
+
 const _baseSchema = z.object({
   title: z.string().min(1),
   firstName: z.string().min(1),
@@ -66,6 +71,7 @@ const _baseSchema = z.object({
   contactPhone: z.string().optional().default(''),
   workExperience: z.array(_baseWorkExperienceSchema).default([]),
   education: z.array(_baseEducationSchema).default([]),
+  languages: z.array(_baseLanguageSchema).default([]),
 })
 
 type FormData = z.infer<typeof _baseSchema>
@@ -131,6 +137,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
         contactPhone: z.string().optional().default(''),
         workExperience: z.array(workExperienceSchema).default([]),
         education: z.array(educationSchema).default([]),
+        languages: z.array(_baseLanguageSchema).default([]),
       }),
     [t, workExperienceSchema, educationSchema]
   )
@@ -179,6 +186,10 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
         endDate: e.endDate != null ? e.endDate : '',
         current: e.current ?? false,
       })),
+      languages: (defaultValues?.languages ?? []).map((l) => ({
+        lang: l.lang,
+        level: l.level,
+      })),
     },
   })
 
@@ -194,7 +205,16 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
     remove: removeEdu,
   } = useFieldArray({ control, name: 'education' })
 
+  const {
+    fields: langFields,
+    append: appendLang,
+    remove: removeLang,
+  } = useFieldArray({ control, name: 'languages' })
+
   const handleFormSubmit = (data: FormData) => {
+    const filledLanguages = data.languages
+      .map((l) => ({ lang: l.lang.trim(), level: l.level.trim() }))
+      .filter((l) => l.lang !== '')
     const payload = {
       title: data.title,
       firstName: data.firstName,
@@ -234,6 +254,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
         endDate: e.endDate || null,
         current: e.current,
       })),
+      ...(filledLanguages.length > 0 ? { languages: filledLanguages } : {}),
     } as ResumeCreateInput
     void onSubmit(payload)
   }
@@ -614,6 +635,52 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                 </div>
               </CardContent>
             </Card>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Секция: Языки */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>{t('forms.resume.sectionLanguages')}</CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => appendLang({ lang: '', level: '' })}
+            >
+              {t('forms.resume.addLanguage')}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {langFields.map((field, index) => (
+            <div key={field.id} className="flex items-end gap-3">
+              <div className="flex-1 space-y-1.5">
+                <Label>{t('forms.resume.languageLabel')}</Label>
+                <Input
+                  {...register(`languages.${index}.lang`)}
+                  placeholder={t('forms.resume.languagePlaceholder')}
+                />
+              </div>
+              <div className="flex-1 space-y-1.5">
+                <Label>{t('forms.resume.languageLevelLabel')}</Label>
+                <Input
+                  {...register(`languages.${index}.level`)}
+                  placeholder={t('forms.resume.languageLevelPlaceholder')}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => removeLang(index)}
+                aria-label={t('forms.resume.removeEntry')}
+              >
+                <Trash2 className="size-4 text-destructive" />
+              </Button>
+            </div>
           ))}
         </CardContent>
       </Card>

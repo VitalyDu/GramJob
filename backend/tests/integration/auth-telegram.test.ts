@@ -59,6 +59,20 @@ describe('POST /api/auth/telegram', () => {
     expect(res.body.user).not.toHaveProperty('password')
   })
 
+  it('returns boostCredits and isVip like GET /users/me (SAFE_RESPONSE_FIELDS parity)', async () => {
+    const userId = 777888999
+    const initData = makeValidInitData(userId)
+
+    const res = await request(strapi.server.httpServer)
+      .post('/api/auth/telegram')
+      .send({ initData })
+
+    expect(res.status).toBe(200)
+    expect(res.body.user).toHaveProperty('boostCredits')
+    expect(res.body.user).toHaveProperty('isVip')
+    expect(res.body.user.isVip).toBe(false)
+  })
+
   it('returns the same user on second call with same telegramId (idempotent)', async () => {
     const userId = 444555666
     const initData1 = makeValidInitData(userId)

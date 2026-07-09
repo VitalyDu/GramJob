@@ -61,14 +61,14 @@ const COMPANY_CARD_FIELDS = [
 async function populateEntity(strapi: Core.Strapi, type: FavoriteType, targetId: string) {
   if (type === 'vacancy') {
     return (strapi.documents as any)('api::vacancy.vacancy').findFirst({
-      filters: { documentId: { $eq: targetId } },
+      filters: { documentId: { $eq: targetId }, status: { $eq: 'published' } },
       fields: VACANCY_CARD_FIELDS as any,
       populate: VACANCY_CARD_POPULATE as any,
     })
   }
   if (type === 'resume') {
     return (strapi.documents as any)('api::resume.resume').findFirst({
-      filters: { documentId: { $eq: targetId } },
+      filters: { documentId: { $eq: targetId }, status: { $eq: 'published' } },
       fields: RESUME_CARD_FIELDS as any,
       populate: { user: { fields: ['id', 'firstName', 'lastName'] } },
     })

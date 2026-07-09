@@ -7,7 +7,7 @@ vi.mock('@/stores/StoreProvider', () => ({
 }))
 
 vi.mock('@/services/api', () => ({
-  api: { get: vi.fn().mockResolvedValue([]) },
+  api: { get: vi.fn().mockResolvedValue({ data: [] }) },
 }))
 
 vi.mock('next/link', () => ({

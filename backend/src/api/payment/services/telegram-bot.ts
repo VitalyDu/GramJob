@@ -126,7 +126,7 @@ export const APPLICATION_STATUS_TO_NOTIFICATION: Record<string, NotificationType
   offer: 'offer_received',
 }
 
-const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME ?? 'GramJobBot'
+const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME ?? 'gramjob_bot'
 
 function buildDeepLink(type: string, data: Record<string, unknown>): string | null {
   if (

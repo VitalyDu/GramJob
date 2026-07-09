@@ -177,9 +177,11 @@ export default {
 
 const SEARCH_VECTOR_MAX_ATTEMPTS = 5
 
-async function updateSearchVector(vacancyId: number | undefined, attempt = 1) {
+export async function updateSearchVector(vacancyId: number | undefined, attempt = 1) {
   if (!vacancyId) return
   const s = globalThis.strapi
+  // Retry fires from setTimeout: strapi may already be destroyed (tests / shutdown)
+  if (!s) return
   try {
     const result = (await s.db.connection.raw(
       `UPDATE vacancies

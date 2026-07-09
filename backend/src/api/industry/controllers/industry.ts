@@ -6,6 +6,6 @@ export default factories.createCoreController('api::industry.industry', ({ strap
       populate: { specializations: true },
       sort: 'slug:asc',
     })
-    ctx.send(industries)
+    ctx.send({ data: industries })
   },
 }))

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { VacancyFilters } from './VacancyFilters'
 
 vi.mock('@/services/api', () => ({
-  api: { get: vi.fn().mockResolvedValue([]) },
+  api: { get: vi.fn().mockResolvedValue({ data: [] }) },
 }))
 
 describe('VacancyFilters', () => {

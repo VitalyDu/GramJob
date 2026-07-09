@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { paramsToSavedFilters } from '@/lib/saved-search-utils'
 import type { SavedSearchType, SavedSearchFilters } from '@/types/api'
 
 interface Props {
@@ -26,7 +27,7 @@ export const SaveSearchButton = observer(function SaveSearchButton({ searchType,
     try {
       await store.createSavedSearch({
         type: searchType,
-        filters,
+        filters: paramsToSavedFilters(filters),
         ...(name.trim() ? { name: name.trim() } : {}),
       })
       setSaved(true)

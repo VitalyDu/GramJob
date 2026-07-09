@@ -17,7 +17,8 @@ type CreateVacancyInput = {
   requirements: string
   conditions?: string
   skills?: string[]
-  languages?: Array<{ lang: string; level: string }>
+  // Vacancy хранит языки как простой список строк (в отличие от Resume: {lang, level}[])
+  languages?: string[]
   experienceYears?: number
   sourceType?: 'internal' | 'external'
   sourceName?: string

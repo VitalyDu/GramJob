@@ -184,7 +184,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           requirements: requirements as string,
           conditions: body.conditions as string | undefined,
           skills: body.skills as string[] | undefined,
-          languages: body.languages as Array<{ lang: string; level: string }> | undefined,
+          languages: body.languages as string[] | undefined,
           experienceYears: body.experienceYears as number | undefined,
           sourceType: (body.sourceType as 'internal' | 'external') ?? 'internal',
           sourceName: body.sourceName as string | undefined,
@@ -546,6 +546,45 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const updateData: Record<string, unknown> = {}
       for (const field of allowedFields) {
         if (field in body) updateData[field] = body[field]
+      }
+
+      if ('industryId' in body) {
+        const industry = await strapi.documents('api::industry.industry').findOne({
+          documentId: body.industryId as string,
+          fields: ['documentId'],
+        })
+        if (!industry) return ctx.badRequest('Industry not found')
+        updateData.industry = body.industryId
+      }
+
+      if ('specializationId' in body) {
+        const specialization = await strapi
+          .documents('api::specialization.specialization')
+          .findOne({
+            documentId: body.specializationId as string,
+            fields: ['documentId'],
+          })
+        if (!specialization) return ctx.badRequest('Specialization not found')
+        updateData.specialization = body.specializationId
+      }
+
+      if ('companyId' in body) {
+        if (body.companyId) {
+          const company = await strapi.documents('api::company.company').findOne({
+            documentId: body.companyId as string,
+            populate: { owner: { fields: ['id'] } },
+            fields: ['documentId', 'status'],
+          })
+          if (!company || (company as any).owner?.id !== user.id) {
+            return ctx.forbidden('You do not own this company')
+          }
+          if ((company as any).status !== 'published') {
+            return ctx.badRequest('Company must be published to post vacancies')
+          }
+          updateData.company = body.companyId
+        } else {
+          updateData.company = null
+        }
       }
 
       if (Object.keys(updateData).length === 0) {

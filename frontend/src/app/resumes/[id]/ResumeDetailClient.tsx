@@ -209,6 +209,24 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
         </Card>
       )}
 
+      {/* Languages */}
+      {r.languages && r.languages.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('resumeDetail.languages')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {r.languages.map((l, i) => (
+                <Badge key={i} variant="secondary">
+                  {l.level ? `${l.lang} — ${l.level}` : l.lang}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Contacts */}
       <Card>
         <CardHeader>

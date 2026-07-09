@@ -260,8 +260,8 @@ export function VacancyFilters({ params, onChange }: Props) {
 
   useEffect(() => {
     void api
-      .get<Industry[]>('/industries')
-      .then((res) => setIndustries(res))
+      .get<{ data: Industry[] }>('/industries')
+      .then((res) => setIndustries(res.data))
       .catch(() => {})
   }, [])
 

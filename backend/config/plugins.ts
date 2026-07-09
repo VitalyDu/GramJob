@@ -13,6 +13,7 @@ export default ({ env }: Core.Config.Shared.ConfigParams) => ({
     config: {
       provider: '@strapi/provider-upload-aws-s3',
       providerOptions: {
+        baseUrl: env('S3_PUBLIC_URL', ''),
         s3Options: {
           credentials: {
             accessKeyId: env('S3_ACCESS_KEY_ID'),

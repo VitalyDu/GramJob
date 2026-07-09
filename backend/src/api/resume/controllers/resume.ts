@@ -122,7 +122,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const updated = await (strapi.documents as any)('api::resume.resume').update({
         documentId: id,
         data: { status: 'moderation' },
-        fields: ['documentId', 'title', 'status', 'createdAt'],
+        fields: RESUME_OWNER_CARD_FIELDS,
+        populate: RESUME_POPULATE,
       })
 
       return ctx.send({ data: updated })
@@ -345,7 +346,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const updated = await (strapi.documents as any)('api::resume.resume').update({
         documentId: id,
         data: { status: 'archived' },
-        fields: ['documentId', 'title', 'status'],
+        fields: RESUME_OWNER_CARD_FIELDS,
+        populate: RESUME_POPULATE,
       })
 
       return ctx.send({ data: updated })

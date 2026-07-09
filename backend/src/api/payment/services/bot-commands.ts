@@ -24,7 +24,7 @@ export function buildHelpText(): string {
   )
 }
 
-const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME ?? 'GramJobBot'
+const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME ?? 'gramjob_bot'
 
 function appLink(startapp: string): string {
   return `https://t.me/${BOT_USERNAME}/app?startapp=${startapp}`

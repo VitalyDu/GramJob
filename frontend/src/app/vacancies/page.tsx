@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { fetchVacanciesPageServer } from '@/lib/server-api'
 import { VacanciesClient } from './VacanciesClient'
@@ -12,5 +13,9 @@ export const metadata: Metadata = {
 
 export default async function VacanciesPage() {
   const { items, total } = await fetchVacanciesPageServer(1, 20)
-  return <VacanciesClient initialVacancies={items} initialTotal={total} />
+  return (
+    <Suspense>
+      <VacanciesClient initialVacancies={items} initialTotal={total} />
+    </Suspense>
+  )
 }

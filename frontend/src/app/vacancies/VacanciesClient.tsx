@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import { useSearchParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { Briefcase, Search } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
@@ -17,6 +18,7 @@ import {
   CardListSkeleton,
   PaginationBar,
 } from '@/components/shared'
+import { parseVacancySearchParams, paramsToSavedFilters } from '@/lib/saved-search-utils'
 import type { Vacancy, VacancyListParams } from '@/types/api'
 
 interface Props {
@@ -30,12 +32,19 @@ export const VacanciesClient = observer(function VacanciesClient({
 }: Props) {
   const { vacancy: store } = useStores()
   const { t } = useTranslation()
-  const [params, setParams] = useState<VacancyListParams>({ page: 1 })
-  const [searchInput, setSearchInput] = useState('')
+  const searchParams = useSearchParams()
+  const initialParamsRef = useRef<VacancyListParams | null>(null)
+  if (initialParamsRef.current === null) {
+    initialParamsRef.current = parseVacancySearchParams(searchParams)
+  }
+  const [params, setParams] = useState<VacancyListParams>(initialParamsRef.current)
+  const [searchInput, setSearchInput] = useState(initialParamsRef.current.search ?? '')
   const [loadedOnce, setLoadedOnce] = useState(false)
 
   useEffect(() => {
-    void store.fetchVacancies({ page: 1 }).finally(() => setLoadedOnce(true))
+    void store
+      .fetchVacancies(initialParamsRef.current ?? { page: 1 })
+      .finally(() => setLoadedOnce(true))
   }, [store])
 
   const handleParamsChange = (next: VacancyListParams) => {
@@ -96,19 +105,13 @@ export const VacanciesClient = observer(function VacanciesClient({
         <aside className="md:sticky md:top-20">
           <VacancyFilters params={params} onChange={handleParamsChange} />
           <div className="mt-3 hidden md:block">
-            <SaveSearchButton
-              searchType="vacancy"
-              filters={params as Record<string, string | number | boolean | undefined>}
-            />
+            <SaveSearchButton searchType="vacancy" filters={paramsToSavedFilters(params)} />
           </div>
         </aside>
 
         <section className="mt-4 md:mt-0">
           <div className="mb-3 md:hidden">
-            <SaveSearchButton
-              searchType="vacancy"
-              filters={params as Record<string, string | number | boolean | undefined>}
-            />
+            <SaveSearchButton searchType="vacancy" filters={paramsToSavedFilters(params)} />
           </div>
 
           {showSkeleton && <CardListSkeleton count={6} />}

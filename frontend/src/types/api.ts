@@ -228,16 +228,12 @@ export interface VacancyListParams {
   salaryFrom?: number
   salaryTo?: number
   salaryCurrency?: SalaryCurrencyEnum
-  experienceYears?: number
-  skills?: string
-  languages?: string
   sourceType?: SourceTypeEnum
   urgent?: boolean
   topPlacement?: boolean
   sort?: 'newest' | 'salary_asc' | 'salary_desc' | 'relevance'
   page?: number
   pageSize?: number
-  status?: VacancyStatusEnum
 }
 
 export interface VacancyCreateInput {
@@ -452,7 +448,7 @@ export interface FavoriteVacancyCard {
   createdAt: string
   industry?: IndustryRef | null
   specialization?: SpecializationRef | null
-  company: VacancyCompanyRef
+  company: VacancyCompanyRef | null
 }
 
 export interface FavoriteResumeCard {
@@ -504,7 +500,7 @@ export interface FavoriteCreateInput {
 
 export type SavedSearchType = 'vacancy' | 'resume'
 
-export type SavedSearchFilters = Record<string, string | number | boolean | undefined>
+export type SavedSearchFilters = Record<string, string | number | boolean | string[] | undefined>
 
 export interface SavedSearch {
   documentId: string

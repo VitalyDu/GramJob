@@ -60,13 +60,27 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const status = company.status as string | null | undefined
       if (!status || !canSubmit(status)) {
-        return ctx.badRequest(`Cannot submit company with status "${status}". Must be "draft".`)
+        return ctx.badRequest(
+          `Cannot submit company with status "${status}". Must be "draft" or "rejected".`
+        )
       }
 
       const updated = await strapi.documents('api::company.company').update({
         documentId: id,
         data: { status: 'moderation' },
-        fields: ['documentId', 'name', 'slug', 'status', 'createdAt'],
+        fields: [
+          'documentId',
+          'name',
+          'slug',
+          'country',
+          'city',
+          'companySize',
+          'status',
+          'createdAt',
+          'rejectionReason',
+          'rejectionComment',
+        ] as any,
+        populate: { logo: true },
       })
 
       return ctx.send({ data: updated })
