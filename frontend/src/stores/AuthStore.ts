@@ -159,6 +159,31 @@ export class AuthStore {
     await api.post('/auth/send-email-confirmation', { email })
   }
 
+  async updateProfile(data: {
+    firstName?: string
+    lastName?: string
+    avatar?: string | null
+    telegramNotificationsEnabled?: boolean
+  }): Promise<void> {
+    const user = await api.put<User>('/users/me', data)
+    runInAction(() => {
+      this.user = this.user ? { ...this.user, ...user } : user
+    })
+  }
+
+  async changePassword(
+    currentPassword: string,
+    password: string,
+    passwordConfirmation: string
+  ): Promise<void> {
+    const res = await api.post<AuthResponse>('/auth/change-password', {
+      currentPassword,
+      password,
+      passwordConfirmation,
+    })
+    this._setSession(res.jwt, res.user)
+  }
+
   async loginWithTelegram(payload: TelegramAuthPayload): Promise<void> {
     runInAction(() => {
       this.isLoading = true

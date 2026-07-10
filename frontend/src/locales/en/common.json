@@ -437,16 +437,7 @@
         "read": "Read"
       }
     },
-    "profile": {
-      "logout": "Sign Out",
-      "links": {
-        "publications": "My publications",
-        "notifications": "Notifications",
-        "favorites": "Favorites",
-        "blocks": "Blocked users",
-        "subscription": "Subscription"
-      }
-    },
+    "profile": {},
     "analytics": {
       "vacancyTitle": "Vacancy analytics",
       "resumeTitle": "Resume analytics",
@@ -769,6 +760,30 @@
       "pro": "Pro",
       "max": "Max",
       "vip": "VIP"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "nav": {
+      "profile": "Profile",
+      "security": "Security",
+      "subscription": "Subscription",
+      "logout": "Log out"
+    },
+    "profile": {
+      "save": "Save",
+      "saved": "Saved",
+      "saveError": "Failed to save",
+      "changeAvatar": "Change avatar",
+      "avatarError": "Failed to upload avatar",
+      "telegramNotifications": "Telegram notifications"
+    },
+    "security": {
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "change": "Change password",
+      "changed": "Password changed",
+      "changeError": "Failed to change password"
     }
   }
 }

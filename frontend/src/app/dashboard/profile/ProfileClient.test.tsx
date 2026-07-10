@@ -1,55 +1,47 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 import { ProfileClient } from './ProfileClient'
 
-const mockPush = vi.fn()
-const mockLogout = vi.fn()
-let mockUser: Record<string, unknown> | null = null
-
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ replace: vi.fn() }),
+  usePathname: () => '/dashboard/profile',
 }))
+vi.mock('@/hooks/useRequireAuth', () => ({ useRequireAuth: vi.fn() }))
 
-vi.mock('@/stores/StoreProvider', () => ({
-  useStores: () => ({
-    auth: { user: mockUser, isAuthenticated: mockUser !== null, logout: mockLogout },
-  }),
-}))
-
-vi.mock('@/hooks/useRequireAuth', () => ({ useRequireAuth: () => mockUser !== null }))
-
-describe('ProfileClient', () => {
-  it('показывает имя, email и план пользователя', () => {
-    mockUser = {
+const makeStores = (overrides: Record<string, unknown> = {}) => ({
+  auth: {
+    isAuthenticated: true,
+    user: {
       id: 1,
       firstName: 'Иван',
-      lastName: 'Петров',
-      email: 'ivan@test.com',
+      lastName: 'Иванов',
+      email: 'ivan@test.io',
+      telegramId: null,
+      avatar: null,
       subscriptionPlan: 'free',
-      subscriptionExpiresAt: null,
-    }
+      telegramNotificationsEnabled: true,
+      ...overrides,
+    },
+    logout: vi.fn(),
+  },
+})
+
+vi.mock('@/stores/StoreProvider', () => ({ useStores: () => makeStores() }))
+
+describe('ProfileClient', () => {
+  it('рендерит форму профиля с полями имени', () => {
     render(<ProfileClient />)
-    expect(screen.getByText('Иван Петров')).toBeInTheDocument()
-    expect(screen.getByText('ivan@test.com')).toBeInTheDocument()
+    expect(screen.getByLabelText(/имя/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/фамилия/i)).toBeInTheDocument()
   })
 
-  it('рендерит навигационные ссылки', () => {
+  it('рендерит кнопку смены аватара', () => {
     render(<ProfileClient />)
-    expect(screen.getByText('Мои публикации')).toBeInTheDocument()
-    expect(screen.getByText('Подписка')).toBeInTheDocument()
-    expect(screen.getByText('Уведомления')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /аватар/i })).toBeInTheDocument()
   })
 
-  it('кнопка «Выйти» вызывает logout и редирект на главную', () => {
+  it('не показывает тумблер уведомлений без telegramId', () => {
     render(<ProfileClient />)
-    fireEvent.click(screen.getByText('Выйти'))
-    expect(mockLogout).toHaveBeenCalledOnce()
-    expect(mockPush).toHaveBeenCalledWith('/')
-  })
-
-  it('без пользователя ничего не рендерит (редирект на /login)', () => {
-    mockUser = null
-    const { container } = render(<ProfileClient />)
-    expect(container.firstChild).toBeNull()
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
   })
 })

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { runInAction } from 'mobx'
 
 vi.mock('@/services/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/services/api')>()
@@ -7,6 +8,7 @@ vi.mock('@/services/api', async (importOriginal) => {
     api: {
       post: vi.fn(),
       get: vi.fn(),
+      put: vi.fn(),
     },
     setAuthToken: vi.fn(),
   }
@@ -45,6 +47,8 @@ const mockUser = {
   subscriptionExpiresAt: null,
   vacancyCredits: 3,
   applyCredits: 3,
+  boostCredits: 3,
+  isVip: false,
   telegramNotificationsEnabled: true,
   createdAt: '2026-01-01T00:00:00Z',
 }
@@ -233,6 +237,23 @@ describe('AuthStore', () => {
       await store.loginWithEmail('a@b.c', 'password').catch(() => {})
       expect(store.emailNotConfirmed).toBe(false)
     })
+  })
+
+  it('updateProfile обновляет user из ответа PUT /users/me', async () => {
+    vi.mocked(api.put).mockResolvedValueOnce({ ...mockUser, firstName: 'New' })
+    const store = new AuthStore()
+    runInAction(() => {
+      store.user = mockUser
+    })
+    await store.updateProfile({ firstName: 'New' })
+    expect(store.user?.firstName).toBe('New')
+  })
+
+  it('changePassword устанавливает новую сессию из ответа', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ jwt: 'new-token', user: mockUser })
+    const store = new AuthStore()
+    await store.changePassword('old', 'new123', 'new123')
+    expect(store.jwt).toBe('new-token')
   })
 
   describe('resetPassword', () => {

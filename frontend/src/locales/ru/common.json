@@ -464,16 +464,7 @@
         "read": "Прочитанные"
       }
     },
-    "profile": {
-      "logout": "Выйти",
-      "links": {
-        "publications": "Мои публикации",
-        "notifications": "Уведомления",
-        "favorites": "Избранное",
-        "blocks": "Блокировки",
-        "subscription": "Подписка"
-      }
-    },
+    "profile": {},
     "analytics": {
       "vacancyTitle": "Аналитика вакансии",
       "resumeTitle": "Аналитика резюме",
@@ -796,6 +787,30 @@
       "pro": "Pro",
       "max": "Max",
       "vip": "VIP"
+    }
+  },
+  "settings": {
+    "title": "Настройки",
+    "nav": {
+      "profile": "Данные профиля",
+      "security": "Безопасность",
+      "subscription": "Подписка",
+      "logout": "Выйти"
+    },
+    "profile": {
+      "save": "Сохранить",
+      "saved": "Сохранено",
+      "saveError": "Не удалось сохранить",
+      "changeAvatar": "Сменить аватар",
+      "avatarError": "Не удалось загрузить аватар",
+      "telegramNotifications": "Telegram-уведомления"
+    },
+    "security": {
+      "currentPassword": "Текущий пароль",
+      "newPassword": "Новый пароль",
+      "change": "Сменить пароль",
+      "changed": "Пароль изменён",
+      "changeError": "Не удалось сменить пароль"
     }
   }
 }

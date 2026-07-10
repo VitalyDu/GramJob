@@ -50,6 +50,7 @@ const AUTHENTICATED_PERMISSIONS = [
   'api::analytics.analytics.vacancyAnalytics',
   'api::analytics.analytics.resumeAnalytics',
   'plugin::upload.content-api.upload',
+  'plugin::users-permissions.auth.changePassword',
 ]
 
 const PUBLIC_PERMISSIONS = [
