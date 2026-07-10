@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { Lock } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { ResumeStatusBadge } from '@/components/resume/ResumeStatusBadge'
 import { FavoriteButton } from '@/components/favorite/FavoriteButton'
 import { ReportDialog } from '@/components/report/ReportDialog'
@@ -26,7 +25,6 @@ interface Props {
 }
 
 export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: Props) {
-  useTelegramBackButton()
   const { resume: store, auth } = useStores()
   const { t } = useTranslation()
   const [reportOpen, setReportOpen] = useState(false)

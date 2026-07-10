@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { ResumeForm } from '@/components/resume/ResumeForm'
 import type { ResumeCreateInput } from '@/types/api'
 
@@ -16,7 +15,6 @@ interface Props {
 }
 
 export const EditResumeClient = observer(function EditResumeClient({ id }: Props) {
-  useTelegramBackButton()
   const { resume: store } = useStores()
   const isAuthenticated = useRequireAuth()
   const router = useRouter()

@@ -8,13 +8,11 @@ import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { VacancyForm } from '@/components/vacancy/VacancyForm'
 import { UpsellModal } from '@/components/vacancy/UpsellModal'
 import type { VacancyCreateInput } from '@/types/api'
 
 export const CreateVacancyClient = observer(function CreateVacancyClient() {
-  useTelegramBackButton()
   const { vacancy: vStore, company: cStore } = useStores()
   const isAuthenticated = useRequireAuth()
   const router = useRouter()

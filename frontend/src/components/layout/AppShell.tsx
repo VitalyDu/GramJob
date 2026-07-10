@@ -1,19 +1,47 @@
 'use client'
 
-import { type ReactNode } from 'react'
+import { type ReactNode, useEffect } from 'react'
 import { Toaster } from 'sonner'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useTelegramInit } from '@/hooks/useTelegramInit'
+import { getTelegramWebApp } from '@/lib/telegram'
 import { WebHeader } from './WebHeader'
 import { TelegramTopBar } from './TelegramTopBar'
 import { BottomNav } from './BottomNav'
 import { ModerationToastWatcher } from '@/components/moderation/ModerationToastWatcher'
 import { StartParamRouter } from './StartParamRouter'
 
+const ROOT_PATHS = new Set([
+  '/',
+  '/vacancies',
+  '/dashboard',
+  '/dashboard/applications',
+  '/dashboard/favorites',
+])
+
 export function AppShell({ children }: { children: ReactNode }) {
   const { isMiniApp } = useTelegramInit()
   const pathname = usePathname()
+  const router = useRouter()
   const isHome = pathname === '/'
+
+  useEffect(() => {
+    if (!isMiniApp) return
+    const twa = getTelegramWebApp()
+    if (!twa) return
+    const isRoot = ROOT_PATHS.has(pathname)
+    if (isRoot) {
+      twa.BackButton.hide()
+      return
+    }
+    const handler = () => router.back()
+    twa.BackButton.onClick(handler)
+    twa.BackButton.show()
+    return () => {
+      twa.BackButton.offClick(handler)
+      twa.BackButton.hide()
+    }
+  }, [isMiniApp, pathname, router])
 
   return (
     <div className="flex min-h-screen flex-col">

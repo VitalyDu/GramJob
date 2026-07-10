@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { ApplicationStatusBadge } from '@/components/application/ApplicationStatusBadge'
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { Card, CardContent } from '@/components/ui/card'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
@@ -23,7 +22,6 @@ export const ApplicationDetailClient = observer(function ApplicationDetailClient
   const { t } = useTranslation()
   const { application: store } = useStores()
   const isAuthenticated = useRequireAuth()
-  useTelegramBackButton()
 
   useEffect(() => {
     void store.fetchApplicationById(documentId)

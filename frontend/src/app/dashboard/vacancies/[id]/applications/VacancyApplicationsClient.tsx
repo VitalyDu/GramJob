@@ -6,7 +6,6 @@ import { Users } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { ApplicationCard } from '@/components/application/ApplicationCard'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
@@ -22,7 +21,6 @@ interface Props {
 export const VacancyApplicationsClient = observer(function VacancyApplicationsClient({
   vacancyId,
 }: Props) {
-  useTelegramBackButton()
   const { t } = useTranslation()
   const { application: store } = useStores()
   const isAuthenticated = useRequireAuth()

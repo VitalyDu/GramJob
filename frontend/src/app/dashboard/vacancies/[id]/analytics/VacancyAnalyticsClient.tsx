@@ -15,7 +15,6 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
@@ -40,7 +39,6 @@ interface Props {
 export const VacancyAnalyticsClient = observer(function VacancyAnalyticsClient({
   vacancyId,
 }: Props) {
-  useTelegramBackButton()
   const { t } = useTranslation()
   const { analytics: store } = useStores()
   const isAuthenticated = useRequireAuth()

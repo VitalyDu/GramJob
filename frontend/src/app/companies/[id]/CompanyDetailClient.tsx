@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { ExternalLink, MessageCircle, Linkedin } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { StatusBadge } from '@/components/company/StatusBadge'
 import { FavoriteButton } from '@/components/favorite/FavoriteButton'
 import { ReportDialog } from '@/components/report/ReportDialog'
@@ -29,7 +28,6 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({
   id,
   initialCompany,
 }: Props) {
-  useTelegramBackButton()
   const { company: store, auth } = useStores()
   const { t } = useTranslation()
   const [reportOpen, setReportOpen] = useState(false)

@@ -8,7 +8,6 @@ import { Eye, Send, ExternalLink } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import type { Vacancy } from '@/types/api'
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { hapticNotify } from '@/lib/telegram'
 import { getMediaUrl } from '@/lib/media'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
@@ -34,7 +33,6 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({
   id,
   initialVacancy,
 }: Props) {
-  useTelegramBackButton()
   const { vacancy: store, application: appStore, auth } = useStores()
   const { t } = useTranslation()
   const [applyOpen, setApplyOpen] = useState(false)

@@ -13,10 +13,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { canUpgradeToPlan } from '@/lib/subscription-utils'
 import { useTelegramPayment } from '@/hooks/useTelegramPayment'
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 
 export const SubscriptionClient = observer(function SubscriptionClient() {
-  useTelegramBackButton()
   const { t } = useTranslation()
   const { auth, payment } = useStores()
   const { openInvoice } = useTelegramPayment()

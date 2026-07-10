@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { CompanyForm } from '@/components/company/CompanyForm'
 import type { CompanyUpdateInput } from '@/types/api'
 
@@ -16,7 +15,6 @@ interface Props {
 }
 
 export const EditCompanyClient = observer(function EditCompanyClient({ id }: Props) {
-  useTelegramBackButton()
   const { company: store } = useStores()
   const isAuthenticated = useRequireAuth()
   const router = useRouter()
