@@ -323,6 +323,14 @@
 - `app/dashboard/profile/` — страница профиля для bottom nav (имя, план, навигация, выход); ранее вкладка вела на 404
 - QA-чеклист ручного прогона: `docs/qa/sprint9-miniapp-checklist.md` (iOS + Android + Desktop)
 
+Выполнено (Forgot Password Flow):
+
+- Backend: nodemailer SMTP email-провайдер (`config/plugins.ts`, env SMTP\_\*), Mailpit в docker-compose (web UI :8025)
+- Backend: `configurePasswordReset` в bootstrap — idempotent установка `email_reset_password` = `{FRONTEND_URL}/reset-password` в advanced settings users-permissions
+- Frontend: `AuthStore.forgotPassword` + `AuthStore.resetPassword` (авто-логин по jwt из ответа)
+- Frontend: страницы `(auth)/forgot-password` и `(auth)/reset-password` (Suspense для useSearchParams), ссылка «Забыли пароль?» в EmailLoginForm
+- Локали: ключи `auth.forgotPassword*`/`resetPassword*` RU/EN, маппинг ошибки «Incorrect code provided»
+
 Текущий шаг — Sprint 9 завершён (остался ручной QA-прогон по чеклисту). Следующий: Sprint 10 — SEO, Performance & Launch.
 Планы: `docs/superpowers/plans/`
 
