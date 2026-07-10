@@ -19,7 +19,7 @@ export function SubscriptionPlanCard({ plan, currentPlan, canBuy, isBuying, onBu
 
   return (
     <div
-      className={`rounded-2xl border p-5 flex flex-col gap-4 ${isActive ? 'border-indigo-400 bg-indigo-50/50' : 'border-border bg-card'}`}
+      className={`rounded-2xl border p-5 flex flex-col gap-4 bg-card ${isActive ? 'border-indigo-400 shadow-md' : 'border-border'}`}
     >
       <div className="flex items-start justify-between">
         <div>

@@ -32,10 +32,10 @@ export function PackageCard(props: Props) {
       : [t('subscription.packageCard.applies', { count: props.pkg.applyCredits })]
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 flex flex-col gap-3">
+    <div className="rounded-2xl border border-border bg-card p-5 flex flex-col gap-4">
       <div className="flex items-start justify-between">
         <p className="text-base font-semibold text-card-foreground">{pkg.name}</p>
-        <p className="text-sm font-bold text-indigo-600">
+        <p className="text-base font-bold text-card-foreground">
           <StarsPrice price={pkg.starsPrice} />
         </p>
       </div>
@@ -46,13 +46,7 @@ export function PackageCard(props: Props) {
         ))}
       </ul>
 
-      <Button
-        size="sm"
-        variant="outline"
-        className="w-full"
-        disabled={isBuying}
-        onClick={() => onBuy(pkg.id)}
-      >
+      <Button size="sm" className="w-full" disabled={isBuying} onClick={() => onBuy(pkg.id)}>
         {isBuying ? t('subscription.packageCard.creating') : t('subscription.packageCard.buy')}
       </Button>
     </div>
