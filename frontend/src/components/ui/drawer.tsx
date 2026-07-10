@@ -4,8 +4,19 @@ import * as React from 'react'
 import { Dialog as DialogPrimitive } from 'radix-ui'
 import { cn } from '@/lib/utils'
 
-function Drawer({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="drawer" {...props} />
+const DrawerContext = React.createContext<{ onClose: () => void }>({ onClose: () => {} })
+
+function Drawer({ onOpenChange, ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
+  const onClose = React.useCallback(() => onOpenChange?.(false), [onOpenChange])
+  return (
+    <DrawerContext.Provider value={{ onClose }}>
+      <DialogPrimitive.Root
+        data-slot="drawer"
+        {...(onOpenChange ? { onOpenChange } : {})}
+        {...props}
+      />
+    </DrawerContext.Provider>
+  )
 }
 
 function DrawerTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
@@ -43,10 +54,54 @@ function DrawerContent({
   children,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content>) {
+  const { onClose } = React.useContext(DrawerContext)
+  const contentRef = React.useRef<HTMLDivElement>(null)
+  const drag = React.useRef({ active: false, startY: 0 })
+
+  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    drag.current = { active: false, startY: e.clientY }
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }
+
+  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    const el = contentRef.current
+    if (!el) return
+    const dy = Math.max(0, e.clientY - drag.current.startY)
+    if (dy > 4) drag.current.active = true
+    if (!drag.current.active) return
+    el.style.transform = `translateY(${dy}px)`
+    el.style.transition = 'none'
+  }
+
+  function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    const el = contentRef.current
+    if (!drag.current.active || !el) return
+    drag.current.active = false
+    const dy = Math.max(0, e.clientY - drag.current.startY)
+
+    if (dy > 80) {
+      el.style.transform = 'translateY(100%)'
+      el.style.transition = 'transform 280ms ease'
+      setTimeout(() => {
+        if (!contentRef.current) return
+        // Disable Radix exit animation — element is already off-screen
+        contentRef.current.style.animation = 'none'
+        onClose()
+      }, 260)
+    } else {
+      el.style.transition = 'transform 250ms cubic-bezier(0.32, 0.72, 0, 1)'
+      el.style.transform = ''
+      setTimeout(() => {
+        if (contentRef.current) contentRef.current.style.transition = ''
+      }, 250)
+    }
+  }
+
   return (
     <DrawerPortal>
       <DrawerOverlay />
       <DialogPrimitive.Content
+        ref={contentRef}
         data-slot="drawer-content"
         className={cn(
           'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] bg-background',
@@ -57,7 +112,14 @@ function DrawerContent({
         )}
         {...props}
       >
-        <div className="mx-auto mt-4 mb-2 h-1.5 w-12 rounded-full bg-muted-foreground/20" />
+        <div
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          className="flex items-center justify-center pt-3 pb-1 touch-none cursor-grab active:cursor-grabbing"
+        >
+          <div className="h-1.5 w-12 rounded-full bg-muted-foreground/20" />
+        </div>
         {children}
       </DialogPrimitive.Content>
     </DrawerPortal>
