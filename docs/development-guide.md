@@ -184,11 +184,13 @@ class VacancyStore {
   }
 
   get publishedVacancies() {
-    return this.vacancies.filter(v => v.status === 'published')
+    return this.vacancies.filter((v) => v.status === 'published')
   }
 
   async fetchVacancies(filters: VacancyFilters) {
-    runInAction(() => { this.isLoading = true })
+    runInAction(() => {
+      this.isLoading = true
+    })
     const data = await api.vacancies.list(filters)
     runInAction(() => {
       this.vacancies = data

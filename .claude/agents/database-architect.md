@@ -35,6 +35,7 @@ Resume ─── ResumeAnalytics[] (one-to-many by date)
 ## Critical indexes
 
 Always ensure these exist:
+
 - `User`: `telegramId` (unique), `email` (unique), `subscriptionPlan`
 - `Vacancy`: `status`, `industry`, `country`, `workFormat`, `employmentType`, `seniority`, `topPlacement`, `expiresAt`
 - `Resume`: `user`, `status`, `country`, `workFormat`
@@ -46,12 +47,14 @@ Always ensure these exist:
 ## JSON fields
 
 `skills` and `languages` are stored as JSON arrays. For search:
+
 - Use PostgreSQL `GIN` index on JSON fields for `@>` operator
 - Or extract to separate tables if full-text search performance is critical
 
 ## Query patterns
 
 **Vacancy search with filters:**
+
 ```sql
 SELECT v.* FROM vacancies v
 WHERE v.status = 'published'
@@ -63,6 +66,7 @@ LIMIT :pageSize OFFSET :offset
 ```
 
 **Check apply limit:**
+
 ```sql
 SELECT COUNT(*) FROM applications
 WHERE user_id = :userId
@@ -70,6 +74,7 @@ WHERE user_id = :userId
 ```
 
 **Active vacancies count:**
+
 ```sql
 SELECT COUNT(*) FROM vacancies
 WHERE posted_by_id = :userId

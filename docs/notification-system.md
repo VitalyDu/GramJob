@@ -5,6 +5,7 @@
 ## Архитектура
 
 Уведомления работают в два слоя:
+
 1. **In-app notifications** — хранятся в таблице `Notification`, отображаются в UI
 2. **Telegram push** — отправляются через Bot API (`sendMessage`)
 
@@ -20,9 +21,10 @@
 interface NotificationPayload {
   userId: number
   type: NotificationType
-  title: string               // Для in-app
-  body: string                // Для in-app + Telegram текст
-  data?: {                    // Deep link data
+  title: string // Для in-app
+  body: string // Для in-app + Telegram текст
+  data?: {
+    // Deep link data
     entityType: string
     entityId: number | string
   }
@@ -38,11 +40,12 @@ async function sendNotification(payload: NotificationPayload): Promise<void> {
       body: payload.body,
       isRead: false,
       data: payload.data,
-    }
+    },
   })
 
   // 2. Отправить в Telegram (если есть telegramId)
-  const user = await strapi.documents('plugin::users-permissions.user')
+  const user = await strapi
+    .documents('plugin::users-permissions.user')
     .findOne({ documentId: payload.userId })
 
   if (user.telegramId) {
@@ -56,11 +59,13 @@ async function sendNotification(payload: NotificationPayload): Promise<void> {
 ## Telegram Rate Limits
 
 Telegram Bot API ограничения:
+
 - **30 сообщений/сек** — глобальный лимит бота
 - **1 сообщение/сек** в один чат
 - При превышении: HTTP 429, `retry_after` в ответе
 
 **Стратегия:**
+
 - Все уведомления проходят через очередь (простая реализация — массив с setTimeout)
 - Для v1: простая задержка 50ms между отправками (≤ 20 msg/sec, безопасный лимит)
 - Для scale: Redis + Bull queue
@@ -80,7 +85,11 @@ class TelegramQueue {
     this.processing = true
     while (this.queue.length > 0) {
       const task = this.queue.shift()!
-      try { await task() } catch (e) { console.error(e) }
+      try {
+        await task()
+      } catch (e) {
+        console.error(e)
+      }
       await sleep(50) // 20 msg/sec
     }
     this.processing = false
@@ -96,12 +105,12 @@ const telegramQueue = new TelegramQueue()
 
 При ошибке отправки в Telegram:
 
-| Код ошибки | Действие |
-|-----------|---------|
-| 429 (flood) | Ждать `retry_after` секунд, повторить |
-| 403 (bot blocked) | Очистить `User.telegramId` (пользователь заблокировал бота) |
-| 400 (chat not found) | Логировать, не повторять |
-| 5xx | Повторить 3 раза с экспоненциальной задержкой |
+| Код ошибки           | Действие                                                    |
+| -------------------- | ----------------------------------------------------------- |
+| 429 (flood)          | Ждать `retry_after` секунд, повторить                       |
+| 403 (bot blocked)    | Очистить `User.telegramId` (пользователь заблокировал бота) |
+| 400 (chat not found) | Логировать, не повторять                                    |
+| 5xx                  | Повторить 3 раза с экспоненциальной задержкой               |
 
 ```typescript
 async function sendWithRetry(chatId: string, message: TelegramMessage, retries = 3) {
@@ -129,28 +138,28 @@ async function sendWithRetry(chatId: string, message: TelegramMessage, retries =
 
 ### Для кандидата
 
-| type | title (RU) | Telegram-текст |
-|------|-----------|----------------|
-| `resume_viewed` | Резюме просмотрено | «Ваше резюме «{resumeTitle}» просмотрел работодатель» |
-| `application_approved` | Отклик одобрен | «Ваш отклик на «{vacancyTitle}» одобрен! Теперь доступны контакты» |
-| `application_rejected` | Отклик отклонён | «Отклик на «{vacancyTitle}» отклонён» |
-| `interview_invitation` | Приглашение на интервью | «Вас приглашают на интервью по вакансии «{vacancyTitle}»» |
-| `test_task` | Тестовое задание | «Вам отправили тестовое задание по вакансии «{vacancyTitle}»» |
-| `offer_received` | Получен оффер | «🎉 Вам сделали оффер по вакансии «{vacancyTitle}»!» |
-| `subscription_expiring` | Подписка истекает | «Ваша подписка {plan} истекает через 7 дней» |
-| `saved_search_match` | Новые вакансии | «{count} новых вакансий по вашему запросу «{query}»» |
-| `moderation_approved` | Публикация одобрена | «Ваше резюме/вакансия «{title}» опубликована» |
-| `moderation_rejected` | Публикация отклонена | «Вакансия/Резюме «{title}» отклонена. Причина: {reason}» |
+| type                    | title (RU)              | Telegram-текст                                                     |
+| ----------------------- | ----------------------- | ------------------------------------------------------------------ |
+| `resume_viewed`         | Резюме просмотрено      | «Ваше резюме «{resumeTitle}» просмотрел работодатель»              |
+| `application_approved`  | Отклик одобрен          | «Ваш отклик на «{vacancyTitle}» одобрен! Теперь доступны контакты» |
+| `application_rejected`  | Отклик отклонён         | «Отклик на «{vacancyTitle}» отклонён»                              |
+| `interview_invitation`  | Приглашение на интервью | «Вас приглашают на интервью по вакансии «{vacancyTitle}»»          |
+| `test_task`             | Тестовое задание        | «Вам отправили тестовое задание по вакансии «{vacancyTitle}»»      |
+| `offer_received`        | Получен оффер           | «🎉 Вам сделали оффер по вакансии «{vacancyTitle}»!»               |
+| `subscription_expiring` | Подписка истекает       | «Ваша подписка {plan} истекает через 7 дней»                       |
+| `saved_search_match`    | Новые вакансии          | «{count} новых вакансий по вашему запросу «{query}»»               |
+| `moderation_approved`   | Публикация одобрена     | «Ваше резюме/вакансия «{title}» опубликована»                      |
+| `moderation_rejected`   | Публикация отклонена    | «Вакансия/Резюме «{title}» отклонена. Причина: {reason}»           |
 
 ### Для работодателя
 
-| type | title (RU) | Telegram-текст |
-|------|-----------|----------------|
-| `new_application` | Новый отклик | «Новый отклик на «{vacancyTitle}» от {candidateName}» |
-| `vacancy_viewed` | Просмотры вакансии | (дайджест — 1 раз/день) «Вакансию «{title}» просмотрели {N} раз» |
-| `subscription_expiring` | Подписка истекает | «Подписка {plan} истекает через 7 дней» |
-| `limits_reached` | Лимиты исчерпаны | «Исчерпан лимит {limitType}. Рассмотрите апгрейд» |
-| `vacancy_expiring_soon` | Вакансия истекает | «Вакансия «{title}» истекает через 3 дня» |
+| type                    | title (RU)         | Telegram-текст                                                   |
+| ----------------------- | ------------------ | ---------------------------------------------------------------- |
+| `new_application`       | Новый отклик       | «Новый отклик на «{vacancyTitle}» от {candidateName}»            |
+| `vacancy_viewed`        | Просмотры вакансии | (дайджест — 1 раз/день) «Вакансию «{title}» просмотрели {N} раз» |
+| `subscription_expiring` | Подписка истекает  | «Подписка {plan} истекает через 7 дней»                          |
+| `limits_reached`        | Лимиты исчерпаны   | «Исчерпан лимит {limitType}. Рассмотрите апгрейд»                |
+| `vacancy_expiring_soon` | Вакансия истекает  | «Вакансия «{title}» истекает через 3 дня»                        |
 
 ---
 
@@ -165,23 +174,29 @@ function buildNotificationMessage(type: string, data: any): TelegramMessage {
     text,
     options: {
       parse_mode: 'HTML',
-      reply_markup: deepLink ? {
-        inline_keyboard: [[{
-          text: getButtonText(type),
-          url: `https://t.me/${BOT_USERNAME}/app?startapp=${deepLink}`
-        }]]
-      } : undefined
-    }
+      reply_markup: deepLink
+        ? {
+            inline_keyboard: [
+              [
+                {
+                  text: getButtonText(type),
+                  url: `https://t.me/${BOT_USERNAME}/app?startapp=${deepLink}`,
+                },
+              ],
+            ],
+          }
+        : undefined,
+    },
   }
 }
 
 function getButtonText(type: string): string {
   const map: Record<string, string> = {
-    'new_application': '👤 Посмотреть отклик',
-    'application_approved': '✅ Открыть контакты',
-    'offer_received': '🎉 Посмотреть оффер',
-    'subscription_expiring': '💳 Продлить подписку',
-    'saved_search_match': '🔍 Посмотреть вакансии',
+    new_application: '👤 Посмотреть отклик',
+    application_approved: '✅ Открыть контакты',
+    offer_received: '🎉 Посмотреть оффер',
+    subscription_expiring: '💳 Продлить подписку',
+    saved_search_match: '🔍 Посмотреть вакансии',
   }
   return map[type] || '📋 Открыть'
 }
@@ -209,11 +224,11 @@ function getButtonText(type: string): string {
 
 ## Cron-задачи уведомлений
 
-| Задача | Расписание |
-|--------|-----------|
-| Subscription expiry warning | Ежедневно 09:00 UTC |
-| Vacancy expiring soon (3 дня) | Ежедневно 09:00 UTC |
-| Vacancy expiry (sets expired) | Каждый час |
-| Saved search check | Каждые 2 часа |
-| Daily vacancy views digest | Ежедневно 18:00 UTC |
-| Clean old notifications | Еженедельно (воскресенье) |
+| Задача                        | Расписание                |
+| ----------------------------- | ------------------------- |
+| Subscription expiry warning   | Ежедневно 09:00 UTC       |
+| Vacancy expiring soon (3 дня) | Ежедневно 09:00 UTC       |
+| Vacancy expiry (sets expired) | Каждый час                |
+| Saved search check            | Каждые 2 часа             |
+| Daily vacancy views digest    | Ежедневно 18:00 UTC       |
+| Clean old notifications       | Еженедельно (воскресенье) |

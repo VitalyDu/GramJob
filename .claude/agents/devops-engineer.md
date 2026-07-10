@@ -54,6 +54,7 @@ volumes:
 ## CI/CD (GitHub Actions)
 
 ### Frontend (Vercel)
+
 Vercel auto-deploys on push to `main`. Preview deployments on PRs.
 Environment variables in Vercel dashboard.
 
@@ -111,16 +112,18 @@ jobs:
 ```javascript
 // backend/ecosystem.config.js
 module.exports = {
-  apps: [{
-    name: 'gramjob-backend',
-    script: 'pnpm',
-    args: 'start',
-    cwd: '/app/gramjob/backend',
-    env: { NODE_ENV: 'production' },
-    instances: 1,          // Strapi is not cluster-safe by default
-    restart_delay: 3000,
-    max_restarts: 10,
-  }]
+  apps: [
+    {
+      name: 'gramjob-backend',
+      script: 'pnpm',
+      args: 'start',
+      cwd: '/app/gramjob/backend',
+      env: { NODE_ENV: 'production' },
+      instances: 1, // Strapi is not cluster-safe by default
+      restart_delay: 3000,
+      max_restarts: 10,
+    },
+  ],
 }
 ```
 
@@ -145,7 +148,7 @@ apt install -y postgresql-16
 # /etc/nginx/sites-available/gramjob-api
 server {
     server_name api.gramjob.com;
-    
+
     location / {
         proxy_pass http://localhost:1337;
         proxy_http_version 1.1;
@@ -154,7 +157,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
-    
+
     location /uploads/ {
         # Redirect to S3/R2 in production
         proxy_pass http://localhost:1337;

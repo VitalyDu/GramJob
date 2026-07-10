@@ -99,7 +99,7 @@ export default {
     const { data } = event.params
     // Validate before creating
   },
-  
+
   async afterCreate(event) {
     const { result } = event
     // Send notification, update counters
@@ -107,7 +107,7 @@ export default {
       data: { userId: result.postedBy, type: 'vacancy_created', ... }
     })
   },
-  
+
   async afterUpdate(event) {
     const { result, params } = event
     if (result.status === 'published' && params.data.status === 'published') {
@@ -134,6 +134,7 @@ export default (config, { strapi }) => {
 ```
 
 Register in `config/middlewares.ts`:
+
 ```typescript
 export default [
   'strapi::errors',
@@ -147,25 +148,28 @@ export default [
 ## Permissions (RBAC)
 
 ### Via Admin Panel
+
 Settings → Users & Permissions → Roles → Authenticated / Public
 
 ### Custom Policy
+
 ```typescript
 // src/policies/is-vacancy-owner.ts
 export default async (policyContext, config, { strapi }) => {
   const { id } = policyContext.params
   const userId = policyContext.state.user?.id
-  
+
   const vacancy = await strapi.documents('api::vacancy.vacancy').findOne({
     documentId: id,
     populate: ['postedBy'],
   })
-  
+
   return vacancy?.postedBy?.id === userId
 }
 ```
 
 Apply in routes:
+
 ```typescript
 { method: 'PUT', path: '/vacancies/:id', handler: 'vacancy.update',
   config: { policies: ['global::is-vacancy-owner'] } }
@@ -174,11 +178,13 @@ Apply in routes:
 ## Plugins
 
 ### Installed plugins to consider
+
 - `@strapi/plugin-users-permissions` — JWT auth (built-in)
 - `@strapi/plugin-upload` — S3 media (built-in)
 - `@strapi/plugin-i18n` — for multilingual content types
 
 ### Custom plugin skeleton
+
 ```
 backend/src/plugins/telegram-bot/
 ├── server/
@@ -201,10 +207,10 @@ export default {
         secretAccessKey: env('S3_SECRET_ACCESS_KEY'),
         region: env('S3_REGION'),
         params: { Bucket: env('S3_BUCKET') },
-        endpoint: env('S3_ENDPOINT'),  // For Cloudflare R2
-      }
-    }
-  }
+        endpoint: env('S3_ENDPOINT'), // For Cloudflare R2
+      },
+    },
+  },
 }
 ```
 

@@ -23,6 +23,7 @@ After changes: restart Strapi (`pnpm develop`).
 ### Custom controllers
 
 Override default CRUD or add custom actions:
+
 ```typescript
 // src/api/vacancy/controllers/vacancy.ts
 export default factories.createCoreController('api::vacancy.vacancy', ({ strapi }) => ({
@@ -30,7 +31,7 @@ export default factories.createCoreController('api::vacancy.vacancy', ({ strapi 
     const { id } = ctx.params
     const userId = ctx.state.user.id
     // custom logic
-  }
+  },
 }))
 ```
 
@@ -44,12 +45,13 @@ export default factories.createCoreController('api::vacancy.vacancy', ({ strapi 
 ### Services
 
 Business logic belongs in services, not controllers:
+
 ```typescript
 // src/api/vacancy/services/vacancy.ts
 export default factories.createCoreService('api::vacancy.vacancy', ({ strapi }) => ({
   async publishVacancy(vacancyId, userId) {
     // check limits, update status, set expiresAt
-  }
+  },
 }))
 ```
 
@@ -60,19 +62,21 @@ export default factories.createCoreService('api::vacancy.vacancy', ({ strapi }) 
 export default {
   async afterCreate({ result }) {
     // send notification, update counters
-  }
+  },
 }
 ```
 
 ## Business logic rules
 
 **Publishing a vacancy:**
+
 1. Check `user.subscriptionPlan` limits (vacanciesPerMonth, activeVacanciesLimit)
 2. Check `user.vacancyCredits` (use credits if plan limit reached)
 3. Set status = `moderation`
 4. On moderation approval: status = `published`, expiresAt = now + 60 days
 
 **Submitting an application:**
+
 1. Check not already applied (unique vacancy+user constraint)
 2. Check vacancy is `published` and `internal`
 3. Check daily apply limit vs `user.applyCredits`
@@ -80,12 +84,14 @@ export default {
 5. Notify employer via Telegram
 
 **Contact visibility:**
+
 - Resume contacts: included in response only if requester is employer with approved application
 - Employer contacts in Application: included only after status = `interview`+
 
 ## Permissions (RBAC)
 
 Use Strapi's built-in roles + custom policies:
+
 - `authenticated` — logged in users
 - `public` — published vacancies/companies
 - Custom policy for ownership checks
@@ -102,6 +108,7 @@ module.exports = async (policyContext, config, { strapi }) => {
 ## Error handling
 
 Always throw structured errors:
+
 ```typescript
 throw new ApplicationError('LIMIT_REACHED', { limit: 3, used: 3 })
 // Results in 400 with { error: { code: 'LIMIT_REACHED', details: {...} } }
@@ -110,7 +117,8 @@ throw new ApplicationError('LIMIT_REACHED', { limit: 3, used: 3 })
 ## Rate limiting
 
 Apply in middleware for:
-- POST /auth/* — 10 req/min
-- POST /applications — 30 req/min  
+
+- POST /auth/\* — 10 req/min
+- POST /applications — 30 req/min
 - POST /vacancies — 20 req/min
 - GET /vacancies (public) — 100 req/min

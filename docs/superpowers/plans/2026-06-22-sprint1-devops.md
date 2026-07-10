@@ -40,6 +40,7 @@ gramjob/
 ## Task 1: Git Init + Monorepo Scaffold
 
 **Files:**
+
 - Create: `.gitignore`
 - Create: `package.json`
 - Create: `pnpm-workspace.yaml`
@@ -215,6 +216,7 @@ git commit -m "chore: initialize monorepo with pnpm workspaces"
 ## Task 2: Docker Compose — PostgreSQL 16 + MinIO
 
 **Files:**
+
 - Create: `docker-compose.yml`
 
 - [ ] **Step 1: Создать `docker-compose.yml`**
@@ -248,8 +250,8 @@ services:
       MINIO_ROOT_USER: gramjob
       MINIO_ROOT_PASSWORD: secret123
     ports:
-      - '9000:9000'  # S3 API
-      - '9001:9001'  # Web Console
+      - '9000:9000' # S3 API
+      - '9001:9001' # Web Console
     volumes:
       - minio_data:/data
     healthcheck:
@@ -270,6 +272,7 @@ docker compose up -d
 ```
 
 Ожидаемый вывод:
+
 ```
 ✔ Container gramjob_postgres  Started
 ✔ Container gramjob_minio     Started
@@ -311,6 +314,7 @@ git commit -m "chore: add Docker Compose with PostgreSQL 16 and MinIO"
 ## Task 3: Environment Variables (.env.example)
 
 **Files:**
+
 - Create: `backend/.env.example`
 - Create: `frontend/.env.example`
 
@@ -402,6 +406,7 @@ git commit -m "chore: add .env.example files for backend and frontend"
 ## Task 4: Pre-commit Hooks (Prettier + ESLint + TypeScript)
 
 **Files:**
+
 - Create: `.prettierrc`
 - Create: `.prettierignore`
 - Create: `.lintstagedrc.json`
@@ -454,18 +459,10 @@ public/
 
 ```json
 {
-  "*.{js,jsx,ts,tsx}": [
-    "prettier --write"
-  ],
-  "*.{json,md,yaml,yml,css,scss}": [
-    "prettier --write"
-  ],
-  "frontend/**/*.{ts,tsx}": [
-    "bash -c 'cd frontend && pnpm exec eslint --fix \"$@\"' --"
-  ],
-  "backend/**/*.ts": [
-    "bash -c 'cd backend && pnpm exec eslint --fix \"$@\"' --"
-  ]
+  "*.{js,jsx,ts,tsx}": ["prettier --write"],
+  "*.{json,md,yaml,yml,css,scss}": ["prettier --write"],
+  "frontend/**/*.{ts,tsx}": ["bash -c 'cd frontend && pnpm exec eslint --fix \"$@\"' --"],
+  "backend/**/*.ts": ["bash -c 'cd backend && pnpm exec eslint --fix \"$@\"' --"]
 }
 ```
 
@@ -511,6 +508,7 @@ git commit -m "chore: add pre-commit hooks with Husky and lint-staged"
 ## Task 5: GitHub Actions CI Pipeline
 
 **Files:**
+
 - Create: `.github/workflows/ci.yml`
 
 - [ ] **Step 1: Создать директорию**

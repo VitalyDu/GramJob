@@ -7,6 +7,7 @@ Use when adding a new model or significant fields to an existing model.
 1. **Design the schema** — write out all fields, types, relations before touching code. Reference `docs/database-schema.md` for conventions.
 
 2. **Create or update schema.json:**
+
    ```
    backend/src/api/<name>/content-types/<name>/schema.json
    ```
@@ -16,6 +17,7 @@ Use when adding a new model or significant fields to an existing model.
 3. **Add indexes** — document them in `docs/database-schema.md`. For PostgreSQL GIN indexes on JSON fields, add raw migration.
 
 4. **Create lifecycle hooks** if needed:
+
    ```
    backend/src/api/<name>/content-types/<name>/lifecycles.ts
    ```

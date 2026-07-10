@@ -55,7 +55,6 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Database 
 
   const connection = connections[client]
 
-   
   return {
     connection: {
       client,

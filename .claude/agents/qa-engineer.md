@@ -46,6 +46,7 @@ backend/
 ## Edge cases to always check
 
 **Vacancy:**
+
 - Apply to expired vacancy (should fail gracefully)
 - Apply to external vacancy (should redirect, not open form)
 - Employer applies to own company's vacancy (should be prevented)
@@ -53,17 +54,20 @@ backend/
 - Vacancy at exact limit (e.g., 3rd vacancy on Free plan) vs. 4th (should block)
 
 **Applications:**
+
 - Duplicate application (same user + vacancy)
 - Status regression (hired → applied, should be prevented)
 - Employer accessing another employer's applications
 - Candidate viewing contacts before application approved
 
 **Subscriptions:**
+
 - Subscription expires while user has active vacancies
 - Credits from package used after plan limit reached
 - Daily limit reset at midnight UTC
 
 **Auth:**
+
 - Expired JWT token
 - Telegram initData older than 24 hours
 - User with no email (Telegram-only)
@@ -77,24 +81,24 @@ describe('POST /api/vacancies/:id/publish', () => {
   it('should submit vacancy for moderation', async () => {
     const user = await createUser({ plan: 'free' })
     const vacancy = await createVacancy({ userId: user.id, status: 'draft' })
-    
+
     const res = await request(app)
       .post(`/api/vacancies/${vacancy.id}/publish`)
       .set('Authorization', `Bearer ${user.jwt}`)
-    
+
     expect(res.status).toBe(200)
     expect(res.body.data.status).toBe('moderation')
   })
-  
+
   it('should reject if monthly limit reached', async () => {
     const user = await createUser({ plan: 'free' })
     await createPublishedVacancies(user.id, 3) // exhaust Free limit
     const vacancy = await createVacancy({ userId: user.id, status: 'draft' })
-    
+
     const res = await request(app)
       .post(`/api/vacancies/${vacancy.id}/publish`)
       .set('Authorization', `Bearer ${user.jwt}`)
-    
+
     expect(res.status).toBe(403)
     expect(res.body.error.code).toBe('LIMIT_REACHED')
   })

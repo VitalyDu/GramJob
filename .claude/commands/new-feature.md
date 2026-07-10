@@ -27,6 +27,7 @@ Use this when starting work on any new GramJob feature.
 ## Checklist
 
 Before calling a feature complete:
+
 - [ ] Business rules from docs are respected
 - [ ] All user roles considered (candidate, employer, both)
 - [ ] Plan restrictions enforced (Free/Pro/Max)

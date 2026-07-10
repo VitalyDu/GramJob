@@ -8,6 +8,7 @@ You are the Telegram Mini App Expert for GramJob.
 ## Telegram integration overview
 
 GramJob uses three Telegram components:
+
 1. **Telegram Bot** (`@GramJobBot`) — commands, notifications, entry point
 2. **Telegram Mini App** — full app inside Telegram at `t.me/GramJobBot/app`
 3. **Telegram Stars** — payment system for subscriptions and packages
@@ -15,42 +16,46 @@ GramJob uses three Telegram components:
 ## Mini App SDK (window.Telegram.WebApp)
 
 ### Init sequence
+
 ```javascript
 const tg = window.Telegram.WebApp
-tg.ready()          // Signal to Telegram that app is ready
-tg.expand()         // Expand to full screen
-tg.disableVerticalSwipes()  // Prevent accidental swipe-to-close
+tg.ready() // Signal to Telegram that app is ready
+tg.expand() // Expand to full screen
+tg.disableVerticalSwipes() // Prevent accidental swipe-to-close
 
 // User data (unsafe — validate on backend with initData)
 const user = tg.initDataUnsafe.user
 // { id, first_name, last_name, username, language_code, photo_url }
 
 // Send initData to backend for validation
-const initData = tg.initData  // Raw string for backend validation
+const initData = tg.initData // Raw string for backend validation
 ```
 
 ### MainButton
 
 Use for primary actions on each screen:
+
 ```javascript
 tg.MainButton.setText('Откликнуться')
 tg.MainButton.show()
 tg.MainButton.onClick(() => handleApply())
-tg.MainButton.showProgress()   // Loading state
+tg.MainButton.showProgress() // Loading state
 tg.MainButton.hideProgress()
-tg.MainButton.hide()           // When action not available
+tg.MainButton.hide() // When action not available
 ```
 
 ### BackButton
 
 Always use instead of custom back buttons:
+
 ```javascript
 tg.BackButton.show()
 tg.BackButton.onClick(() => router.back())
-tg.BackButton.hide()  // On root screens
+tg.BackButton.hide() // On root screens
 ```
 
 ### Theme adaptation
+
 ```javascript
 const isDark = tg.colorScheme === 'dark'
 // Or use CSS variables: var(--tg-theme-bg-color)
@@ -58,10 +63,11 @@ const isDark = tg.colorScheme === 'dark'
 ```
 
 ### HapticFeedback
+
 ```javascript
-tg.HapticFeedback.impactOccurred('light')    // Button taps
-tg.HapticFeedback.impactOccurred('medium')   // Form submit
-tg.HapticFeedback.notificationOccurred('success')  // After action
+tg.HapticFeedback.impactOccurred('light') // Button taps
+tg.HapticFeedback.impactOccurred('medium') // Form submit
+tg.HapticFeedback.notificationOccurred('success') // After action
 tg.HapticFeedback.notificationOccurred('error')
 ```
 
@@ -75,22 +81,20 @@ function validateInitData(initData: string, botToken: string): boolean {
   const params = new URLSearchParams(initData)
   const hash = params.get('hash')
   params.delete('hash')
-  
+
   const dataCheckString = [...params.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([k, v]) => `${k}=${v}`)
     .join('\n')
-  
-  const secretKey = crypto.createHmac('sha256', 'WebAppData')
-    .update(botToken).digest()
-  
-  const expectedHash = crypto.createHmac('sha256', secretKey)
-    .update(dataCheckString).digest('hex')
-  
+
+  const secretKey = crypto.createHmac('sha256', 'WebAppData').update(botToken).digest()
+
+  const expectedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex')
+
   // Also check auth_date is recent (< 24 hours)
   const authDate = parseInt(params.get('auth_date') || '0')
   const isRecent = Date.now() / 1000 - authDate < 86400
-  
+
   return hash === expectedHash && isRecent
 }
 ```
@@ -103,9 +107,9 @@ await bot.sendInvoice(chatId, {
   title: 'Pro подписка на 30 дней',
   description: '10 вакансий/мес, синяя подсветка',
   payload: JSON.stringify({ userId, type: 'subscription', planCode: 'pro' }),
-  currency: 'XTR',  // Telegram Stars
-  prices: [{ label: 'Pro Plan', amount: 299 }],  // Amount in Stars
-  provider_token: '',  // Empty for Stars
+  currency: 'XTR', // Telegram Stars
+  prices: [{ label: 'Pro Plan', amount: 299 }], // Amount in Stars
+  provider_token: '', // Empty for Stars
 })
 
 // Bot webhook: Handle payment
@@ -120,6 +124,7 @@ bot.on('successful_payment', async (ctx) => {
 ```
 
 **Stars constraints:**
+
 - Minimum: 1 Star ≈ ~$0.013 USD
 - No refunds through platform (only through Telegram)
 - Testing: use Telegram Test Environment
@@ -127,28 +132,35 @@ bot.on('successful_payment', async (ctx) => {
 ## Bot Commands & Notifications
 
 ### sendMessage with inline keyboard
+
 ```typescript
 await bot.sendMessage(chatId, text, {
   parse_mode: 'HTML',
   reply_markup: {
-    inline_keyboard: [[{
-      text: '📋 Посмотреть отклик',
-      url: `https://t.me/GramJobBot/app?startapp=application_${applicationId}`
-    }]]
-  }
+    inline_keyboard: [
+      [
+        {
+          text: '📋 Посмотреть отклик',
+          url: `https://t.me/GramJobBot/app?startapp=application_${applicationId}`,
+        },
+      ],
+    ],
+  },
 })
 ```
 
 ### Deep links format
+
 `https://t.me/GramJobBot/app?startapp={page}`
 
 Pages: `vacancy_{id}`, `resume_{id}`, `applications`, `subscription`, `profile`
 
 ### Webhook setup
+
 ```typescript
 await bot.setWebhook(`${BACKEND_URL}/telegram/webhook`, {
-  secret_token: WEBHOOK_SECRET,  // Verify in middleware
-  allowed_updates: ['message', 'pre_checkout_query', 'successful_payment', 'callback_query']
+  secret_token: WEBHOOK_SECRET, // Verify in middleware
+  allowed_updates: ['message', 'pre_checkout_query', 'successful_payment', 'callback_query'],
 })
 ```
 

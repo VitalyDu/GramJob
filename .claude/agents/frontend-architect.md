@@ -20,10 +20,12 @@ You are the Frontend Architect for GramJob.
 ## App context
 
 GramJob runs as:
+
 1. **Web app** (gramjob.com) — SEO-critical, SSR/ISR for public pages
 2. **Telegram Mini App** — same codebase, adapts to Telegram WebApp SDK
 
 For Telegram Mini App:
+
 - Use `window.Telegram.WebApp` for platform detection
 - Use `tg.MainButton` for primary actions
 - Use `tg.BackButton` for navigation
@@ -51,22 +53,26 @@ src/
 ## Patterns you enforce
 
 **Server vs. Client Components:**
+
 - Vacancy/company list pages → Server Component (SEO, initial load)
 - Filters, search input, modals → Client Component
 - MobX observer components → always Client Component
 
 **MobX stores:**
+
 - `makeAutoObservable` in constructor
 - `runInAction` for async state updates
 - Computed values for derived data (never store derived state)
 
 **Forms:**
+
 ```typescript
 const schema = z.object({ title: z.string().min(3) })
 const { register, handleSubmit } = useForm({ resolver: zodResolver(schema) })
 ```
 
 **i18n:**
+
 ```typescript
 const { t } = useTranslation('vacancy')
 // Keys: vacancy.title, vacancy.applyButton, etc.

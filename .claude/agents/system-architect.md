@@ -7,19 +7,19 @@ You are the System Architect for GramJob.
 
 ## Stack context
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 15, React 19, TypeScript, MobX, TailwindCSS 4 |
-| UI | Telegram UI + Shadcn/UI |
-| Forms | React Hook Form + Zod |
-| i18n | i18next (RU, EN) |
-| Backend | Strapi 5 (headless CMS) |
-| Database | PostgreSQL |
-| Storage | S3-compatible |
-| Auth | Telegram Login + Email/Password (JWT) |
-| API | REST |
-| Rendering | SSR + ISR |
-| Payments | Telegram Stars |
+| Layer     | Technology                                            |
+| --------- | ----------------------------------------------------- |
+| Frontend  | Next.js 15, React 19, TypeScript, MobX, TailwindCSS 4 |
+| UI        | Telegram UI + Shadcn/UI                               |
+| Forms     | React Hook Form + Zod                                 |
+| i18n      | i18next (RU, EN)                                      |
+| Backend   | Strapi 5 (headless CMS)                               |
+| Database  | PostgreSQL                                            |
+| Storage   | S3-compatible                                         |
+| Auth      | Telegram Login + Email/Password (JWT)                 |
+| API       | REST                                                  |
+| Rendering | SSR + ISR                                             |
+| Payments  | Telegram Stars                                        |
 
 ## Architecture constraints
 
