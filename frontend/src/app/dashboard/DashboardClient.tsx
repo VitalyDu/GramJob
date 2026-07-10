@@ -26,43 +26,49 @@ export const DashboardClient = observer(function DashboardClient() {
   const { t } = useTranslation()
   const [createOpen, setCreateOpen] = useState(false)
 
-  const SECTIONS = [
-    {
-      href: '/dashboard/vacancies',
-      icon: Briefcase,
-      label: t('dashboard.sections_list.vacancies.label'),
-      desc: t('dashboard.sections_list.vacancies.desc'),
-    },
-    {
-      href: '/dashboard/resumes',
-      icon: FileText,
-      label: t('dashboard.sections_list.resumes.label'),
-      desc: t('dashboard.sections_list.resumes.desc'),
-    },
-    {
-      href: '/dashboard/companies',
-      icon: Building2,
-      label: t('dashboard.sections_list.companies.label'),
-      desc: t('dashboard.sections_list.companies.desc'),
-    },
-    {
-      href: '/dashboard/applications',
-      icon: MessageSquare,
-      label: t('dashboard.sections_list.applications.label'),
-      desc: t('dashboard.sections_list.applications.desc'),
-    },
-    {
-      href: '/dashboard/publications',
-      icon: ListChecks,
-      label: t('dashboard.sections_list.publications.label'),
-      desc: t('dashboard.sections_list.publications.desc'),
-    },
-    {
-      href: '/dashboard/blocks',
-      icon: Shield,
-      label: t('dashboard.sections_list.blocks.label'),
-      desc: t('dashboard.sections_list.blocks.desc'),
-    },
+  const GROUPS = [
+    [
+      {
+        href: '/dashboard/resumes',
+        icon: FileText,
+        label: t('dashboard.sections_list.resumes.label'),
+        desc: t('dashboard.sections_list.resumes.desc'),
+      },
+      {
+        href: '/dashboard/applications',
+        icon: MessageSquare,
+        label: t('dashboard.sections_list.applications.label'),
+        desc: t('dashboard.sections_list.applications.desc'),
+      },
+    ],
+    [
+      {
+        href: '/dashboard/vacancies',
+        icon: Briefcase,
+        label: t('dashboard.sections_list.vacancies.label'),
+        desc: t('dashboard.sections_list.vacancies.desc'),
+      },
+      {
+        href: '/dashboard/companies',
+        icon: Building2,
+        label: t('dashboard.sections_list.companies.label'),
+        desc: t('dashboard.sections_list.companies.desc'),
+      },
+    ],
+    [
+      {
+        href: '/dashboard/publications',
+        icon: ListChecks,
+        label: t('dashboard.sections_list.publications.label'),
+        desc: t('dashboard.sections_list.publications.desc'),
+      },
+      {
+        href: '/dashboard/blocks',
+        icon: Shield,
+        label: t('dashboard.sections_list.blocks.label'),
+        desc: t('dashboard.sections_list.blocks.desc'),
+      },
+    ],
   ]
 
   const CREATE_ACTIONS = [
@@ -109,21 +115,27 @@ export const DashboardClient = observer(function DashboardClient() {
 
       <SubscriptionBanner />
 
-      <section aria-label={t('dashboard.sections')} className="grid grid-cols-1 gap-2">
-        {SECTIONS.map(({ href, icon: Icon, label, desc }) => (
-          <Link key={href} href={href} className="group">
-            <Card className="transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md">
-              <CardContent className="flex items-center gap-3 p-3 sm:p-4">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  <Icon className="h-5 w-5 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold group-hover:text-primary">{label}</p>
-                  <p className="truncate text-sm text-muted-foreground">{desc}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+      <section aria-label={t('dashboard.sections')} className="space-y-2">
+        {GROUPS.map((group, gi) => (
+          <div key={gi} className="grid grid-cols-2 gap-2">
+            {group.map(({ href, icon: Icon, label, desc }) => (
+              <Link key={href} href={href} className="group">
+                <Card className="h-full transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md">
+                  <CardContent className="flex flex-col gap-2 p-3 sm:p-4">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                      <Icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold leading-tight group-hover:text-primary">
+                        {label}
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
         ))}
       </section>
 

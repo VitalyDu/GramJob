@@ -53,6 +53,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
     <div className="space-y-6">
       <PageHeader
         title={t('dashboard.companies.title')}
+        description={t('dashboard.sections_list.companies.desc')}
         actions={
           <Button
             asChild

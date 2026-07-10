@@ -70,6 +70,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
 
       <PageHeader
         title={t('dashboard.vacancies.title')}
+        description={t('dashboard.sections_list.vacancies.desc')}
         actions={
           <Button
             asChild
