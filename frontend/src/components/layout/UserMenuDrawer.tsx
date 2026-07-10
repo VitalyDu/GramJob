@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Bell, Globe, Star } from 'lucide-react'
+import { Bell, Globe, Settings, Star } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
 import { useStores } from '@/stores/StoreProvider'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { UserAvatar } from '@/components/shared/UserAvatar'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 import { Sheet, SheetContent, SheetHeader } from '@/components/ui/sheet'
 import { LanguageDrawer } from './LanguageDrawer'
@@ -23,7 +23,6 @@ export const UserMenuDrawer = observer(function UserMenuDrawer({ open, onOpenCha
 
   if (!auth.isAuthenticated || !auth.user) return null
 
-  const initial = auth.user.firstName?.charAt(0) ?? auth.user.email?.charAt(0) ?? '?'
   const displayName =
     (auth.user.firstName || auth.user.email) + (auth.user.lastName ? ` ${auth.user.lastName}` : '')
 
@@ -34,18 +33,10 @@ export const UserMenuDrawer = observer(function UserMenuDrawer({ open, onOpenCha
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="bottom">
           <SheetHeader>
-            <Link
-              href="/dashboard/profile"
-              onClick={close}
-              className="flex items-center gap-3 rounded-md p-2 hover:bg-accent"
-            >
-              <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
-                  {initial.toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col gap-1">
-                <span className="font-medium leading-none">{displayName}</span>
+            <Link href="/dashboard/profile" onClick={close} className="flex items-center gap-3 p-2">
+              <UserAvatar user={auth.user} className="h-10 w-10" />
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <span className="truncate font-medium leading-none">{displayName}</span>
                 <SubscriptionBadge plan={auth.user.subscriptionPlan} />
               </div>
             </Link>
@@ -66,6 +57,14 @@ export const UserMenuDrawer = observer(function UserMenuDrawer({ open, onOpenCha
             >
               <Star className="h-4 w-4" />
               {t('nav.subscription')}
+            </Link>
+            <Link
+              href="/dashboard/profile"
+              onClick={close}
+              className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-accent"
+            >
+              <Settings className="h-4 w-4" />
+              {t('nav.settings')}
             </Link>
             <button
               type="button"

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { observer } from 'mobx-react-lite'
@@ -17,13 +17,13 @@ import {
 import { useStores } from '@/stores/StoreProvider'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
-import { SubscriptionBanner } from '@/components/subscription/SubscriptionBanner'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 
 export const DashboardClient = observer(function DashboardClient() {
   const router = useRouter()
   const { auth } = useStores()
   const { t } = useTranslation()
+  const [createOpen, setCreateOpen] = useState(false)
 
   const SECTIONS = [
     {
@@ -64,6 +64,24 @@ export const DashboardClient = observer(function DashboardClient() {
     },
   ]
 
+  const CREATE_ACTIONS = [
+    {
+      href: '/dashboard/resumes/new',
+      icon: FileText,
+      label: t('dashboard.createResume'),
+    },
+    {
+      href: '/dashboard/vacancies/new',
+      icon: Briefcase,
+      label: t('dashboard.createVacancy'),
+    },
+    {
+      href: '/dashboard/companies/new',
+      icon: Building2,
+      label: t('dashboard.addCompany'),
+    },
+  ]
+
   useEffect(() => {
     if (!auth.isAuthenticated) router.replace('/login')
   }, [auth.isAuthenticated, router])
@@ -72,61 +90,60 @@ export const DashboardClient = observer(function DashboardClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t('dashboard.title')}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t('dashboard.greetingDesc')}</p>
         </div>
-        <Link href="/subscription" aria-label={t('dashboard.manageSubscription')}>
-          <SubscriptionBadge plan={auth.user.subscriptionPlan} />
-        </Link>
+        <Button
+          size="icon"
+          variant="outline"
+          className="h-9 w-9 shrink-0 rounded-full"
+          onClick={() => setCreateOpen(true)}
+          aria-label={t('dashboard.quickActions')}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
       </div>
 
-      <section aria-label={t('dashboard.quickActions')} className="flex flex-wrap gap-2">
-        <Button asChild>
-          <Link href="/dashboard/vacancies/new">
-            <Plus className="mr-1.5 h-4 w-4" />
-            {t('dashboard.createVacancy')}
-          </Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link href="/dashboard/resumes/new">
-            <Plus className="mr-1.5 h-4 w-4" />
-            {t('dashboard.createResume')}
-          </Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link href="/dashboard/companies/new">
-            <Plus className="mr-1.5 h-4 w-4" />
-            {t('dashboard.addCompany')}
-          </Link>
-        </Button>
-      </section>
-
-      <SubscriptionBanner />
-
-      <section
-        aria-label={t('dashboard.sections')}
-        className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3"
-      >
+      <section aria-label={t('dashboard.sections')} className="grid grid-cols-1 gap-2">
         {SECTIONS.map(({ href, icon: Icon, label, desc }) => (
           <Link key={href} href={href} className="group">
-            <Card className="h-full transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md">
-              <CardContent className="flex items-start gap-3 p-3 sm:p-4">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 sm:h-10 sm:w-10">
+            <Card className="transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md">
+              <CardContent className="flex items-center gap-3 p-3 sm:p-4">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                   <Icon className="h-5 w-5 text-primary" />
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold group-hover:text-primary sm:text-base">
-                    {label}
-                  </p>
-                  <p className="mt-0.5 truncate text-sm text-muted-foreground">{desc}</p>
+                  <p className="truncate text-sm font-semibold group-hover:text-primary">{label}</p>
+                  <p className="truncate text-sm text-muted-foreground">{desc}</p>
                 </div>
               </CardContent>
             </Card>
           </Link>
         ))}
       </section>
+
+      <Sheet open={createOpen} onOpenChange={setCreateOpen}>
+        <SheetContent side="bottom">
+          <SheetHeader>
+            <SheetTitle>{t('dashboard.quickActions')}</SheetTitle>
+          </SheetHeader>
+          <div className="flex flex-col gap-1 px-4 pb-4">
+            {CREATE_ACTIONS.map(({ href, icon: Icon, label }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setCreateOpen(false)}
+                className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-accent"
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </Link>
+            ))}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 })

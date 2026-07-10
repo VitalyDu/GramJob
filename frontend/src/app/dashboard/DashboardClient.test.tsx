@@ -40,17 +40,8 @@ describe('DashboardClient', () => {
     }
   })
 
-  it('показывает быстрые действия', () => {
+  it('показывает кнопку открытия drawer создания', () => {
     render(<DashboardClient />)
-    expect(screen.getByRole('link', { name: /создать вакансию/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /создать резюме/i })).toBeInTheDocument()
-  })
-
-  it('показывает баннер подписки для free пользователя', () => {
-    render(<DashboardClient />)
-    const subscriptionLinks = screen
-      .getAllByRole('link')
-      .filter((link) => link.getAttribute('href') === '/subscription')
-    expect(subscriptionLinks.length).toBeGreaterThan(0)
+    expect(screen.getByRole('button', { name: /быстрые действия/i })).toBeInTheDocument()
   })
 })

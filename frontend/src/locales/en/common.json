@@ -16,7 +16,8 @@
     "languageSwitcher": "Interface language",
     "myResumes": "My resumes",
     "resumeDatabase": "Resume database",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "settings": "Settings"
   },
   "auth": {
     "email": "Email",
@@ -307,19 +308,46 @@
       "desc": "More vacancies, boosts and resume database access"
     },
     "sections_list": {
-      "vacancies": { "label": "My vacancies", "desc": "Postings, boosts, analytics" },
-      "resumes": { "label": "My resumes", "desc": "Resumes and their statuses" },
-      "companies": { "label": "My companies", "desc": "Company profiles" },
-      "applications": { "label": "Applications", "desc": "Your applications and their statuses" },
+      "vacancies": {
+        "label": "My vacancies",
+        "desc": "Postings, boosts, analytics"
+      },
+      "resumes": {
+        "label": "My resumes",
+        "desc": "Resumes and their statuses"
+      },
+      "companies": {
+        "label": "My companies",
+        "desc": "Company profiles"
+      },
+      "applications": {
+        "label": "Applications",
+        "desc": "Your applications and their statuses"
+      },
       "publications": {
         "label": "My publications",
         "desc": "Everything under moderation in one place"
       },
-      "favorites": { "label": "Favorites", "desc": "Saved vacancies and resumes" },
-      "notifications": { "label": "Notifications", "desc": "Events and moderation" },
-      "blocks": { "label": "Blocked users", "desc": "Hidden employers and candidates" },
-      "subscription": { "label": "Subscription", "desc": "Plan, limits and packages" },
-      "profile": { "label": "Profile", "desc": "Personal data and sign out" }
+      "favorites": {
+        "label": "Favorites",
+        "desc": "Saved vacancies and resumes"
+      },
+      "notifications": {
+        "label": "Notifications",
+        "desc": "Events and moderation"
+      },
+      "blocks": {
+        "label": "Blocked users",
+        "desc": "Hidden employers and candidates"
+      },
+      "subscription": {
+        "label": "Subscription",
+        "desc": "Plan, limits and packages"
+      },
+      "profile": {
+        "label": "Profile",
+        "desc": "Personal data and sign out"
+      }
     },
     "vacancies": {
       "title": "My vacancies",

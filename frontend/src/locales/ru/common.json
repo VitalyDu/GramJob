@@ -16,7 +16,8 @@
     "languageSwitcher": "Язык интерфейса",
     "myResumes": "Мои резюме",
     "resumeDatabase": "База резюме",
-    "notifications": "Уведомления"
+    "notifications": "Уведомления",
+    "settings": "Настройки"
   },
   "auth": {
     "email": "Email",
