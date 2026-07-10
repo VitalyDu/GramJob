@@ -1,8 +1,4 @@
 import type { Core } from '@strapi/strapi'
-import {
-  buildVacancyFiltersFromSaved,
-  buildResumeFiltersFromSaved,
-} from '../src/api/saved-search/services/saved-search-utils'
 import { sendNotification } from '../src/services/notification.service'
 import { computeDelta, yesterdayUTC } from '../src/services/analytics.service'
 
@@ -47,77 +43,6 @@ export default {
         }
       } catch (err) {
         strapi.log.error('[cron] Failed to expire vacancies', err)
-      }
-    },
-    options: {
-      tz: 'UTC',
-    },
-  },
-
-  // Every 2 hours: check saved searches for new results and notify
-  '0 */2 * * *': {
-    task: async ({ strapi }: { strapi: Core.Strapi }) => {
-      try {
-        const searches = await (strapi.documents as any)('api::saved-search.saved-search').findMany(
-          {
-            fields: ['documentId', 'type', 'filters', 'lastNotifiedAt', 'createdAt'],
-            populate: { user: { fields: ['id', 'telegramId'] } },
-            limit: 5000,
-          }
-        )
-
-        if (searches.length === 0) return
-
-        strapi.log.info(`[cron] Checking ${searches.length} saved searches`)
-
-        for (const search of searches) {
-          try {
-            const since = search.lastNotifiedAt ?? search.createdAt
-            const savedFilters = (search.filters ?? {}) as Record<string, unknown>
-
-            let newCount = 0
-
-            if (search.type === 'vacancy') {
-              const filters = {
-                ...buildVacancyFiltersFromSaved(savedFilters),
-                createdAt: { $gt: since },
-              }
-              newCount = await (strapi.documents as any)('api::vacancy.vacancy').count({ filters })
-            } else if (search.type === 'resume') {
-              const filters = {
-                ...buildResumeFiltersFromSaved(savedFilters),
-                createdAt: { $gt: since },
-              }
-              newCount = await (strapi.documents as any)('api::resume.resume').count({ filters })
-            }
-
-            if (newCount > 0) {
-              strapi.log.info(
-                `[cron] SavedSearch ${search.documentId}: ${newCount} new ${search.type}(s) for user ${search.user?.id}`
-              )
-
-              if (search.user?.id) {
-                await sendNotification(strapi, {
-                  userId: search.user.id,
-                  type: 'saved_search_match',
-                  templateData: {
-                    count: newCount,
-                    searchType: search.type,
-                  },
-                })
-              }
-
-              await (strapi.documents as any)('api::saved-search.saved-search').update({
-                documentId: search.documentId,
-                data: { lastNotifiedAt: new Date().toISOString() },
-              })
-            }
-          } catch (searchErr) {
-            strapi.log.warn(`[cron] Failed to check saved search ${search.documentId}`, searchErr)
-          }
-        }
-      } catch (err) {
-        strapi.log.error('[cron] Failed to process saved searches', err)
       }
     },
     options: {

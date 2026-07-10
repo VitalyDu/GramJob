@@ -843,35 +843,6 @@ export interface ApiResumeResume extends Struct.CollectionTypeSchema {
   }
 }
 
-export interface ApiSavedSearchSavedSearch extends Struct.CollectionTypeSchema {
-  collectionName: 'saved_searches'
-  info: {
-    description: "User's saved search subscriptions"
-    displayName: 'SavedSearch'
-    pluralName: 'saved-searches'
-    singularName: 'saved-search'
-  }
-  options: {
-    draftAndPublish: false
-  }
-  attributes: {
-    createdAt: Schema.Attribute.DateTime
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
-    filters: Schema.Attribute.JSON & Schema.Attribute.Required
-    lastNotifiedAt: Schema.Attribute.DateTime
-    locale: Schema.Attribute.String & Schema.Attribute.Private
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::saved-search.saved-search'> &
-      Schema.Attribute.Private
-    name: Schema.Attribute.String
-    publishedAt: Schema.Attribute.DateTime
-    type: Schema.Attribute.Enumeration<['vacancy', 'resume']> & Schema.Attribute.Required
-    updatedAt: Schema.Attribute.DateTime
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
-    user: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'> &
-      Schema.Attribute.Required
-  }
-}
-
 export interface ApiSpecializationSpecialization extends Struct.CollectionTypeSchema {
   collectionName: 'specializations'
   info: {
@@ -1557,7 +1528,6 @@ declare module '@strapi/strapi' {
       'api::report.report': ApiReportReport
       'api::resume-analytics.resume-analytics': ApiResumeAnalyticsResumeAnalytics
       'api::resume.resume': ApiResumeResume
-      'api::saved-search.saved-search': ApiSavedSearchSavedSearch
       'api::specialization.specialization': ApiSpecializationSpecialization
       'api::subscription-plan.subscription-plan': ApiSubscriptionPlanSubscriptionPlan
       'api::vacancy-analytics.vacancy-analytics': ApiVacancyAnalyticsVacancyAnalytics

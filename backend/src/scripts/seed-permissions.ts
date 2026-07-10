@@ -34,9 +34,6 @@ const AUTHENTICATED_PERMISSIONS = [
   'api::favorite.favorite.findMine',
   'api::favorite.favorite.create',
   'api::favorite.favorite.remove',
-  'api::saved-search.saved-search.findMine',
-  'api::saved-search.saved-search.create',
-  'api::saved-search.saved-search.remove',
   'api::block.block.findMine',
   'api::block.block.create',
   'api::block.block.remove',
@@ -81,7 +78,13 @@ const PUBLIC_PERMISSIONS = [
 
 // Previously seeded permissions that must be revoked (renamed handlers, closed routes)
 const REMOVED_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
-  authenticated: ['api::payment.payment.buyVacancyPack', 'api::payment.payment.buyApplyPack'],
+  authenticated: [
+    'api::payment.payment.buyVacancyPack',
+    'api::payment.payment.buyApplyPack',
+    'api::saved-search.saved-search.findMine',
+    'api::saved-search.saved-search.create',
+    'api::saved-search.saved-search.remove',
+  ],
   public: ['api::resume.resume.findPublic', 'api::resume.resume.findOne'],
 }
 
