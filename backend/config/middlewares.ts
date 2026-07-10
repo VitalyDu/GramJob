@@ -32,7 +32,12 @@ export default ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Middlewar
       config: {
         enabled: true,
         headers: ['Authorization', 'Content-Type', 'X-Telegram-Init-Data'],
-        origin: [env('FRONTEND_URL', 'http://localhost:3000'), 'https://web.telegram.org'],
+        origin: [
+          ...env('FRONTEND_URL', 'http://localhost:3000')
+            .split(',')
+            .map((u: string) => u.trim()),
+          'https://web.telegram.org',
+        ],
       },
     },
     'strapi::query',
