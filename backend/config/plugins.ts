@@ -9,6 +9,21 @@ export default ({ env }: Core.Config.Shared.ConfigParams) => ({
       },
     },
   },
+  email: {
+    config: {
+      provider: '@strapi/provider-email-nodemailer',
+      providerOptions: {
+        host: env('SMTP_HOST', 'localhost'),
+        port: env.int('SMTP_PORT', 1025),
+        secure: env.bool('SMTP_SECURE', false),
+        ...(env('SMTP_USER') ? { auth: { user: env('SMTP_USER'), pass: env('SMTP_PASS') } } : {}),
+      },
+      settings: {
+        defaultFrom: env('EMAIL_FROM', 'noreply@gramjob.com'),
+        defaultReplyTo: env('EMAIL_FROM', 'noreply@gramjob.com'),
+      },
+    },
+  },
   upload: {
     config: {
       provider: '@strapi/provider-upload-aws-s3',
