@@ -67,7 +67,7 @@ export const ForgotPasswordCard = observer(function ForgotPasswordCard() {
         {sent ? (
           <p className="rounded-md bg-primary/10 px-3 py-2 text-sm">{t('auth.resetEmailSent')}</p>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="email">{t('auth.email')}</Label>
               <Input id="email" type="email" {...register('email')} />
