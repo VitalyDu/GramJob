@@ -175,6 +175,31 @@ describe('AuthStore', () => {
     })
   })
 
+  describe('email confirmation', () => {
+    it('registerWithEmail без jwt в ответе включает pendingEmailConfirmation и не создаёт сессию', async () => {
+      vi.mocked(api.post).mockResolvedValueOnce({ user: mockUser })
+      const store = new AuthStore()
+      await store.registerWithEmail('a@b.c', 'password', 'A', 'B')
+      expect(store.pendingEmailConfirmation).toBe(true)
+      expect(store.isAuthenticated).toBe(false)
+    })
+
+    it('registerWithEmail с jwt создаёт сессию (email confirmation выключена)', async () => {
+      vi.mocked(api.post).mockResolvedValueOnce({ jwt: 'token', user: mockUser })
+      const store = new AuthStore()
+      await store.registerWithEmail('a@b.c', 'password', 'A', 'B')
+      expect(store.isAuthenticated).toBe(true)
+      expect(store.pendingEmailConfirmation).toBe(false)
+    })
+
+    it('resendConfirmation отправляет POST /auth/send-email-confirmation', async () => {
+      vi.mocked(api.post).mockResolvedValueOnce({})
+      const store = new AuthStore()
+      await store.resendConfirmation('a@b.c')
+      expect(api.post).toHaveBeenCalledWith('/auth/send-email-confirmation', { email: 'a@b.c' })
+    })
+  })
+
   describe('resetPassword', () => {
     const authResponse = {
       jwt: 'new-jwt',

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -27,6 +27,8 @@ export const EmailRegisterForm = observer(function EmailRegisterForm() {
   const { t } = useTranslation()
   const { auth } = useStores()
   const router = useRouter()
+  const [sentEmail, setSentEmail] = useState('')
+  const [resent, setResent] = useState(false)
 
   const schema = useMemo(
     () =>
@@ -54,12 +56,36 @@ export const EmailRegisterForm = observer(function EmailRegisterForm() {
   })
 
   const onSubmit = async (data: FormData) => {
+    setSentEmail(data.email)
     try {
       await auth.registerWithEmail(data.email, data.password, data.firstName, data.lastName)
-      router.push('/')
+      if (!auth.pendingEmailConfirmation) router.push('/')
     } catch {
       // error сохранён в auth.error
     }
+  }
+
+  if (auth.pendingEmailConfirmation) {
+    return (
+      <div className="space-y-4 rounded-md border border-border bg-card p-6 text-center">
+        <p className="font-semibold">{t('auth.confirmEmailTitle')}</p>
+        <p className="text-sm text-muted-foreground">
+          {t('auth.confirmEmailDesc', { email: sentEmail })}
+        </p>
+        {resent ? (
+          <p className="text-sm text-green-600">{t('auth.confirmEmailResent')}</p>
+        ) : (
+          <Button
+            variant="outline"
+            onClick={() => {
+              void auth.resendConfirmation(sentEmail).then(() => setResent(true))
+            }}
+          >
+            {t('auth.resendConfirmation')}
+          </Button>
+        )}
+      </div>
+    )
   }
 
   return (

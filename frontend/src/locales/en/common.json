@@ -48,6 +48,12 @@
     "setNewPassword": "Save password",
     "resetMissingCode": "The link is invalid: reset code is missing.",
     "requestNewLink": "Request a new link",
+    "confirmEmailTitle": "Check your email",
+    "confirmEmailDesc": "We sent a confirmation link to {{email}}. Follow the link to complete registration.",
+    "confirmEmailResent": "Email sent again",
+    "resendConfirmation": "Resend confirmation email",
+    "emailConfirmedTitle": "Email confirmed",
+    "emailConfirmedDesc": "Your email is confirmed. You can now sign in.",
     "validation": {
       "invalidEmail": "Enter a valid email",
       "minPassword": "At least 6 characters",
@@ -664,7 +670,8 @@
     "Invalid identifier or password": "Invalid email or password",
     "Email already taken": "This email is already registered",
     "Too Many Requests": "Too many requests. Please try again later",
-    "Incorrect code provided": "The link is invalid or has expired"
+    "Incorrect code provided": "The link is invalid or has expired",
+    "Your account email is not confirmed": "Email is not confirmed. Check your inbox or resend the email."
   },
   "countrySelect": {
     "placeholder": "Select country",

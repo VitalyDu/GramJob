@@ -13,6 +13,7 @@ const API_ERROR_I18N_KEYS: Record<string, string> = {
   'Email already taken': 'apiErrors.Email already taken',
   'Too Many Requests': 'apiErrors.Too Many Requests',
   'Incorrect code provided': 'apiErrors.Incorrect code provided',
+  'Your account email is not confirmed': 'apiErrors.Your account email is not confirmed',
 }
 
 export class ApiClientError extends Error {

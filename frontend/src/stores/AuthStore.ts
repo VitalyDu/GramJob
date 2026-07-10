@@ -10,6 +10,8 @@ export class AuthStore {
   isLoading = false
   isInitializing = false
   error: string | null = null
+  pendingEmailConfirmation = false
+  emailNotConfirmed = false
 
   constructor() {
     makeAutoObservable(this)
@@ -57,7 +59,12 @@ export class AuthStore {
       const res = await api.post<AuthResponse>('/auth/local', { identifier, password })
       this._setSession(res.jwt, res.user)
     } catch (e) {
+      const notConfirmed =
+        e instanceof ApiClientError &&
+        ((e.data as { error?: { message?: string } })?.error?.message ?? '') ===
+          'Your account email is not confirmed'
       runInAction(() => {
+        this.emailNotConfirmed = notConfirmed
         this.error = e instanceof Error ? e.message : 'Login failed'
       })
       throw e
@@ -122,13 +129,19 @@ export class AuthStore {
       this.error = null
     })
     try {
-      const res = await api.post<AuthResponse>('/auth/local/register', {
+      const res = await api.post<{ jwt?: string | null; user: User }>('/auth/local/register', {
         email,
         password,
         firstName,
         lastName,
       })
-      this._setSession(res.jwt, res.user)
+      if (res.jwt) {
+        this._setSession(res.jwt, res.user)
+      } else {
+        runInAction(() => {
+          this.pendingEmailConfirmation = true
+        })
+      }
     } catch (e) {
       runInAction(() => {
         this.error = e instanceof Error ? e.message : 'Registration failed'
@@ -139,6 +152,10 @@ export class AuthStore {
         this.isLoading = false
       })
     }
+  }
+
+  async resendConfirmation(email: string): Promise<void> {
+    await api.post('/auth/send-email-confirmation', { email })
   }
 
   async loginWithTelegram(payload: TelegramAuthPayload): Promise<void> {

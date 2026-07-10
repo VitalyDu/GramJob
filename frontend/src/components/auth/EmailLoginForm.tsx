@@ -38,6 +38,7 @@ export const EmailLoginForm = observer(function EmailLoginForm() {
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -80,6 +81,19 @@ export const EmailLoginForm = observer(function EmailLoginForm() {
         <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {auth.error}
         </p>
+      )}
+
+      {auth.emailNotConfirmed && (
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => {
+            void auth.resendConfirmation(getValues('identifier'))
+          }}
+        >
+          {t('auth.resendConfirmation')}
+        </Button>
       )}
 
       <Button type="submit" className="w-full" disabled={auth.isLoading}>
