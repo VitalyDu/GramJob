@@ -53,8 +53,7 @@ export const TelegramTopBar = observer(function TelegramTopBar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
 
-  const isHome = pathname === '/'
-  const headerCls = cn('z-50 w-full', isHome ? 'absolute top-0 left-0 right-0' : 'static')
+  const headerCls = 'absolute top-0 left-0 right-0 z-50 w-full'
 
   return (
     <>
