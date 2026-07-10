@@ -4,7 +4,6 @@ import { sendMessage } from '../api/payment/services/telegram-bot'
 export interface AdminModerationEvent {
   entityType: 'vacancy' | 'resume' | 'company' | 'report'
   title: string
-  authorName?: string
   authorId?: number
   documentId?: string
 }
@@ -29,9 +28,7 @@ export function buildAdminModerationText(event: AdminModerationEvent): string {
     event.entityType === 'report'
       ? 'Новая жалоба'
       : `${{ vacancy: 'Вакансия', resume: 'Резюме', company: 'Компания' }[event.entityType]} на модерации`
-  const author = event.authorName
-    ? ` от ${event.authorName}${event.authorId ? ` (#${event.authorId})` : ''}`
-    : ''
+  const author = event.authorId ? ` от пользователя #${event.authorId}` : ''
   return `🛡 ${prefix}: «${event.title}»${author}`
 }
 

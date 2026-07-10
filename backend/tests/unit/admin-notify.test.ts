@@ -16,15 +16,14 @@ describe('parseAdminChatIds', () => {
 })
 
 describe('buildAdminModerationText', () => {
-  it('вакансия на модерации с автором', () => {
+  it('вакансия на модерации с authorId', () => {
     expect(
       buildAdminModerationText({
         entityType: 'vacancy',
         title: 'Frontend Developer',
-        authorName: 'Ivan Petrov',
         authorId: 42,
       })
-    ).toBe('🛡 Вакансия на модерации: «Frontend Developer» от Ivan Petrov (#42)')
+    ).toBe('🛡 Вакансия на модерации: «Frontend Developer» от пользователя #42')
   })
 
   it('жалоба', () => {
