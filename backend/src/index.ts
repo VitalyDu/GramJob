@@ -3,6 +3,7 @@ import { seedSubscriptionPlans } from './scripts/seed-subscription-plans'
 import { seedPackages } from './scripts/seed-packages'
 import { seedPermissions } from './scripts/seed-permissions'
 import { configurePasswordReset } from './scripts/setup-password-reset'
+import { configureEmailConfirmation } from './scripts/setup-email-confirmation'
 import { setWebhook } from './api/payment/services/telegram-bot'
 import { registerModerationRoutes } from './services/moderation-routes'
 import type { Core } from '@strapi/strapi'
@@ -36,6 +37,7 @@ export default {
     await seedPackages(strapi)
     await seedPermissions(strapi)
     await configurePasswordReset(strapi)
+    await configureEmailConfirmation(strapi)
 
     const botToken = process.env.TELEGRAM_BOT_TOKEN
     const webhookUrl = process.env.TELEGRAM_WEBHOOK_URL
