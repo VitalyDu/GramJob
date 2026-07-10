@@ -331,7 +331,21 @@
 - Frontend: страницы `(auth)/forgot-password` и `(auth)/reset-password` (Suspense для useSearchParams), ссылка «Забыли пароль?» в EmailLoginForm
 - Локали: ключи `auth.forgotPassword*`/`resetPassword*` RU/EN, маппинг ошибки «Incorrect code provided»
 
-Текущий шаг — Sprint 9 завершён (остался ручной QA-прогон по чеклисту). Следующий: Sprint 10 — SEO, Performance & Launch.
+Выполнено (Account & UX Batch — после Sprint 9):
+
+- Удалён модуль «Сохранённые поиски» (backend API, cron, frontend store/компоненты/страница)
+- Автоопределение языка интерфейса: `detectLanguage` (хранилище → Telegram → navigator) в i18n инициализации
+- Telegram-уведомления для администраторов о новых объектах на модерации (`admin-notify.ts`, env `ADMIN_TELEGRAM_CHAT_IDS`)
+- Email-верификация при регистрации: `configureEmailConfirmation` (bootstrap), миграция подтверждения существующих пользователей, `pendingEmailConfirmation` / `emailNotConfirmed` в AuthStore, страница `/email-confirmed`, кнопка повторной отправки
+- Аватар: загрузка файла (`uploadFile` в api.ts), валидация URL (`avatar-utils.ts`, allowlist: t.me, telegram.org, telegram-cdn.org, S3), компонент `UserAvatar`, поле `avatar` в `/users/me` PUT/GET
+- Тумблер Telegram-уведомлений: поле `telegramNotificationsEnabled` (User schema, SAFE_RESPONSE_FIELDS, ALLOWED_UPDATE_FIELDS), проверка флага в `notification.service` (`!== false`)
+- Header: кнопка ♥ (Избранное), ссылка «Подписка» в nav, dropdown — UserAvatar + имя → /dashboard/profile, бейдж плана → /subscription
+- Редизайн «Мой кабинет»: компонент `SubscriptionBanner` (free/pro), компактная сетка 2 колонки, убраны дублирующие секции (Избранное, Уведомления, Подписка, Профиль)
+- Страница «Настройки» (`/dashboard/profile`): layout с `SettingsNav`, `AvatarUploader`, `ProfileSettingsForm`, `TelegramNotificationsToggle`, `ChangePasswordForm`, route `/dashboard/profile/security`
+- Backend: `plugin::users-permissions.auth.changePassword` в seed-permissions; `updateProfile`/`changePassword` в AuthStore
+- Итого: 451 тест frontend, 271 тест backend, 0 ошибок TypeScript
+
+Текущий шаг — Account & UX Batch завершён. Следующий: Sprint 10 — SEO, Performance & Launch.
 Планы: `docs/superpowers/plans/`
 
 ---
