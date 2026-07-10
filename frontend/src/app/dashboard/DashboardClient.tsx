@@ -18,6 +18,7 @@ import { useStores } from '@/stores/StoreProvider'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { SubscriptionBanner } from '@/components/subscription/SubscriptionBanner'
 
 export const DashboardClient = observer(function DashboardClient() {
   const router = useRouter()
@@ -105,6 +106,8 @@ export const DashboardClient = observer(function DashboardClient() {
           <Plus className="h-4 w-4" />
         </Button>
       </div>
+
+      <SubscriptionBanner />
 
       <section aria-label={t('dashboard.sections')} className="grid grid-cols-1 gap-2">
         {SECTIONS.map(({ href, icon: Icon, label, desc }) => (
