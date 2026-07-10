@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import {
@@ -515,11 +516,16 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id={`current-work-${index}`}
-                    {...register(`workExperience.${index}.current`)}
-                    className="rounded"
+                  <Controller
+                    control={control}
+                    name={`workExperience.${index}.current`}
+                    render={({ field }) => (
+                      <Switch
+                        id={`current-work-${index}`}
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
                   />
                   <Label htmlFor={`current-work-${index}`}>
                     {t('forms.resume.currentlyWorking')}
@@ -623,11 +629,16 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id={`current-edu-${index}`}
-                    {...register(`education.${index}.current`)}
-                    className="rounded"
+                  <Controller
+                    control={control}
+                    name={`education.${index}.current`}
+                    render={({ field }) => (
+                      <Switch
+                        id={`current-edu-${index}`}
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
                   />
                   <Label htmlFor={`current-edu-${index}`}>
                     {t('forms.resume.currentlyStudying')}

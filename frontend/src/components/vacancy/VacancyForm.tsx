@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import {
@@ -527,11 +528,15 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
                 placeholder="3"
               />
             </div>
-            <div className="flex items-end pb-1">
-              <label className="flex cursor-pointer items-center gap-2">
-                <input type="checkbox" {...register('urgent')} className="h-4 w-4" />
-                <span className="text-sm text-foreground">{t('forms.vacancy.urgentLabel')}</span>
-              </label>
+            <div className="flex items-center gap-2">
+              <Controller
+                control={control}
+                name="urgent"
+                render={({ field }) => (
+                  <Switch id="urgent" checked={field.value} onCheckedChange={field.onChange} />
+                )}
+              />
+              <Label htmlFor="urgent">{t('forms.vacancy.urgentLabel')}</Label>
             </div>
           </div>
         </CardContent>

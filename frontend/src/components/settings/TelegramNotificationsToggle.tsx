@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 
 export const TelegramNotificationsToggle = observer(function TelegramNotificationsToggle() {
@@ -27,11 +27,11 @@ export const TelegramNotificationsToggle = observer(function TelegramNotificatio
 
   return (
     <div className="flex items-center gap-2">
-      <Checkbox
+      <Switch
         id="tg-notifications"
         checked={enabled}
         disabled={isSaving}
-        onCheckedChange={(checked) => void toggle(checked === true)}
+        onCheckedChange={(checked) => void toggle(checked)}
       />
       <Label htmlFor="tg-notifications" className="cursor-pointer">
         {t('settings.profile.telegramNotifications')}
