@@ -48,6 +48,13 @@ function makeStore(overrides = {}) {
   }
 }
 
+function makeStores(store = makeStore()) {
+  return {
+    company: store,
+    auth: { isAuthenticated: false },
+  }
+}
+
 describe('CompaniesClient', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -55,9 +62,9 @@ describe('CompaniesClient', () => {
 
   it('вызывает fetchCompanies при монтировании', async () => {
     const store = makeStore()
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(
+      makeStores(store) as unknown as ReturnType<typeof useStores>
+    )
 
     render(<CompaniesClient />)
 
@@ -68,9 +75,9 @@ describe('CompaniesClient', () => {
 
   it('отображает компании из стора', () => {
     const store = makeStore({ companies: [mockCompany], total: 1 })
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(
+      makeStores(store) as unknown as ReturnType<typeof useStores>
+    )
 
     render(<CompaniesClient />)
 
@@ -79,9 +86,9 @@ describe('CompaniesClient', () => {
 
   it('отображает skeleton во время загрузки', () => {
     const store = makeStore({ isLoading: true })
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(
+      makeStores(store) as unknown as ReturnType<typeof useStores>
+    )
 
     render(<CompaniesClient />)
 
@@ -90,9 +97,9 @@ describe('CompaniesClient', () => {
 
   it('отображает ошибку из стора', () => {
     const store = makeStore({ error: 'Network error' })
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(
+      makeStores(store) as unknown as ReturnType<typeof useStores>
+    )
 
     render(<CompaniesClient />)
 
@@ -101,9 +108,9 @@ describe('CompaniesClient', () => {
 
   it('отображает "не найдены" если список пуст', () => {
     const store = makeStore({ companies: [] })
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(
+      makeStores(store) as unknown as ReturnType<typeof useStores>
+    )
 
     render(<CompaniesClient />)
 
@@ -112,9 +119,9 @@ describe('CompaniesClient', () => {
 
   it('вызывает fetchCompanies с параметрами при поиске', async () => {
     const store = makeStore()
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(
+      makeStores(store) as unknown as ReturnType<typeof useStores>
+    )
 
     render(<CompaniesClient />)
 
@@ -132,9 +139,9 @@ describe('CompaniesClient', () => {
 
   it('не показывает пагинацию если pageCount <= 1', () => {
     const store = makeStore({ pageCount: 1 })
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(
+      makeStores(store) as unknown as ReturnType<typeof useStores>
+    )
 
     render(<CompaniesClient />)
 
@@ -143,9 +150,9 @@ describe('CompaniesClient', () => {
 
   it('показывает пагинацию если pageCount > 1', () => {
     const store = makeStore({ pageCount: 3, page: 2, companies: [mockCompany], total: 60 })
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(
+      makeStores(store) as unknown as ReturnType<typeof useStores>
+    )
 
     render(<CompaniesClient />)
 
@@ -154,9 +161,9 @@ describe('CompaniesClient', () => {
 
   it('renders SSR initial companies while store is loading', () => {
     const store = makeStore({ isLoading: true, companies: [], total: 0 })
-    vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
-      typeof useStores
-    >)
+    vi.mocked(useStores).mockReturnValue(
+      makeStores(store) as unknown as ReturnType<typeof useStores>
+    )
 
     render(<CompaniesClient initialCompanies={[mockCompany]} initialTotal={1} />)
 
