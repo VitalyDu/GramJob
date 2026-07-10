@@ -1,5 +1,6 @@
 import type { Core } from '@strapi/strapi'
 import { isValidReportType, isValidReportReason } from '../services/report-utils'
+import { notifyAdmins } from '../../../services/admin-notify'
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async create(ctx: any) {
@@ -29,6 +30,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         status: 'pending',
       },
       fields: ['documentId', 'type', 'targetId', 'reason', 'comment', 'status', 'createdAt'],
+    })
+
+    notifyAdmins(strapi, {
+      entityType: 'report',
+      title: `${type} #${targetId}: ${reason}`,
+      authorId: user.id,
+      documentId: report.documentId,
     })
 
     return ctx.send({ data: report }, 201)

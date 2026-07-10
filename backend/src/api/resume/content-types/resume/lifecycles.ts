@@ -1,6 +1,7 @@
 import { sendNotification } from '../../../../services/notification.service'
 import { logModeration } from '../../../../services/moderation.service'
 import { rejectionReasonLabel } from '../../../../services/moderation-utils'
+import { notifyAdmins } from '../../../../services/admin-notify'
 import type { Core } from '@strapi/strapi'
 
 type ResumeBeforeUpdateEvent = {
@@ -63,6 +64,12 @@ export default {
           entityDocumentId: documentId,
           entityTitle: resume?.title ?? '',
           action: 'submitted',
+        })
+        notifyAdmins(s, {
+          entityType: 'resume',
+          title: resume?.title ?? '',
+          ...(resume?.user?.id ? { authorId: resume.user.id } : {}),
+          documentId,
         })
         return
       }

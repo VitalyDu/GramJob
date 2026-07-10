@@ -1,6 +1,7 @@
 import { sendNotification } from '../../../../services/notification.service'
 import { logModeration } from '../../../../services/moderation.service'
 import { rejectionReasonLabel } from '../../../../services/moderation-utils'
+import { notifyAdmins } from '../../../../services/admin-notify'
 import type { Core } from '@strapi/strapi'
 
 type CompanyBeforeUpdateEvent = {
@@ -65,6 +66,12 @@ export default {
           entityDocumentId: documentId,
           entityTitle: company?.name ?? '',
           action: 'submitted',
+        })
+        notifyAdmins(s, {
+          entityType: 'company',
+          title: company?.name ?? '',
+          ...(company?.owner?.id ? { authorId: company.owner.id } : {}),
+          documentId,
         })
         return
       }

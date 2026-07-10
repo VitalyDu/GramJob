@@ -1,6 +1,7 @@
 import { sendNotification } from '../../../../services/notification.service'
 import { logModeration } from '../../../../services/moderation.service'
 import { rejectionReasonLabel } from '../../../../services/moderation-utils'
+import { notifyAdmins } from '../../../../services/admin-notify'
 import type { Core } from '@strapi/strapi'
 
 type VacancyBeforeCreateEvent = {
@@ -106,6 +107,11 @@ export default {
         entityTitle: ((event.params.data?.['title'] as string) ?? '') || '',
         action: 'submitted',
       })
+      notifyAdmins(s, {
+        entityType: 'vacancy',
+        title: ((event.params.data?.['title'] as string) ?? '') || '',
+        ...(documentId ? { documentId } : {}),
+      })
     } catch (err) {
       s.log.error('[vacancy] afterCreate moderation log failed', err)
     }
@@ -140,6 +146,12 @@ export default {
           entityDocumentId: documentId,
           entityTitle: vacancy?.title ?? '',
           action: 'submitted',
+        })
+        notifyAdmins(s, {
+          entityType: 'vacancy',
+          title: vacancy?.title ?? '',
+          ...(vacancy?.postedBy?.id ? { authorId: vacancy.postedBy.id } : {}),
+          documentId,
         })
         return
       }
