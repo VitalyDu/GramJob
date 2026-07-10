@@ -184,23 +184,42 @@ export default {
           vacancy?: { documentId?: string; title?: string; postedBy?: { id?: number } }
         }>
 
-        strapi.log.info(
-          `[cron] ${records.length} vacancies with ≥5 views yesterday (${yesterdayDate})`
-        )
-
+        // Aggregate by vacancy to avoid duplicate notifications if analytics records were duplicated
+        const byVacancy = new Map<
+          string,
+          { posterId: number; title: string; vacancyId: string; totalViews: number }
+        >()
         for (const record of records) {
+          const vacancyId = record.vacancy?.documentId
           const posterId = record.vacancy?.postedBy?.id
-          if (posterId) {
-            await sendNotification(strapi, {
-              userId: posterId,
-              type: 'vacancy_viewed',
-              templateData: {
-                vacancyTitle: record.vacancy?.title ?? '',
-                vacancyId: record.vacancy?.documentId ?? '',
-                views: record.views,
-              },
+          if (!vacancyId || !posterId) continue
+          const agg = byVacancy.get(vacancyId)
+          if (agg) {
+            agg.totalViews += record.views
+          } else {
+            byVacancy.set(vacancyId, {
+              posterId,
+              title: record.vacancy?.title ?? '',
+              vacancyId,
+              totalViews: record.views,
             })
           }
+        }
+
+        strapi.log.info(
+          `[cron] ${byVacancy.size} vacancies with ≥5 views yesterday (${yesterdayDate}), ${records.length} raw records`
+        )
+
+        for (const { posterId, title, vacancyId, totalViews } of byVacancy.values()) {
+          await sendNotification(strapi, {
+            userId: posterId,
+            type: 'vacancy_viewed',
+            templateData: {
+              vacancyTitle: title,
+              vacancyId,
+              views: totalViews,
+            },
+          })
         }
       } catch (err) {
         strapi.log.error('[cron] Failed to send vacancy views digest', err)
@@ -252,10 +271,17 @@ export default {
 
         for (const vacancy of vacancies) {
           try {
+            // Skip if a record for this date already exists (idempotency for restarts/cluster)
+            const todayRecord = await strapi.db
+              .query('api::vacancy-analytics.vacancy-analytics')
+              .findOne({ where: { vacancy: vacancy.id, date } })
+            if (todayRecord) continue
+
+            // Use numeric vacancy.id at DB layer for reliable filtering
             const existing = (await strapi.db
               .query('api::vacancy-analytics.vacancy-analytics')
               .findMany({
-                where: { vacancy: { documentId: vacancy.documentId } },
+                where: { vacancy: vacancy.id },
                 select: ['views', 'uniqueViews', 'applications'],
               })) as Array<{ views: number; uniqueViews: number; applications: number }>
 
@@ -296,10 +322,17 @@ export default {
 
         for (const resume of resumes) {
           try {
+            // Skip if a record for this date already exists (idempotency for restarts/cluster)
+            const todayRecord = await strapi.db
+              .query('api::resume-analytics.resume-analytics')
+              .findOne({ where: { resume: resume.id, date } })
+            if (todayRecord) continue
+
+            // Use numeric resume.id at DB layer for reliable filtering
             const existing = (await strapi.db
               .query('api::resume-analytics.resume-analytics')
               .findMany({
-                where: { resume: { documentId: resume.documentId } },
+                where: { resume: resume.id },
                 select: ['views', 'invitations'],
               })) as Array<{ views: number; invitations: number }>
 
