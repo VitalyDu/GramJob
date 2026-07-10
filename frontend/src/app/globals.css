@@ -188,3 +188,11 @@
 @utility zoom-out-95 {
   --tw-exit-scale: 0.95;
 }
+
+@utility slide-in-from-bottom-full {
+  --tw-enter-translate-y: 100%;
+}
+
+@utility slide-out-to-bottom-full {
+  --tw-exit-translate-y: 100%;
+}
