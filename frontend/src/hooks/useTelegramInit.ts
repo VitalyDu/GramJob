@@ -1,14 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTheme } from 'next-themes'
 import { isTelegramMiniApp, getTelegramWebApp, type TelegramWebApp } from '@/lib/telegram'
 import { useStores } from '@/stores/StoreProvider'
-import { applyTelegramTheme } from '@/lib/telegram-theme'
 
 export function useTelegramInit() {
   const [isMiniApp, setIsMiniApp] = useState(false)
   const [twa, setTwa] = useState<TelegramWebApp | null>(null)
   const { auth } = useStores()
+  const { setTheme } = useTheme()
 
   useEffect(() => {
     const isMA = isTelegramMiniApp()
@@ -19,8 +20,9 @@ export function useTelegramInit() {
     setTwa(app)
     app.ready()
     app.expand()
-    applyTelegramTheme(app)
-    const onThemeChanged = () => applyTelegramTheme(app)
+
+    setTheme(app.colorScheme)
+    const onThemeChanged = () => setTheme(app.colorScheme)
     app.onEvent('themeChanged', onThemeChanged)
 
     if (!auth.isAuthenticated && app.initData) {
@@ -32,7 +34,7 @@ export function useTelegramInit() {
     return () => {
       app.offEvent('themeChanged', onThemeChanged)
     }
-  }, [auth])
+  }, [auth, setTheme])
 
   return { isMiniApp, twa }
 }

@@ -17,7 +17,11 @@
     "myResumes": "Мои резюме",
     "resumeDatabase": "База резюме",
     "notifications": "Уведомления",
-    "settings": "Настройки"
+    "settings": "Настройки",
+    "themeSwitcher": "Тема оформления",
+    "themeLight": "Светлая",
+    "themeDark": "Тёмная",
+    "themeSystem": "Системная"
   },
   "auth": {
     "email": "Email",

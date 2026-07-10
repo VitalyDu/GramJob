@@ -17,7 +17,11 @@
     "myResumes": "My resumes",
     "resumeDatabase": "Resume database",
     "notifications": "Notifications",
-    "settings": "Settings"
+    "settings": "Settings",
+    "themeSwitcher": "Color theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System"
   },
   "auth": {
     "email": "Email",

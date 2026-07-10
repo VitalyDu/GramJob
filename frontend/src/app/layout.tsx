@@ -5,6 +5,7 @@ import './globals.css'
 import { StoreProvider } from '@/stores/StoreProvider'
 import { I18nProvider } from '@/components/I18nProvider'
 import { AppShell } from '@/components/layout/AppShell'
+import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import { SITE_URL } from '@/lib/site'
 
 const inter = Inter({
@@ -31,11 +32,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru" className={inter.variable} suppressHydrationWarning>
       <body className="font-sans antialiased">
         <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
-        <I18nProvider>
-          <StoreProvider>
-            <AppShell>{children}</AppShell>
-          </StoreProvider>
-        </I18nProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          storageKey="gramjob_theme"
+          disableTransitionOnChange
+        >
+          <I18nProvider>
+            <StoreProvider>
+              <AppShell>{children}</AppShell>
+            </StoreProvider>
+          </I18nProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -22,6 +22,7 @@ import { NotificationBadge } from '@/components/notification/NotificationBadge'
 import { UserAvatar } from '@/components/shared/UserAvatar'
 import i18next from '@/lib/i18n'
 import { LanguageDrawer } from './LanguageDrawer'
+import { ModeToggle } from './ModeToggle'
 
 const STATIC_NAV_LINKS = [
   { href: '/vacancies', key: 'nav.vacancies' },
@@ -168,6 +169,7 @@ export const WebHeader = observer(function WebHeader() {
 
         {auth.isAuthenticated && auth.user ? (
           <div className="flex items-center gap-2">
+            <ModeToggle />
             {/* мобиль: Globe открывает Drawer */}
             {mobileGlobeButton}
             {/* десктоп: Globe открывает DropdownMenu */}
@@ -244,6 +246,7 @@ export const WebHeader = observer(function WebHeader() {
           </div>
         ) : (
           <div className="flex items-center gap-2">
+            <ModeToggle />
             {/* мобиль: Globe открывает Drawer */}
             {mobileGlobeButton}
             {/* десктоп: Globe открывает DropdownMenu */}
