@@ -155,4 +155,55 @@ describe('AuthStore', () => {
     expect(store.jwt).toBe('stored-jwt')
     expect(localStorageMock.getItem('gramjob_jwt')).toBe('stored-jwt')
   })
+
+  describe('forgotPassword', () => {
+    it('вызывает POST /auth/forgot-password с email', async () => {
+      vi.mocked(api.post).mockResolvedValueOnce({ ok: true })
+      const store = new AuthStore()
+      await store.forgotPassword('user@test.com')
+      expect(api.post).toHaveBeenCalledWith('/auth/forgot-password', { email: 'user@test.com' })
+      expect(store.error).toBeNull()
+      expect(store.isLoading).toBe(false)
+    })
+
+    it('сохраняет ошибку и пробрасывает исключение', async () => {
+      vi.mocked(api.post).mockRejectedValueOnce(new Error('Too Many Requests'))
+      const store = new AuthStore()
+      await expect(store.forgotPassword('user@test.com')).rejects.toThrow()
+      expect(store.error).toBe('Too Many Requests')
+      expect(store.isLoading).toBe(false)
+    })
+  })
+
+  describe('resetPassword', () => {
+    const authResponse = {
+      jwt: 'new-jwt',
+      user: { id: 1, email: 'user@test.com' },
+    }
+
+    it('вызывает POST /auth/reset-password и устанавливает сессию', async () => {
+      vi.mocked(api.post).mockResolvedValueOnce(authResponse)
+      const store = new AuthStore()
+      await store.resetPassword('code123', 'newpass1', 'newpass1')
+      expect(api.post).toHaveBeenCalledWith('/auth/reset-password', {
+        code: 'code123',
+        password: 'newpass1',
+        passwordConfirmation: 'newpass1',
+      })
+      expect(store.jwt).toBe('new-jwt')
+      expect(store.user).toEqual(authResponse.user)
+      expect(setAuthToken).toHaveBeenCalledWith('new-jwt')
+      expect(localStorage.getItem('gramjob_jwt')).toBe('new-jwt')
+    })
+
+    it('сохраняет ошибку при невалидном коде и пробрасывает исключение', async () => {
+      vi.mocked(api.post).mockRejectedValueOnce(
+        new ApiClientError(400, {}, 'Ссылка недействительна или устарела')
+      )
+      const store = new AuthStore()
+      await expect(store.resetPassword('bad', 'newpass1', 'newpass1')).rejects.toThrow()
+      expect(store.error).toBe('Ссылка недействительна или устарела')
+      expect(store.jwt).toBeNull()
+    })
+  })
 })

@@ -68,6 +68,49 @@ export class AuthStore {
     }
   }
 
+  async forgotPassword(email: string): Promise<void> {
+    runInAction(() => {
+      this.isLoading = true
+      this.error = null
+    })
+    try {
+      await api.post('/auth/forgot-password', { email })
+    } catch (e) {
+      runInAction(() => {
+        this.error = e instanceof Error ? e.message : 'Request failed'
+      })
+      throw e
+    } finally {
+      runInAction(() => {
+        this.isLoading = false
+      })
+    }
+  }
+
+  async resetPassword(code: string, password: string, passwordConfirmation: string): Promise<void> {
+    runInAction(() => {
+      this.isLoading = true
+      this.error = null
+    })
+    try {
+      const res = await api.post<AuthResponse>('/auth/reset-password', {
+        code,
+        password,
+        passwordConfirmation,
+      })
+      this._setSession(res.jwt, res.user)
+    } catch (e) {
+      runInAction(() => {
+        this.error = e instanceof Error ? e.message : 'Reset failed'
+      })
+      throw e
+    } finally {
+      runInAction(() => {
+        this.isLoading = false
+      })
+    }
+  }
+
   async registerWithEmail(
     email: string,
     password: string,
