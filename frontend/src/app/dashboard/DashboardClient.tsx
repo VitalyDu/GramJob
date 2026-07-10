@@ -14,7 +14,6 @@ import {
   ListChecks,
   MessageSquare,
   Plus,
-  Search,
   Shield,
   Star,
   User,
@@ -66,12 +65,6 @@ export const DashboardClient = observer(function DashboardClient() {
       icon: Heart,
       label: t('dashboard.sections_list.favorites.label'),
       desc: t('dashboard.sections_list.favorites.desc'),
-    },
-    {
-      href: '/dashboard/saved-searches',
-      icon: Search,
-      label: t('dashboard.sections_list.savedSearches.label'),
-      desc: t('dashboard.sections_list.savedSearches.desc'),
     },
     {
       href: '/dashboard/notifications',

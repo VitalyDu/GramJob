@@ -496,27 +496,6 @@ export interface FavoriteCreateInput {
   targetId: string
 }
 
-// --- Saved Search ---
-
-export type SavedSearchType = 'vacancy' | 'resume'
-
-export type SavedSearchFilters = Record<string, string | number | boolean | string[] | undefined>
-
-export interface SavedSearch {
-  documentId: string
-  name?: string | null
-  type: SavedSearchType
-  filters: SavedSearchFilters
-  lastNotifiedAt?: string | null
-  createdAt: string
-}
-
-export interface SavedSearchCreateInput {
-  type: SavedSearchType
-  filters: SavedSearchFilters
-  name?: string
-}
-
 // --- Block ---
 
 export type BlockTargetType = 'employer' | 'candidate'

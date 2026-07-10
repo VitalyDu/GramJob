@@ -1,45 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  filtersToQueryString,
-  paramsToSavedFilters,
-  parseVacancySearchParams,
-} from './saved-search-utils'
-
-describe('filtersToQueryString', () => {
-  it('сериализует массивы повторением ключа', () => {
-    const qs = filtersToQueryString({ workFormat: ['office', 'remote'], country: 'RU' })
-    expect(qs).toBe('workFormat=office&workFormat=remote&country=RU')
-  })
-
-  it('пропускает page, undefined, пустые строки и пустые массивы', () => {
-    const qs = filtersToQueryString({
-      page: 3,
-      search: '',
-      seniority: [],
-      country: undefined,
-      workFormat: ['remote'],
-    })
-    expect(qs).toBe('workFormat=remote')
-  })
-
-  it('сериализует числа и булевы значения', () => {
-    const qs = filtersToQueryString({ salaryFrom: 1000, urgent: true })
-    expect(qs).toBe('salaryFrom=1000&urgent=true')
-  })
-})
-
-describe('paramsToSavedFilters', () => {
-  it('исключает page и undefined-значения', () => {
-    expect(
-      paramsToSavedFilters({
-        search: 'react',
-        page: 5,
-        workFormat: ['office', 'remote'],
-        country: undefined,
-      })
-    ).toEqual({ search: 'react', workFormat: ['office', 'remote'] })
-  })
-})
+import { parseVacancySearchParams } from './search-params'
 
 describe('parseVacancySearchParams', () => {
   it('читает multi-select фильтры из повторённых ключей', () => {

@@ -11,7 +11,6 @@ import { ResumeCard } from '@/components/resume/ResumeCard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { SaveSearchButton } from '@/components/saved-search/SaveSearchButton'
 import {
   PageHeader,
   EmptyState,
@@ -143,32 +142,9 @@ export const ResumesClient = observer(function ResumesClient() {
               onChange={setEmploymentTypes}
             />
           </div>
-          <div className="mt-3 hidden md:block">
-            <SaveSearchButton
-              searchType="resume"
-              filters={{
-                ...(search ? { search } : {}),
-                ...(country ? { country } : {}),
-                ...(workFormats.length > 0 ? { workFormat: workFormats } : {}),
-                ...(employmentTypes.length > 0 ? { employmentType: employmentTypes } : {}),
-              }}
-            />
-          </div>
         </aside>
 
         <section className="mt-4 md:mt-0">
-          <div className="mb-3 md:hidden">
-            <SaveSearchButton
-              searchType="resume"
-              filters={{
-                ...(search ? { search } : {}),
-                ...(country ? { country } : {}),
-                ...(workFormats.length > 0 ? { workFormat: workFormats } : {}),
-                ...(employmentTypes.length > 0 ? { employmentType: employmentTypes } : {}),
-              }}
-            />
-          </div>
-
           {store.isLoading && <CardListSkeleton count={6} />}
 
           {store.error && !store.isLoading && (

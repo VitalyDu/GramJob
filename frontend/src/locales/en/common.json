@@ -101,10 +101,6 @@
     "views": "Views: {{count}}",
     "applications": "Applications: {{count}}"
   },
-  "savedSearch": {
-    "namePlaceholder": "Name (optional)",
-    "saved": "Search saved ✓"
-  },
   "report": {
     "title": "Report",
     "reason": "Reason",
@@ -312,7 +308,6 @@
         "desc": "Everything under moderation in one place"
       },
       "favorites": { "label": "Favorites", "desc": "Saved vacancies and resumes" },
-      "savedSearches": { "label": "Saved searches", "desc": "Quick access to filters" },
       "notifications": { "label": "Notifications", "desc": "Events and moderation" },
       "blocks": { "label": "Blocked users", "desc": "Hidden employers and candidates" },
       "subscription": { "label": "Subscription", "desc": "Plan, limits and packages" },
@@ -407,26 +402,6 @@
         "company": "Companies"
       }
     },
-    "savedSearches": {
-      "title": "Saved searches",
-      "description": "Use the «Save search» button on the vacancies or resumes page",
-      "empty": "No saved searches",
-      "emptyDesc": "Use the «Save search» button on the vacancies or resumes page",
-      "unnamed": "Unnamed",
-      "confirmRemove": "Delete saved search?",
-      "open": "Open",
-      "remove": "Delete",
-      "colName": "Name",
-      "colType": "Type",
-      "colDate": "Created date",
-      "colActions": "Actions",
-      "createdAt": "Created",
-      "lastNotified": "notification",
-      "types": {
-        "vacancy": "Vacancies",
-        "resume": "Resumes"
-      }
-    },
     "blocks": {
       "title": "Blocked users",
       "description": "Content from blocked users does not appear in search results",
@@ -460,7 +435,6 @@
         "publications": "My publications",
         "notifications": "Notifications",
         "favorites": "Favorites",
-        "savedSearches": "Saved searches",
         "blocks": "Blocked users",
         "subscription": "Subscription"
       }

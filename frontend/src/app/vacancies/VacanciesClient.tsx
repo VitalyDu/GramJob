@@ -10,7 +10,6 @@ import { VacancyCard } from '@/components/vacancy/VacancyCard'
 import { VacancyFilters } from '@/components/vacancy/VacancyFilters'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { SaveSearchButton } from '@/components/saved-search/SaveSearchButton'
 import {
   PageHeader,
   EmptyState,
@@ -18,7 +17,7 @@ import {
   CardListSkeleton,
   PaginationBar,
 } from '@/components/shared'
-import { parseVacancySearchParams, paramsToSavedFilters } from '@/lib/saved-search-utils'
+import { parseVacancySearchParams } from '@/lib/search-params'
 import type { Vacancy, VacancyListParams } from '@/types/api'
 
 interface Props {
@@ -104,16 +103,9 @@ export const VacanciesClient = observer(function VacanciesClient({
       <div className="md:grid md:grid-cols-[280px_1fr] md:items-start md:gap-6">
         <aside className="md:sticky md:top-20">
           <VacancyFilters params={params} onChange={handleParamsChange} />
-          <div className="mt-3 hidden md:block">
-            <SaveSearchButton searchType="vacancy" filters={paramsToSavedFilters(params)} />
-          </div>
         </aside>
 
         <section className="mt-4 md:mt-0">
-          <div className="mb-3 md:hidden">
-            <SaveSearchButton searchType="vacancy" filters={paramsToSavedFilters(params)} />
-          </div>
-
           {showSkeleton && <CardListSkeleton count={6} />}
 
           {store.error && !store.isLoading && (

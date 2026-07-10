@@ -4,7 +4,6 @@ import { VacancyStore } from './VacancyStore'
 import { ResumeStore } from './ResumeStore'
 import { ApplicationStore } from './ApplicationStore'
 import { FavoriteStore } from './FavoriteStore'
-import { SavedSearchStore } from './SavedSearchStore'
 import { BlockStore } from './BlockStore'
 import { PaymentStore } from './PaymentStore'
 import { NotificationStore } from './NotificationStore'
@@ -17,7 +16,6 @@ export class RootStore {
   resume: ResumeStore
   application: ApplicationStore
   favorite: FavoriteStore
-  savedSearch: SavedSearchStore
   block: BlockStore
   payment: PaymentStore
   notification: NotificationStore
@@ -30,7 +28,6 @@ export class RootStore {
     this.resume = new ResumeStore()
     this.application = new ApplicationStore()
     this.favorite = new FavoriteStore()
-    this.savedSearch = new SavedSearchStore()
     this.block = new BlockStore()
     this.payment = new PaymentStore()
     this.notification = new NotificationStore()

@@ -23,7 +23,6 @@ export const ProfileClient = observer(function ProfileClient() {
     { href: '/dashboard/publications', label: t('dashboard.profile.links.publications') },
     { href: '/dashboard/notifications', label: t('dashboard.profile.links.notifications') },
     { href: '/dashboard/favorites', label: t('dashboard.profile.links.favorites') },
-    { href: '/dashboard/saved-searches', label: t('dashboard.profile.links.savedSearches') },
     { href: '/dashboard/blocks', label: t('dashboard.profile.links.blocks') },
     { href: '/subscription', label: t('dashboard.profile.links.subscription') },
   ]
