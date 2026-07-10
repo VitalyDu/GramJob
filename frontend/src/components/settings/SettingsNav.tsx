@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 import { LogOut, Shield, Star, User } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
+import { useTelegramInit } from '@/hooks/useTelegramInit'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
@@ -19,6 +20,7 @@ export const SettingsNav = observer(function SettingsNav() {
   const pathname = usePathname()
   const router = useRouter()
   const { auth } = useStores()
+  const { isMiniApp } = useTelegramInit()
 
   const items = NAV_ITEMS.filter(
     (item) => !('requiresEmail' in item && item.requiresEmail) || Boolean(auth.user?.email)
@@ -43,17 +45,19 @@ export const SettingsNav = observer(function SettingsNav() {
           </Link>
         )
       })}
-      <button
-        type="button"
-        className={itemClasses(false)}
-        onClick={() => {
-          auth.logout()
-          router.push('/')
-        }}
-      >
-        <LogOut className="h-4 w-4 shrink-0" />
-        {t('settings.nav.logout')}
-      </button>
+      {!isMiniApp && (
+        <button
+          type="button"
+          className={itemClasses(false)}
+          onClick={() => {
+            auth.logout()
+            router.push('/')
+          }}
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          {t('settings.nav.logout')}
+        </button>
+      )}
     </nav>
   )
 })
