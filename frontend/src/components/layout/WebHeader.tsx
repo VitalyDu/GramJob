@@ -6,21 +6,20 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
-import { Check, FileText, Globe, LayoutDashboard, LogOut, Star, User } from 'lucide-react'
+import { Check, FileText, Globe, Heart, LayoutDashboard, LogOut, Star } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 import { NotificationBadge } from '@/components/notification/NotificationBadge'
+import { UserAvatar } from '@/components/shared/UserAvatar'
 import i18next from '@/lib/i18n'
 import { LanguageDrawer } from './LanguageDrawer'
 
@@ -78,7 +77,6 @@ export const WebHeader = observer(function WebHeader() {
   const router = useRouter()
   const { auth } = useStores()
 
-  const initial = auth.user?.firstName?.charAt(0) ?? auth.user?.email?.charAt(0) ?? '?'
   const [langDrawerOpen, setLangDrawerOpen] = useState(false)
 
   const mobileGlobeButton = (
@@ -152,6 +150,19 @@ export const WebHeader = observer(function WebHeader() {
                   {t('nav.resumeDatabase')}
                 </Link>
               )}
+            {auth.isAuthenticated && (
+              <Link
+                href="/subscription"
+                className={cn(
+                  'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                  pathname.startsWith('/subscription')
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                )}
+              >
+                {t('nav.subscription')}
+              </Link>
+            )}
           </div>
         </div>
 
@@ -164,6 +175,11 @@ export const WebHeader = observer(function WebHeader() {
               <LanguageSwitcher />
             </div>
             <NotificationBadge />
+            <Button asChild variant="ghost" size="icon" className="h-8 w-8">
+              <Link href="/dashboard/favorites" aria-label={t('nav.favorites')}>
+                <Heart className="h-4 w-4" />
+              </Link>
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -171,25 +187,29 @@ export const WebHeader = observer(function WebHeader() {
                   aria-label={t('nav.userMenu')}
                   className="flex items-center gap-2 rounded-full outline-none ring-ring focus-visible:ring-2"
                 >
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
-                      {initial.toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <UserAvatar user={auth.user} />
                   <span className="hidden max-w-[140px] truncate text-sm font-medium sm:inline">
                     {auth.user.firstName ?? auth.user.email}
                   </span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="flex items-center gap-2">
-                  <User className="h-4 w-4 shrink-0" />
-                  <span className="min-w-0 truncate">
-                    {auth.user.firstName ?? auth.user.email}
-                    {auth.user.lastName ? ` ${auth.user.lastName}` : ''}
-                  </span>
-                  <SubscriptionBadge plan={auth.user.subscriptionPlan} />
-                </DropdownMenuLabel>
+                <div className="flex items-center justify-between gap-1">
+                  <DropdownMenuItem asChild className="min-w-0 flex-1">
+                    <Link href="/dashboard/profile">
+                      <UserAvatar user={auth.user} className="mr-2 h-5 w-5" />
+                      <span className="min-w-0 truncate">
+                        {auth.user.firstName ?? auth.user.email}
+                        {auth.user.lastName ? ` ${auth.user.lastName}` : ''}
+                      </span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/subscription">
+                      <SubscriptionBadge plan={auth.user.subscriptionPlan} />
+                    </Link>
+                  </DropdownMenuItem>
+                </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard">
