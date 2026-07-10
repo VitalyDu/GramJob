@@ -1,9 +1,4 @@
 import type { NextConfig } from 'next'
-import bundleAnalyzer from '@next/bundle-analyzer'
-
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-})
 
 const securityHeaders = [
   { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
@@ -51,5 +46,14 @@ const nextConfig: NextConfig = {
     ],
   },
 }
+
+/* eslint-disable @typescript-eslint/no-require-imports */
+const withBundleAnalyzer =
+  process.env.ANALYZE === 'true'
+    ? (require('@next/bundle-analyzer') as (o: object) => (c: NextConfig) => NextConfig)({
+        enabled: true,
+      })
+    : (c: NextConfig) => c
+/* eslint-enable @typescript-eslint/no-require-imports */
 
 export default withBundleAnalyzer(nextConfig)
