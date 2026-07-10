@@ -26,11 +26,10 @@ describe('ForgotPasswordCard', () => {
     expect(screen.getByRole('button', { name: 'Отправить ссылку' })).toBeInTheDocument()
   })
 
-  it('не отправляет форму при некорректном email (браузерная валидация)', async () => {
+  it('не отправляет форму при некорректном email', async () => {
     render(<ForgotPasswordCard />)
     await userEvent.type(screen.getByLabelText('Email'), 'not-an-email')
     await userEvent.click(screen.getByRole('button', { name: 'Отправить ссылку' }))
-    // Браузерная HTML5 валидация email поля предотвращает отправку формы
     expect(mockAuth.forgotPassword).not.toHaveBeenCalled()
   })
 
