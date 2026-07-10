@@ -89,7 +89,9 @@ export async function uploadFile(file: File): Promise<UploadedFile> {
     const data = await res.json().catch(() => ({}))
     const raw =
       (data as { error?: { message?: string } } | undefined)?.error?.message ?? res.statusText
-    throw new ApiClientError(res.status, data, raw)
+    const i18nKey = API_ERROR_I18N_KEYS[raw]
+    const message = i18nKey ? i18n.t(i18nKey) : raw
+    throw new ApiClientError(res.status, data, message)
   }
 
   const files = (await res.json()) as UploadedFile[]

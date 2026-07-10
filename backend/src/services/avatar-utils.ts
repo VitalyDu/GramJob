@@ -1,4 +1,4 @@
-const TELEGRAM_HOSTS = ['t.me', 'telegram.org']
+const TELEGRAM_HOSTS = ['t.me', 'telegram.org', 'telegram-cdn.org']
 
 export function isAllowedAvatarUrl(value: unknown): boolean {
   if (value === null || value === '') return true

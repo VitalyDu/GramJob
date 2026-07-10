@@ -20,6 +20,7 @@ describe('isAllowedAvatarUrl', () => {
 
   it('разрешает Telegram photo_url', () => {
     expect(isAllowedAvatarUrl('https://t.me/i/userpic/320/abc.jpg')).toBe(true)
+    expect(isAllowedAvatarUrl('https://cdn.telegram-cdn.org/file/abc123.jpg')).toBe(true)
   })
 
   it('отклоняет чужие домены', () => {
