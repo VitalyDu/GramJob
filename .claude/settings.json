@@ -1,0 +1,21 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/gh-monitor.sh",
+            "timeout": 750,
+            "asyncRewake": true,
+            "if": "Bash(git push*)",
+            "statusMessage": "Мониторинг GitHub Actions...",
+            "rewakeMessage": "GitHub Actions deploy завершился с ошибкой. Вот логи — анализирую и исправляю:",
+            "rewakeSummary": "Deploy failed — требуется фикс"
+          }
+        ]
+      }
+    ]
+  }
+}
