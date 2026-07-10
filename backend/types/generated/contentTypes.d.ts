@@ -1476,6 +1476,7 @@ export interface PluginUsersPermissionsUser extends Struct.CollectionTypeSchema 
       }>
     firstName: Schema.Attribute.String
     isVip: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>
+    telegramNotificationsEnabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>
     language: Schema.Attribute.Enumeration<['ru', 'en']> & Schema.Attribute.DefaultTo<'ru'>
     lastName: Schema.Attribute.String
     locale: Schema.Attribute.String & Schema.Attribute.Private

@@ -94,6 +94,10 @@
     "isVip": {
       "type": "boolean",
       "default": false
+    },
+    "telegramNotificationsEnabled": {
+      "type": "boolean",
+      "default": true
     }
   }
 }

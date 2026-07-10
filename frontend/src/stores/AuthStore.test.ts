@@ -45,6 +45,7 @@ const mockUser = {
   subscriptionExpiresAt: null,
   vacancyCredits: 3,
   applyCredits: 3,
+  telegramNotificationsEnabled: true,
   createdAt: '2026-01-01T00:00:00Z',
 }
 

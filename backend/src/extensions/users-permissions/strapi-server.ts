@@ -18,10 +18,17 @@ const SAFE_RESPONSE_FIELDS = [
   'applyCredits',
   'boostCredits',
   'isVip',
+  'telegramNotificationsEnabled',
   'createdAt',
 ] as const
 
-const ALLOWED_UPDATE_FIELDS = ['firstName', 'lastName', 'language', 'avatar'] as const
+const ALLOWED_UPDATE_FIELDS = [
+  'firstName',
+  'lastName',
+  'language',
+  'avatar',
+  'telegramNotificationsEnabled',
+] as const
 
 // Action uid used by the scope generator: plugin::users-permissions.user.updateMe
 const UPDATE_ME_ACTION = 'plugin::users-permissions.user.updateMe'

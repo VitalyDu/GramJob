@@ -107,14 +107,14 @@ export async function sendNotification(
     )
   }
 
-  // 2. Send Telegram message if user has telegramId
+  // 2. Send Telegram message if user has telegramId and notifications enabled
   try {
     const user = (await strapi.db.query('plugin::users-permissions.user').findOne({
       where: { id: userId },
-      select: ['telegramId'],
-    })) as { telegramId?: string | null } | null
+      select: ['telegramId', 'telegramNotificationsEnabled'],
+    })) as { telegramId?: string | null; telegramNotificationsEnabled?: boolean | null } | null
 
-    if (user?.telegramId) {
+    if (user?.telegramId && user.telegramNotificationsEnabled !== false) {
       sendMessage(user.telegramId, message)
     }
   } catch (err) {

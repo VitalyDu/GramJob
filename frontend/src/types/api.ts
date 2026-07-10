@@ -12,6 +12,7 @@ export interface User {
   applyCredits: number
   boostCredits: number
   isVip: boolean
+  telegramNotificationsEnabled: boolean
   createdAt: string
 }
 
