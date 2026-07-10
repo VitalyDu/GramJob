@@ -56,7 +56,7 @@ export class VacancyStore {
         `/vacancies${qs ? `?${qs}` : ''}`
       )
       runInAction(() => {
-        this.vacancies = res.data
+        this.vacancies = Array.isArray(res.data) ? res.data : []
         this.total = res.meta.total
         this.page = res.meta.page
       })

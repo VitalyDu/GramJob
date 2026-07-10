@@ -30,7 +30,6 @@ export default ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Middlewar
     {
       name: 'strapi::cors',
       config: {
-        enabled: true,
         headers: ['Authorization', 'Content-Type', 'X-Telegram-Init-Data'],
         origin: [
           ...env('FRONTEND_URL', 'http://localhost:3000')
