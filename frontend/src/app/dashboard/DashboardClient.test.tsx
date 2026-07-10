@@ -9,16 +9,21 @@ vi.mock('@/stores/StoreProvider', () => ({
   useStores: () => ({
     auth: {
       isAuthenticated: true,
-      user: { id: 1, firstName: 'Иван', email: 'ivan@test.io', subscriptionPlan: 'free' },
+      user: {
+        id: 1,
+        firstName: 'Иван',
+        email: 'ivan@test.io',
+        subscriptionPlan: 'free',
+        telegramNotificationsEnabled: true,
+      },
     },
-    notification: { unreadCount: 3, fetchUnreadCount: vi.fn() },
   }),
 }))
 
 describe('DashboardClient', () => {
-  it('показывает приветствие с именем пользователя', () => {
+  it('показывает заголовок кабинета', () => {
     render(<DashboardClient />)
-    expect(screen.getByText(/Иван/)).toBeInTheDocument()
+    expect(screen.getByText('Мой кабинет')).toBeInTheDocument()
   })
 
   it('показывает разделы кабинета', () => {
@@ -28,23 +33,24 @@ describe('DashboardClient', () => {
       'Мои резюме',
       'Мои компании',
       'Отклики',
-      'Избранное',
-      'Уведомления',
-      'Подписка',
-      'Профиль',
+      'Мои публикации',
+      'Блокировки',
     ]) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
-  })
-
-  it('показывает счётчик непрочитанных уведомлений', () => {
-    render(<DashboardClient />)
-    expect(screen.getByText('3')).toBeInTheDocument()
   })
 
   it('показывает быстрые действия', () => {
     render(<DashboardClient />)
     expect(screen.getByRole('link', { name: /создать вакансию/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /создать резюме/i })).toBeInTheDocument()
+  })
+
+  it('показывает баннер подписки для free пользователя', () => {
+    render(<DashboardClient />)
+    const subscriptionLinks = screen
+      .getAllByRole('link')
+      .filter((link) => link.getAttribute('href') === '/subscription')
+    expect(subscriptionLinks.length).toBeGreaterThan(0)
   })
 })

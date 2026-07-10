@@ -294,7 +294,7 @@
     "anySize": "Any size"
   },
   "dashboard": {
-    "greeting": "Hi, {{name}}!",
+    "title": "My Account",
     "greetingDesc": "Manage vacancies, resumes and applications from one place",
     "manageSubscription": "Manage subscription",
     "quickActions": "Quick actions",
@@ -302,6 +302,10 @@
     "createVacancy": "Create vacancy",
     "createResume": "Create resume",
     "addCompany": "Add company",
+    "banner": {
+      "title": "Unlock more with Pro and Max",
+      "desc": "More vacancies, boosts and resume database access"
+    },
     "sections_list": {
       "vacancies": { "label": "My vacancies", "desc": "Postings, boosts, analytics" },
       "resumes": { "label": "My resumes", "desc": "Resumes and their statuses" },

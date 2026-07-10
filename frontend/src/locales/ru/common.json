@@ -294,7 +294,7 @@
     "anySize": "Любой размер"
   },
   "dashboard": {
-    "greeting": "Привет, {{name}}!",
+    "title": "Мой кабинет",
     "greetingDesc": "Управляйте вакансиями, резюме и откликами из одного места",
     "manageSubscription": "Управление подпиской",
     "quickActions": "Быстрые действия",
@@ -302,6 +302,10 @@
     "createVacancy": "Создать вакансию",
     "createResume": "Создать резюме",
     "addCompany": "Добавить компанию",
+    "banner": {
+      "title": "Больше возможностей с Pro и Max",
+      "desc": "Больше вакансий, бустов и доступ к базе резюме"
+    },
     "sections_list": {
       "vacancies": {
         "label": "Мои вакансии",

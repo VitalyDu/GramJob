@@ -6,27 +6,23 @@ import { useRouter } from 'next/navigation'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 import {
-  Bell,
   Briefcase,
   Building2,
   FileText,
-  Heart,
   ListChecks,
   MessageSquare,
   Plus,
   Shield,
-  Star,
-  User,
 } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
+import { SubscriptionBanner } from '@/components/subscription/SubscriptionBanner'
 
 export const DashboardClient = observer(function DashboardClient() {
   const router = useRouter()
-  const { auth, notification } = useStores()
+  const { auth } = useStores()
   const { t } = useTranslation()
 
   const SECTIONS = [
@@ -61,35 +57,10 @@ export const DashboardClient = observer(function DashboardClient() {
       desc: t('dashboard.sections_list.publications.desc'),
     },
     {
-      href: '/dashboard/favorites',
-      icon: Heart,
-      label: t('dashboard.sections_list.favorites.label'),
-      desc: t('dashboard.sections_list.favorites.desc'),
-    },
-    {
-      href: '/dashboard/notifications',
-      icon: Bell,
-      label: t('dashboard.sections_list.notifications.label'),
-      desc: t('dashboard.sections_list.notifications.desc'),
-      badge: 'unread' as const,
-    },
-    {
       href: '/dashboard/blocks',
       icon: Shield,
       label: t('dashboard.sections_list.blocks.label'),
       desc: t('dashboard.sections_list.blocks.desc'),
-    },
-    {
-      href: '/subscription',
-      icon: Star,
-      label: t('dashboard.sections_list.subscription.label'),
-      desc: t('dashboard.sections_list.subscription.desc'),
-    },
-    {
-      href: '/dashboard/profile',
-      icon: User,
-      label: t('dashboard.sections_list.profile.label'),
-      desc: t('dashboard.sections_list.profile.desc'),
     },
   ]
 
@@ -97,21 +68,13 @@ export const DashboardClient = observer(function DashboardClient() {
     if (!auth.isAuthenticated) router.replace('/login')
   }, [auth.isAuthenticated, router])
 
-  useEffect(() => {
-    if (auth.isAuthenticated) void notification.fetchUnreadCount()
-  }, [auth.isAuthenticated, notification])
-
   if (!auth.isAuthenticated || !auth.user) return null
 
-  const name = auth.user.firstName ?? auth.user.email
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            {t('dashboard.greeting', { name })}
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t('dashboard.title')}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t('dashboard.greetingDesc')}</p>
         </div>
         <Link href="/subscription" aria-label={t('dashboard.manageSubscription')}>
@@ -140,25 +103,22 @@ export const DashboardClient = observer(function DashboardClient() {
         </Button>
       </section>
 
+      <SubscriptionBanner />
+
       <section
         aria-label={t('dashboard.sections')}
-        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+        className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3"
       >
-        {SECTIONS.map(({ href, icon: Icon, label, desc, ...rest }) => (
+        {SECTIONS.map(({ href, icon: Icon, label, desc }) => (
           <Link key={href} href={href} className="group">
             <Card className="h-full transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md">
-              <CardContent className="flex items-start gap-3 p-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              <CardContent className="flex items-start gap-3 p-3 sm:p-4">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 sm:h-10 sm:w-10">
                   <Icon className="h-5 w-5 text-primary" />
                 </div>
                 <div className="min-w-0">
-                  <p className="flex items-center gap-2 font-semibold group-hover:text-primary">
+                  <p className="truncate text-sm font-semibold group-hover:text-primary sm:text-base">
                     {label}
-                    {'badge' in rest && notification.unreadCount > 0 && (
-                      <Badge className="h-5 min-w-5 justify-center px-1">
-                        {notification.unreadCount}
-                      </Badge>
-                    )}
                   </p>
                   <p className="mt-0.5 truncate text-sm text-muted-foreground">{desc}</p>
                 </div>
