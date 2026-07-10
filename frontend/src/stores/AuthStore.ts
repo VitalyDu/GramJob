@@ -54,6 +54,7 @@ export class AuthStore {
     runInAction(() => {
       this.isLoading = true
       this.error = null
+      this.emailNotConfirmed = false
     })
     try {
       const res = await api.post<AuthResponse>('/auth/local', { identifier, password })

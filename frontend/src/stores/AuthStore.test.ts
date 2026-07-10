@@ -198,6 +198,40 @@ describe('AuthStore', () => {
       await store.resendConfirmation('a@b.c')
       expect(api.post).toHaveBeenCalledWith('/auth/send-email-confirmation', { email: 'a@b.c' })
     })
+
+    it('loginWithEmail ставит emailNotConfirmed при ошибке "not confirmed"', async () => {
+      const err = new ApiClientError(
+        400,
+        { error: { message: 'Your account email is not confirmed' } },
+        'Your account email is not confirmed'
+      )
+      vi.mocked(api.post).mockRejectedValueOnce(err)
+      const store = new AuthStore()
+      await store.loginWithEmail('a@b.c', 'password').catch(() => {})
+      expect(store.emailNotConfirmed).toBe(true)
+    })
+
+    it('loginWithEmail не ставит emailNotConfirmed при обычной ошибке', async () => {
+      vi.mocked(api.post).mockRejectedValueOnce(new Error('Network error'))
+      const store = new AuthStore()
+      await store.loginWithEmail('a@b.c', 'password').catch(() => {})
+      expect(store.emailNotConfirmed).toBe(false)
+    })
+
+    it('loginWithEmail сбрасывает emailNotConfirmed при новой попытке', async () => {
+      const err = new ApiClientError(
+        400,
+        { error: { message: 'Your account email is not confirmed' } },
+        'Your account email is not confirmed'
+      )
+      vi.mocked(api.post).mockRejectedValueOnce(err)
+      const store = new AuthStore()
+      await store.loginWithEmail('a@b.c', 'password').catch(() => {})
+      expect(store.emailNotConfirmed).toBe(true)
+      vi.mocked(api.post).mockRejectedValueOnce(new Error('Network error'))
+      await store.loginWithEmail('a@b.c', 'password').catch(() => {})
+      expect(store.emailNotConfirmed).toBe(false)
+    })
   })
 
   describe('resetPassword', () => {

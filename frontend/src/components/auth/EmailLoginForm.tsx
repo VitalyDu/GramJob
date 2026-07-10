@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -25,6 +25,8 @@ export const EmailLoginForm = observer(function EmailLoginForm() {
   const { t } = useTranslation()
   const { auth } = useStores()
   const router = useRouter()
+  const [resent, setResent] = useState(false)
+  const [resendError, setResendError] = useState<string | null>(null)
 
   const schema = useMemo(
     () =>
@@ -84,16 +86,29 @@ export const EmailLoginForm = observer(function EmailLoginForm() {
       )}
 
       {auth.emailNotConfirmed && (
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={() => {
-            void auth.resendConfirmation(getValues('identifier'))
-          }}
-        >
-          {t('auth.resendConfirmation')}
-        </Button>
+        <div className="space-y-1">
+          {resent ? (
+            <p className="text-sm text-green-600">{t('auth.confirmEmailResent')}</p>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setResendError(null)
+                void auth
+                  .resendConfirmation(getValues('identifier'))
+                  .then(() => setResent(true))
+                  .catch((e: unknown) =>
+                    setResendError(e instanceof Error ? e.message : t('common.error'))
+                  )
+              }}
+            >
+              {t('auth.resendConfirmation')}
+            </Button>
+          )}
+          {resendError && <p className="text-sm text-destructive">{resendError}</p>}
+        </div>
       )}
 
       <Button type="submit" className="w-full" disabled={auth.isLoading}>
