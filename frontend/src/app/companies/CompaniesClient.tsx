@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
-import { Building2 } from 'lucide-react'
+import { Building2, Plus } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { CompanyCard } from '@/components/company/CompanyCard'
 import { CompanyFilters } from '@/components/company/CompanyFilters'
@@ -27,7 +28,7 @@ export const CompaniesClient = observer(function CompaniesClient({
   initialCompanies,
   initialTotal,
 }: Props) {
-  const { company: store } = useStores()
+  const { company: store, auth } = useStores()
   const { t } = useTranslation()
   const [params, setParams] = useState<CompanyListParams>({ page: 1 })
   const [searchInput, setSearchInput] = useState('')
@@ -70,7 +71,25 @@ export const CompaniesClient = observer(function CompaniesClient({
 
   return (
     <div>
-      <PageHeader title={t('nav.companies')} description={t('companies.description')} />
+      <PageHeader
+        title={t('nav.companies')}
+        description={t('companies.description')}
+        actions={
+          auth.isAuthenticated ? (
+            <Button
+              asChild
+              size="icon"
+              variant="outline"
+              className="h-9 w-9 shrink-0 rounded-full"
+              aria-label={t('dashboard.companies.createNew')}
+            >
+              <Link href="/dashboard/companies/new">
+                <Plus className="h-4 w-4" />
+              </Link>
+            </Button>
+          ) : undefined
+        }
+      />
 
       {/* Поиск — на всю ширину */}
       <form onSubmit={handleSearch} className="mb-4 flex gap-2">

@@ -19,8 +19,8 @@ export const SubscriptionBanner = observer(function SubscriptionBanner() {
         <div className="flex min-w-0 items-center gap-3">
           <Sparkles className="h-6 w-6 shrink-0" />
           <div className="min-w-0">
-            <p className="font-semibold">{t('dashboard.banner.title')}</p>
-            <p className="truncate text-sm opacity-90">{t('dashboard.banner.desc')}</p>
+            <p className="text-sm font-semibold sm:text-base">{t('dashboard.banner.title')}</p>
+            <p className="text-sm opacity-90">{t('dashboard.banner.desc')}</p>
           </div>
         </div>
         <ArrowRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-0.5" />

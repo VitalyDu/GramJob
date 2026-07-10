@@ -92,9 +92,15 @@
     @apply border-border outline-ring/50;
   }
 
+  /* html is the actual viewport scroll container — reserve scrollbar gutter here
+     so the layout width stays constant when navigating between scrollable and non-scrollable pages */
+  html {
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
+  }
+
   body {
     @apply bg-background text-foreground;
-    scrollbar-gutter: stable;
   }
 
   button:not(:disabled),

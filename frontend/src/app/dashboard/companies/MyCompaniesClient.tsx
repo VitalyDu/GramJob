@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Building2 } from 'lucide-react'
+import { Building2, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
@@ -54,8 +54,16 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
       <PageHeader
         title={t('dashboard.companies.title')}
         actions={
-          <Button asChild>
-            <Link href="/dashboard/companies/new">{t('dashboard.companies.createNew')}</Link>
+          <Button
+            asChild
+            size="icon"
+            variant="outline"
+            className="h-9 w-9 shrink-0 rounded-full"
+            aria-label={t('dashboard.companies.createNew')}
+          >
+            <Link href="/dashboard/companies/new">
+              <Plus className="h-4 w-4" />
+            </Link>
           </Button>
         }
       />

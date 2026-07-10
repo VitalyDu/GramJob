@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { Briefcase, Search } from 'lucide-react'
+import { Briefcase, Plus, Search } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { VacancyCard } from '@/components/vacancy/VacancyCard'
 import { VacancyFilters } from '@/components/vacancy/VacancyFilters'
@@ -29,7 +30,7 @@ export const VacanciesClient = observer(function VacanciesClient({
   initialVacancies,
   initialTotal,
 }: Props) {
-  const { vacancy: store } = useStores()
+  const { vacancy: store, auth } = useStores()
   const { t } = useTranslation()
   const searchParams = useSearchParams()
   const initialParamsRef = useRef<VacancyListParams | null>(null)
@@ -83,7 +84,25 @@ export const VacanciesClient = observer(function VacanciesClient({
 
   return (
     <div>
-      <PageHeader title={t('nav.vacancies')} description={t('vacancies.description')} />
+      <PageHeader
+        title={t('nav.vacancies')}
+        description={t('vacancies.description')}
+        actions={
+          auth.isAuthenticated ? (
+            <Button
+              asChild
+              size="icon"
+              variant="outline"
+              className="h-9 w-9 shrink-0 rounded-full"
+              aria-label={t('dashboard.vacancies.createNew')}
+            >
+              <Link href="/dashboard/vacancies/new">
+                <Plus className="h-4 w-4" />
+              </Link>
+            </Button>
+          ) : undefined
+        }
+      />
 
       {/* Поиск — на всю ширину, над сеткой */}
       <form onSubmit={handleSearch} className="mb-4 flex gap-2">

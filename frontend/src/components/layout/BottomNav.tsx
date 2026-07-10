@@ -65,7 +65,14 @@ export function BottomNav({ isMiniApp }: { isMiniApp: boolean }) {
         !isMiniApp && 'md:hidden'
       )}
     >
-      <div className="mx-auto flex max-w-6xl pb-[env(safe-area-inset-bottom)]">
+      <div
+        className={cn(
+          'mx-auto flex max-w-6xl',
+          isMiniApp
+            ? 'pb-[max(env(safe-area-inset-bottom),16px)]'
+            : 'pb-[env(safe-area-inset-bottom)]'
+        )}
+      >
         {links.map(({ href, icon: Icon, label, isActive }) => {
           const active = isActive(pathname)
           return (

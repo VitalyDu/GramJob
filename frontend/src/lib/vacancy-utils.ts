@@ -86,7 +86,8 @@ export function formatSalary(
   if (!from && !to) return ''
   const sym = currency ? (SALARY_CURRENCY_SYMBOLS[currency] ?? '') : ''
   const locale = i18next.language === 'ru' ? 'ru' : 'en'
-  if (from && to) return `${sym}${from.toLocaleString(locale)} — ${sym}${to.toLocaleString(locale)}`
-  if (from) return `${i18next.t('salary.from')} ${sym}${from.toLocaleString(locale)}`
-  return `${i18next.t('salary.to')} ${sym}${to!.toLocaleString(locale)}`
+  const fmt = (n: number) => (sym ? `${n.toLocaleString(locale)} ${sym}` : n.toLocaleString(locale))
+  if (from && to) return `${fmt(from)} — ${fmt(to)}`
+  if (from) return `${i18next.t('salary.from')} ${fmt(from)}`
+  return `${i18next.t('salary.to')} ${fmt(to!)}`
 }

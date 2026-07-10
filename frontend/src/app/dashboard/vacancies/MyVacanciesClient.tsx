@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
-import { Briefcase } from 'lucide-react'
+import { Briefcase, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
@@ -71,8 +71,16 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
       <PageHeader
         title={t('dashboard.vacancies.title')}
         actions={
-          <Button asChild>
-            <Link href="/dashboard/vacancies/new">{t('dashboard.vacancies.createNew')}</Link>
+          <Button
+            asChild
+            size="icon"
+            variant="outline"
+            className="h-9 w-9 shrink-0 rounded-full"
+            aria-label={t('dashboard.vacancies.createNew')}
+          >
+            <Link href="/dashboard/vacancies/new">
+              <Plus className="h-4 w-4" />
+            </Link>
           </Button>
         }
       />
