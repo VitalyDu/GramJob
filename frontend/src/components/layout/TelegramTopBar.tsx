@@ -3,12 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Globe, Heart, Settings } from 'lucide-react'
+import { Globe, Heart, Settings, User } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
 import { useStores } from '@/stores/StoreProvider'
 import { cn } from '@/lib/utils'
-import { UserAvatar } from '@/components/shared/UserAvatar'
 import { NotificationBadge } from '@/components/notification/NotificationBadge'
 import { LanguageDrawer } from './LanguageDrawer'
 import { UserMenuDrawer } from './UserMenuDrawer'
@@ -62,11 +61,7 @@ export const TelegramTopBar = observer(function TelegramTopBar() {
       <header className={headerCls}>
         <div className="flex h-12 items-center justify-end px-3">
           <div className="flex items-center gap-1.5">
-            <IconButton
-              label={t('nav.languageSwitcher')}
-              active={langOpen}
-              onClick={() => setLangOpen(true)}
-            >
+            <IconButton label={t('nav.languageSwitcher')} onClick={() => setLangOpen(true)}>
               <Globe className="h-4 w-4" />
             </IconButton>
 
@@ -99,24 +94,16 @@ export const TelegramTopBar = observer(function TelegramTopBar() {
               </>
             )}
 
-            {auth.isAuthenticated && auth.user ? (
-              <button
-                type="button"
-                onClick={() => setUserMenuOpen(true)}
-                aria-label={t('nav.userMenu')}
-                className={cn(
-                  'flex h-8 w-8 items-center justify-center rounded-full transition-colors',
-                  userMenuOpen && 'ring-2 ring-primary ring-offset-1'
-                )}
-              >
-                <UserAvatar user={auth.user} className="h-8 w-8" />
-              </button>
+            {auth.isAuthenticated ? (
+              <IconButton label={t('nav.userMenu')} onClick={() => setUserMenuOpen(true)}>
+                <User className="h-4 w-4" />
+              </IconButton>
             ) : null}
           </div>
         </div>
       </header>
 
-      {auth.isAuthenticated && auth.user && (
+      {auth.isAuthenticated && (
         <UserMenuDrawer open={userMenuOpen} onOpenChange={setUserMenuOpen} />
       )}
       <LanguageDrawer open={langOpen} onOpenChange={setLangOpen} />
