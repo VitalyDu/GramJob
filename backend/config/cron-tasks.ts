@@ -4,7 +4,7 @@ import { computeDelta, yesterdayUTC } from '../src/services/analytics.service'
 
 export default {
   // Every hour at minute 0: expire vacancies
-  '0 * * * *': {
+  expireVacancies: {
     task: async ({ strapi }: { strapi: Core.Strapi }) => {
       try {
         const now = new Date().toISOString()
@@ -46,12 +46,13 @@ export default {
       }
     },
     options: {
+      rule: '0 * * * *',
       tz: 'UTC',
     },
   },
 
   // Daily at 02:00 UTC: expire subscriptions
-  '0 2 * * *': {
+  expireSubscriptions: {
     task: async ({ strapi }: { strapi: Core.Strapi }) => {
       try {
         const now = new Date().toISOString()
@@ -86,11 +87,11 @@ export default {
         strapi.log.error('[cron] Failed to expire subscriptions', err)
       }
     },
-    options: { tz: 'UTC' },
+    options: { rule: '0 2 * * *', tz: 'UTC' },
   },
 
   // Daily at 09:00 UTC: subscription 7-day warning + vacancy expiring in 3 days
-  '0 9 * * *': {
+  dailyWarnings: {
     task: async ({ strapi }: { strapi: Core.Strapi }) => {
       try {
         // 1. Subscription 7-day warning
@@ -157,11 +158,11 @@ export default {
         strapi.log.error('[cron] Failed to process daily 09:00 notifications', err)
       }
     },
-    options: { tz: 'UTC' },
+    options: { rule: '0 9 * * *', tz: 'UTC' },
   },
 
   // Daily 18:00 UTC: vacancy views digest (notify employer if ≥5 views yesterday)
-  '0 18 * * *': {
+  vacancyViewsDigest: {
     task: async ({ strapi }: { strapi: Core.Strapi }) => {
       try {
         const yesterday = new Date()
@@ -225,16 +226,16 @@ export default {
         strapi.log.error('[cron] Failed to send vacancy views digest', err)
       }
     },
-    options: { tz: 'UTC' },
+    options: { rule: '0 18 * * *', tz: 'UTC' },
   },
 
   // Weekly Sunday 00:00 UTC: delete read notifications older than 30 days
-  '0 0 * * 0': {
+  cleanupNotifications: {
     task: async ({ strapi }: { strapi: Core.Strapi }) => {
       try {
         const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
-        const result = await strapi.db.query('api::notification.notification').deleteMany({
+        await strapi.db.query('api::notification.notification').deleteMany({
           where: {
             isRead: true,
             createdAt: { $lt: thirtyDaysAgo },
@@ -246,11 +247,11 @@ export default {
         strapi.log.error('[cron] Failed to cleanup notifications', err)
       }
     },
-    options: { tz: 'UTC' },
+    options: { rule: '0 0 * * 0', tz: 'UTC' },
   },
 
   // Daily 01:00 UTC: aggregate analytics for yesterday
-  '0 1 * * *': {
+  aggregateAnalytics: {
     task: async ({ strapi }: { strapi: Core.Strapi }) => {
       const date = yesterdayUTC()
       strapi.log.info(`[cron] Aggregating analytics for ${date}`)
@@ -366,6 +367,6 @@ export default {
         strapi.log.error('[cron] Analytics aggregation failed', err)
       }
     },
-    options: { tz: 'UTC' },
+    options: { rule: '0 1 * * *', tz: 'UTC' },
   },
 }
