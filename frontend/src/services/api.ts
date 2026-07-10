@@ -70,3 +70,30 @@ export const api = {
     request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 }
+
+export interface UploadedFile {
+  id: number
+  url: string
+}
+
+export async function uploadFile(file: File): Promise<UploadedFile> {
+  const headers: Record<string, string> = {}
+  if (authToken) headers['Authorization'] = `Bearer ${authToken}`
+
+  const form = new FormData()
+  form.append('files', file)
+
+  // Без Content-Type: браузер сам выставит multipart boundary
+  const res = await fetch(`${API_URL}/upload`, { method: 'POST', headers, body: form })
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    const raw =
+      (data as { error?: { message?: string } } | undefined)?.error?.message ?? res.statusText
+    throw new ApiClientError(res.status, data, raw)
+  }
+
+  const files = (await res.json()) as UploadedFile[]
+  const first = files[0]
+  if (!first) throw new ApiClientError(500, files, 'Upload returned no files')
+  return first
+}

@@ -49,6 +49,7 @@ const AUTHENTICATED_PERMISSIONS = [
   'api::notification.notification.markAllRead',
   'api::analytics.analytics.vacancyAnalytics',
   'api::analytics.analytics.resumeAnalytics',
+  'plugin::upload.content-api.upload',
 ]
 
 const PUBLIC_PERMISSIONS = [

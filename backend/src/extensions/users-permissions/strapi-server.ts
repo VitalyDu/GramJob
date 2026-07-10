@@ -2,6 +2,8 @@
 // - GET /users/me: strips sensitive fields, ensures custom fields are included
 // - PUT /users/me: allowlist-only field updates (firstName, lastName, language, avatar)
 
+import { isAllowedAvatarUrl } from '../../services/avatar-utils'
+
 const SAFE_RESPONSE_FIELDS = [
   'id',
   'email',
@@ -72,6 +74,10 @@ export default (plugin: any) => {
 
     const body = (ctx.request.body ?? {}) as Record<string, unknown>
     const safeData = pickFields(body, ALLOWED_UPDATE_FIELDS)
+
+    if ('avatar' in safeData && !isAllowedAvatarUrl(safeData.avatar)) {
+      return ctx.badRequest('avatar must be a URL from the uploads storage or Telegram')
+    }
 
     // Use db.query for the update (resolves numeric id directly)
     const updatedUser = await strapi.db.query('plugin::users-permissions.user').update({
