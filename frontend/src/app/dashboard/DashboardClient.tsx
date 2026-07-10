@@ -17,7 +17,7 @@ import {
 import { useStores } from '@/stores/StoreProvider'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
 import { SubscriptionBanner } from '@/components/subscription/SubscriptionBanner'
 
 export const DashboardClient = observer(function DashboardClient() {
@@ -127,12 +127,12 @@ export const DashboardClient = observer(function DashboardClient() {
         ))}
       </section>
 
-      <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-        <SheetContent side="bottom">
-          <SheetHeader>
-            <SheetTitle>{t('dashboard.quickActions')}</SheetTitle>
-          </SheetHeader>
-          <div className="flex flex-col gap-1 px-4 pb-4">
+      <Drawer open={createOpen} onOpenChange={setCreateOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{t('dashboard.quickActions')}</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex flex-col gap-0.5 px-4 pb-6 pt-1">
             {CREATE_ACTIONS.map(({ href, icon: Icon, label }) => (
               <Link
                 key={href}
@@ -145,8 +145,8 @@ export const DashboardClient = observer(function DashboardClient() {
               </Link>
             ))}
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 })

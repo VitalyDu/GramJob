@@ -3,7 +3,7 @@
 import { Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import i18next from '@/lib/i18n'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
 
 interface Props {
   open: boolean
@@ -23,12 +23,12 @@ export function LanguageDrawer({ open, onOpenChange }: Props) {
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom">
-        <SheetHeader>
-          <SheetTitle>Язык / Language</SheetTitle>
-        </SheetHeader>
-        <div className="flex flex-col gap-1 px-4 pb-4">
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>Язык / Language</DrawerTitle>
+        </DrawerHeader>
+        <div className="flex flex-col gap-0.5 px-4 pb-6 pt-1">
           <button
             type="button"
             onClick={() => setLang('ru')}
@@ -46,7 +46,7 @@ export function LanguageDrawer({ open, onOpenChange }: Props) {
             {currentLang === 'en' && <Check className="h-4 w-4" />}
           </button>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   )
 }

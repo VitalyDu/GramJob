@@ -1,6 +1,10 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/vacancies',
+}))
+
 const mockUseStores = vi.fn()
 vi.mock('@/stores/StoreProvider', () => ({
   useStores: () => mockUseStores(),
@@ -18,7 +22,7 @@ import { TelegramTopBar } from './TelegramTopBar'
 
 const unauthStores = () => ({
   auth: { isAuthenticated: false, user: null },
-  notification: { unreadCount: 0 },
+  notification: { unreadCount: 0, fetchUnreadCount: vi.fn() },
 })
 
 const authStores = () => ({
@@ -31,7 +35,7 @@ const authStores = () => ({
       subscriptionPlan: 'free' as const,
     },
   },
-  notification: { unreadCount: 0 },
+  notification: { unreadCount: 0, fetchUnreadCount: vi.fn() },
 })
 
 describe('TelegramTopBar', () => {
@@ -62,7 +66,7 @@ describe('TelegramTopBar', () => {
   it('показывает счётчик непрочитанных уведомлений', () => {
     mockUseStores.mockReturnValue({
       ...authStores(),
-      notification: { unreadCount: 5 },
+      notification: { unreadCount: 5, fetchUnreadCount: vi.fn() },
     })
     render(<TelegramTopBar />)
     expect(screen.getByText('5')).toBeInTheDocument()

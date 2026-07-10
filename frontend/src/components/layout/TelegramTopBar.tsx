@@ -1,74 +1,113 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Globe, Heart, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
 import { useStores } from '@/stores/StoreProvider'
-import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { UserAvatar } from '@/components/shared/UserAvatar'
 import { NotificationBadge } from '@/components/notification/NotificationBadge'
 import { LanguageDrawer } from './LanguageDrawer'
 import { UserMenuDrawer } from './UserMenuDrawer'
 
+function IconButton({
+  active,
+  onClick,
+  href,
+  label,
+  children,
+}: {
+  active?: boolean
+  onClick?: () => void
+  href?: string
+  label: string
+  children: React.ReactNode
+}) {
+  const cls = cn(
+    'flex h-8 w-8 items-center justify-center rounded-full transition-colors',
+    active
+      ? 'bg-primary/15 text-primary'
+      : 'bg-muted/80 text-muted-foreground hover:bg-muted hover:text-foreground'
+  )
+
+  if (href) {
+    return (
+      <Link href={href} aria-label={label} className={cls}>
+        {children}
+      </Link>
+    )
+  }
+  return (
+    <button type="button" onClick={onClick} aria-label={label} className={cls}>
+      {children}
+    </button>
+  )
+}
+
 export const TelegramTopBar = observer(function TelegramTopBar() {
   const { auth } = useStores()
   const { t } = useTranslation()
+  const pathname = usePathname()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
 
+  const isHome = pathname === '/'
+  const headerCls = cn('z-50 w-full', isHome ? 'absolute top-0 left-0 right-0' : 'static')
+
   return (
     <>
-      <header className="w-full border-b bg-background">
-        <div className="flex h-12 items-center justify-between px-3">
-          <Link href="/" aria-label={t('nav.home')}>
-            <Image
-              src="/logo-horizontal.png"
-              alt="GramJob"
-              width={80}
-              height={28}
-              priority
-              className="h-7 w-auto"
-            />
-          </Link>
-
-          <div className="flex items-center gap-0.5">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
+      <header className={headerCls}>
+        <div className="flex h-12 items-center justify-end px-3">
+          <div className="flex items-center gap-1.5">
+            <IconButton
+              label={t('nav.languageSwitcher')}
+              active={langOpen}
               onClick={() => setLangOpen(true)}
-              aria-label={t('nav.languageSwitcher')}
             >
               <Globe className="h-4 w-4" />
-            </Button>
+            </IconButton>
 
             {auth.isAuthenticated && (
               <>
-                <NotificationBadge />
+                <NotificationBadge
+                  className={cn(
+                    'flex h-8 w-8 items-center justify-center rounded-full transition-colors',
+                    pathname.startsWith('/dashboard/notifications')
+                      ? 'bg-primary/15 text-primary'
+                      : 'bg-muted/80 text-muted-foreground hover:bg-muted hover:text-foreground'
+                  )}
+                />
 
-                <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-                  <Link href="/dashboard/favorites" aria-label={t('nav.favorites')}>
-                    <Heart className="h-4 w-4" />
-                  </Link>
-                </Button>
+                <IconButton
+                  href="/dashboard/favorites"
+                  label={t('nav.favorites')}
+                  active={pathname.startsWith('/dashboard/favorites')}
+                >
+                  <Heart className="h-4 w-4" />
+                </IconButton>
 
-                <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-                  <Link href="/dashboard/profile" aria-label={t('nav.settings')}>
-                    <Settings className="h-4 w-4" />
-                  </Link>
-                </Button>
+                <IconButton
+                  href="/dashboard/profile"
+                  label={t('nav.settings')}
+                  active={pathname.startsWith('/dashboard/profile')}
+                >
+                  <Settings className="h-4 w-4" />
+                </IconButton>
               </>
             )}
 
             {auth.isAuthenticated && auth.user ? (
               <button
                 type="button"
-                className="ml-0.5 rounded-full outline-none ring-ring focus-visible:ring-2"
                 onClick={() => setUserMenuOpen(true)}
                 aria-label={t('nav.userMenu')}
+                className={cn(
+                  'flex h-8 w-8 items-center justify-center rounded-full transition-colors',
+                  userMenuOpen && 'ring-2 ring-primary ring-offset-1'
+                )}
               >
                 <UserAvatar user={auth.user} className="h-8 w-8" />
               </button>
