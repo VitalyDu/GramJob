@@ -37,7 +37,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           defaultTheme="system"
           enableSystem
           storageKey="gramjob_theme"
-          disableTransitionOnChange
         >
           <I18nProvider>
             <StoreProvider>

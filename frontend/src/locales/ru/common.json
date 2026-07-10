@@ -311,6 +311,11 @@
       "title": "Больше возможностей с Pro и Max",
       "desc": "Больше вакансий, бустов и доступ к базе резюме"
     },
+    "groups": {
+      "jobSeekers": "Для соискателей",
+      "employers": "Работодателям",
+      "general": "Общее"
+    },
     "sections_list": {
       "vacancies": {
         "label": "Мои вакансии",
@@ -325,8 +330,12 @@
         "desc": "Профили компаний"
       },
       "applications": {
-        "label": "Отклики",
+        "label": "Мои отклики",
         "desc": "Ваши отклики и их статусы"
+      },
+      "resumes_db": {
+        "label": "База резюме",
+        "desc": "Поиск кандидатов"
       },
       "publications": {
         "label": "Мои публикации",
@@ -682,6 +691,12 @@
       "close": "Закрыть",
       "vacanciesPerMonth": "{{count}} вакансий/мес",
       "upgrade": "Улучшить тариф"
+    },
+    "usage": {
+      "vacanciesMonth": "Вакансии в этом месяце",
+      "applyToday": "Отклики сегодня",
+      "resumes": "Резюме",
+      "resetsIn": "Обновится через {{time}}"
     }
   },
   "salary": {
@@ -799,6 +814,7 @@
     "nav": {
       "profile": "Данные профиля",
       "security": "Безопасность",
+      "interface": "Интерфейс",
       "subscription": "Подписка",
       "logout": "Выйти"
     },
@@ -816,6 +832,15 @@
       "change": "Сменить пароль",
       "changed": "Пароль изменён",
       "changeError": "Не удалось сменить пароль"
+    },
+    "interface": {
+      "languageTitle": "Язык интерфейса",
+      "themeTitle": "Тема оформления",
+      "theme": {
+        "light": "Светлая",
+        "dark": "Тёмная",
+        "system": "Системная"
+      }
     }
   }
 }

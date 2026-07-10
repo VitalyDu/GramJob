@@ -3,21 +3,22 @@ import { describe, expect, it, vi } from 'vitest'
 import { BottomNav } from './BottomNav'
 
 vi.mock('next/navigation', () => ({
-  usePathname: () => '/dashboard/favorites',
+  usePathname: () => '/dashboard/applications',
 }))
 
 describe('BottomNav', () => {
-  it('показывает четыре пункта: Вакансии, Отклики, Избранное, Кабинет', () => {
+  it('показывает пять пунктов: Компании, Вакансии, Мои резюме, Отклики, Кабинет', () => {
     render(<BottomNav isMiniApp={false} />)
+    expect(screen.getByText('Компании')).toBeInTheDocument()
     expect(screen.getByText('Вакансии')).toBeInTheDocument()
+    expect(screen.getByText('Мои резюме')).toBeInTheDocument()
     expect(screen.getByText('Отклики')).toBeInTheDocument()
-    expect(screen.getByText('Избранное')).toBeInTheDocument()
     expect(screen.getByText('Кабинет')).toBeInTheDocument()
   })
 
   it('подсвечивает активный раздел через aria-current', () => {
     render(<BottomNav isMiniApp={false} />)
-    const active = screen.getByRole('link', { name: /избранное/i })
+    const active = screen.getByRole('link', { name: /отклики/i })
     expect(active).toHaveAttribute('aria-current', 'page')
   })
 

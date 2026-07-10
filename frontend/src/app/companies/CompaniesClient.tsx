@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
-import { Building2, Plus } from 'lucide-react'
+import { Building2, Plus, Search } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { CompanyCard } from '@/components/company/CompanyCard'
 import { CompanyFilters } from '@/components/company/CompanyFilters'
@@ -33,8 +33,10 @@ export const CompaniesClient = observer(function CompaniesClient({
   const [params, setParams] = useState<CompanyListParams>({ page: 1 })
   const [searchInput, setSearchInput] = useState('')
   const [loadedOnce, setLoadedOnce] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     void store.fetchCompanies({ page: 1 }).finally(() => setLoadedOnce(true))
   }, [store])
 
@@ -75,7 +77,7 @@ export const CompaniesClient = observer(function CompaniesClient({
         title={t('nav.companies')}
         description={t('companies.description')}
         actions={
-          auth.isAuthenticated ? (
+          mounted && auth.isAuthenticated ? (
             <Button
               asChild
               size="icon"
@@ -91,24 +93,25 @@ export const CompaniesClient = observer(function CompaniesClient({
         }
       />
 
-      {/* Поиск — на всю ширину */}
-      <form onSubmit={handleSearch} className="mb-4 flex gap-2">
-        <Input
-          placeholder={t('companies.searchPlaceholder')}
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          className="flex-1"
-          aria-label={t('companies.searchPlaceholder')}
-        />
-        <Button type="submit">{t('common.search')}</Button>
-      </form>
-
       <div className="md:grid md:grid-cols-[280px_1fr] md:items-start md:gap-6">
         <aside className="md:sticky md:top-20">
           <CompanyFilters params={params} onChange={handleParamsChange} />
         </aside>
 
         <section className="mt-4 md:mt-0">
+          <form onSubmit={handleSearch} className="mb-4 flex gap-2">
+            <Input
+              placeholder={t('companies.searchPlaceholder')}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="flex-1"
+              aria-label={t('companies.searchPlaceholder')}
+            />
+            <Button type="submit">
+              <Search className="mr-1.5 h-4 w-4" />
+              {t('common.search')}
+            </Button>
+          </form>
           {showSkeleton && <CardListSkeleton count={6} />}
 
           {store.error && !store.isLoading && (

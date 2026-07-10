@@ -13,10 +13,11 @@ import { StartParamRouter } from './StartParamRouter'
 
 const ROOT_PATHS = new Set([
   '/',
+  '/companies',
   '/vacancies',
   '/dashboard',
+  '/dashboard/resumes',
   '/dashboard/applications',
-  '/dashboard/favorites',
 ])
 
 export function AppShell({ children }: { children: ReactNode }) {

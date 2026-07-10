@@ -73,6 +73,8 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<'div'>) {
         'flex flex-col gap-1.5 px-4 pb-2 pt-2',
         'group-data-[vaul-drawer-direction=bottom]/drawer-content:text-center',
         'group-data-[vaul-drawer-direction=top]/drawer-content:text-center',
+        'group-data-[vaul-drawer-direction=left]/drawer-content:pt-6',
+        'group-data-[vaul-drawer-direction=right]/drawer-content:pt-6',
         className
       )}
       {...props}

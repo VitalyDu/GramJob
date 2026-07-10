@@ -40,8 +40,10 @@ export const VacanciesClient = observer(function VacanciesClient({
   const [params, setParams] = useState<VacancyListParams>(initialParamsRef.current)
   const [searchInput, setSearchInput] = useState(initialParamsRef.current.search ?? '')
   const [loadedOnce, setLoadedOnce] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     void store
       .fetchVacancies(initialParamsRef.current ?? { page: 1 })
       .finally(() => setLoadedOnce(true))
@@ -88,7 +90,7 @@ export const VacanciesClient = observer(function VacanciesClient({
         title={t('nav.vacancies')}
         description={t('vacancies.description')}
         actions={
-          auth.isAuthenticated ? (
+          mounted && auth.isAuthenticated ? (
             <Button
               asChild
               size="icon"
@@ -104,27 +106,25 @@ export const VacanciesClient = observer(function VacanciesClient({
         }
       />
 
-      {/* Поиск — на всю ширину, над сеткой */}
-      <form onSubmit={handleSearch} className="mb-4 flex gap-2">
-        <Input
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          placeholder={t('vacancies.searchPlaceholder')}
-          className="flex-1"
-          aria-label={t('vacancies.searchPlaceholder')}
-        />
-        <Button type="submit">
-          <Search className="mr-1.5 h-4 w-4" />
-          {t('common.search')}
-        </Button>
-      </form>
-
       <div className="md:grid md:grid-cols-[280px_1fr] md:items-start md:gap-6">
         <aside className="md:sticky md:top-20">
           <VacancyFilters params={params} onChange={handleParamsChange} />
         </aside>
 
         <section className="mt-4 md:mt-0">
+          <form onSubmit={handleSearch} className="mb-4 flex gap-2">
+            <Input
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder={t('vacancies.searchPlaceholder')}
+              className="flex-1"
+              aria-label={t('vacancies.searchPlaceholder')}
+            />
+            <Button type="submit">
+              <Search className="mr-1.5 h-4 w-4" />
+              {t('common.search')}
+            </Button>
+          </form>
           {showSkeleton && <CardListSkeleton count={6} />}
 
           {store.error && !store.isLoading && (

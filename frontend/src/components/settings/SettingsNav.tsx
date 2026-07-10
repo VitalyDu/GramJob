@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
-import { LogOut, Shield, Star, User } from 'lucide-react'
+import { LogOut, Monitor, Shield, Star, User } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { useTelegramInit } from '@/hooks/useTelegramInit'
 import { cn } from '@/lib/utils'
@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 const NAV_ITEMS = [
   { key: 'profile', href: '/dashboard/profile', icon: User, exact: true },
   { key: 'security', href: '/dashboard/profile/security', icon: Shield, requiresEmail: true },
+  { key: 'interface', href: '/dashboard/profile/interface', icon: Monitor },
   { key: 'subscription', href: '/subscription', icon: Star },
 ] as const
 
@@ -48,7 +49,7 @@ export const SettingsNav = observer(function SettingsNav() {
       {!isMiniApp && (
         <button
           type="button"
-          className={itemClasses(false)}
+          className="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
           onClick={() => {
             auth.logout()
             router.push('/')

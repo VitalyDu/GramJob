@@ -311,6 +311,11 @@
       "title": "Unlock more with Pro and Max",
       "desc": "More vacancies, boosts and resume database access"
     },
+    "groups": {
+      "jobSeekers": "For job seekers",
+      "employers": "For employers",
+      "general": "General"
+    },
     "sections_list": {
       "vacancies": {
         "label": "My vacancies",
@@ -325,8 +330,12 @@
         "desc": "Company profiles"
       },
       "applications": {
-        "label": "Applications",
+        "label": "My applications",
         "desc": "Your applications and their statuses"
+      },
+      "resumes_db": {
+        "label": "Resume database",
+        "desc": "Search for candidates"
       },
       "publications": {
         "label": "My publications",
@@ -682,6 +691,12 @@
       "close": "Close",
       "vacanciesPerMonth": "{{count}} vacancies/month",
       "upgrade": "Upgrade plan"
+    },
+    "usage": {
+      "vacanciesMonth": "Vacancies this month",
+      "applyToday": "Applications today",
+      "resumes": "Resumes",
+      "resetsIn": "Resets in {{time}}"
     }
   },
   "salary": {
@@ -799,6 +814,7 @@
     "nav": {
       "profile": "Profile",
       "security": "Security",
+      "interface": "Interface",
       "subscription": "Subscription",
       "logout": "Log out"
     },
@@ -816,6 +832,15 @@
       "change": "Change password",
       "changed": "Password changed",
       "changeError": "Failed to change password"
+    },
+    "interface": {
+      "languageTitle": "Interface language",
+      "themeTitle": "Color theme",
+      "theme": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      }
     }
   }
 }

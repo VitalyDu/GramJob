@@ -19,7 +19,7 @@ export function SubscriptionPlanCard({ plan, currentPlan, canBuy, isBuying, onBu
 
   return (
     <div
-      className={`rounded-2xl border p-5 flex flex-col gap-4 bg-card ${isActive ? 'border-indigo-400 shadow-md' : 'border-border'}`}
+      className={`rounded-2xl border p-5 flex flex-col gap-4 bg-card ${isActive ? 'border-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.3),0_4px_12px_hsl(var(--primary)/0.15)]' : 'border-border'}`}
     >
       <div className="flex items-start justify-between">
         <div>
@@ -27,7 +27,7 @@ export function SubscriptionPlanCard({ plan, currentPlan, canBuy, isBuying, onBu
             {plan.name}
           </span>
           {isActive && (
-            <span className="ml-2 text-xs text-indigo-600 font-medium">
+            <span className="ml-2 text-xs text-primary font-medium">
               {t('subscription.planCard.active')}
             </span>
           )}

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { usePathname } from 'next/navigation'
-import { Briefcase, Heart, Home, LayoutDashboard, MessageSquare } from 'lucide-react'
+import { Briefcase, Building2, FileText, Home, LayoutDashboard, MessageSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type NavLink = {
@@ -19,10 +19,22 @@ export function BottomNav({ isMiniApp }: { isMiniApp: boolean }) {
 
   const baseLinks: NavLink[] = [
     {
+      href: '/companies',
+      icon: Building2,
+      label: t('nav.companies'),
+      isActive: (p) => p.startsWith('/companies'),
+    },
+    {
       href: '/vacancies',
       icon: Briefcase,
       label: t('nav.vacancies'),
       isActive: (p) => p.startsWith('/vacancies'),
+    },
+    {
+      href: '/dashboard/resumes',
+      icon: FileText,
+      label: t('nav.myResumes'),
+      isActive: (p) => p.startsWith('/dashboard/resumes'),
     },
     {
       href: '/dashboard/applications',
@@ -31,20 +43,14 @@ export function BottomNav({ isMiniApp }: { isMiniApp: boolean }) {
       isActive: (p) => p.startsWith('/dashboard/applications'),
     },
     {
-      href: '/dashboard/favorites',
-      icon: Heart,
-      label: t('nav.favorites'),
-      isActive: (p) => p.startsWith('/dashboard/favorites'),
-    },
-    {
       href: '/dashboard',
       icon: LayoutDashboard,
       label: t('nav.dashboard'),
       isActive: (p) =>
         p === '/dashboard' ||
         (p.startsWith('/dashboard') &&
-          !p.startsWith('/dashboard/applications') &&
-          !p.startsWith('/dashboard/favorites')),
+          !p.startsWith('/dashboard/resumes') &&
+          !p.startsWith('/dashboard/applications')),
     },
   ]
 

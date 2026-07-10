@@ -3,12 +3,14 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Globe, Heart, Settings, User } from 'lucide-react'
+import { Globe, Heart } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
 import { useStores } from '@/stores/StoreProvider'
 import { cn } from '@/lib/utils'
 import { NotificationBadge } from '@/components/notification/NotificationBadge'
+import { UserAvatar } from '@/components/shared/UserAvatar'
+import { ModeToggle } from './ModeToggle'
 import { LanguageDrawer } from './LanguageDrawer'
 import { UserMenuDrawer } from './UserMenuDrawer'
 
@@ -53,13 +55,15 @@ export const TelegramTopBar = observer(function TelegramTopBar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
 
-  const headerCls = 'absolute top-0 left-0 right-0 z-50 w-full'
+  const user = auth.user
 
   return (
     <>
-      <header className={headerCls}>
+      <header className="absolute top-0 left-0 right-0 z-50 w-full">
         <div className="flex h-12 items-center justify-end px-3">
           <div className="flex items-center gap-1.5">
+            <ModeToggle />
+
             <IconButton label={t('nav.languageSwitcher')} onClick={() => setLangOpen(true)}>
               <Globe className="h-4 w-4" />
             </IconButton>
@@ -82,21 +86,18 @@ export const TelegramTopBar = observer(function TelegramTopBar() {
                 >
                   <Heart className="h-4 w-4" />
                 </IconButton>
-
-                <IconButton
-                  href="/dashboard/profile"
-                  label={t('nav.settings')}
-                  active={pathname.startsWith('/dashboard/profile')}
-                >
-                  <Settings className="h-4 w-4" />
-                </IconButton>
               </>
             )}
 
-            {auth.isAuthenticated ? (
-              <IconButton label={t('nav.userMenu')} onClick={() => setUserMenuOpen(true)}>
-                <User className="h-4 w-4" />
-              </IconButton>
+            {auth.isAuthenticated && user ? (
+              <button
+                type="button"
+                aria-label={t('nav.userMenu')}
+                onClick={() => setUserMenuOpen(true)}
+                className="flex items-center rounded-full outline-none ring-ring focus-visible:ring-2"
+              >
+                <UserAvatar user={user} />
+              </button>
             ) : null}
           </div>
         </div>

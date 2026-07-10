@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 import { SubscriptionPlanCard } from '@/components/subscription/SubscriptionPlanCard'
+import { PlanUsageCard } from '@/components/subscription/PlanUsageCard'
 import { PackageCard } from '@/components/subscription/PackageCard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -16,7 +17,7 @@ import { useTelegramPayment } from '@/hooks/useTelegramPayment'
 
 export const SubscriptionClient = observer(function SubscriptionClient() {
   const { t } = useTranslation()
-  const { auth, payment } = useStores()
+  const { auth, payment, resume } = useStores()
   const { openInvoice } = useTelegramPayment()
   const router = useRouter()
 
@@ -31,7 +32,8 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
     void payment.fetchPlans()
     void payment.fetchVacancyPackages()
     void payment.fetchApplyPackages()
-  }, [payment])
+    if (user) void resume.fetchMyResumes()
+  }, [payment, resume, user])
 
   const handleBuyPlan = async (planCode: string) => {
     if (!user) {
@@ -103,34 +105,31 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
 
   return (
     <div className="space-y-10">
-      <PageHeader title={t('subscription.pageTitle')} />
+      <PageHeader
+        title={t('subscription.pageTitle')}
+        actions={
+          user ? (
+            <SubscriptionBadge
+              plan={user.subscriptionPlan}
+              expiresAt={user.subscriptionExpiresAt}
+              showExpiry
+            />
+          ) : undefined
+        }
+      />
 
-      {/* Текущий план */}
+      {/* Использование плана */}
       {user ? (
         <section>
-          <Card>
-            <CardContent className="flex flex-col gap-3 pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="mb-1 text-sm text-muted-foreground">
-                  {t('subscription.currentPlan')}
-                </p>
-                <SubscriptionBadge
-                  plan={user.subscriptionPlan}
-                  expiresAt={user.subscriptionExpiresAt}
-                  showExpiry
-                />
-              </div>
-
-              <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                <span>
-                  {t('subscription.vacancyCreditsLeft')} <strong>{user.vacancyCredits}</strong>
-                </span>
-                <span>
-                  {t('subscription.applyCreditsLeft')} <strong>{user.applyCredits}</strong>
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+          <PlanUsageCard
+            user={user}
+            plan={
+              payment.plans.find((p) => p.code === user.subscriptionPlan) ??
+              payment.plans.find((p) => p.code === 'free') ??
+              null
+            }
+            resumeTotal={resume.total}
+          />
         </section>
       ) : (
         <section>
@@ -184,7 +183,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
         )}
 
         {orderedPlans.length > 0 && (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {orderedPlans.map((plan) => {
               const currentPlan = user?.subscriptionPlan ?? 'free'
               return (
