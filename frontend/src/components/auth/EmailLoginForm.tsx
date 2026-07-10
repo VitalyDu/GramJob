@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -62,7 +63,15 @@ export const EmailLoginForm = observer(function EmailLoginForm() {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="password">{t('auth.password')}</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">{t('auth.password')}</Label>
+          <Link
+            href="/forgot-password"
+            className="text-sm text-muted-foreground underline hover:no-underline"
+          >
+            {t('auth.forgotPassword')}
+          </Link>
+        </div>
         <Input id="password" type="password" {...register('password')} />
         {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
       </div>
