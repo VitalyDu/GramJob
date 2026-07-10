@@ -90,6 +90,12 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease,
+      fill 0.3s ease,
+      stroke 0.3s ease;
   }
 
   /* html is the actual viewport scroll container — reserve scrollbar gutter here
@@ -99,6 +105,14 @@
     scrollbar-gutter: stable;
   }
 
+  /* react-remove-scroll-bar injects `body[data-scroll-locked] { margin-right: Xpx !important }`
+     to compensate for the scrollbar it hides. But scrollbar-gutter: stable on html already
+     reserves that space permanently, so this extra margin only creates a jitter.
+     Higher specificity (html body > body) overrides their injected !important rule. */
+  html body[data-scroll-locked] {
+    margin-right: 0 !important;
+  }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -106,6 +120,35 @@
   button:not(:disabled),
   [role='button']:not([aria-disabled='true']) {
     cursor: pointer;
+  }
+
+  /* Custom scrollbars — webkit */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
   }
 }
 
