@@ -12,6 +12,7 @@ const API_ERROR_I18N_KEYS: Record<string, string> = {
   'Invalid identifier or password': 'apiErrors.Invalid identifier or password',
   'Email already taken': 'apiErrors.Email already taken',
   'Too Many Requests': 'apiErrors.Too Many Requests',
+  'Incorrect code provided': 'apiErrors.Incorrect code provided',
 }
 
 export class ApiClientError extends Error {

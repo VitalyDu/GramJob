@@ -36,6 +36,18 @@
     "registerTitle": "Регистрация",
     "registerDescription": "Создайте аккаунт, чтобы начать",
     "telegramUnavailableLocalhost": "Telegram-вход недоступен на localhost",
+    "forgotPassword": "Забыли пароль?",
+    "forgotPasswordTitle": "Восстановление пароля",
+    "forgotPasswordDescription": "Укажите email — мы отправим ссылку для сброса пароля",
+    "sendResetLink": "Отправить ссылку",
+    "resetEmailSent": "Если аккаунт с таким email существует, мы отправили письмо со ссылкой для сброса пароля. Проверьте почту.",
+    "backToLogin": "Вернуться ко входу",
+    "resetPasswordTitle": "Новый пароль",
+    "resetPasswordDescription": "Придумайте новый пароль для входа",
+    "newPassword": "Новый пароль",
+    "setNewPassword": "Сохранить пароль",
+    "resetMissingCode": "Ссылка недействительна: отсутствует код сброса.",
+    "requestNewLink": "Запросить новую ссылку",
     "validation": {
       "invalidEmail": "Введите корректный email",
       "minPassword": "Минимум 6 символов",
@@ -709,7 +721,8 @@
     "Internal Server Error": "Ошибка сервера",
     "Invalid identifier or password": "Неверный email или пароль",
     "Email already taken": "Этот email уже зарегистрирован",
-    "Too Many Requests": "Слишком много запросов. Попробуйте позже"
+    "Too Many Requests": "Слишком много запросов. Попробуйте позже",
+    "Incorrect code provided": "Ссылка недействительна или устарела"
   },
   "countrySelect": {
     "placeholder": "Выберите страну",

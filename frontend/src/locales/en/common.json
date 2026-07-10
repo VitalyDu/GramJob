@@ -36,6 +36,18 @@
     "registerTitle": "Sign Up",
     "registerDescription": "Create an account to get started",
     "telegramUnavailableLocalhost": "Telegram login is not available on localhost",
+    "forgotPassword": "Forgot password?",
+    "forgotPasswordTitle": "Password recovery",
+    "forgotPasswordDescription": "Enter your email and we will send you a reset link",
+    "sendResetLink": "Send reset link",
+    "resetEmailSent": "If an account with this email exists, we have sent a password reset link. Check your inbox.",
+    "backToLogin": "Back to login",
+    "resetPasswordTitle": "New password",
+    "resetPasswordDescription": "Choose a new password for your account",
+    "newPassword": "New password",
+    "setNewPassword": "Save password",
+    "resetMissingCode": "The link is invalid: reset code is missing.",
+    "requestNewLink": "Request a new link",
     "validation": {
       "invalidEmail": "Enter a valid email",
       "minPassword": "At least 6 characters",
@@ -679,7 +691,8 @@
     "Internal Server Error": "Server error",
     "Invalid identifier or password": "Invalid email or password",
     "Email already taken": "This email is already registered",
-    "Too Many Requests": "Too many requests. Please try again later"
+    "Too Many Requests": "Too many requests. Please try again later",
+    "Incorrect code provided": "The link is invalid or has expired"
   },
   "countrySelect": {
     "placeholder": "Select country",
