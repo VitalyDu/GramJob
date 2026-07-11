@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Globe, Heart } from 'lucide-react'
+import { Globe, Heart, LayoutDashboard } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
 import { useStores } from '@/stores/StoreProvider'
@@ -60,7 +60,14 @@ export const TelegramTopBar = observer(function TelegramTopBar() {
   return (
     <>
       <header className="absolute top-0 left-0 right-0 z-50 w-full">
-        <div className="flex h-12 items-center justify-end px-3">
+        <div className="flex h-12 items-center justify-between px-3">
+          <IconButton
+            href="/dashboard"
+            label={t('nav.dashboard')}
+            active={pathname === '/dashboard'}
+          >
+            <LayoutDashboard className="h-4 w-4" />
+          </IconButton>
           <div className="flex items-center gap-1.5">
             <ModeToggle />
 
