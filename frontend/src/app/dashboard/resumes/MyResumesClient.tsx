@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
-import { FileText, Plus } from 'lucide-react'
+import { Archive, BarChart2, Eye, FileText, MoreVertical, Pencil, Plus, Send } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
@@ -16,6 +16,7 @@ import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { PaginationBar } from '@/components/shared/PaginationBar'
+import { EntityActionsDrawer } from '@/components/shared/EntityActionsDrawer'
 import {
   canPublishResume,
   canEditResume,
@@ -28,6 +29,10 @@ export const MyResumesClient = observer(function MyResumesClient() {
   const { t } = useTranslation()
   const { resume: store, auth } = useStores()
   useRequireAuth()
+
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [activeId, setActiveId] = useState<string | null>(null)
+  const activeResume = activeId ? store.myResumes.find((r) => r.documentId === activeId) : null
 
   useEffect(() => {
     void store.fetchMyResumes()
@@ -97,55 +102,30 @@ export const MyResumesClient = observer(function MyResumesClient() {
       <div className="space-y-3">
         {store.myResumes.map((r) => (
           <div key={r.documentId} className="rounded-xl border border-border bg-card p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+            <div className="flex items-start gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="truncate font-semibold text-card-foreground">{r.title}</p>
                   <ResumeStatusBadge status={r.moderationStatus} />
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {r.firstName} {r.lastName} · {t(`enums.resumeWorkFormat.${r.workFormat}`)} ·{' '}
-                  {t(`enums.employmentType.${r.employmentType}`)}
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2 sm:shrink-0 sm:justify-end">
-                <Link
-                  href={`/dashboard/resumes/${r.documentId}/analytics`}
-                  className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
-                >
-                  {t('dashboard.resumes.analytics')}
-                </Link>
-                {canEditResume(r.moderationStatus) && (
-                  <Link
-                    href={`/dashboard/resumes/${r.documentId}/edit`}
-                    className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
-                  >
-                    {t('dashboard.resumes.edit')}
-                  </Link>
-                )}
-                {canPublishResume(r.moderationStatus) && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => void handlePublish(r.documentId)}
-                    disabled={store.isLoading}
-                  >
-                    {t('dashboard.resumes.toModeration')}
-                  </Button>
-                )}
-                {canArchiveResume(r.moderationStatus) && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-destructive hover:bg-destructive/10"
-                    onClick={() => handleArchive(r.documentId)}
-                    disabled={store.isLoading}
-                  >
-                    {t('dashboard.resumes.archive')}
-                  </Button>
+                {(r.firstName || r.lastName) && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {[r.firstName, r.lastName].filter(Boolean).join(' ')}
+                  </p>
                 )}
               </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 shrink-0"
+                aria-label={t('actions.openActions')}
+                onClick={() => {
+                  setActiveId(r.documentId)
+                  setDrawerOpen(true)
+                }}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
             </div>
 
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -169,6 +149,67 @@ export const MyResumesClient = observer(function MyResumesClient() {
           </div>
         ))}
       </div>
+
+      {activeResume && (
+        <EntityActionsDrawer
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+          title={activeResume.title}
+          statusBadge={<ResumeStatusBadge status={activeResume.moderationStatus} />}
+          actions={[
+            {
+              id: 'view',
+              icon: Eye,
+              label: t('actions.view'),
+              description: t('actions.viewDesc'),
+              href: `/resumes/${activeResume.documentId}`,
+            },
+            {
+              id: 'analytics',
+              icon: BarChart2,
+              label: t('actions.analytics'),
+              description: t('actions.analyticsDesc'),
+              href: `/dashboard/resumes/${activeResume.documentId}/analytics`,
+            },
+            ...(canEditResume(activeResume.moderationStatus)
+              ? [
+                  {
+                    id: 'edit',
+                    icon: Pencil,
+                    label: t('actions.edit'),
+                    description: t('actions.editDesc'),
+                    href: `/dashboard/resumes/${activeResume.documentId}/edit`,
+                  },
+                ]
+              : []),
+            ...(canPublishResume(activeResume.moderationStatus)
+              ? [
+                  {
+                    id: 'publish',
+                    icon: Send,
+                    label: t('actions.toModeration'),
+                    description: t('actions.toModerationDesc'),
+                    onClick: () => void handlePublish(activeResume.documentId),
+                    disabled: store.isLoading,
+                  },
+                ]
+              : []),
+            ...(canArchiveResume(activeResume.moderationStatus)
+              ? [
+                  {
+                    id: 'archive',
+                    icon: Archive,
+                    label: t('actions.archive'),
+                    description: t('actions.archiveDesc'),
+                    onClick: () => handleArchive(activeResume.documentId),
+                    variant: 'destructive' as const,
+                    disabled: store.isLoading,
+                  },
+                ]
+              : []),
+          ]}
+        />
+      )}
 
       <PaginationBar
         page={store.page}

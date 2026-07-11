@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Building2, Plus } from 'lucide-react'
+import { Building2, Eye, MoreVertical, Pencil, Plus, Send, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
@@ -19,12 +19,17 @@ import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { PaginationBar } from '@/components/shared/PaginationBar'
+import { EntityActionsDrawer } from '@/components/shared/EntityActionsDrawer'
 import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 
 export const MyCompaniesClient = observer(function MyCompaniesClient() {
   const { t } = useTranslation()
   const { company: store } = useStores()
   const isAuthenticated = useRequireAuth()
+
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [activeId, setActiveId] = useState<string | null>(null)
+  const activeCompany = activeId ? store.myCompanies.find((c) => c.documentId === activeId) : null
 
   useEffect(() => {
     void store.fetchMyCompanies(1)
@@ -94,66 +99,46 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
 
           return (
             <div key={company.documentId} className="rounded-xl border border-border bg-card p-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-                <div className="flex min-w-0 flex-1 items-center gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
-                    {logoUrl ? (
-                      <Image
-                        src={logoUrl}
-                        alt={company.name}
-                        width={48}
-                        height={48}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-lg font-bold text-muted-foreground">
-                        {company.name.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="truncate font-semibold text-card-foreground">{company.name}</p>
-                      <StatusBadge status={company.moderationStatus} />
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {company.country} · {COMPANY_SIZE_LABELS[company.companySize]}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 sm:shrink-0 sm:justify-end">
-                  <Link
-                    href={`/dashboard/companies/${company.documentId}/edit`}
-                    className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
-                  >
-                    {t('dashboard.companies.edit')}
-                  </Link>
-
-                  {canSubmitCompany(company.moderationStatus) && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => void handleSubmit(company.documentId)}
-                      disabled={store.isLoading}
-                    >
-                      {t('dashboard.companies.toModeration')}
-                    </Button>
-                  )}
-
-                  {canDeleteCompany(company.moderationStatus) && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-destructive hover:bg-destructive/10"
-                      onClick={() => handleDelete(company.documentId)}
-                      disabled={store.isLoading}
-                    >
-                      {t('dashboard.companies.delete')}
-                    </Button>
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
+                  {logoUrl ? (
+                    <Image
+                      src={logoUrl}
+                      alt={company.name}
+                      width={48}
+                      height={48}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-lg font-bold text-muted-foreground">
+                      {company.name.charAt(0).toUpperCase()}
+                    </span>
                   )}
                 </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="truncate font-semibold text-card-foreground">{company.name}</p>
+                    <StatusBadge status={company.moderationStatus} />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {company.country}
+                    {company.companySize ? ` · ${COMPANY_SIZE_LABELS[company.companySize]}` : ''}
+                  </p>
+                </div>
+
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 shrink-0"
+                  aria-label={t('actions.openActions')}
+                  onClick={() => {
+                    setActiveId(company.documentId)
+                    setDrawerOpen(true)
+                  }}
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
               </div>
               {company.moderationStatus === 'rejected' && (
                 <RejectionNotice
@@ -170,6 +155,60 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
           )
         })}
       </div>
+
+      {activeCompany && (
+        <EntityActionsDrawer
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+          title={activeCompany.name}
+          statusBadge={<StatusBadge status={activeCompany.moderationStatus} />}
+          actions={[
+            ...(activeCompany.moderationStatus === 'published'
+              ? [
+                  {
+                    id: 'view',
+                    icon: Eye,
+                    label: t('actions.view'),
+                    description: t('actions.viewDesc'),
+                    href: `/companies/${activeCompany.documentId}`,
+                  },
+                ]
+              : []),
+            {
+              id: 'edit',
+              icon: Pencil,
+              label: t('actions.edit'),
+              description: t('actions.editDesc'),
+              href: `/dashboard/companies/${activeCompany.documentId}/edit`,
+            },
+            ...(canSubmitCompany(activeCompany.moderationStatus)
+              ? [
+                  {
+                    id: 'submit',
+                    icon: Send,
+                    label: t('actions.toModeration'),
+                    description: t('actions.toModerationDesc'),
+                    onClick: () => void handleSubmit(activeCompany.documentId),
+                    disabled: store.isLoading,
+                  },
+                ]
+              : []),
+            ...(canDeleteCompany(activeCompany.moderationStatus)
+              ? [
+                  {
+                    id: 'delete',
+                    icon: Trash2,
+                    label: t('actions.delete'),
+                    description: t('actions.deleteDesc'),
+                    onClick: () => handleDelete(activeCompany.documentId),
+                    variant: 'destructive' as const,
+                    disabled: store.isLoading,
+                  },
+                ]
+              : []),
+          ]}
+        />
+      )}
 
       <PaginationBar
         page={store.page}

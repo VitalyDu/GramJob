@@ -1,9 +1,20 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
-import { Briefcase, Plus } from 'lucide-react'
+import {
+  Archive,
+  BarChart2,
+  Briefcase,
+  Eye,
+  MoreVertical,
+  Pencil,
+  Plus,
+  Send,
+  Users,
+  Zap,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
@@ -19,6 +30,7 @@ import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { PaginationBar } from '@/components/shared/PaginationBar'
+import { EntityActionsDrawer } from '@/components/shared/EntityActionsDrawer'
 import {
   canPublishVacancy,
   canBoostVacancy,
@@ -32,6 +44,10 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
   const { t } = useTranslation()
   const { vacancy: store, auth } = useStores()
   useRequireAuth()
+
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [activeId, setActiveId] = useState<string | null>(null)
+  const activeVacancy = activeId ? store.myVacancies.find((v) => v.documentId === activeId) : null
 
   useEffect(() => {
     void store.fetchMyVacancies()
@@ -114,68 +130,26 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
       <div className="space-y-3">
         {store.myVacancies.map((v) => (
           <div key={v.documentId} className="rounded-xl border border-border bg-card p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+            <div className="flex items-start gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="truncate font-semibold text-card-foreground">{v.title}</p>
                   <VacancyStatusBadge status={v.moderationStatus} />
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {v.company?.name} · {t(`enums.seniority.${v.seniority}`)} ·{' '}
-                  {t(`enums.workFormat.${v.workFormat}`)}
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">{v.company?.name}</p>
               </div>
-
-              <div className="flex flex-wrap gap-2 sm:shrink-0 sm:justify-end">
-                {canEditVacancy(v.moderationStatus) && (
-                  <Link
-                    href={`/dashboard/vacancies/${v.documentId}/edit`}
-                    className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
-                  >
-                    {t('dashboard.vacancies.edit')}
-                  </Link>
-                )}
-                {canPublishVacancy(v.moderationStatus) && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => void handlePublish(v.documentId)}
-                    disabled={store.isLoading}
-                  >
-                    {t('dashboard.vacancies.toModeration')}
-                  </Button>
-                )}
-                {canBoostVacancy(v.moderationStatus) && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleBoost(v.documentId)}
-                    disabled={store.isLoading}
-                  >
-                    {t('dashboard.vacancies.boost')}
-                    {store.boostsRemaining !== null && (
-                      <span className="ml-1 text-xs opacity-70">({store.boostsRemaining})</span>
-                    )}
-                  </Button>
-                )}
-                {canArchiveVacancy(v.moderationStatus) && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-destructive hover:bg-destructive/10"
-                    onClick={() => handleArchive(v.documentId)}
-                    disabled={store.isLoading}
-                  >
-                    {t('dashboard.vacancies.archive')}
-                  </Button>
-                )}
-                <Link
-                  href={`/dashboard/vacancies/${v.documentId}/analytics`}
-                  className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
-                >
-                  {t('dashboard.vacancies.analytics')}
-                </Link>
-              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 shrink-0"
+                aria-label={t('actions.openActions')}
+                onClick={() => {
+                  setActiveId(v.documentId)
+                  setDrawerOpen(true)
+                }}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
             </div>
 
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -205,6 +179,86 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
           </div>
         ))}
       </div>
+
+      {activeVacancy && (
+        <EntityActionsDrawer
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+          title={activeVacancy.title}
+          statusBadge={<VacancyStatusBadge status={activeVacancy.moderationStatus} />}
+          actions={[
+            {
+              id: 'view',
+              icon: Eye,
+              label: t('actions.view'),
+              description: t('actions.viewDesc'),
+              href: `/vacancies/${activeVacancy.documentId}`,
+            },
+            {
+              id: 'analytics',
+              icon: BarChart2,
+              label: t('actions.analytics'),
+              description: t('actions.analyticsDesc'),
+              href: `/dashboard/vacancies/${activeVacancy.documentId}/analytics`,
+            },
+            {
+              id: 'applications',
+              icon: Users,
+              label: t('actions.applications'),
+              description: t('actions.applicationsDesc'),
+              href: `/dashboard/vacancies/${activeVacancy.documentId}/applications`,
+            },
+            ...(canEditVacancy(activeVacancy.moderationStatus)
+              ? [
+                  {
+                    id: 'edit',
+                    icon: Pencil,
+                    label: t('actions.edit'),
+                    description: t('actions.editDesc'),
+                    href: `/dashboard/vacancies/${activeVacancy.documentId}/edit`,
+                  },
+                ]
+              : []),
+            ...(canPublishVacancy(activeVacancy.moderationStatus)
+              ? [
+                  {
+                    id: 'publish',
+                    icon: Send,
+                    label: t('actions.toModeration'),
+                    description: t('actions.toModerationDesc'),
+                    onClick: () => void handlePublish(activeVacancy.documentId),
+                    disabled: store.isLoading,
+                  },
+                ]
+              : []),
+            ...(canBoostVacancy(activeVacancy.moderationStatus)
+              ? [
+                  {
+                    id: 'boost',
+                    icon: Zap,
+                    label: t('actions.boost'),
+                    description: t('actions.boostDesc'),
+                    onClick: () => handleBoost(activeVacancy.documentId),
+                    disabled: store.isLoading,
+                  },
+                ]
+              : []),
+            ...(canArchiveVacancy(activeVacancy.moderationStatus)
+              ? [
+                  {
+                    id: 'archive',
+                    icon: Archive,
+                    label: t('actions.archive'),
+                    description: t('actions.archiveDesc'),
+                    onClick: () => handleArchive(activeVacancy.documentId),
+                    variant: 'destructive' as const,
+                    disabled: store.isLoading,
+                  },
+                ]
+              : []),
+          ]}
+        />
+      )}
 
       <PaginationBar
         page={store.page}

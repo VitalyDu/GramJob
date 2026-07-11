@@ -801,10 +801,7 @@ export interface ApiResumeResume extends Struct.CollectionTypeSchema {
     currency: Schema.Attribute.Enumeration<['USD', 'EUR', 'RUB', 'GBP']>
     desiredSalary: Schema.Attribute.Integer
     education: Schema.Attribute.Component<'resume.education', true>
-    employmentType: Schema.Attribute.Enumeration<
-      ['full-time', 'part-time', 'contract', 'internship', 'freelance']
-    > &
-      Schema.Attribute.Required
+    employmentType: Schema.Attribute.JSON & Schema.Attribute.Required
     experienceYears: Schema.Attribute.Integer
     firstName: Schema.Attribute.String & Schema.Attribute.Required
     invitations: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
@@ -840,8 +837,7 @@ export interface ApiResumeResume extends Struct.CollectionTypeSchema {
       Schema.Attribute.Required
     views: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
     workExperience: Schema.Attribute.Component<'resume.work-experience', true>
-    workFormat: Schema.Attribute.Enumeration<['office', 'remote', 'hybrid', 'any']> &
-      Schema.Attribute.Required
+    workFormat: Schema.Attribute.JSON & Schema.Attribute.Required
   }
 }
 
@@ -1015,10 +1011,7 @@ export interface ApiVacancyVacancy extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
     description: Schema.Attribute.RichText & Schema.Attribute.Required
-    employmentType: Schema.Attribute.Enumeration<
-      ['full-time', 'part-time', 'contract', 'internship', 'freelance']
-    > &
-      Schema.Attribute.Required
+    employmentType: Schema.Attribute.JSON & Schema.Attribute.Required
     experienceYears: Schema.Attribute.Integer
     expiresAt: Schema.Attribute.DateTime
     highlighted: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>
@@ -1054,10 +1047,7 @@ export interface ApiVacancyVacancy extends Struct.CollectionTypeSchema {
     salaryCurrency: Schema.Attribute.Enumeration<['USD', 'EUR', 'RUB', 'GBP']>
     salaryFrom: Schema.Attribute.Integer
     salaryTo: Schema.Attribute.Integer
-    seniority: Schema.Attribute.Enumeration<
-      ['intern', 'junior', 'middle', 'senior', 'lead', 'principal']
-    > &
-      Schema.Attribute.Required
+    seniority: Schema.Attribute.JSON & Schema.Attribute.Required
     skills: Schema.Attribute.JSON
     sourceName: Schema.Attribute.String
     sourceType: Schema.Attribute.Enumeration<['internal', 'external']> &
@@ -1074,8 +1064,7 @@ export interface ApiVacancyVacancy extends Struct.CollectionTypeSchema {
     urgent: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>
     vacancySource: Schema.Attribute.Relation<'oneToOne', 'api::vacancy-source.vacancy-source'>
     views: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
-    workFormat: Schema.Attribute.Enumeration<['office', 'remote', 'hybrid']> &
-      Schema.Attribute.Required
+    workFormat: Schema.Attribute.JSON & Schema.Attribute.Required
   }
 }
 

@@ -87,26 +87,32 @@ describe('MyCompaniesClient', () => {
     expect(screen.getByText('Draft Corp')).toBeDefined()
   })
 
-  it('отображает кнопку "Подать на модерацию" для draft компании', () => {
+  it('отображает кнопку "Подать на модерацию" для draft компании', async () => {
     const store = makeStore({ myCompanies: [draftCompany] })
     vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
       typeof useStores
     >)
 
     render(<MyCompaniesClient />)
+    fireEvent.click(screen.getByRole('button', { name: /действия/i }))
 
-    expect(screen.getByRole('button', { name: /на модерацию/i })).toBeDefined()
+    await waitFor(() => {
+      expect(screen.getByText(/на модерацию/i)).toBeDefined()
+    })
   })
 
-  it('НЕ отображает кнопку "Подать на модерацию" для published компании', () => {
+  it('НЕ отображает кнопку "Подать на модерацию" для published компании', async () => {
     const store = makeStore({ myCompanies: [publishedCompany] })
     vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
       typeof useStores
     >)
 
     render(<MyCompaniesClient />)
+    fireEvent.click(screen.getByRole('button', { name: /действия/i }))
 
-    expect(screen.queryByRole('button', { name: /на модерацию/i })).toBeNull()
+    await waitFor(() => {
+      expect(screen.queryByText(/на модерацию/i)).toBeNull()
+    })
   })
 
   it('вызывает submitCompany при клике', async () => {
@@ -116,22 +122,28 @@ describe('MyCompaniesClient', () => {
     >)
 
     render(<MyCompaniesClient />)
-    fireEvent.click(screen.getByRole('button', { name: /на модерацию/i }))
+    fireEvent.click(screen.getByRole('button', { name: /действия/i }))
+
+    await waitFor(() => screen.getByText(/на модерацию/i))
+    fireEvent.click(screen.getByText(/на модерацию/i))
 
     await waitFor(() => {
       expect(store.submitCompany).toHaveBeenCalledWith('draft1')
     })
   })
 
-  it('отображает кнопку "Удалить" для draft компании', () => {
+  it('отображает кнопку "Удалить" для draft компании', async () => {
     const store = makeStore({ myCompanies: [draftCompany] })
     vi.mocked(useStores).mockReturnValue({ company: store } as unknown as ReturnType<
       typeof useStores
     >)
 
     render(<MyCompaniesClient />)
+    fireEvent.click(screen.getByRole('button', { name: /действия/i }))
 
-    expect(screen.getByRole('button', { name: /удалить/i })).toBeDefined()
+    await waitFor(() => {
+      expect(screen.getByText(/^удалить$/i)).toBeDefined()
+    })
   })
 
   it('вызывает deleteCompany при подтверждении удаления', async () => {
@@ -142,7 +154,10 @@ describe('MyCompaniesClient', () => {
     >)
 
     render(<MyCompaniesClient />)
-    fireEvent.click(screen.getByRole('button', { name: /удалить/i }))
+    fireEvent.click(screen.getByRole('button', { name: /действия/i }))
+
+    await waitFor(() => screen.getByText(/^удалить$/i))
+    fireEvent.click(screen.getByText(/^удалить$/i))
 
     await waitFor(() => {
       expect(store.deleteCompany).toHaveBeenCalledWith('draft1')
@@ -157,7 +172,10 @@ describe('MyCompaniesClient', () => {
     >)
 
     render(<MyCompaniesClient />)
-    fireEvent.click(screen.getByRole('button', { name: /удалить/i }))
+    fireEvent.click(screen.getByRole('button', { name: /действия/i }))
+
+    await waitFor(() => screen.getByText(/^удалить$/i))
+    fireEvent.click(screen.getByText(/^удалить$/i))
 
     expect(store.deleteCompany).not.toHaveBeenCalled()
   })
