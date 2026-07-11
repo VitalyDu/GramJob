@@ -60,7 +60,7 @@ export function HomeContent({ latest }: Props) {
       {/* Latest vacancies */}
       {latest.length > 0 && (
         <section>
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-start justify-between">
             <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
               {t('home.latestVacancies')}
             </h2>

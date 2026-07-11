@@ -50,7 +50,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {isMiniApp && <TelegramTopBar />}
       <main className={`flex-1 ${isMiniApp ? 'pb-20' : 'pb-20 md:pb-0'}`}>
         <div
-          className={`mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 ${isMiniApp && !isHome ? 'py-12' : 'py-6'}`}
+          className={`mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 ${isMiniApp && !isHome ? 'py-16' : 'py-6'}`}
         >
           {children}
         </div>
