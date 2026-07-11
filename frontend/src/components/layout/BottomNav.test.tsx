@@ -32,9 +32,18 @@ describe('BottomNav', () => {
     expect(screen.getByRole('navigation')).not.toHaveClass('md:hidden')
   })
 
-  it('в Mini App показывает пункт GramJob', () => {
+  it('в Mini App показывает пять пунктов: GramJob, Компании, Вакансии, Мои резюме, Отклики', () => {
     render(<BottomNav isMiniApp={true} />)
     expect(screen.getByText('GramJob')).toBeInTheDocument()
+    expect(screen.getByText('Компании')).toBeInTheDocument()
+    expect(screen.getByText('Вакансии')).toBeInTheDocument()
+    expect(screen.getByText('Мои резюме')).toBeInTheDocument()
+    expect(screen.getByText('Отклики')).toBeInTheDocument()
+  })
+
+  it('в Mini App не показывает пункт Кабинет', () => {
+    render(<BottomNav isMiniApp={true} />)
+    expect(screen.queryByText('Кабинет')).not.toBeInTheDocument()
   })
 
   it('на вебе не показывает пункт GramJob', () => {

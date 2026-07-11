@@ -61,7 +61,35 @@ export function BottomNav({ isMiniApp }: { isMiniApp: boolean }) {
     isActive: (p) => p === '/',
   }
 
-  const links = isMiniApp ? [gramJobLink, ...baseLinks] : baseLinks
+  const miniAppLinks: NavLink[] = [
+    gramJobLink,
+    {
+      href: '/companies',
+      icon: Building2,
+      label: t('nav.companies'),
+      isActive: (p) => p.startsWith('/companies'),
+    },
+    {
+      href: '/vacancies',
+      icon: Briefcase,
+      label: t('nav.vacancies'),
+      isActive: (p) => p.startsWith('/vacancies'),
+    },
+    {
+      href: '/dashboard/resumes',
+      icon: FileText,
+      label: t('nav.myResumes'),
+      isActive: (p) => p.startsWith('/dashboard/resumes'),
+    },
+    {
+      href: '/dashboard/applications',
+      icon: MessageSquare,
+      label: t('nav.applications'),
+      isActive: (p) => p.startsWith('/dashboard/applications'),
+    },
+  ]
+
+  const links = isMiniApp ? miniAppLinks : baseLinks
 
   return (
     <nav
