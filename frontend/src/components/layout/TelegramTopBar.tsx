@@ -11,6 +11,7 @@ import { useStores } from '@/stores/StoreProvider'
 import { cn } from '@/lib/utils'
 import { NotificationBadge } from '@/components/notification/NotificationBadge'
 import { UserAvatar } from '@/components/shared/UserAvatar'
+import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 import { LanguageDrawer } from './LanguageDrawer'
 import { UserMenuDrawer } from './UserMenuDrawer'
 
@@ -58,22 +59,32 @@ export const TelegramTopBar = observer(function TelegramTopBar() {
 
   const user = auth.user
   const isDark = resolvedTheme === 'dark'
+  const isDashboard = pathname === '/dashboard'
 
   return (
     <>
       <header className="absolute top-0 left-0 right-0 z-50 w-full">
-        <div className="flex h-12 items-center justify-between px-3">
-          {/* Left */}
-          <IconButton
-            href="/dashboard"
-            label={t('nav.dashboard')}
-            active={pathname === '/dashboard'}
-          >
-            <LayoutDashboard className="h-4 w-4" />
-          </IconButton>
+        <div className="flex h-12 items-center justify-between gap-2 px-3">
+          {/* Left: avatar + name + plan */}
+          {auth.isAuthenticated && user ? (
+            <button
+              type="button"
+              aria-label={t('nav.userMenu')}
+              onClick={() => setUserMenuOpen(true)}
+              className="flex min-w-0 items-center gap-2 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <UserAvatar user={user} className="h-8 w-8 shrink-0" />
+              <span className="truncate text-sm font-medium leading-tight">
+                {user.firstName ?? user.email}
+              </span>
+              <SubscriptionBadge plan={user.subscriptionPlan} />
+            </button>
+          ) : (
+            <div />
+          )}
 
-          {/* Right */}
-          <div className="flex items-center gap-1.5">
+          {/* Right: actions + dashboard */}
+          <div className="flex shrink-0 items-center gap-1.5">
             <IconButton
               label={t('nav.themeSwitcher')}
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
@@ -106,16 +117,17 @@ export const TelegramTopBar = observer(function TelegramTopBar() {
               </>
             )}
 
-            {auth.isAuthenticated && user ? (
-              <button
-                type="button"
-                aria-label={t('nav.userMenu')}
-                onClick={() => setUserMenuOpen(true)}
-                className={cn(iconBtnBase, iconBtnInactive, 'overflow-hidden')}
-              >
-                <UserAvatar user={user} className="h-8 w-8" />
-              </button>
-            ) : null}
+            <Link
+              href="/dashboard"
+              aria-label={t('nav.dashboard')}
+              className={cn(
+                'flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                isDashboard ? iconBtnActive : iconBtnInactive
+              )}
+            >
+              <LayoutDashboard className="h-4 w-4 shrink-0" />
+              <span>{t('nav.dashboard')}</span>
+            </Link>
           </div>
         </div>
       </header>
