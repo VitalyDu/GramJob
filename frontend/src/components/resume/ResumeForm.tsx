@@ -446,7 +446,6 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                     country={selectedCountry}
                     value={field.value ?? ''}
                     onChange={field.onChange}
-                    placeholder={t('forms.resume.cityPlaceholder')}
                   />
                 )}
               />

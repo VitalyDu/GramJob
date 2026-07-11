@@ -553,7 +553,6 @@
       "urgentLabel": "🔥 Urgent vacancy",
       "submitCreate": "Submit for review",
       "submitEdit": "Save and submit for review",
-      "cityPlaceholder": "Moscow",
       "languagesPlaceholder": "Russian, English",
       "saving": "Saving..."
     },
@@ -575,7 +574,6 @@
       "cityLabel": "City",
       "companySizeLabel": "Company size",
       "employees": "employees",
-      "cityPlaceholder": "Moscow",
       "save": "Save",
       "saving": "Saving..."
     },
@@ -601,7 +599,6 @@
       "lastNameLabel": "Last name",
       "countryLabel": "Country",
       "cityLabel": "City",
-      "cityPlaceholder": "Moscow",
       "titleLabel": "Desired position",
       "workFormatLabel": "Work format",
       "employmentTypeLabel": "Employment type",

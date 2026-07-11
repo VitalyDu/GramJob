@@ -246,7 +246,6 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
                     country={selectedCountry}
                     value={field.value ?? ''}
                     onChange={field.onChange}
-                    placeholder={t('forms.company.cityPlaceholder')}
                   />
                 )}
               />

@@ -553,7 +553,6 @@
       "urgentLabel": "🔥 Срочная вакансия",
       "submitCreate": "Отправить на модерацию",
       "submitEdit": "Сохранить и отправить на модерацию",
-      "cityPlaceholder": "Москва",
       "languagesPlaceholder": "Русский, English",
       "saving": "Сохранение..."
     },
@@ -575,7 +574,6 @@
       "cityLabel": "Город",
       "companySizeLabel": "Размер компании",
       "employees": "сотрудников",
-      "cityPlaceholder": "Москва",
       "save": "Сохранить",
       "saving": "Сохранение..."
     },
@@ -601,7 +599,6 @@
       "lastNameLabel": "Фамилия",
       "countryLabel": "Страна",
       "cityLabel": "Город",
-      "cityPlaceholder": "Москва",
       "titleLabel": "Желаемая должность",
       "workFormatLabel": "Формат работы",
       "employmentTypeLabel": "Тип занятости",

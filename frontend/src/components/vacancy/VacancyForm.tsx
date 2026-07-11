@@ -454,7 +454,6 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
                     country={selectedCountry}
                     value={field.value ?? ''}
                     onChange={field.onChange}
-                    placeholder={t('forms.vacancy.cityPlaceholder')}
                   />
                 )}
               />
