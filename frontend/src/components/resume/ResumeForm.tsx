@@ -4,8 +4,19 @@ import { useMemo } from 'react'
 import { useFieldArray, useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Trash2 } from 'lucide-react'
+import {
+  AlignLeft,
+  Briefcase,
+  FileText,
+  GraduationCap,
+  Globe,
+  Phone,
+  Target,
+  Trash2,
+  User,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,10 +30,51 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { RESUME_WORK_FORMAT_VALUES, RESUME_EMPLOYMENT_TYPE_VALUES } from '@/lib/resume-utils'
 import { CountrySelect } from '@/components/ui/country-select'
 import type { ResumeCreateInput, ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
+
+function EnumPills<T extends string>({
+  id,
+  values,
+  value,
+  onChange,
+  getLabel,
+}: {
+  id: string
+  values: readonly T[]
+  value: T
+  onChange: (v: T) => void
+  getLabel: (v: T) => string
+}) {
+  return (
+    <RadioGroup
+      value={value}
+      onValueChange={(v) => onChange(v as T)}
+      className="flex flex-wrap gap-1.5"
+    >
+      {values.map((v) => (
+        <div key={v} className="flex">
+          <RadioGroupItem value={v} id={`${id}-${v}`} className="peer sr-only" />
+          <Label
+            htmlFor={`${id}-${v}`}
+            className={cn(
+              'flex h-8 cursor-pointer select-none items-center rounded-full border px-4 text-sm font-medium transition-colors',
+              'hover:bg-muted',
+              'peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 peer-data-[state=checked]:text-primary',
+              'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-1'
+            )}
+          >
+            {getLabel(v)}
+          </Label>
+        </div>
+      ))}
+    </RadioGroup>
+  )
+}
 
 // Static schemas for type inference only
 const _baseWorkExperienceSchema = z.object({
@@ -269,33 +321,32 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
   const watchWorkExperience = watch('workExperience')
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
       {/* Секция: Личные данные */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t('forms.resume.sectionPersonal')}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <User className="h-4 w-4 text-muted-foreground" />
+            {t('forms.resume.sectionPersonal')}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="firstName">{t('forms.resume.firstNameLabel')} *</Label>
+            <Field>
+              <FieldLabel htmlFor="firstName">{t('forms.resume.firstNameLabel')} *</FieldLabel>
               <Input id="firstName" {...register('firstName')} />
-              {errors.firstName && (
-                <p className="text-sm text-destructive">{errors.firstName.message}</p>
-              )}
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="lastName">{t('forms.resume.lastNameLabel')} *</Label>
+              {errors.firstName && <FieldError errors={[errors.firstName]} />}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="lastName">{t('forms.resume.lastNameLabel')} *</FieldLabel>
               <Input id="lastName" {...register('lastName')} />
-              {errors.lastName && (
-                <p className="text-sm text-destructive">{errors.lastName.message}</p>
-              )}
-            </div>
+              {errors.lastName && <FieldError errors={[errors.lastName]} />}
+            </Field>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label>{t('forms.resume.countryLabel')} *</Label>
+            <Field>
+              <FieldLabel>{t('forms.resume.countryLabel')} *</FieldLabel>
               <Controller
                 name="country"
                 control={control}
@@ -303,88 +354,76 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                   <CountrySelect value={field.value} onChange={field.onChange} />
                 )}
               />
-              {errors.country && (
-                <p className="text-sm text-destructive">{errors.country.message}</p>
-              )}
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="city">{t('forms.resume.cityLabel')}</Label>
+              {errors.country && <FieldError errors={[errors.country]} />}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="city">{t('forms.resume.cityLabel')}</FieldLabel>
               <Input
                 id="city"
                 {...register('city')}
                 placeholder={t('forms.resume.cityPlaceholder')}
               />
-            </div>
+            </Field>
           </div>
         </CardContent>
       </Card>
 
       {/* Секция: Пожелания */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t('forms.resume.sectionPreferences')}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Target className="h-4 w-4 text-muted-foreground" />
+            {t('forms.resume.sectionPreferences')}
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="title">{t('forms.resume.titleLabel')} *</Label>
+        <CardContent className="space-y-5">
+          <Field>
+            <FieldLabel htmlFor="title">{t('forms.resume.titleLabel')} *</FieldLabel>
             <Input id="title" {...register('title')} placeholder="Senior Frontend Developer" />
-            {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
-          </div>
+            {errors.title && <FieldError errors={[errors.title]} />}
+          </Field>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="workFormat">{t('forms.resume.workFormatLabel')} *</Label>
-              <Controller
-                control={control}
-                name="workFormat"
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger id="workFormat" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(RESUME_WORK_FORMAT_VALUES as readonly ResumeWorkFormatEnum[]).map((fmt) => (
-                        <SelectItem key={fmt} value={fmt}>
-                          {t(`enums.resumeWorkFormat.${fmt}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="employmentType">{t('forms.resume.employmentTypeLabel')} *</Label>
-              <Controller
-                control={control}
-                name="employmentType"
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger id="employmentType" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(RESUME_EMPLOYMENT_TYPE_VALUES as readonly EmploymentTypeEnum[]).map(
-                        (empType) => (
-                          <SelectItem key={empType} value={empType}>
-                            {t(`enums.employmentType.${empType}`)}
-                          </SelectItem>
-                        )
-                      )}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
-          </div>
+          <Field>
+            <FieldLabel>{t('forms.resume.workFormatLabel')} *</FieldLabel>
+            <Controller
+              control={control}
+              name="workFormat"
+              render={({ field }) => (
+                <EnumPills
+                  id="resumeWorkFormat"
+                  values={RESUME_WORK_FORMAT_VALUES as readonly ResumeWorkFormatEnum[]}
+                  value={field.value}
+                  onChange={field.onChange}
+                  getLabel={(v) => t(`enums.resumeWorkFormat.${v}`)}
+                />
+              )}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel>{t('forms.resume.employmentTypeLabel')} *</FieldLabel>
+            <Controller
+              control={control}
+              name="employmentType"
+              render={({ field }) => (
+                <EnumPills
+                  id="resumeEmploymentType"
+                  values={RESUME_EMPLOYMENT_TYPE_VALUES as readonly EmploymentTypeEnum[]}
+                  value={field.value}
+                  onChange={field.onChange}
+                  getLabel={(v) => t(`enums.employmentType.${v}`)}
+                />
+              )}
+            />
+          </Field>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="desiredSalary">{t('forms.resume.salaryLabel')}</Label>
+            <Field>
+              <FieldLabel htmlFor="desiredSalary">{t('forms.resume.salaryLabel')}</FieldLabel>
               <Input id="desiredSalary" type="number" {...register('desiredSalary')} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="currency">{t('forms.resume.currencyLabel')}</Label>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="currency">{t('forms.resume.currencyLabel')}</FieldLabel>
               <Controller
                 control={control}
                 name="currency"
@@ -403,43 +442,49 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                   </Select>
                 )}
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="experienceYears">{t('forms.resume.experienceLabel')}</Label>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="experienceYears">{t('forms.resume.experienceLabel')}</FieldLabel>
               <Input id="experienceYears" type="number" {...register('experienceYears')} />
-            </div>
+            </Field>
           </div>
         </CardContent>
       </Card>
 
       {/* Секция: О себе */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t('forms.resume.sectionAbout')}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <AlignLeft className="h-4 w-4 text-muted-foreground" />
+            {t('forms.resume.sectionAbout')}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="about">{t('forms.resume.aboutLabel')}</Label>
+          <Field>
+            <FieldLabel htmlFor="about">{t('forms.resume.aboutLabel')}</FieldLabel>
             <Textarea
               id="about"
               {...register('about')}
               rows={4}
               placeholder={t('forms.resume.aboutPlaceholder')}
             />
-          </div>
+          </Field>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="skills">{t('forms.resume.skillsLabel')}</Label>
+          <Field>
+            <FieldLabel htmlFor="skills">{t('forms.resume.skillsLabel')}</FieldLabel>
             <Input id="skills" {...register('skills')} placeholder="React, TypeScript, Node.js" />
-          </div>
+          </Field>
         </CardContent>
       </Card>
 
       {/* Секция: Опыт работы */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle>{t('forms.resume.sectionWorkExp')}</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+              {t('forms.resume.sectionWorkExp')}
+            </CardTitle>
             <Button
               type="button"
               variant="outline"
@@ -461,8 +506,8 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
         </CardHeader>
         <CardContent className="space-y-4">
           {workFields.map((field, index) => (
-            <Card key={field.id}>
-              <CardHeader>
+            <Card key={field.id} className="bg-muted/30">
+              <CardHeader className="pb-2 pt-3">
                 <div className="flex items-center justify-end">
                   <Button
                     type="button"
@@ -475,47 +520,43 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 pt-0">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label>{t('forms.resume.companyLabel')} *</Label>
+                  <Field>
+                    <FieldLabel>{t('forms.resume.companyLabel')} *</FieldLabel>
                     <Input {...register(`workExperience.${index}.company`)} />
                     {errors.workExperience?.[index]?.company && (
-                      <p className="text-sm text-destructive">
-                        {errors.workExperience[index].company?.message}
-                      </p>
+                      <FieldError errors={[errors.workExperience[index].company]} />
                     )}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>{t('forms.resume.positionLabel')} *</Label>
+                  </Field>
+                  <Field>
+                    <FieldLabel>{t('forms.resume.positionLabel')} *</FieldLabel>
                     <Input {...register(`workExperience.${index}.position`)} />
                     {errors.workExperience?.[index]?.position && (
-                      <p className="text-sm text-destructive">
-                        {errors.workExperience[index].position?.message}
-                      </p>
+                      <FieldError errors={[errors.workExperience[index].position]} />
                     )}
-                  </div>
+                  </Field>
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label>{t('forms.resume.startDateLabel')} *</Label>
+                  <Field>
+                    <FieldLabel>{t('forms.resume.startDateLabel')} *</FieldLabel>
                     <Input
                       type="date"
                       className="min-w-0"
                       {...register(`workExperience.${index}.startDate`)}
                     />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>{t('forms.resume.endDateLabel')}</Label>
+                  </Field>
+                  <Field>
+                    <FieldLabel>{t('forms.resume.endDateLabel')}</FieldLabel>
                     <Input
                       type="date"
                       className="min-w-0"
                       {...register(`workExperience.${index}.endDate`)}
                       disabled={watchWorkExperience[index]?.current}
                     />
-                  </div>
+                  </Field>
                 </div>
-                <div className="flex items-center gap-2">
+                <Field orientation="horizontal" className="gap-2">
                   <Controller
                     control={control}
                     name={`workExperience.${index}.current`}
@@ -527,14 +568,14 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                       />
                     )}
                   />
-                  <Label htmlFor={`current-work-${index}`}>
+                  <FieldLabel htmlFor={`current-work-${index}`}>
                     {t('forms.resume.currentlyWorking')}
-                  </Label>
-                </div>
-                <div className="space-y-1.5">
-                  <Label>{t('forms.resume.descriptionLabel')}</Label>
+                  </FieldLabel>
+                </Field>
+                <Field>
+                  <FieldLabel>{t('forms.resume.descriptionLabel')}</FieldLabel>
                   <Textarea {...register(`workExperience.${index}.description`)} rows={2} />
-                </div>
+                </Field>
               </CardContent>
             </Card>
           ))}
@@ -543,9 +584,12 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
 
       {/* Секция: Образование */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle>{t('forms.resume.sectionEducation')}</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <GraduationCap className="h-4 w-4 text-muted-foreground" />
+              {t('forms.resume.sectionEducation')}
+            </CardTitle>
             <Button
               type="button"
               variant="outline"
@@ -567,10 +611,10 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
         </CardHeader>
         <CardContent className="space-y-4">
           {eduFields.map((field, index) => (
-            <Card key={field.id}>
-              <CardHeader>
+            <Card key={field.id} className="bg-muted/30">
+              <CardHeader className="pb-2 pt-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
                     {t('forms.resume.educationEntry', { num: index + 1 })}
                   </CardTitle>
                   <Button
@@ -584,51 +628,49 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label>{t('forms.resume.institutionLabel')} *</Label>
+              <CardContent className="space-y-3 pt-0">
+                <Field>
+                  <FieldLabel>{t('forms.resume.institutionLabel')} *</FieldLabel>
                   <Input {...register(`education.${index}.institution`)} />
                   {errors.education?.[index]?.institution && (
-                    <p className="text-sm text-destructive">
-                      {errors.education[index].institution?.message}
-                    </p>
+                    <FieldError errors={[errors.education[index].institution]} />
                   )}
-                </div>
+                </Field>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label>{t('forms.resume.degreeLabel')} *</Label>
+                  <Field>
+                    <FieldLabel>{t('forms.resume.degreeLabel')} *</FieldLabel>
                     <Input
                       {...register(`education.${index}.degree`)}
                       placeholder={t('forms.resume.degreePlaceholder')}
                     />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>{t('forms.resume.fieldLabel')} *</Label>
+                  </Field>
+                  <Field>
+                    <FieldLabel>{t('forms.resume.fieldLabel')} *</FieldLabel>
                     <Input
                       {...register(`education.${index}.field`)}
                       placeholder={t('forms.resume.fieldPlaceholder')}
                     />
-                  </div>
+                  </Field>
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label>{t('forms.resume.startDateLabel')} *</Label>
+                  <Field>
+                    <FieldLabel>{t('forms.resume.startDateLabel')} *</FieldLabel>
                     <Input
                       type="date"
                       className="min-w-0"
                       {...register(`education.${index}.startDate`)}
                     />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>{t('forms.resume.endDateLabel')}</Label>
+                  </Field>
+                  <Field>
+                    <FieldLabel>{t('forms.resume.endDateLabel')}</FieldLabel>
                     <Input
                       type="date"
                       className="min-w-0"
                       {...register(`education.${index}.endDate`)}
                     />
-                  </div>
+                  </Field>
                 </div>
-                <div className="flex items-center gap-2">
+                <Field orientation="horizontal" className="gap-2">
                   <Controller
                     control={control}
                     name={`education.${index}.current`}
@@ -640,10 +682,10 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                       />
                     )}
                   />
-                  <Label htmlFor={`current-edu-${index}`}>
+                  <FieldLabel htmlFor={`current-edu-${index}`}>
                     {t('forms.resume.currentlyStudying')}
-                  </Label>
-                </div>
+                  </FieldLabel>
+                </Field>
               </CardContent>
             </Card>
           ))}
@@ -652,9 +694,12 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
 
       {/* Секция: Языки */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle>{t('forms.resume.sectionLanguages')}</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Globe className="h-4 w-4 text-muted-foreground" />
+              {t('forms.resume.sectionLanguages')}
+            </CardTitle>
             <Button
               type="button"
               variant="outline"
@@ -668,26 +713,27 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
         <CardContent className="space-y-3">
           {langFields.map((field, index) => (
             <div key={field.id} className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
-                <Label>{t('forms.resume.languageLabel')}</Label>
+              <Field className="flex-1">
+                <FieldLabel>{t('forms.resume.languageLabel')}</FieldLabel>
                 <Input
                   {...register(`languages.${index}.lang`)}
                   placeholder={t('forms.resume.languagePlaceholder')}
                 />
-              </div>
-              <div className="flex-1 space-y-1.5">
-                <Label>{t('forms.resume.languageLevelLabel')}</Label>
+              </Field>
+              <Field className="flex-1">
+                <FieldLabel>{t('forms.resume.languageLevelLabel')}</FieldLabel>
                 <Input
                   {...register(`languages.${index}.level`)}
                   placeholder={t('forms.resume.languageLevelPlaceholder')}
                 />
-              </div>
+              </Field>
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
                 onClick={() => removeLang(index)}
                 aria-label={t('forms.resume.removeEntry')}
+                className="mb-0.5"
               >
                 <Trash2 className="size-4 text-destructive" />
               </Button>
@@ -698,27 +744,30 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
 
       {/* Секция: Контакты */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t('forms.resume.sectionContacts')}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Phone className="h-4 w-4 text-muted-foreground" />
+            {t('forms.resume.sectionContacts')}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="contactTelegram">{t('forms.resume.telegramLabel')}</Label>
+            <Field>
+              <FieldLabel htmlFor="contactTelegram">{t('forms.resume.telegramLabel')}</FieldLabel>
               <Input
                 id="contactTelegram"
                 {...register('contactTelegram')}
                 placeholder="@username"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="contactEmail">{t('forms.resume.emailLabel')}</Label>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="contactEmail">{t('forms.resume.emailLabel')}</FieldLabel>
               <Input id="contactEmail" type="email" {...register('contactEmail')} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="contactPhone">{t('forms.resume.phoneLabel')}</Label>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="contactPhone">{t('forms.resume.phoneLabel')}</FieldLabel>
               <Input id="contactPhone" {...register('contactPhone')} placeholder="+7..." />
-            </div>
+            </Field>
           </div>
         </CardContent>
       </Card>

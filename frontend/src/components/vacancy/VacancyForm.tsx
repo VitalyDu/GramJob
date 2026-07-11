@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { AlignLeft, Briefcase, FileText, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,6 +20,8 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { WORK_FORMAT_VALUES, EMPLOYMENT_TYPE_VALUES, SENIORITY_VALUES } from '@/lib/vacancy-utils'
 import { CountrySelect } from '@/components/ui/country-select'
 import type {
@@ -32,6 +36,45 @@ import type {
 } from '@/types/api'
 import { api } from '@/services/api'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
+
+function EnumPills<T extends string>({
+  id,
+  values,
+  value,
+  onChange,
+  getLabel,
+}: {
+  id: string
+  values: readonly T[]
+  value: T
+  onChange: (v: T) => void
+  getLabel: (v: T) => string
+}) {
+  return (
+    <RadioGroup
+      value={value}
+      onValueChange={(v) => onChange(v as T)}
+      className="flex flex-wrap gap-1.5"
+    >
+      {values.map((v) => (
+        <div key={v} className="flex">
+          <RadioGroupItem value={v} id={`${id}-${v}`} className="peer sr-only" />
+          <Label
+            htmlFor={`${id}-${v}`}
+            className={cn(
+              'flex h-8 cursor-pointer select-none items-center rounded-full border px-4 text-sm font-medium transition-colors',
+              'hover:bg-muted',
+              'peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 peer-data-[state=checked]:text-primary',
+              'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-1'
+            )}
+          >
+            {getLabel(v)}
+          </Label>
+        </div>
+      ))}
+    </RadioGroup>
+  )
+}
 
 // Static schema for type inference only
 const _baseSchema = z.object({
@@ -213,21 +256,24 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
   })
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
       {/* Секция: Основное */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t('forms.vacancy.sectionMain')}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FileText className="h-4 w-4 text-muted-foreground" />
+            {t('forms.vacancy.sectionMain')}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="title">{t('forms.vacancy.titleLabel')} *</Label>
+          <Field>
+            <FieldLabel htmlFor="title">{t('forms.vacancy.titleLabel')} *</FieldLabel>
             <Input id="title" {...register('title')} placeholder="Frontend Developer" />
-            {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
-          </div>
+            {errors.title && <FieldError errors={[errors.title]} />}
+          </Field>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="companyId">{t('forms.vacancy.companyLabel')}</Label>
+          <Field>
+            <FieldLabel htmlFor="companyId">{t('forms.vacancy.companyLabel')}</FieldLabel>
             <Controller
               control={control}
               name="companyId"
@@ -249,10 +295,10 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
                 </Select>
               )}
             />
-          </div>
+          </Field>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="industryId">{t('forms.vacancy.industryLabel')} *</Label>
+          <Field>
+            <FieldLabel htmlFor="industryId">{t('forms.vacancy.industryLabel')} *</FieldLabel>
             <Controller
               control={control}
               name="industryId"
@@ -271,13 +317,13 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
                 </Select>
               )}
             />
-            {errors.industryId && (
-              <p className="text-sm text-destructive">{errors.industryId.message}</p>
-            )}
-          </div>
+            {errors.industryId && <FieldError errors={[errors.industryId]} />}
+          </Field>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="specializationId">{t('forms.vacancy.specializationLabel')} *</Label>
+          <Field>
+            <FieldLabel htmlFor="specializationId">
+              {t('forms.vacancy.specializationLabel')} *
+            </FieldLabel>
             <Controller
               control={control}
               name="specializationId"
@@ -300,88 +346,74 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
                 </Select>
               )}
             />
-            {errors.specializationId && (
-              <p className="text-sm text-destructive">{errors.specializationId.message}</p>
-            )}
-          </div>
+            {errors.specializationId && <FieldError errors={[errors.specializationId]} />}
+          </Field>
         </CardContent>
       </Card>
 
       {/* Секция: Условия */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t('forms.vacancy.sectionConditions')}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Briefcase className="h-4 w-4 text-muted-foreground" />
+            {t('forms.vacancy.sectionConditions')}
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="employmentType">{t('forms.vacancy.employmentLabel')} *</Label>
-              <Controller
-                control={control}
-                name="employmentType"
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger id="employmentType" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(EMPLOYMENT_TYPE_VALUES as readonly EmploymentTypeEnum[]).map((v) => (
-                        <SelectItem key={v} value={v}>
-                          {t(`enums.employmentType.${v}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="workFormat">{t('forms.vacancy.workFormatLabel')} *</Label>
-              <Controller
-                control={control}
-                name="workFormat"
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger id="workFormat" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(WORK_FORMAT_VALUES as readonly WorkFormatEnum[]).map((v) => (
-                        <SelectItem key={v} value={v}>
-                          {t(`enums.workFormat.${v}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="seniority">{t('forms.vacancy.seniorityLabel')} *</Label>
-              <Controller
-                control={control}
-                name="seniority"
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger id="seniority" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(SENIORITY_VALUES as readonly SeniorityEnum[]).map((v) => (
-                        <SelectItem key={v} value={v}>
-                          {t(`enums.seniority.${v}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
-          </div>
+        <CardContent className="space-y-5">
+          <Field>
+            <FieldLabel>{t('forms.vacancy.workFormatLabel')} *</FieldLabel>
+            <Controller
+              control={control}
+              name="workFormat"
+              render={({ field }) => (
+                <EnumPills
+                  id="workFormat"
+                  values={WORK_FORMAT_VALUES as readonly WorkFormatEnum[]}
+                  value={field.value}
+                  onChange={field.onChange}
+                  getLabel={(v) => t(`enums.workFormat.${v}`)}
+                />
+              )}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel>{t('forms.vacancy.employmentLabel')} *</FieldLabel>
+            <Controller
+              control={control}
+              name="employmentType"
+              render={({ field }) => (
+                <EnumPills
+                  id="employmentType"
+                  values={EMPLOYMENT_TYPE_VALUES as readonly EmploymentTypeEnum[]}
+                  value={field.value}
+                  onChange={field.onChange}
+                  getLabel={(v) => t(`enums.employmentType.${v}`)}
+                />
+              )}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel>{t('forms.vacancy.seniorityLabel')} *</FieldLabel>
+            <Controller
+              control={control}
+              name="seniority"
+              render={({ field }) => (
+                <EnumPills
+                  id="seniority"
+                  values={SENIORITY_VALUES as readonly SeniorityEnum[]}
+                  value={field.value}
+                  onChange={field.onChange}
+                  getLabel={(v) => t(`enums.seniority.${v}`)}
+                />
+              )}
+            />
+          </Field>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label>{t('forms.vacancy.countryLabel')} *</Label>
+            <Field>
+              <FieldLabel>{t('forms.vacancy.countryLabel')} *</FieldLabel>
               <Controller
                 name="country"
                 control={control}
@@ -389,36 +421,34 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
                   <CountrySelect value={field.value} onChange={field.onChange} />
                 )}
               />
-              {errors.country && (
-                <p className="text-sm text-destructive">{errors.country.message}</p>
-              )}
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="city">{t('forms.vacancy.cityLabel')}</Label>
+              {errors.country && <FieldError errors={[errors.country]} />}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="city">{t('forms.vacancy.cityLabel')}</FieldLabel>
               <Input
                 id="city"
                 {...register('city')}
                 placeholder={t('forms.vacancy.cityPlaceholder')}
               />
-            </div>
+            </Field>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="salaryFrom">{t('forms.vacancy.salaryFromLabel')}</Label>
+            <Field>
+              <FieldLabel htmlFor="salaryFrom">{t('forms.vacancy.salaryFromLabel')}</FieldLabel>
               <Input
                 id="salaryFrom"
                 type="number"
                 {...register('salaryFrom')}
                 placeholder="100000"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="salaryTo">{t('forms.vacancy.salaryToLabel')}</Label>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="salaryTo">{t('forms.vacancy.salaryToLabel')}</FieldLabel>
               <Input id="salaryTo" type="number" {...register('salaryTo')} placeholder="200000" />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="salaryCurrency">{t('forms.vacancy.currencyLabel')}</Label>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="salaryCurrency">{t('forms.vacancy.currencyLabel')}</FieldLabel>
               <Controller
                 control={control}
                 name="salaryCurrency"
@@ -436,99 +466,103 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
                   </Select>
                 )}
               />
-            </div>
+            </Field>
           </div>
         </CardContent>
       </Card>
 
       {/* Секция: Описание */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t('forms.vacancy.sectionDescription')}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <AlignLeft className="h-4 w-4 text-muted-foreground" />
+            {t('forms.vacancy.sectionDescription')}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="description">{t('forms.vacancy.descriptionLabel')} *</Label>
+          <Field>
+            <FieldLabel htmlFor="description">{t('forms.vacancy.descriptionLabel')} *</FieldLabel>
             <Textarea
               id="description"
               {...register('description')}
               rows={4}
               placeholder={t('forms.vacancy.descriptionPlaceholder')}
             />
-            {errors.description && (
-              <p className="text-sm text-destructive">{errors.description.message}</p>
-            )}
-          </div>
+            {errors.description && <FieldError errors={[errors.description]} />}
+          </Field>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="responsibilities">{t('forms.vacancy.responsibilitiesLabel')} *</Label>
+          <Field>
+            <FieldLabel htmlFor="responsibilities">
+              {t('forms.vacancy.responsibilitiesLabel')} *
+            </FieldLabel>
             <Textarea
               id="responsibilities"
               {...register('responsibilities')}
               rows={4}
               placeholder={t('forms.vacancy.responsibilitiesPlaceholder')}
             />
-            {errors.responsibilities && (
-              <p className="text-sm text-destructive">{errors.responsibilities.message}</p>
-            )}
-          </div>
+            {errors.responsibilities && <FieldError errors={[errors.responsibilities]} />}
+          </Field>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="requirements">{t('forms.vacancy.requirementsLabel')} *</Label>
+          <Field>
+            <FieldLabel htmlFor="requirements">{t('forms.vacancy.requirementsLabel')} *</FieldLabel>
             <Textarea
               id="requirements"
               {...register('requirements')}
               rows={4}
               placeholder={t('forms.vacancy.requirementsPlaceholder')}
             />
-            {errors.requirements && (
-              <p className="text-sm text-destructive">{errors.requirements.message}</p>
-            )}
-          </div>
+            {errors.requirements && <FieldError errors={[errors.requirements]} />}
+          </Field>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="conditions">{t('forms.vacancy.conditionsLabel')}</Label>
+          <Field>
+            <FieldLabel htmlFor="conditions">{t('forms.vacancy.conditionsLabel')}</FieldLabel>
             <Textarea
               id="conditions"
               {...register('conditions')}
               rows={3}
               placeholder={t('forms.vacancy.conditionsPlaceholder')}
             />
-          </div>
+          </Field>
         </CardContent>
       </Card>
 
       {/* Секция: Дополнительно */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t('forms.vacancy.sectionExtra')}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Sparkles className="h-4 w-4 text-muted-foreground" />
+            {t('forms.vacancy.sectionExtra')}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="skills">{t('forms.vacancy.skillsLabel')}</Label>
+          <Field>
+            <FieldLabel htmlFor="skills">{t('forms.vacancy.skillsLabel')}</FieldLabel>
             <Input id="skills" {...register('skills')} placeholder="React, TypeScript, Node.js" />
-          </div>
+          </Field>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="languages">{t('forms.vacancy.languagesLabel')}</Label>
+          <Field>
+            <FieldLabel htmlFor="languages">{t('forms.vacancy.languagesLabel')}</FieldLabel>
             <Input
               id="languages"
               {...register('languages')}
               placeholder={t('forms.vacancy.languagesPlaceholder')}
             />
-          </div>
+          </Field>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="experienceYears">{t('forms.vacancy.experienceLabel')}</Label>
+            <Field>
+              <FieldLabel htmlFor="experienceYears">
+                {t('forms.vacancy.experienceLabel')}
+              </FieldLabel>
               <Input
                 id="experienceYears"
                 type="number"
                 {...register('experienceYears')}
                 placeholder="3"
               />
-            </div>
-            <div className="flex items-center gap-2">
+            </Field>
+            <Field orientation="horizontal" className="items-end pb-0.5">
               <Controller
                 control={control}
                 name="urgent"
@@ -536,8 +570,8 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
                   <Switch id="urgent" checked={field.value} onCheckedChange={field.onChange} />
                 )}
               />
-              <Label htmlFor="urgent">{t('forms.vacancy.urgentLabel')}</Label>
-            </div>
+              <FieldLabel htmlFor="urgent">{t('forms.vacancy.urgentLabel')}</FieldLabel>
+            </Field>
           </div>
         </CardContent>
       </Card>

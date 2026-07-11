@@ -31,7 +31,7 @@ describe('CompanyForm', () => {
 
   it('отображает поле размера компании', () => {
     render(<CompanyForm onSubmit={vi.fn()} />)
-    expect(screen.getByLabelText(/размер/i)).toBeDefined()
+    expect(screen.getByText(/размер компании/i)).toBeDefined()
   })
 
   it('показывает ошибку если название пустое при submit', async () => {

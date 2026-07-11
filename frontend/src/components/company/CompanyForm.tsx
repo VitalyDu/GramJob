@@ -4,7 +4,9 @@ import { useMemo } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { Building2, Link, MapPin } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { cn } from '@/lib/utils'
 import type { CompanyCreateInput, CompanySizeEnum } from '@/types/api'
 import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
 
@@ -17,15 +19,49 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from '@/components/ui/select'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
 import { CountrySelect } from '@/components/ui/country-select'
+
+function EnumPills<T extends string>({
+  id,
+  values,
+  value,
+  onChange,
+  getLabel,
+}: {
+  id: string
+  values: readonly T[]
+  value: T
+  onChange: (v: T) => void
+  getLabel: (v: T) => string
+}) {
+  return (
+    <RadioGroup
+      value={value}
+      onValueChange={(v) => onChange(v as T)}
+      className="flex flex-wrap gap-1.5"
+    >
+      {values.map((v) => (
+        <div key={v} className="flex">
+          <RadioGroupItem value={v} id={`${id}-${v}`} className="peer sr-only" />
+          <Label
+            htmlFor={`${id}-${v}`}
+            className={cn(
+              'flex h-8 cursor-pointer select-none items-center rounded-full border px-4 text-sm font-medium transition-colors',
+              'hover:bg-muted',
+              'peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 peer-data-[state=checked]:text-primary',
+              'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-1'
+            )}
+          >
+            {getLabel(v)}
+          </Label>
+        </div>
+      ))}
+    </RadioGroup>
+  )
+}
 
 // Static schema for type inference only
 const _baseSchema = z.object({
@@ -103,80 +139,85 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
   })
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Секция: Основное */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t('forms.company.sectionMain')}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+            {t('forms.company.sectionMain')}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="name">{t('forms.company.nameLabel')} *</Label>
+          <Field>
+            <FieldLabel htmlFor="name">{t('forms.company.nameLabel')} *</FieldLabel>
             <Input
               id="name"
               {...register('name')}
               placeholder={t('forms.company.namePlaceholder')}
             />
-            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
-          </div>
+            {errors.name && <FieldError errors={[errors.name]} />}
+          </Field>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="description">{t('forms.company.descriptionLabel')}</Label>
+          <Field>
+            <FieldLabel htmlFor="description">{t('forms.company.descriptionLabel')}</FieldLabel>
             <Textarea
               id="description"
               {...register('description')}
               placeholder={t('forms.company.descriptionPlaceholder')}
               rows={4}
             />
-            {errors.description && (
-              <p className="text-sm text-destructive">{errors.description.message}</p>
-            )}
-          </div>
+            {errors.description && <FieldError errors={[errors.description]} />}
+          </Field>
         </CardContent>
       </Card>
 
       {/* Секция: Контакты */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t('forms.company.sectionContacts')}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Link className="h-4 w-4 text-muted-foreground" />
+            {t('forms.company.sectionContacts')}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="website">{t('forms.company.websiteLabel')}</Label>
+          <Field>
+            <FieldLabel htmlFor="website">{t('forms.company.websiteLabel')}</FieldLabel>
             <Input id="website" {...register('website')} placeholder="https://example.com" />
-            {errors.website && <p className="text-sm text-destructive">{errors.website.message}</p>}
-          </div>
+            {errors.website && <FieldError errors={[errors.website]} />}
+          </Field>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="telegram">{t('forms.company.telegramLabel')}</Label>
+            <Field>
+              <FieldLabel htmlFor="telegram">{t('forms.company.telegramLabel')}</FieldLabel>
               <Input id="telegram" {...register('telegram')} placeholder="@company" />
-            </div>
+            </Field>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="linkedin">{t('forms.company.linkedinLabel')}</Label>
+            <Field>
+              <FieldLabel htmlFor="linkedin">{t('forms.company.linkedinLabel')}</FieldLabel>
               <Input
                 id="linkedin"
                 {...register('linkedin')}
                 placeholder="https://linkedin.com/company/..."
               />
-              {errors.linkedin && (
-                <p className="text-sm text-destructive">{errors.linkedin.message}</p>
-              )}
-            </div>
+              {errors.linkedin && <FieldError errors={[errors.linkedin]} />}
+            </Field>
           </div>
         </CardContent>
       </Card>
 
       {/* Секция: Локация */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t('forms.company.sectionLocation')}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            {t('forms.company.sectionLocation')}
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label>{t('forms.company.countryLabel')} *</Label>
+            <Field>
+              <FieldLabel>{t('forms.company.countryLabel')} *</FieldLabel>
               <Controller
                 name="country"
                 control={control}
@@ -184,42 +225,38 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
                   <CountrySelect value={field.value} onChange={field.onChange} />
                 )}
               />
-              {errors.country && (
-                <p className="text-sm text-destructive">{errors.country.message}</p>
-              )}
-            </div>
+              {errors.country && <FieldError errors={[errors.country]} />}
+            </Field>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="city">{t('forms.company.cityLabel')}</Label>
+            <Field>
+              <FieldLabel htmlFor="city">{t('forms.company.cityLabel')}</FieldLabel>
               <Input
                 id="city"
                 {...register('city')}
                 placeholder={t('forms.company.cityPlaceholder')}
               />
-            </div>
+            </Field>
           </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="companySize">{t('forms.company.companySizeLabel')}</Label>
+          <Field>
+            <FieldLabel>{t('forms.company.companySizeLabel')}</FieldLabel>
             <Controller
               control={control}
               name="companySize"
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger id="companySize" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SIZE_OPTIONS.map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label} {t('forms.company.employees')}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <EnumPills
+                  id="companySize"
+                  values={COMPANY_SIZE_VALUES}
+                  value={field.value}
+                  onChange={field.onChange}
+                  getLabel={(v) => {
+                    const label = COMPANY_SIZE_LABELS[v]
+                    return `${label} ${t('forms.company.employees')}`
+                  }}
+                />
               )}
             />
-          </div>
+          </Field>
         </CardContent>
       </Card>
 
