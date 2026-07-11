@@ -30,7 +30,9 @@ describe('home-data', () => {
       'fetch',
       vi.fn().mockResolvedValueOnce(okJson({ data: [{ documentId: 'v1' }], meta: { total: 1 } }))
     )
-    expect(await getLatestVacancies(6)).toEqual([{ documentId: 'v1' }])
+    expect(await getLatestVacancies(6)).toEqual([
+      { documentId: 'v1', workFormat: [], employmentType: [], seniority: [] },
+    ])
 
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('down')))
     expect(await getLatestVacancies(6)).toEqual([])
