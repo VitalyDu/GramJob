@@ -1,17 +1,17 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { usePathname } from 'next/navigation'
-import { Briefcase, Building2, FileText, Home, LayoutDashboard, MessageSquare } from 'lucide-react'
+import { Briefcase, Building2, FileText, LayoutDashboard, MessageSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type NavLink = {
   href: string
-  icon: typeof Briefcase
   label: string
   isActive: (pathname: string) => boolean
-}
+} & ({ icon: typeof Briefcase; imageSrc?: never } | { imageSrc: string; icon?: never })
 
 export function BottomNav({ isMiniApp }: { isMiniApp: boolean }) {
   const { t } = useTranslation('common')
@@ -56,7 +56,7 @@ export function BottomNav({ isMiniApp }: { isMiniApp: boolean }) {
 
   const gramJobLink: NavLink = {
     href: '/',
-    icon: Home,
+    imageSrc: '/gramjob-icon.png',
     label: 'GramJob',
     isActive: (p) => p === '/',
   }
@@ -107,20 +107,32 @@ export function BottomNav({ isMiniApp }: { isMiniApp: boolean }) {
             : 'pb-[env(safe-area-inset-bottom)]'
         )}
       >
-        {links.map(({ href, icon: Icon, label, isActive }) => {
-          const active = isActive(pathname)
+        {links.map((link) => {
+          const active = link.isActive(pathname)
+          const Icon = 'icon' in link ? link.icon : null
+          const imageSrc = 'imageSrc' in link ? link.imageSrc : null
           return (
             <Link
-              key={href}
-              href={href}
+              key={link.href}
+              href={link.href}
               aria-current={active ? 'page' : undefined}
               className={cn(
                 'flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition-colors duration-200',
                 active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              <Icon size={22} strokeWidth={active ? 2.4 : 2} />
-              <span>{label}</span>
+              {imageSrc ? (
+                <Image
+                  src={imageSrc}
+                  alt={link.label}
+                  width={22}
+                  height={22}
+                  className={cn('rounded-sm', !active && 'opacity-60')}
+                />
+              ) : Icon ? (
+                <Icon size={22} strokeWidth={active ? 2.4 : 2} />
+              ) : null}
+              <span>{link.label}</span>
             </Link>
           )
         })}
