@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
-import { Ban, LogOut, Monitor, Shield, Star, User } from 'lucide-react'
+import { Ban, Bell, LogOut, Monitor, Shield, Star, User } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { useTelegramInit } from '@/hooks/useTelegramInit'
 import { cn } from '@/lib/utils'
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { key: 'interface', href: '/dashboard/profile/interface', icon: Monitor },
   { key: 'subscription', href: '/subscription', icon: Star },
   { key: 'blocks', href: '/dashboard/blocks', icon: Ban },
+  { key: 'notifications', href: '/dashboard/profile/notifications', icon: Bell, onlyMiniApp: true },
 ] as const
 
 export const SettingsNav = observer(function SettingsNav() {
@@ -24,9 +25,11 @@ export const SettingsNav = observer(function SettingsNav() {
   const { auth } = useStores()
   const { isMiniApp } = useTelegramInit()
 
-  const items = NAV_ITEMS.filter(
-    (item) => !('requiresEmail' in item && item.requiresEmail) || Boolean(auth.user?.email)
-  )
+  const items = NAV_ITEMS.filter((item) => {
+    if ('requiresEmail' in item && item.requiresEmail && !auth.user?.email) return false
+    if ('onlyMiniApp' in item && item.onlyMiniApp && !isMiniApp) return false
+    return true
+  })
 
   const itemClasses = (active: boolean) =>
     cn(

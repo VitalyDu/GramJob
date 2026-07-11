@@ -7,7 +7,6 @@ import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AvatarUploader } from '@/components/settings/AvatarUploader'
 import { ProfileSettingsForm } from '@/components/settings/ProfileSettingsForm'
-import { TelegramNotificationsToggle } from '@/components/settings/TelegramNotificationsToggle'
 
 export const ProfileClient = observer(function ProfileClient() {
   const { t } = useTranslation()
@@ -25,7 +24,6 @@ export const ProfileClient = observer(function ProfileClient() {
         <CardContent className="space-y-6">
           <AvatarUploader />
           <ProfileSettingsForm />
-          <TelegramNotificationsToggle />
         </CardContent>
       </Card>
     </div>

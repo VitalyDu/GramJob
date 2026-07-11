@@ -817,6 +817,7 @@
       "interface": "Interface",
       "subscription": "Subscription",
       "blocks": "Blocks",
+      "notifications": "Notifications",
       "logout": "Log out"
     },
     "profile": {
