@@ -72,7 +72,7 @@ export const TelegramTopBar = observer(function TelegramTopBar() {
               type="button"
               aria-label={t('nav.userMenu')}
               onClick={() => setUserMenuOpen(true)}
-              className="flex min-w-0 items-center gap-2 rounded-full shadow-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex min-w-0 items-center gap-1.5 rounded-full bg-background/75 py-0.5 pl-0.5 pr-2.5 backdrop-blur-sm transition-colors hover:bg-background/95 outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <UserAvatar user={user} className="h-8 w-8 shrink-0" />
               <SubscriptionBadge plan={user.subscriptionPlan} />
