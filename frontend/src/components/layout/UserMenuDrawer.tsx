@@ -6,9 +6,21 @@ import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from 'next-themes'
 import { observer } from 'mobx-react-lite'
-import { Check, FileText, LayoutDashboard, LogOut, Moon, Settings, Star, Sun } from 'lucide-react'
+import {
+  Bell,
+  Check,
+  FileText,
+  Heart,
+  LayoutDashboard,
+  LogOut,
+  Moon,
+  Settings,
+  Star,
+  Sun,
+} from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { useIsDesktop } from '@/hooks/useIsDesktop'
+import { isTelegramMiniApp } from '@/lib/telegram'
 import { Drawer, DrawerContent, DrawerHeader } from '@/components/ui/drawer'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 import { UserAvatar } from '@/components/shared/UserAvatar'
@@ -31,6 +43,7 @@ export const UserMenuDrawer = observer(function UserMenuDrawer({ open, onOpenCha
 
   const close = () => onOpenChange(false)
   const isDark = resolvedTheme === 'dark'
+  const isMiniApp = isTelegramMiniApp()
 
   const setLang = (lang: string) => {
     void i18next.changeLanguage(lang)
@@ -59,6 +72,18 @@ export const UserMenuDrawer = observer(function UserMenuDrawer({ open, onOpenCha
             icon={<LayoutDashboard className="h-4 w-4" />}
             href="/dashboard"
             label={t('nav.dashboard')}
+            onClick={close}
+          />
+          <NavItem
+            icon={<Heart className="h-4 w-4" />}
+            href="/dashboard/favorites"
+            label={t('nav.favorites')}
+            onClick={close}
+          />
+          <NavItem
+            icon={<Bell className="h-4 w-4" />}
+            href="/dashboard/notifications"
+            label={t('nav.notifications')}
             onClick={close}
           />
           <NavItem
@@ -116,20 +141,24 @@ export const UserMenuDrawer = observer(function UserMenuDrawer({ open, onOpenCha
             {i18n.language === 'en' && <Check className="h-4 w-4" />}
           </button>
 
-          <Divider />
+          {!isMiniApp && (
+            <>
+              <Divider />
 
-          <button
-            type="button"
-            onClick={() => {
-              auth.logout()
-              router.push('/')
-              close()
-            }}
-            className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-destructive hover:bg-destructive/10"
-          >
-            <LogOut className="h-4 w-4" />
-            {t('auth.logout')}
-          </button>
+              <button
+                type="button"
+                onClick={() => {
+                  auth.logout()
+                  router.push('/')
+                  close()
+                }}
+                className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-destructive hover:bg-destructive/10"
+              >
+                <LogOut className="h-4 w-4" />
+                {t('auth.logout')}
+              </button>
+            </>
+          )}
         </div>
       </DrawerContent>
     </Drawer>
