@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { ResumeForm } from '@/components/resume/ResumeForm'
+import { getTelegramWebApp } from '@/lib/telegram'
 import type { ResumeCreateInput } from '@/types/api'
 
 export const CreateResumeClient = observer(function CreateResumeClient() {
@@ -29,6 +30,9 @@ export const CreateResumeClient = observer(function CreateResumeClient() {
 
   if (!isAuthenticated) return null
 
+  const tgUsername = getTelegramWebApp()?.initDataUnsafe?.user?.username
+  const telegramDefault = tgUsername ? `@${tgUsername}` : undefined
+
   return (
     <div className="space-y-6">
       <div className="space-y-1">
@@ -47,7 +51,11 @@ export const CreateResumeClient = observer(function CreateResumeClient() {
         </p>
       )}
 
-      <ResumeForm isLoading={store.isLoading} onSubmit={handleSubmit} />
+      <ResumeForm
+        isLoading={store.isLoading}
+        onSubmit={handleSubmit}
+        {...(telegramDefault ? { defaultValues: { contacts: { telegram: telegramDefault } } } : {})}
+      />
     </div>
   )
 })
