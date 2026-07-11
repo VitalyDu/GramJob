@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Eye, Send, ExternalLink } from 'lucide-react'
+import { Eye, Send, ExternalLink, Share2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import type { Vacancy } from '@/types/api'
 import { hapticNotify } from '@/lib/telegram'
+import { toast } from 'sonner'
 import { getMediaUrl } from '@/lib/media'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
 import { ApplyDialog } from '@/components/application/ApplyDialog'
@@ -37,6 +38,16 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({
   const { t } = useTranslation()
   const [applyOpen, setApplyOpen] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)
+
+  const handleShare = async () => {
+    const url = window.location.href
+    if (navigator.share) {
+      await navigator.share({ url })
+    } else {
+      await navigator.clipboard.writeText(url)
+      toast.success(t('vacancyDetail.linkCopied'))
+    }
+  }
 
   useEffect(() => {
     void store.fetchVacancyById(id)
@@ -157,6 +168,10 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({
                 <Link href="/login">{t('vacancyDetail.loginToApply')}</Link>
               </Button>
             )}
+            <Button variant="outline" size="sm" onClick={() => void handleShare()}>
+              <Share2 className="mr-2 h-4 w-4" />
+              {t('vacancyDetail.share')}
+            </Button>
             {auth.user && (
               <>
                 <FavoriteButton type="vacancy" targetId={id} />

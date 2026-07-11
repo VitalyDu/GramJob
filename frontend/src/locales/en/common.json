@@ -176,7 +176,9 @@
     "conditions": "Conditions",
     "skills": "Skills",
     "backToAll": "← All vacancies",
-    "notFound": "Failed to load vacancy"
+    "notFound": "Failed to load vacancy",
+    "share": "Share",
+    "linkCopied": "Link copied"
   },
   "resumeDetail": {
     "salaryFrom": "from",

@@ -176,7 +176,9 @@
     "conditions": "Условия",
     "skills": "Навыки",
     "backToAll": "← Все вакансии",
-    "notFound": "Не удалось загрузить вакансию"
+    "notFound": "Не удалось загрузить вакансию",
+    "share": "Поделиться",
+    "linkCopied": "Ссылка скопирована"
   },
   "resumeDetail": {
     "salaryFrom": "от",
