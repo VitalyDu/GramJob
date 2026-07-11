@@ -36,7 +36,7 @@ export function InterfaceSettings() {
           <CardTitle className="text-base">{t('settings.interface.languageTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {LANGUAGES.map(({ code, label }) => (
               <button
                 key={code}
@@ -61,20 +61,20 @@ export function InterfaceSettings() {
           <CardTitle className="text-base">{t('settings.interface.themeTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {THEMES.map(({ value, icon: Icon }) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => setTheme(value)}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors',
+                  'flex items-center justify-center gap-2 rounded-lg border px-2 py-2 text-sm font-medium transition-colors',
                   theme === value
                     ? 'border-primary bg-primary text-primary-foreground'
                     : 'border-border bg-card text-card-foreground hover:bg-accent'
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-4 w-4 shrink-0" />
                 {t(`settings.interface.theme.${value}`)}
               </button>
             ))}
