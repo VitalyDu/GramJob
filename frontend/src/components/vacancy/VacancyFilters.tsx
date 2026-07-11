@@ -259,6 +259,10 @@ export function VacancyFilters({ params, onChange }: Props) {
   const { t } = useTranslation()
 
   useEffect(() => {
+    setDraft(draftFromParams(params))
+  }, [params])
+
+  useEffect(() => {
     void api
       .get<{ data: Industry[] }>('/industries')
       .then((res) => setIndustries(Array.isArray(res.data) ? res.data : []))

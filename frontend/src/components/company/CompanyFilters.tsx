@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SlidersHorizontal } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { CompanyListParams, CompanySizeEnum } from '@/types/api'
@@ -91,6 +91,10 @@ export function CompanyFilters({ params, onChange }: Props) {
   const [draft, setDraft] = useState<Draft>(draftFromParams(params))
   const [sheetOpen, setSheetOpen] = useState(false)
   const { t } = useTranslation()
+
+  useEffect(() => {
+    setDraft(draftFromParams(params))
+  }, [params])
 
   const activeCount = countActive(draftFromParams(params))
 
