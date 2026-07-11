@@ -9,19 +9,20 @@ const OPTIONS = [
 ]
 
 describe('MultiSelect', () => {
-  it('показывает label, когда ничего не выбрано', () => {
+  it('показывает placeholder, когда ничего не выбрано', () => {
     render(<MultiSelect label="Все форматы" options={OPTIONS} value={[]} onChange={vi.fn()} />)
-    expect(screen.getByRole('combobox').textContent).toContain('Все форматы')
+    const input = screen.getByPlaceholderText('Все форматы')
+    expect(input).toBeDefined()
   })
 
-  it('показывает label выбранного значения при одном выбранном', () => {
+  it('показывает чип с label выбранного значения при одном выбранном', () => {
     render(
       <MultiSelect label="Все форматы" options={OPTIONS} value={['office']} onChange={vi.fn()} />
     )
-    expect(screen.getByRole('combobox').textContent).toContain('Офис')
+    expect(screen.getByText('Офис')).toBeDefined()
   })
 
-  it('перечисляет выбранные значения через запятую при нескольких выбранных', () => {
+  it('показывает отдельные чипы для каждого выбранного значения', () => {
     render(
       <MultiSelect
         label="Все форматы"
@@ -30,12 +31,11 @@ describe('MultiSelect', () => {
         onChange={vi.fn()}
       />
     )
-    const trigger = screen.getByRole('combobox')
-    expect(trigger.textContent).toContain('Удалённо, Офис')
-    expect(trigger.textContent).not.toContain('Все форматы:')
+    expect(screen.getByText('Удалённо')).toBeDefined()
+    expect(screen.getByText('Офис')).toBeDefined()
   })
 
-  it('сохраняет каунтер при нескольких выбранных', () => {
+  it('рендерит чипы с кнопками удаления для каждого выбранного значения', () => {
     render(
       <MultiSelect
         label="Все форматы"
@@ -44,6 +44,7 @@ describe('MultiSelect', () => {
         onChange={vi.fn()}
       />
     )
-    expect(screen.getByText('2')).toBeDefined()
+    const chips = document.querySelectorAll('[data-slot="combobox-chip"]')
+    expect(chips).toHaveLength(2)
   })
 })
