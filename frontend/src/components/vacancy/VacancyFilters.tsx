@@ -313,7 +313,12 @@ export function VacancyFilters({ params, onChange }: Props) {
               <FilterFields draft={draft} setDraft={setDraft} industries={industries} />
             </div>
             <SheetFooter className="flex-row gap-2">
-              <Button variant="outline" className="flex-1" onClick={reset}>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={reset}
+                data-testid="filters-reset"
+              >
                 {t('common.reset')}
               </Button>
               <Button className="flex-1" onClick={() => apply()}>
@@ -332,7 +337,7 @@ export function VacancyFilters({ params, onChange }: Props) {
             <Button size="sm" onClick={() => apply()}>
               {t('filters.apply')}
             </Button>
-            <Button size="sm" variant="ghost" onClick={reset}>
+            <Button size="sm" variant="ghost" onClick={reset} data-testid="filters-reset">
               {t('common.reset')}
             </Button>
           </div>

@@ -26,7 +26,7 @@ describe('VacancyFilters', () => {
   it('кнопка «Сбросить» вызывает onChange с { page: 1 }', async () => {
     const onChange = vi.fn()
     render(<VacancyFilters params={{ workFormat: ['remote'] }} onChange={onChange} />)
-    await userEvent.click(screen.getAllByRole('button', { name: /сбросить/i })[0]!)
+    await userEvent.click(screen.getAllByTestId('filters-reset')[0]!)
     expect(onChange).toHaveBeenCalledWith({ page: 1 })
   })
 })

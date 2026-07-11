@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
@@ -16,8 +16,11 @@ import {
   ErrorState,
   CardListSkeleton,
   PaginationBar,
+  ActiveFilterChips,
 } from '@/components/shared'
-import type { Company, CompanyListParams } from '@/types/api'
+import { getCountryName } from '@/lib/countries'
+import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
+import type { Company, CompanyListParams, CompanySizeEnum } from '@/types/api'
 
 interface Props {
   initialCompanies?: Company[]
@@ -62,6 +65,38 @@ export const CompaniesClient = observer(function CompaniesClient({
     setParams(next)
     void store.fetchCompanies(next)
   }
+
+  const activeChips = useMemo(() => {
+    const chips: { key: string; label: string; onRemove: () => void }[] = []
+
+    if (params.country) {
+      chips.push({
+        key: 'country',
+        label: getCountryName(params.country),
+        onRemove: () => {
+          const next = { ...params, page: 1 }
+          delete next.country
+          handleParamsChange(next)
+        },
+      })
+    }
+
+    if (params.companySize) {
+      const size = params.companySize
+      chips.push({
+        key: 'companySize',
+        label: COMPANY_SIZE_LABELS[size as CompanySizeEnum] ?? size,
+        onRemove: () => {
+          const next = { ...params, page: 1 }
+          delete next.companySize
+          handleParamsChange(next)
+        },
+      })
+    }
+
+    return chips
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params])
 
   const useInitial =
     !loadedOnce && store.companies.length === 0 && (initialCompanies?.length ?? 0) > 0
@@ -112,6 +147,9 @@ export const CompaniesClient = observer(function CompaniesClient({
               {t('common.search')}
             </Button>
           </form>
+
+          <ActiveFilterChips chips={activeChips} />
+
           {showSkeleton && <CardListSkeleton count={6} />}
 
           {store.error && !store.isLoading && (

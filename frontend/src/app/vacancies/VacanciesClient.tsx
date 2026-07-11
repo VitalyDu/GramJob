@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -17,9 +17,12 @@ import {
   ErrorState,
   CardListSkeleton,
   PaginationBar,
+  ActiveFilterChips,
 } from '@/components/shared'
 import { parseVacancySearchParams } from '@/lib/search-params'
-import type { Vacancy, VacancyListParams } from '@/types/api'
+import { getCountryName } from '@/lib/countries'
+import { api } from '@/services/api'
+import type { Industry, Vacancy, VacancyListParams } from '@/types/api'
 
 interface Props {
   initialVacancies?: Vacancy[]
@@ -31,7 +34,7 @@ export const VacanciesClient = observer(function VacanciesClient({
   initialTotal,
 }: Props) {
   const { vacancy: store, auth } = useStores()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const searchParams = useSearchParams()
   const initialParamsRef = useRef<VacancyListParams | null>(null)
   if (initialParamsRef.current === null) {
@@ -41,6 +44,7 @@ export const VacanciesClient = observer(function VacanciesClient({
   const [searchInput, setSearchInput] = useState(initialParamsRef.current.search ?? '')
   const [loadedOnce, setLoadedOnce] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [industries, setIndustries] = useState<Industry[]>([])
 
   useEffect(() => {
     setMounted(true)
@@ -48,6 +52,13 @@ export const VacanciesClient = observer(function VacanciesClient({
       .fetchVacancies(initialParamsRef.current ?? { page: 1 })
       .finally(() => setLoadedOnce(true))
   }, [store])
+
+  useEffect(() => {
+    void api
+      .get<{ data: Industry[] }>('/industries')
+      .then((res) => setIndustries(Array.isArray(res.data) ? res.data : []))
+      .catch(() => {})
+  }, [])
 
   const handleParamsChange = (next: VacancyListParams) => {
     setParams(next)
@@ -75,6 +86,149 @@ export const VacanciesClient = observer(function VacanciesClient({
     setParams(next)
     void store.fetchVacancies(next)
   }
+
+  const lang = i18n.language === 'en' ? 'en' : 'ru'
+
+  const activeChips = useMemo(() => {
+    const chips: { key: string; label: string; onRemove: () => void }[] = []
+
+    if (params.country) {
+      const country = params.country
+      chips.push({
+        key: 'country',
+        label: getCountryName(country),
+        onRemove: () => {
+          const next = { ...params, page: 1 }
+          delete next.country
+          handleParamsChange(next)
+        },
+      })
+    }
+
+    if (params.industry) {
+      const ind = industries.find((i) => i.documentId === params.industry)
+      const industryDocId = params.industry
+      chips.push({
+        key: 'industry',
+        label: ind ? ind.name[lang] : t('filters.industry'),
+        onRemove: () => {
+          const next = { ...params, page: 1 }
+          delete next.industry
+          delete next.specialization
+          handleParamsChange(next)
+        },
+      })
+
+      if (params.specialization) {
+        const spec = ind?.specializations?.find((s) => s.documentId === params.specialization)
+        chips.push({
+          key: 'specialization',
+          label: spec ? spec.name[lang] : t('filters.specialization'),
+          onRemove: () => {
+            const next = { ...params, page: 1 }
+            delete next.specialization
+            handleParamsChange(next)
+          },
+        })
+      }
+      void industryDocId
+    }
+
+    for (const wf of params.workFormat ?? []) {
+      const val = wf
+      chips.push({
+        key: `wf_${wf}`,
+        label: t(`enums.workFormat.${wf}`),
+        onRemove: () => {
+          const next = { ...params, page: 1 }
+          const remaining = (params.workFormat ?? []).filter((x) => x !== val)
+          if (remaining.length > 0) {
+            next.workFormat = remaining
+          } else {
+            delete next.workFormat
+          }
+          handleParamsChange(next)
+        },
+      })
+    }
+
+    for (const et of params.employmentType ?? []) {
+      const val = et
+      chips.push({
+        key: `et_${et}`,
+        label: t(`enums.employmentType.${et}`),
+        onRemove: () => {
+          const next = { ...params, page: 1 }
+          const remaining = (params.employmentType ?? []).filter((x) => x !== val)
+          if (remaining.length > 0) {
+            next.employmentType = remaining
+          } else {
+            delete next.employmentType
+          }
+          handleParamsChange(next)
+        },
+      })
+    }
+
+    for (const s of params.seniority ?? []) {
+      const val = s
+      chips.push({
+        key: `seniority_${s}`,
+        label: t(`enums.seniority.${s}`),
+        onRemove: () => {
+          const next = { ...params, page: 1 }
+          const remaining = (params.seniority ?? []).filter((x) => x !== val)
+          if (remaining.length > 0) {
+            next.seniority = remaining
+          } else {
+            delete next.seniority
+          }
+          handleParamsChange(next)
+        },
+      })
+    }
+
+    if (params.salaryFrom != null) {
+      const val = params.salaryFrom
+      chips.push({
+        key: 'salaryFrom',
+        label: `${t('filters.from')} ${val}`,
+        onRemove: () => {
+          const next = { ...params, page: 1 }
+          delete next.salaryFrom
+          handleParamsChange(next)
+        },
+      })
+    }
+
+    if (params.salaryTo != null) {
+      const val = params.salaryTo
+      chips.push({
+        key: 'salaryTo',
+        label: `${t('filters.to')} ${val}`,
+        onRemove: () => {
+          const next = { ...params, page: 1 }
+          delete next.salaryTo
+          handleParamsChange(next)
+        },
+      })
+    }
+
+    if (params.salaryCurrency) {
+      chips.push({
+        key: 'salaryCurrency',
+        label: params.salaryCurrency,
+        onRemove: () => {
+          const next = { ...params, page: 1 }
+          delete next.salaryCurrency
+          handleParamsChange(next)
+        },
+      })
+    }
+
+    return chips
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params, industries, lang])
 
   const useInitial =
     !loadedOnce && store.vacancies.length === 0 && (initialVacancies?.length ?? 0) > 0
@@ -125,6 +279,9 @@ export const VacanciesClient = observer(function VacanciesClient({
               {t('common.search')}
             </Button>
           </form>
+
+          <ActiveFilterChips chips={activeChips} />
+
           {showSkeleton && <CardListSkeleton count={6} />}
 
           {store.error && !store.isLoading && (
