@@ -20,6 +20,12 @@ const mockStore = {
     clearLimitReached: vi.fn(),
   },
   auth: { user: { subscriptionPlan: 'free', vacancyCredits: 0 }, isAuthenticated: true },
+  limits: {
+    data: null,
+    isLoading: false,
+    error: null,
+    fetchLimits: vi.fn(),
+  },
 }
 
 vi.mock('@/stores/StoreProvider', () => ({

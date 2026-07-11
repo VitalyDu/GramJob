@@ -27,8 +27,20 @@ const companyStore = {
   submitCompany: vi.fn(),
 }
 
+const limitsStore = {
+  data: null,
+  isLoading: false,
+  error: null,
+  fetchLimits: vi.fn(),
+}
+
 vi.mock('@/stores/StoreProvider', () => ({
-  useStores: () => ({ vacancy: vacancyStore, resume: resumeStore, company: companyStore }),
+  useStores: () => ({
+    vacancy: vacancyStore,
+    resume: resumeStore,
+    company: companyStore,
+    limits: limitsStore,
+  }),
 }))
 
 vi.mock('@/hooks/useRequireAuth', () => ({ useRequireAuth: () => true }))

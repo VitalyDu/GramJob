@@ -25,6 +25,12 @@ vi.mock('@/stores/StoreProvider', () => ({
       total: 0,
       fetchMyResumes: vi.fn(),
     },
+    limits: {
+      data: null,
+      isLoading: false,
+      error: null,
+      fetchLimits: vi.fn(),
+    },
   }),
 }))
 
