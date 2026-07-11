@@ -144,8 +144,8 @@ export const RejectAction = ({ model, documentId, document }: ActionProps) => {
 
 const REPORT_MODEL = 'api::report.report'
 
-export const ResolveReportAction = ({ model, documentId, document }: ActionProps) => {
-  if (model !== REPORT_MODEL || !documentId || document?.status !== 'pending') return null
+export const ResolveReportAction = ({ model, documentId }: ActionProps) => {
+  if (model !== REPORT_MODEL || !documentId) return null
 
   return {
     label: 'Жалоба подтверждена',
@@ -165,8 +165,8 @@ export const ResolveReportAction = ({ model, documentId, document }: ActionProps
   }
 }
 
-export const DismissReportAction = ({ model, documentId, document }: ActionProps) => {
-  if (model !== REPORT_MODEL || !documentId || document?.status !== 'pending') return null
+export const DismissReportAction = ({ model, documentId }: ActionProps) => {
+  if (model !== REPORT_MODEL || !documentId) return null
 
   return {
     label: 'Отклонить жалобу',
