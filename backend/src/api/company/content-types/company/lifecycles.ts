@@ -22,7 +22,44 @@ type CompanyLifecycleEvent = {
   state?: Record<string, unknown>
 }
 
+type CompanyAfterCreateEvent = {
+  result: {
+    documentId?: string
+    moderationStatus?: string
+    name?: string
+  }
+  params: { data?: Record<string, unknown> }
+}
+
 export default {
+  async afterCreate(event: CompanyAfterCreateEvent) {
+    if (event.result.moderationStatus !== 'moderation') return
+    const s = globalThis.strapi as Core.Strapi
+    const documentId = event.result.documentId
+    if (!documentId) return
+    try {
+      const company = await (s.documents as any)('api::company.company').findOne({
+        documentId,
+        populate: { owner: { fields: ['id'] } },
+        fields: ['documentId', 'name'],
+      })
+      await logModeration(s, {
+        entityType: 'company',
+        entityDocumentId: documentId,
+        entityTitle: company?.name ?? '',
+        action: 'submitted',
+      })
+      notifyAdmins(s, {
+        entityType: 'company',
+        title: company?.name ?? '',
+        ...(company?.owner?.id ? { authorId: company.owner.id } : {}),
+        documentId,
+      })
+    } catch (err) {
+      s.log.error('[company] afterCreate moderation log failed', err)
+    }
+  },
+
   async beforeUpdate(event: CompanyBeforeUpdateEvent) {
     const statusSet = event.params.data?.['moderationStatus']
     if (statusSet !== 'moderation' && statusSet !== 'published' && statusSet !== 'rejected') {

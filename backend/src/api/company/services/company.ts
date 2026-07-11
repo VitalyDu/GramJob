@@ -33,7 +33,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         telegram: input.telegram,
         linkedin: input.linkedin,
         slug,
-        moderationStatus: 'draft',
+        moderationStatus: 'moderation',
         owner: ownerId,
       },
     })
