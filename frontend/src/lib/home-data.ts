@@ -34,9 +34,25 @@ export async function getHomeStats(): Promise<HomeStats> {
   }
 }
 
+function ensureArray(val: unknown): string[] {
+  if (Array.isArray(val)) return val as string[]
+  if (typeof val === 'string' && val) return [val]
+  return []
+}
+
+function normalizeVacancy(v: unknown): Vacancy {
+  const raw = v as Record<string, unknown>
+  return {
+    ...raw,
+    workFormat: ensureArray(raw['workFormat']),
+    employmentType: ensureArray(raw['employmentType']),
+    seniority: ensureArray(raw['seniority']),
+  } as Vacancy
+}
+
 export async function getLatestVacancies(limit: number): Promise<Vacancy[]> {
-  const res = await fetchJson<{ data: Vacancy[] }>(
+  const res = await fetchJson<{ data: unknown[] }>(
     `/vacancies?page=1&pageSize=${limit}&sort=newest`
   )
-  return res?.data ?? []
+  return res?.data?.map(normalizeVacancy) ?? []
 }
