@@ -21,6 +21,7 @@ import {
 import { RESUME_WORK_FORMAT_VALUES, RESUME_EMPLOYMENT_TYPE_VALUES } from '@/lib/resume-utils'
 import { MultiSelect } from '@/components/ui/multi-select'
 import { CountrySelect } from '@/components/ui/country-select'
+import { CitySelect } from '@/components/ui/city-select'
 import type { ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 
 export const ResumesClient = observer(function ResumesClient() {
@@ -29,6 +30,7 @@ export const ResumesClient = observer(function ResumesClient() {
   const searchParams = useSearchParams()
   const [search, setSearch] = useState(() => searchParams.get('search') ?? '')
   const [country, setCountry] = useState(() => searchParams.get('country') ?? '')
+  const [city, setCity] = useState(() => searchParams.get('city') ?? '')
   const [workFormats, setWorkFormats] = useState<ResumeWorkFormatEnum[]>(
     () =>
       searchParams
@@ -49,15 +51,17 @@ export const ResumesClient = observer(function ResumesClient() {
     void store.fetchResumes({
       search,
       country,
+      ...(city ? { city } : {}),
       ...(workFormats.length > 0 ? { workFormat: workFormats } : {}),
       ...(employmentTypes.length > 0 ? { employmentType: employmentTypes } : {}),
     })
-  }, [store, auth.user, search, country, workFormats, employmentTypes])
+  }, [store, auth.user, search, country, city, workFormats, employmentTypes])
 
   const handlePageChange = (page: number) => {
     void store.fetchResumes({
       search,
       country,
+      ...(city ? { city } : {}),
       ...(workFormats.length > 0 ? { workFormat: workFormats } : {}),
       ...(employmentTypes.length > 0 ? { employmentType: employmentTypes } : {}),
       page,
@@ -121,8 +125,20 @@ export const ResumesClient = observer(function ResumesClient() {
               <Label>{t('filters.country')}</Label>
               <CountrySelect
                 value={country}
-                onChange={setCountry}
+                onChange={(v) => {
+                  setCountry(v)
+                  setCity('')
+                }}
                 placeholder={t('filters.anyCountry')}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t('filters.city')}</Label>
+              <CitySelect
+                country={country}
+                value={city}
+                onChange={setCity}
+                placeholder={t('filters.anyCity')}
               />
             </div>
             <MultiSelect
@@ -154,6 +170,7 @@ export const ResumesClient = observer(function ResumesClient() {
                 void store.fetchResumes({
                   search,
                   country,
+                  ...(city ? { city } : {}),
                   ...(workFormats.length > 0 ? { workFormat: workFormats } : {}),
                   ...(employmentTypes.length > 0 ? { employmentType: employmentTypes } : {}),
                 })

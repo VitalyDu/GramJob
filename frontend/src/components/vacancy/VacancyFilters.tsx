@@ -40,6 +40,7 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer'
 import { CountrySelect } from '@/components/ui/country-select'
+import { CitySelect } from '@/components/ui/city-select'
 
 interface Props {
   params: VacancyListParams
@@ -58,6 +59,7 @@ const SORT_KEYS = [
 
 type Draft = {
   country: string
+  city: string
   industry: string
   specialization: string
   workFormat: WorkFormatEnum[]
@@ -72,6 +74,7 @@ type Draft = {
 function draftFromParams(params: VacancyListParams): Draft {
   return {
     country: params.country ?? '',
+    city: params.city ?? '',
     industry: params.industry ?? '',
     specialization: params.specialization ?? '',
     workFormat: params.workFormat ?? [],
@@ -87,6 +90,7 @@ function draftFromParams(params: VacancyListParams): Draft {
 function countActive(draft: Draft): number {
   return [
     draft.country,
+    draft.city,
     draft.industry,
     draft.specialization,
     draft.salaryFrom,
@@ -188,13 +192,22 @@ function FilterFields({
         {/* Location */}
         <AccordionItem value="location">
           <AccordionTrigger className="px-1 py-3 text-sm hover:no-underline">
-            <SectionLabel label={t('filters.country')} count={draft.country ? 1 : 0} />
+            <SectionLabel
+              label={t('filters.location')}
+              count={(draft.country ? 1 : 0) + (draft.city ? 1 : 0)}
+            />
           </AccordionTrigger>
-          <AccordionContent className="px-1 pb-3">
+          <AccordionContent className="space-y-2 px-1 pb-3">
             <CountrySelect
               value={draft.country}
-              onChange={(v) => setDraft({ ...draft, country: v })}
+              onChange={(v) => setDraft({ ...draft, country: v, city: '' })}
               placeholder={t('filters.anyCountry')}
+            />
+            <CitySelect
+              country={draft.country}
+              value={draft.city}
+              onChange={(v) => setDraft({ ...draft, city: v })}
+              placeholder={t('filters.anyCity')}
             />
           </AccordionContent>
         </AccordionItem>
@@ -371,6 +384,7 @@ export function VacancyFilters({ params, onChange }: Props) {
     const next: VacancyListParams = { page: 1 }
     if (params.search) next.search = params.search
     if (d.country) next.country = d.country
+    if (d.city) next.city = d.city
     if (d.industry) next.industry = d.industry
     if (d.specialization) next.specialization = d.specialization
     if (d.salaryFrom) next.salaryFrom = Number(d.salaryFrom)

@@ -298,7 +298,10 @@
     "sortSalaryAsc": "Зарплата ↑",
     "sortRelevance": "По релевантности",
     "companySize": "Размер компании",
-    "anySize": "Любой размер"
+    "anySize": "Любой размер",
+    "location": "Локация",
+    "city": "Город",
+    "anyCity": "Любой город"
   },
   "dashboard": {
     "title": "Мой кабинет",
@@ -722,6 +725,12 @@
     "searchPlaceholder": "Поиск страны...",
     "notFound": "Не найдено",
     "notSpecified": "— Не указана"
+  },
+  "citySelect": {
+    "placeholder": "Выберите город",
+    "searchPlaceholder": "Поиск города...",
+    "notFound": "Не найдено",
+    "notSpecified": "— Не указан"
   },
   "shared": {
     "retry": "Повторить",

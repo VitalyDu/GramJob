@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { useFieldArray, useForm, Controller } from 'react-hook-form'
+import { useState, useMemo, useEffect } from 'react'
+import { useFieldArray, useForm, Controller, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
@@ -38,6 +38,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { RESUME_WORK_FORMAT_VALUES, RESUME_EMPLOYMENT_TYPE_VALUES } from '@/lib/resume-utils'
 import { CountrySelect } from '@/components/ui/country-select'
+import { CitySelect } from '@/components/ui/city-select'
 import type { ResumeCreateInput, ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
 
@@ -260,6 +261,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
     handleSubmit,
     watch,
     control,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -305,6 +307,11 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
       })),
     },
   })
+
+  const selectedCountry = useWatch({ control, name: 'country' })
+  useEffect(() => {
+    setValue('city', '')
+  }, [selectedCountry, setValue])
 
   const {
     fields: workFields,
@@ -417,11 +424,18 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
               {errors.country && <FieldError errors={[errors.country]} />}
             </Field>
             <Field>
-              <FieldLabel htmlFor="city">{t('forms.resume.cityLabel')}</FieldLabel>
-              <Input
-                id="city"
-                {...register('city')}
-                placeholder={t('forms.resume.cityPlaceholder')}
+              <FieldLabel>{t('forms.resume.cityLabel')}</FieldLabel>
+              <Controller
+                name="city"
+                control={control}
+                render={({ field }) => (
+                  <CitySelect
+                    country={selectedCountry}
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    placeholder={t('forms.resume.cityPlaceholder')}
+                  />
+                )}
               />
             </Field>
           </div>

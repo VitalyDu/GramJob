@@ -298,7 +298,10 @@
     "sortSalaryAsc": "Salary ↑",
     "sortRelevance": "By relevance",
     "companySize": "Company size",
-    "anySize": "Any size"
+    "anySize": "Any size",
+    "location": "Location",
+    "city": "City",
+    "anyCity": "Any city"
   },
   "dashboard": {
     "title": "My Account",
@@ -720,6 +723,12 @@
   "countrySelect": {
     "placeholder": "Select country",
     "searchPlaceholder": "Search country...",
+    "notFound": "Not found",
+    "notSpecified": "— Not specified"
+  },
+  "citySelect": {
+    "placeholder": "Select city",
+    "searchPlaceholder": "Search city...",
     "notFound": "Not found",
     "notSpecified": "— Not specified"
   },

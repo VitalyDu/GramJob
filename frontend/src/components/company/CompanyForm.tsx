@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useEffect, useMemo } from 'react'
+import { useForm, Controller, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Building2, Link, MapPin } from 'lucide-react'
@@ -23,6 +23,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
 import { CountrySelect } from '@/components/ui/country-select'
+import { CitySelect } from '@/components/ui/city-select'
 
 function EnumPills<T extends string>({
   id,
@@ -117,6 +118,7 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -131,6 +133,11 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
       linkedin: defaultValues?.linkedin ?? '',
     },
   })
+
+  const selectedCountry = useWatch({ control, name: 'country' })
+  useEffect(() => {
+    setValue('city', '')
+  }, [selectedCountry, setValue])
 
   const mainButtonActive = useTelegramMainButton({
     text: isLoading ? t('forms.company.saving') : t('forms.company.save'),
@@ -229,11 +236,18 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="city">{t('forms.company.cityLabel')}</FieldLabel>
-              <Input
-                id="city"
-                {...register('city')}
-                placeholder={t('forms.company.cityPlaceholder')}
+              <FieldLabel>{t('forms.company.cityLabel')}</FieldLabel>
+              <Controller
+                name="city"
+                control={control}
+                render={({ field }) => (
+                  <CitySelect
+                    country={selectedCountry}
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    placeholder={t('forms.company.cityPlaceholder')}
+                  />
+                )}
               />
             </Field>
           </div>

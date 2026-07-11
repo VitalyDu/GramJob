@@ -109,6 +109,7 @@ export interface Company {
 export interface CompanyListParams {
   search?: string
   country?: string
+  city?: string
   companySize?: CompanySizeEnum
   page?: number
   pageSize?: number

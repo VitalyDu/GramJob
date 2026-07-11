@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { AlignLeft, Briefcase, FileText, Sparkles } from 'lucide-react'
@@ -24,6 +24,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { WORK_FORMAT_VALUES, EMPLOYMENT_TYPE_VALUES, SENIORITY_VALUES } from '@/lib/vacancy-utils'
 import { CountrySelect } from '@/components/ui/country-select'
+import { CitySelect } from '@/components/ui/city-select'
 import type {
   VacancyCreateInput,
   Industry,
@@ -164,6 +165,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
     handleSubmit,
     watch,
     control,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -194,6 +196,10 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
   })
 
   const selectedIndustry = watch('industryId')
+  const selectedCountry = useWatch({ control, name: 'country' })
+  useEffect(() => {
+    setValue('city', '')
+  }, [selectedCountry, setValue])
 
   useEffect(() => {
     void api
@@ -424,11 +430,18 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
               {errors.country && <FieldError errors={[errors.country]} />}
             </Field>
             <Field>
-              <FieldLabel htmlFor="city">{t('forms.vacancy.cityLabel')}</FieldLabel>
-              <Input
-                id="city"
-                {...register('city')}
-                placeholder={t('forms.vacancy.cityPlaceholder')}
+              <FieldLabel>{t('forms.vacancy.cityLabel')}</FieldLabel>
+              <Controller
+                name="city"
+                control={control}
+                render={({ field }) => (
+                  <CitySelect
+                    country={selectedCountry}
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    placeholder={t('forms.vacancy.cityPlaceholder')}
+                  />
+                )}
               />
             </Field>
           </div>

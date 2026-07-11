@@ -76,6 +76,20 @@ export const CompaniesClient = observer(function CompaniesClient({
         onRemove: () => {
           const next = { ...params, page: 1 }
           delete next.country
+          delete next.city
+          handleParamsChange(next)
+        },
+      })
+    }
+
+    if (params.city) {
+      const cityVal = params.city
+      chips.push({
+        key: 'city',
+        label: cityVal,
+        onRemove: () => {
+          const next = { ...params, page: 1 }
+          delete next.city
           handleParamsChange(next)
         },
       })

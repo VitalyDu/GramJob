@@ -90,6 +90,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const {
         search,
         country,
+        city,
         companySize,
         page = '1',
         pageSize = '20',
@@ -117,6 +118,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         filters.$or = [{ name: { $containsi: search } }, { description: { $containsi: search } }]
       }
       if (country) filters.country = { $eq: country }
+      if (city) filters.city = { $containsi: city }
       if (companySize) filters.companySize = { $eq: companySize }
       if (blockedUserIds.length > 0) {
         filters.owner = { id: { $notIn: blockedUserIds } }
