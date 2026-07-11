@@ -11,6 +11,7 @@ describe('api client', () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ id: 1 }),
+      text: () => Promise.resolve(JSON.stringify({ id: 1 })),
     })
     vi.stubGlobal('fetch', fetchMock)
 
@@ -29,6 +30,7 @@ describe('api client', () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({}),
+      text: () => Promise.resolve('{}'),
     })
     vi.stubGlobal('fetch', fetchMock)
 
@@ -48,6 +50,7 @@ describe('api client', () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({}),
+      text: () => Promise.resolve('{}'),
     })
     vi.stubGlobal('fetch', fetchMock)
 
@@ -76,6 +79,7 @@ describe('api client', () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ jwt: 'token', user: {} }),
+      text: () => Promise.resolve(JSON.stringify({ jwt: 'token', user: {} })),
     })
     vi.stubGlobal('fetch', fetchMock)
 
