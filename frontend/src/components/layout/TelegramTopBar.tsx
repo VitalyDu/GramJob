@@ -74,9 +74,6 @@ export const TelegramTopBar = observer(function TelegramTopBar() {
               className="flex min-w-0 items-center gap-2 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <UserAvatar user={user} className="h-8 w-8 shrink-0" />
-              <span className="truncate text-sm font-medium leading-tight">
-                {user.firstName ?? user.email}
-              </span>
               <SubscriptionBadge plan={user.subscriptionPlan} />
             </button>
           ) : (
