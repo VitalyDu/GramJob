@@ -12,6 +12,11 @@ if (!i18next.isInitialized) {
   i18next.use(initReactI18next).init({
     lng: 'ru',
     fallbackLng: 'en',
+    // initImmediate: false forces synchronous init so i18next is fully ready
+    // before React's hydration render runs. Without this, the default async init
+    // (setTimeout) hasn't completed yet, i18next falls back to 'en', and the
+    // client renders "Vacancies" while the server rendered "Вакансии".
+    initImmediate: false,
     resources: {
       ru: { common: ruCommon },
       en: { common: enCommon },
