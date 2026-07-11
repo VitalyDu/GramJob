@@ -78,7 +78,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         education: input.education ?? [],
         views: 0,
         invitations: 0,
-        moderationStatus: 'draft',
+        moderationStatus: 'moderation',
       },
     })
   },

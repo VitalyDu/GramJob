@@ -18,7 +18,44 @@ type ResumeAfterEvent = {
   state?: Record<string, unknown>
 }
 
+type ResumeAfterCreateEvent = {
+  result: {
+    documentId?: string
+    moderationStatus?: string
+    title?: string
+  }
+  params: { data?: Record<string, unknown> }
+}
+
 export default {
+  async afterCreate(event: ResumeAfterCreateEvent) {
+    if (event.result.moderationStatus !== 'moderation') return
+    const s = globalThis.strapi as Core.Strapi
+    const documentId = event.result.documentId
+    if (!documentId) return
+    try {
+      const resume = await (s.documents as any)('api::resume.resume').findOne({
+        documentId,
+        populate: { user: { fields: ['id'] } },
+        fields: ['documentId', 'title'],
+      })
+      await logModeration(s, {
+        entityType: 'resume',
+        entityDocumentId: documentId,
+        entityTitle: resume?.title ?? '',
+        action: 'submitted',
+      })
+      notifyAdmins(s, {
+        entityType: 'resume',
+        title: resume?.title ?? '',
+        ...(resume?.user?.id ? { authorId: resume.user.id } : {}),
+        documentId,
+      })
+    } catch (err) {
+      s.log.error('[resume] afterCreate moderation log failed', err)
+    }
+  },
+
   async beforeUpdate(event: ResumeBeforeUpdateEvent) {
     const statusSet = event.params.data?.['moderationStatus']
     if (statusSet !== 'moderation' && statusSet !== 'published' && statusSet !== 'rejected') {
