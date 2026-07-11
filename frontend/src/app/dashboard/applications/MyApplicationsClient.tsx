@@ -12,15 +12,18 @@ import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { PaginationBar } from '@/components/shared/PaginationBar'
+import { UsageLimitBar } from '@/components/shared/UsageLimitBar'
+import { Card, CardContent } from '@/components/ui/card'
 
 export const MyApplicationsClient = observer(function MyApplicationsClient() {
   const { t } = useTranslation()
-  const { application: store } = useStores()
+  const { application: store, limits } = useStores()
   const isAuthenticated = useRequireAuth()
 
   useEffect(() => {
     void store.fetchMyApplications()
-  }, [store])
+    void limits.fetchLimits()
+  }, [store, limits])
 
   const handlePageChange = (page: number) => {
     void store.fetchMyApplications(page)
@@ -36,6 +39,19 @@ export const MyApplicationsClient = observer(function MyApplicationsClient() {
           ? { description: t('dashboard.applications.totalCount', { count: store.total }) }
           : {})}
       />
+
+      {limits.data && (
+        <Card>
+          <CardContent className="pt-6">
+            <UsageLimitBar
+              label={t('limits.applications.label')}
+              remaining={limits.data.applications.remaining}
+              limit={limits.data.applications.limit}
+              resetsAt={limits.data.applications.resetsAt}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {store.isLoading && <CardListSkeleton count={6} />}
 

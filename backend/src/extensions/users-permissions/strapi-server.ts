@@ -1,8 +1,10 @@
 // Extension for @strapi/plugin-users-permissions
 // - GET /users/me: strips sensitive fields, ensures custom fields are included
 // - PUT /users/me: allowlist-only field updates (firstName, lastName, language, avatar)
+// - GET /users/me/limits: real-time usage limits for all 4 plan bars
 
 import { isAllowedAvatarUrl } from '../../services/avatar-utils'
+import { getAppliesUsedToday } from '../../api/application/services/apply-credit-service'
 
 const SAFE_RESPONSE_FIELDS = [
   'id',
@@ -32,6 +34,14 @@ const ALLOWED_UPDATE_FIELDS = [
 
 // Action uid used by the scope generator: plugin::users-permissions.user.updateMe
 const UPDATE_ME_ACTION = 'plugin::users-permissions.user.updateMe'
+const MY_LIMITS_ACTION = 'plugin::users-permissions.user.myLimits'
+
+const FREE_PLAN_LIMITS = {
+  vacanciesPerMonth: 3,
+  activeVacanciesLimit: 3,
+  applicationsPerDay: 3,
+  resumesLimit: 1,
+}
 
 function pickFields<T extends Record<string, unknown>>(
   obj: T,
@@ -96,8 +106,118 @@ export default (plugin: any) => {
     ctx.body = updatedUser
   }
 
+  // Add GET /users/me/limits — real-time plan usage stats for all 4 limit bars
+  plugin.controllers.user.myLimits = async (ctx: any) => {
+    const authUser = ctx.state.user as { id: number } | undefined
+    if (!authUser) return ctx.unauthorized()
+
+    const userId = authUser.id
+
+    // Get user's plan and credits
+    const user = (await strapi.db.query('plugin::users-permissions.user').findOne({
+      where: { id: userId },
+      select: ['id', 'subscriptionPlan', 'applyCredits', 'vacancyCredits'],
+    })) as {
+      id: number
+      subscriptionPlan: string
+      applyCredits: number
+      vacancyCredits: number
+    } | null
+    if (!user) return ctx.notFound()
+
+    // Get plan limits from SubscriptionPlan content type
+    const planDoc = (await (strapi.documents as any)(
+      'api::subscription-plan.subscription-plan'
+    ).findFirst({
+      filters: { code: { $eq: user.subscriptionPlan } },
+      fields: ['vacanciesPerMonth', 'activeVacanciesLimit', 'applicationsPerDay', 'resumesLimit'],
+    })) as {
+      vacanciesPerMonth: number
+      activeVacanciesLimit: number
+      applicationsPerDay: number
+      resumesLimit: number
+    } | null
+    const plan = planDoc ?? FREE_PLAN_LIMITS
+
+    // ── Applications ───────────────────────────────────────────────────────────
+    const applyUsedToday = getAppliesUsedToday(userId)
+    const applyRemaining = Math.max(plan.applicationsPerDay - applyUsedToday, 0) + user.applyCredits
+    const todayStr = new Date().toISOString().slice(0, 10)
+    const applyResetsAt = `${todayStr}T23:59:59Z`
+
+    // ── Vacancy creations this month ───────────────────────────────────────────
+    const monthStart = new Date()
+    monthStart.setUTCDate(1)
+    monthStart.setUTCHours(0, 0, 0, 0)
+    const createdThisMonth = (await (strapi.documents as any)('api::vacancy.vacancy').count({
+      filters: {
+        postedBy: { id: { $eq: userId } },
+        moderationStatus: { $in: ['moderation', 'published'] },
+        createdAt: { $gte: monthStart.toISOString() },
+      },
+    })) as number
+    const vacancyCreationsRemaining =
+      Math.max(plan.vacanciesPerMonth - createdThisMonth, 0) + user.vacancyCredits
+    const nextMonth = new Date()
+    nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1, 1)
+    nextMonth.setUTCHours(0, 0, 0, 0)
+    const vacancyCreationsResetsAt = nextMonth.toISOString()
+
+    // ── Active vacancies ───────────────────────────────────────────────────────
+    const activeVacanciesCount = (await (strapi.documents as any)('api::vacancy.vacancy').count({
+      filters: {
+        postedBy: { id: { $eq: userId } },
+        moderationStatus: { $in: ['moderation', 'published'] },
+      },
+    })) as number
+    const activeVacanciesRemaining = Math.max(plan.activeVacanciesLimit - activeVacanciesCount, 0)
+
+    // ── Resumes ────────────────────────────────────────────────────────────────
+    const resumesCount = (await (strapi.documents as any)('api::resume.resume').count({
+      filters: {
+        user: { id: { $eq: userId } },
+        moderationStatus: { $notIn: ['archived', 'rejected'] },
+      },
+    })) as number
+    const resumesRemaining = Math.max(plan.resumesLimit - resumesCount, 0)
+
+    ctx.body = {
+      applications: {
+        remaining: applyRemaining,
+        limit: plan.applicationsPerDay,
+        resetsAt: applyResetsAt,
+      },
+      resumes: {
+        remaining: resumesRemaining,
+        limit: plan.resumesLimit,
+      },
+      vacancyCreations: {
+        remaining: vacancyCreationsRemaining,
+        limit: plan.vacanciesPerMonth,
+        resetsAt: vacancyCreationsResetsAt,
+      },
+      activeVacancies: {
+        remaining: activeVacanciesRemaining,
+        limit: plan.activeVacanciesLimit,
+      },
+    }
+  }
+
   // Add PUT /users/me route — must come before PUT /users/:id to avoid id-capture
   const contentApiRoutes: any[] = plugin.routes?.['content-api']?.routes ?? []
+
+  // GET /users/me/limits — must be before GET /users/me to avoid :id capture
+  const existingLimits = contentApiRoutes.find(
+    (r: any) => r.method === 'GET' && r.path === '/users/me/limits'
+  )
+  if (!existingLimits) {
+    contentApiRoutes.unshift({
+      method: 'GET',
+      path: '/users/me/limits',
+      handler: 'user.myLimits',
+      config: { prefix: '' },
+    })
+  }
 
   // Check if a PUT /users/me route already exists (avoid duplicate)
   const existingPutMe = contentApiRoutes.find(
@@ -118,10 +238,7 @@ export default (plugin: any) => {
     existingPutMe.handler = 'user.updateMe'
   }
 
-  // Hook into bootstrap to grant the updateMe permission to the authenticated role.
-  // The scope generator assigns plugin::users-permissions.user.updateMe as the required
-  // action. syncPermissions() only creates default permissions on first run, so new
-  // actions must be seeded explicitly.
+  // Hook into bootstrap to grant the updateMe and myLimits permissions to the authenticated role.
   const originalBootstrap = plugin.bootstrap
   plugin.bootstrap = async (ctx: any) => {
     if (originalBootstrap) {
@@ -136,17 +253,19 @@ export default (plugin: any) => {
 
     if (!authenticatedRole) return
 
-    const existing = await strapiInstance.db
-      .query('plugin::users-permissions.permission')
-      .findOne({ where: { action: UPDATE_ME_ACTION, role: authenticatedRole.id } })
+    for (const action of [UPDATE_ME_ACTION, MY_LIMITS_ACTION]) {
+      const existing = await strapiInstance.db
+        .query('plugin::users-permissions.permission')
+        .findOne({ where: { action, role: authenticatedRole.id } })
 
-    if (!existing) {
-      await strapiInstance.db.query('plugin::users-permissions.permission').create({
-        data: {
-          action: UPDATE_ME_ACTION,
-          role: authenticatedRole.id,
-        },
-      })
+      if (!existing) {
+        await strapiInstance.db.query('plugin::users-permissions.permission').create({
+          data: {
+            action,
+            role: authenticatedRole.id,
+          },
+        })
+      }
     }
   }
 

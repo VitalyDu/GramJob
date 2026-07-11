@@ -729,6 +729,21 @@
     "notFound": "Not found",
     "notSpecified": "— Not specified"
   },
+  "limits": {
+    "resetsIn": "Resets in {{time}}",
+    "applications": {
+      "label": "Applications remaining"
+    },
+    "resumes": {
+      "label": "Resumes remaining"
+    },
+    "vacancyCreations": {
+      "label": "Vacancies remaining this month"
+    },
+    "activeVacancies": {
+      "label": "Active vacancies remaining"
+    }
+  },
   "shared": {
     "retry": "Retry",
     "errorDefault": "Something went wrong",

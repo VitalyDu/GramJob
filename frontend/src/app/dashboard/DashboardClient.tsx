@@ -21,11 +21,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
 import { SubscriptionBanner } from '@/components/subscription/SubscriptionBanner'
-import { PlanUsageCard } from '@/components/subscription/PlanUsageCard'
+import { PlanLimitsCard } from '@/components/subscription/PlanLimitsCard'
 
 export const DashboardClient = observer(function DashboardClient() {
   const router = useRouter()
-  const { auth, payment, resume } = useStores()
+  const { auth } = useStores()
   const { t } = useTranslation()
   const [createOpen, setCreateOpen] = useState(false)
   const isDesktop = useIsDesktop()
@@ -112,12 +112,6 @@ export const DashboardClient = observer(function DashboardClient() {
     if (!auth.isAuthenticated) router.replace('/login')
   }, [auth.isAuthenticated, router])
 
-  useEffect(() => {
-    if (!auth.user) return
-    void payment.fetchPlans()
-    void resume.fetchMyResumes()
-  }, [auth.user, payment, resume])
-
   if (!auth.isAuthenticated || !auth.user) return null
 
   const user = auth.user
@@ -142,15 +136,7 @@ export const DashboardClient = observer(function DashboardClient() {
 
       <SubscriptionBanner />
 
-      <PlanUsageCard
-        user={user}
-        plan={
-          payment.plans.find((p) => p.code === user.subscriptionPlan) ??
-          payment.plans.find((p) => p.code === 'free') ??
-          null
-        }
-        resumeTotal={resume.total}
-      />
+      <PlanLimitsCard />
 
       <section aria-label={t('dashboard.sections')} className="space-y-4">
         {GROUPS.map((group, gi) => (

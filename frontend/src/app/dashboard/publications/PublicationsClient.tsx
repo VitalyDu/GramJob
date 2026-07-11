@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { CardListSkeleton } from '@/components/shared/CardListSkeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { PlanLimitsCard } from '@/components/subscription/PlanLimitsCard'
 
 const STATUS_HINT_KEYS: Record<string, string> = {
   draft: 'publications.hints.draft',
@@ -70,6 +71,8 @@ export const PublicationsClient = observer(function PublicationsClient() {
   return (
     <div className="space-y-6">
       <PageHeader title={t('publications.title')} />
+
+      <PlanLimitsCard />
 
       {isLoading && <CardListSkeleton count={6} />}
 

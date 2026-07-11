@@ -21,8 +21,8 @@ import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { hapticNotify } from '@/lib/telegram'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
-import { LimitBar } from '@/components/vacancy/LimitBar'
 import { UpsellModal } from '@/components/vacancy/UpsellModal'
+import { UsageLimitBar } from '@/components/shared/UsageLimitBar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { PageHeader } from '@/components/shared/PageHeader'
@@ -38,11 +38,10 @@ import {
   canEditVacancy,
 } from '@/lib/vacancy-utils'
 import { RejectionNotice } from '@/components/moderation/RejectionNotice'
-import { PLAN_LIMITS } from './plan-limits'
 
 export const MyVacanciesClient = observer(function MyVacanciesClient() {
   const { t } = useTranslation()
-  const { vacancy: store, auth } = useStores()
+  const { vacancy: store, auth, limits } = useStores()
   useRequireAuth()
 
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -51,11 +50,8 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
 
   useEffect(() => {
     void store.fetchMyVacancies()
-  }, [store])
-
-  const plan = auth.user?.subscriptionPlan ?? 'free'
-  const limit = PLAN_LIMITS[plan] ?? 3
-  const used = auth.user?.vacancyCredits !== undefined ? limit - auth.user.vacancyCredits : 0
+    void limits.fetchLimits()
+  }, [store, limits])
 
   const handlePublish = async (id: string) => {
     await store.publishVacancy(id)
@@ -102,11 +98,23 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
         }
       />
 
-      <Card>
-        <CardContent className="pt-6">
-          <LimitBar used={used} limit={limit} />
-        </CardContent>
-      </Card>
+      {limits.data && (
+        <Card>
+          <CardContent className="space-y-5 pt-6">
+            <UsageLimitBar
+              label={t('limits.vacancyCreations.label')}
+              remaining={limits.data.vacancyCreations.remaining}
+              limit={limits.data.vacancyCreations.limit}
+              resetsAt={limits.data.vacancyCreations.resetsAt}
+            />
+            <UsageLimitBar
+              label={t('limits.activeVacancies.label')}
+              remaining={limits.data.activeVacancies.remaining}
+              limit={limits.data.activeVacancies.limit}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {store.isLoading && <CardListSkeleton count={6} />}
 

@@ -729,6 +729,21 @@
     "notFound": "Не найдено",
     "notSpecified": "— Не указан"
   },
+  "limits": {
+    "resetsIn": "Обновится через {{time}}",
+    "applications": {
+      "label": "Остаток откликов"
+    },
+    "resumes": {
+      "label": "Остаток резюме"
+    },
+    "vacancyCreations": {
+      "label": "Остаток вакансий за месяц"
+    },
+    "activeVacancies": {
+      "label": "Остаток активных вакансий"
+    }
+  },
   "shared": {
     "retry": "Повторить",
     "errorDefault": "Что-то пошло не так",

@@ -17,18 +17,15 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { PaginationBar } from '@/components/shared/PaginationBar'
 import { EntityActionsDrawer } from '@/components/shared/EntityActionsDrawer'
-import {
-  canPublishResume,
-  canEditResume,
-  canArchiveResume,
-  APPLY_PLAN_LIMITS,
-} from '@/lib/resume-utils'
+import { canPublishResume, canEditResume, canArchiveResume } from '@/lib/resume-utils'
 import { RejectionNotice } from '@/components/moderation/RejectionNotice'
+import { UsageLimitBar } from '@/components/shared/UsageLimitBar'
+import { Card, CardContent } from '@/components/ui/card'
 
 export const MyResumesClient = observer(function MyResumesClient() {
   const { t } = useTranslation()
-  const { resume: store, auth } = useStores()
-  useRequireAuth()
+  const { resume: store, limits } = useStores()
+  const isAuthenticated = useRequireAuth()
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -36,10 +33,8 @@ export const MyResumesClient = observer(function MyResumesClient() {
 
   useEffect(() => {
     void store.fetchMyResumes()
-  }, [store])
-
-  const plan = auth.user?.subscriptionPlan ?? 'free'
-  const applyLimit = APPLY_PLAN_LIMITS[plan] ?? 3
+    void limits.fetchLimits()
+  }, [store, limits])
 
   const handlePublish = async (id: string) => {
     await store.publishResume(id)
@@ -58,13 +53,12 @@ export const MyResumesClient = observer(function MyResumesClient() {
     void store.fetchMyResumes(page)
   }
 
-  if (!auth.isAuthenticated) return null
+  if (!isAuthenticated) return null
 
   return (
     <div className="space-y-6">
       <PageHeader
         title={t('dashboard.resumes.title')}
-        description={t('dashboard.resumes.applyLimitDesc', { plan, limit: applyLimit })}
         actions={
           <Button
             asChild
@@ -79,6 +73,18 @@ export const MyResumesClient = observer(function MyResumesClient() {
           </Button>
         }
       />
+
+      {limits.data && (
+        <Card>
+          <CardContent className="pt-6">
+            <UsageLimitBar
+              label={t('limits.resumes.label')}
+              remaining={limits.data.resumes.remaining}
+              limit={limits.data.resumes.limit}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {store.isLoading && <CardListSkeleton count={6} />}
 

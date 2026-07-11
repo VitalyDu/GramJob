@@ -561,6 +561,15 @@ export interface ApplyPackage {
   starsPrice: number
 }
 
+// --- User Limits ---
+
+export interface UserLimits {
+  applications: { remaining: number; limit: number; resetsAt: string }
+  resumes: { remaining: number; limit: number }
+  vacancyCreations: { remaining: number; limit: number; resetsAt: string }
+  activeVacancies: { remaining: number; limit: number }
+}
+
 // --- Notifications ---
 
 export type NotificationType =

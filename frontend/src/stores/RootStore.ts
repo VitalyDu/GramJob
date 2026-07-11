@@ -8,6 +8,7 @@ import { BlockStore } from './BlockStore'
 import { PaymentStore } from './PaymentStore'
 import { NotificationStore } from './NotificationStore'
 import { AnalyticsStore } from './AnalyticsStore'
+import { LimitsStore } from './LimitsStore'
 
 export class RootStore {
   auth: AuthStore
@@ -20,6 +21,7 @@ export class RootStore {
   payment: PaymentStore
   notification: NotificationStore
   analytics: AnalyticsStore
+  limits: LimitsStore
 
   constructor() {
     this.auth = new AuthStore()
@@ -32,6 +34,7 @@ export class RootStore {
     this.payment = new PaymentStore()
     this.notification = new NotificationStore()
     this.analytics = new AnalyticsStore()
+    this.limits = new LimitsStore()
   }
 }
 
