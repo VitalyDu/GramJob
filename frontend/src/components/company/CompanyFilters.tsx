@@ -22,13 +22,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer'
 import { CountrySelect } from '@/components/ui/country-select'
 
 interface Props {
@@ -146,8 +146,8 @@ export function CompanyFilters({ params, onChange }: Props) {
     <div>
       {/* Mobile */}
       <div className="mb-3 md:hidden">
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-          <SheetTrigger asChild>
+        <Drawer open={sheetOpen} onOpenChange={setSheetOpen} direction="bottom">
+          <DrawerTrigger asChild>
             <Button type="button" variant="outline" className="w-full">
               <SlidersHorizontal className="mr-1.5 h-4 w-4" />
               {t('filters.title')}
@@ -155,24 +155,22 @@ export function CompanyFilters({ params, onChange }: Props) {
                 <Badge className="ml-1.5 h-5 min-w-5 justify-center px-1">{activeCount}</Badge>
               )}
             </Button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-xl">
-            <SheetHeader>
-              <SheetTitle>{t('filters.title')}</SheetTitle>
-            </SheetHeader>
-            <div className="px-4">
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>{t('filters.title')}</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex-1 overflow-y-auto px-4">
               <FilterFields draft={draft} setDraft={setDraft} />
             </div>
-            <SheetFooter className="flex-row gap-2 px-4 pt-2">
-              <Button variant="outline" className="flex-1" onClick={reset}>
+            <DrawerFooter>
+              <Button onClick={() => apply()}>{t('filters.apply')}</Button>
+              <Button variant="ghost" onClick={reset}>
                 {t('common.reset')}
               </Button>
-              <Button className="flex-1" onClick={() => apply()}>
-                {t('filters.apply')}
-              </Button>
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
       </div>
 
       {/* Desktop */}
