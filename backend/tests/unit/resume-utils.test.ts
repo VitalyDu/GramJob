@@ -2,7 +2,6 @@ import {
   canPublishResume,
   canEditResume,
   canArchiveResume,
-  publishedTransitionsOnEditResume,
 } from '../../src/api/resume/services/resume-utils'
 
 describe('canPublishResume', () => {
@@ -68,19 +67,5 @@ describe('canArchiveResume', () => {
 
   it('blocks archive for already archived', () => {
     expect(canArchiveResume('archived')).toBe(false)
-  })
-})
-
-describe('publishedTransitionsOnEditResume', () => {
-  it('returns true for published', () => {
-    expect(publishedTransitionsOnEditResume('published')).toBe(true)
-  })
-
-  it('returns false for draft', () => {
-    expect(publishedTransitionsOnEditResume('draft')).toBe(false)
-  })
-
-  it('returns false for rejected', () => {
-    expect(publishedTransitionsOnEditResume('rejected')).toBe(false)
   })
 })

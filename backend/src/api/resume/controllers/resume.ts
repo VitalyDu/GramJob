@@ -1,10 +1,5 @@
 import type { Core } from '@strapi/strapi'
-import {
-  canPublishResume,
-  canEditResume,
-  canArchiveResume,
-  publishedTransitionsOnEditResume,
-} from '../services/resume-utils'
+import { canPublishResume, canEditResume, canArchiveResume } from '../services/resume-utils'
 import { checkIsMaxPlan } from '../policies/requires-max-plan'
 import { toArray } from '../../../utils/query'
 import type resumeServiceFactory from '../services/resume'
@@ -379,9 +374,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         }
       }
 
-      if (publishedTransitionsOnEditResume(status)) {
-        updateData.moderationStatus = 'draft'
-      }
+      updateData.moderationStatus = 'moderation'
 
       const updated = await (strapi.documents as any)('api::resume.resume').update({
         documentId: id,
