@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
-import { LogOut, Monitor, Shield, Star, User } from 'lucide-react'
+import { Ban, LogOut, Monitor, Shield, Star, User } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { useTelegramInit } from '@/hooks/useTelegramInit'
 import { cn } from '@/lib/utils'
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { key: 'security', href: '/dashboard/profile/security', icon: Shield, requiresEmail: true },
   { key: 'interface', href: '/dashboard/profile/interface', icon: Monitor },
   { key: 'subscription', href: '/subscription', icon: Star },
+  { key: 'blocks', href: '/dashboard/blocks', icon: Ban },
 ] as const
 
 export const SettingsNav = observer(function SettingsNav() {
