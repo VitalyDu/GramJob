@@ -12,14 +12,7 @@ import { BottomNav } from './BottomNav'
 import { ModerationToastWatcher } from '@/components/moderation/ModerationToastWatcher'
 import { StartParamRouter } from './StartParamRouter'
 
-const ROOT_PATHS = new Set([
-  '/',
-  '/companies',
-  '/vacancies',
-  '/dashboard',
-  '/dashboard/resumes',
-  '/dashboard/applications',
-])
+const ROOT_PATHS = new Set(['/', '/companies', '/vacancies', '/dashboard'])
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { isMiniApp } = useTelegramInit()
