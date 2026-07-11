@@ -21,7 +21,13 @@ describe('server-api', () => {
   it('fetchVacancyServer returns vacancy data with skipViewCount', async () => {
     mockFetch.mockResolvedValue(okResponse({ data: { documentId: 'v1', title: 'Dev' } }))
     const result = await fetchVacancyServer('v1')
-    expect(result).toEqual({ documentId: 'v1', title: 'Dev' })
+    expect(result).toEqual({
+      documentId: 'v1',
+      title: 'Dev',
+      workFormat: [],
+      employmentType: [],
+      seniority: [],
+    })
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/vacancies/v1?skipViewCount=true'),
       { next: { revalidate: 300 } }
