@@ -30,8 +30,8 @@ export function ApplicationCard({
   const { t } = useTranslation()
   const nextStatuses = STATUS_TRANSITIONS[app.status] ?? []
 
-  return (
-    <div className="rounded-xl border border-border bg-card p-4">
+  const cardContent = (
+    <>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           {employerMode ? (
@@ -46,12 +46,9 @@ export function ApplicationCard({
             </>
           ) : (
             <>
-              <Link
-                href={`/vacancies/${app.vacancy.documentId}`}
-                className="truncate font-semibold text-card-foreground hover:underline"
-              >
+              <span className="truncate font-semibold text-card-foreground">
                 {app.vacancy.title}
-              </Link>
+              </span>
               <p className="mt-0.5 text-sm text-muted-foreground">{app.vacancy.company?.name}</p>
             </>
           )}
@@ -100,6 +97,19 @@ export function ApplicationCard({
           <p className="mt-1 text-sm text-foreground">{app.coverLetter}</p>
         </div>
       )}
-    </div>
+    </>
   )
+
+  if (!employerMode) {
+    return (
+      <Link
+        href={`/vacancies/${app.vacancy.documentId}`}
+        className="block rounded-xl border border-border bg-card p-4 transition hover:border-primary/40"
+      >
+        {cardContent}
+      </Link>
+    )
+  }
+
+  return <div className="rounded-xl border border-border bg-card p-4">{cardContent}</div>
 }
