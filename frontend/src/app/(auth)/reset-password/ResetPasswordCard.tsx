@@ -10,6 +10,7 @@ import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { Button } from '@/components/ui/button'
+import { scrollToFirstFormError } from '@/lib/form-utils'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -85,7 +86,11 @@ export const ResetPasswordCard = observer(function ResetPasswordCard() {
             </Link>
           </div>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+          <form
+            onSubmit={handleSubmit(onSubmit, scrollToFirstFormError)}
+            noValidate
+            className="space-y-4"
+          >
             <div className="space-y-1.5">
               <Label htmlFor="password">{t('auth.newPassword')}</Label>
               <Input id="password" type="password" {...register('password')} />

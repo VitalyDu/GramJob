@@ -36,6 +36,7 @@ import type {
 } from '@/types/api'
 import { api } from '@/services/api'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
+import { scrollToFirstFormError } from '@/lib/form-utils'
 
 function EnumMultiPills<T extends string>({
   id,
@@ -271,12 +272,12 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
 
   const mainButtonActive = useTelegramMainButton({
     text: isLoading ? t('forms.vacancy.saving') : submitLabel,
-    onClick: () => void handleSubmit(handleFormSubmit)(),
+    onClick: () => void handleSubmit(handleFormSubmit, scrollToFirstFormError)(),
     disabled: !!isLoading,
   })
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(handleFormSubmit, scrollToFirstFormError)} className="space-y-5">
       {/* Секция: Основное */}
       <Card>
         <CardHeader className="pb-3">

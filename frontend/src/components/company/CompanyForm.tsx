@@ -22,6 +22,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
+import { scrollToFirstFormError } from '@/lib/form-utils'
 import { CountrySelect } from '@/components/ui/country-select'
 import { CitySelect } from '@/components/ui/city-select'
 
@@ -141,12 +142,12 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
 
   const mainButtonActive = useTelegramMainButton({
     text: isLoading ? t('forms.company.saving') : t('forms.company.save'),
-    onClick: () => void handleSubmit(onSubmit)(),
+    onClick: () => void handleSubmit(onSubmit, scrollToFirstFormError)(),
     disabled: !!isLoading,
   })
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit, scrollToFirstFormError)} className="space-y-5">
       {/* Секция: Основное */}
       <Card>
         <CardHeader className="pb-3">

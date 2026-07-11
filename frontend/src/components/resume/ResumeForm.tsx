@@ -40,6 +40,7 @@ import { CountrySelect } from '@/components/ui/country-select'
 import { CitySelect } from '@/components/ui/city-select'
 import type { ResumeCreateInput, ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
+import { scrollToFirstFormError } from '@/lib/form-utils'
 
 function EnumMultiPills<T extends string>({
   id,
@@ -393,14 +394,14 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
 
   const mainButtonActive = useTelegramMainButton({
     text: isLoading ? t('forms.resume.saving') : t('forms.resume.save'),
-    onClick: () => void handleSubmit(handleFormSubmit)(),
+    onClick: () => void handleSubmit(handleFormSubmit, scrollToFirstFormError)(),
     disabled: !!isLoading,
   })
 
   const watchWorkExperience = watch('workExperience')
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(handleFormSubmit, scrollToFirstFormError)} className="space-y-5">
       {/* Секция: Личные данные */}
       <Card>
         <CardHeader className="pb-3">
