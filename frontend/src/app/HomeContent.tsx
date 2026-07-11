@@ -19,7 +19,7 @@ export function HomeContent({ latest }: Props) {
   return (
     <div className="space-y-16 pb-8">
       {/* Hero */}
-      <section className="bg-brand-gradient -mx-4 -mt-6 px-4 py-16 text-white sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+      <section className="bg-brand-gradient -mx-4 -mt-6 px-4 py-24 text-white sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
         <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
           <Image
             src="/logo-vertical.png"
