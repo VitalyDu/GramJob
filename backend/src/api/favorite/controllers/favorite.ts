@@ -23,7 +23,7 @@ const VACANCY_CARD_FIELDS = [
   'topPlacement',
   'highlighted',
   'sourceType',
-  'status',
+  'moderationStatus',
   'expiresAt',
   'createdAt',
 ] as const
@@ -43,7 +43,7 @@ const RESUME_CARD_FIELDS = [
   'skills',
   'languages',
   'views',
-  'status',
+  'moderationStatus',
   'createdAt',
 ] as const
 
@@ -54,28 +54,28 @@ const COMPANY_CARD_FIELDS = [
   'country',
   'city',
   'companySize',
-  'status',
+  'moderationStatus',
   'createdAt',
 ] as const
 
 async function populateEntity(strapi: Core.Strapi, type: FavoriteType, targetId: string) {
   if (type === 'vacancy') {
     return (strapi.documents as any)('api::vacancy.vacancy').findFirst({
-      filters: { documentId: { $eq: targetId }, status: { $eq: 'published' } },
+      filters: { documentId: { $eq: targetId }, moderationStatus: { $eq: 'published' } },
       fields: VACANCY_CARD_FIELDS as any,
       populate: VACANCY_CARD_POPULATE as any,
     })
   }
   if (type === 'resume') {
     return (strapi.documents as any)('api::resume.resume').findFirst({
-      filters: { documentId: { $eq: targetId }, status: { $eq: 'published' } },
+      filters: { documentId: { $eq: targetId }, moderationStatus: { $eq: 'published' } },
       fields: RESUME_CARD_FIELDS as any,
       populate: { user: { fields: ['id', 'firstName', 'lastName'] } },
     })
   }
   if (type === 'company') {
     return (strapi.documents as any)('api::company.company').findFirst({
-      filters: { documentId: { $eq: targetId }, status: { $eq: 'published' } },
+      filters: { documentId: { $eq: targetId }, moderationStatus: { $eq: 'published' } },
       fields: COMPANY_CARD_FIELDS as any,
       populate: { logo: true },
     })

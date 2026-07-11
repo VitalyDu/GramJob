@@ -33,7 +33,7 @@ const app = {
   vacancy: {
     documentId: 'vac1',
     title: 'Frontend Developer',
-    status: 'published',
+    moderationStatus: 'published',
     sourceType: 'internal',
     company: { documentId: 'c1', name: 'Acme Inc', slug: 'acme' },
   },
@@ -42,7 +42,7 @@ const app = {
     title: 'Senior Frontend',
     firstName: 'Иван',
     lastName: 'Петров',
-    status: 'published',
+    moderationStatus: 'published',
   },
   user: { id: 7, firstName: 'Иван', lastName: 'Петров' },
 }

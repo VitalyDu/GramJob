@@ -73,7 +73,7 @@ export async function checkAndConsumeVacancyCredit(
   const usedThisMonth = await strapi.documents('api::vacancy.vacancy').count({
     filters: {
       postedBy: { id: { $eq: userId } },
-      status: { $in: ['moderation', 'published'] },
+      moderationStatus: { $in: ['moderation', 'published'] },
       createdAt: { $gte: monthStart.toISOString() },
     },
   })

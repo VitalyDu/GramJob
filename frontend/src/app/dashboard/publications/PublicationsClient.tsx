@@ -99,14 +99,14 @@ export const PublicationsClient = observer(function PublicationsClient() {
               <div key={v.documentId} className="rounded-xl border border-border bg-background p-4">
                 <div className="flex items-center gap-2">
                   <p className="truncate font-semibold">{v.title}</p>
-                  <VacancyStatusBadge status={v.status} />
+                  <VacancyStatusBadge status={v.moderationStatus} />
                 </div>
-                {v.status !== 'rejected' && STATUS_HINT_KEYS[v.status] && (
+                {v.moderationStatus !== 'rejected' && STATUS_HINT_KEYS[v.moderationStatus] && (
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {t(STATUS_HINT_KEYS[v.status]!)}
+                    {t(STATUS_HINT_KEYS[v.moderationStatus]!)}
                   </p>
                 )}
-                {v.status === 'rejected' && (
+                {v.moderationStatus === 'rejected' && (
                   <RejectionNotice
                     {...(v.rejectionReason != null ? { reason: v.rejectionReason } : {})}
                     {...(v.rejectionComment != null ? { comment: v.rejectionComment } : {})}
@@ -139,14 +139,14 @@ export const PublicationsClient = observer(function PublicationsClient() {
               <div key={r.documentId} className="rounded-xl border border-border bg-background p-4">
                 <div className="flex items-center gap-2">
                   <p className="truncate font-semibold">{r.title}</p>
-                  <ResumeStatusBadge status={r.status} />
+                  <ResumeStatusBadge status={r.moderationStatus} />
                 </div>
-                {r.status !== 'rejected' && STATUS_HINT_KEYS[r.status] && (
+                {r.moderationStatus !== 'rejected' && STATUS_HINT_KEYS[r.moderationStatus] && (
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {t(STATUS_HINT_KEYS[r.status]!)}
+                    {t(STATUS_HINT_KEYS[r.moderationStatus]!)}
                   </p>
                 )}
-                {r.status === 'rejected' && (
+                {r.moderationStatus === 'rejected' && (
                   <RejectionNotice
                     {...(r.rejectionReason != null ? { reason: r.rejectionReason } : {})}
                     {...(r.rejectionComment != null ? { comment: r.rejectionComment } : {})}
@@ -179,14 +179,14 @@ export const PublicationsClient = observer(function PublicationsClient() {
               <div key={c.documentId} className="rounded-xl border border-border bg-background p-4">
                 <div className="flex items-center gap-2">
                   <p className="truncate font-semibold">{c.name}</p>
-                  <StatusBadge status={c.status} />
+                  <StatusBadge status={c.moderationStatus} />
                 </div>
-                {c.status !== 'rejected' && STATUS_HINT_KEYS[c.status] && (
+                {c.moderationStatus !== 'rejected' && STATUS_HINT_KEYS[c.moderationStatus] && (
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {t(STATUS_HINT_KEYS[c.status]!)}
+                    {t(STATUS_HINT_KEYS[c.moderationStatus]!)}
                   </p>
                 )}
-                {c.status === 'rejected' && (
+                {c.moderationStatus === 'rejected' && (
                   <RejectionNotice
                     {...(c.rejectionReason != null ? { reason: c.rejectionReason } : {})}
                     {...(c.rejectionComment != null ? { comment: c.rejectionComment } : {})}

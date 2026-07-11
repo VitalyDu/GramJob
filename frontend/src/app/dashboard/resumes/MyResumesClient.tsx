@@ -101,7 +101,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="truncate font-semibold text-card-foreground">{r.title}</p>
-                  <ResumeStatusBadge status={r.status} />
+                  <ResumeStatusBadge status={r.moderationStatus} />
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {r.firstName} {r.lastName} · {t(`enums.resumeWorkFormat.${r.workFormat}`)} ·{' '}
@@ -116,7 +116,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
                 >
                   {t('dashboard.resumes.analytics')}
                 </Link>
-                {canEditResume(r.status) && (
+                {canEditResume(r.moderationStatus) && (
                   <Link
                     href={`/dashboard/resumes/${r.documentId}/edit`}
                     className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
@@ -124,7 +124,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
                     {t('dashboard.resumes.edit')}
                   </Link>
                 )}
-                {canPublishResume(r.status) && (
+                {canPublishResume(r.moderationStatus) && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -134,7 +134,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
                     {t('dashboard.resumes.toModeration')}
                   </Button>
                 )}
-                {canArchiveResume(r.status) && (
+                {canArchiveResume(r.moderationStatus) && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -157,7 +157,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
                 </span>
               )}
             </div>
-            {r.status === 'rejected' && (
+            {r.moderationStatus === 'rejected' && (
               <RejectionNotice
                 {...(r.rejectionReason != null ? { reason: r.rejectionReason } : {})}
                 {...(r.rejectionComment != null ? { comment: r.rejectionComment } : {})}

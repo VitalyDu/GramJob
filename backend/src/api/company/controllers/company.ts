@@ -53,12 +53,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       // Ownership already verified by is-company-owner policy
       const company = await strapi.documents('api::company.company').findOne({
         documentId: id,
-        fields: ['documentId', 'status'],
+        fields: ['documentId', 'moderationStatus'],
       })
 
       if (!company) return ctx.notFound('Company not found')
 
-      const status = company.status as string | null | undefined
+      const status = (company as any).moderationStatus as string | null | undefined
       if (!status || !canSubmit(status)) {
         return ctx.badRequest(
           `Cannot submit company with status "${status}". Must be "draft" or "rejected".`
@@ -67,7 +67,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const updated = await strapi.documents('api::company.company').update({
         documentId: id,
-        data: { status: 'moderation' },
+        data: { moderationStatus: 'moderation' } as any,
         fields: [
           'documentId',
           'name',
@@ -75,7 +75,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           'country',
           'city',
           'companySize',
-          'status',
+          'moderationStatus',
           'createdAt',
           'rejectionReason',
           'rejectionComment',
@@ -112,7 +112,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         blockedUserIds = await getBlockedUserIds(strapi, (ctx.state.user as { id: number }).id)
       }
 
-      const filters: Record<string, unknown> = { status: { $eq: 'published' } }
+      const filters: Record<string, unknown> = { moderationStatus: { $eq: 'published' } }
 
       if (search) {
         filters.$or = [{ name: { $containsi: search } }, { description: { $containsi: search } }]
@@ -134,7 +134,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             'country',
             'city',
             'companySize',
-            'status',
+            'moderationStatus',
             'createdAt',
           ],
           populate: { logo: true },
@@ -160,7 +160,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const { id } = ctx.params as { id: string }
 
       const company = await strapi.documents('api::company.company').findFirst({
-        filters: { documentId: { $eq: id }, status: { $eq: 'published' } },
+        filters: { documentId: { $eq: id }, moderationStatus: { $eq: 'published' } },
         fields: [
           'documentId',
           'name',
@@ -172,7 +172,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           'country',
           'city',
           'companySize',
-          'status',
+          'moderationStatus',
           'createdAt',
         ],
         populate: {
@@ -193,7 +193,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const company = await strapi.documents('api::company.company').findFirst({
         filters: {
           slug: { $eq: slug },
-          status: { $eq: 'published' },
+          moderationStatus: { $eq: 'published' },
         },
         fields: [
           'documentId',
@@ -206,7 +206,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           'country',
           'city',
           'companySize',
-          'status',
+          'moderationStatus',
           'createdAt',
         ],
         populate: {
@@ -230,11 +230,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const existing = await strapi.documents('api::company.company').findOne({
         documentId: id,
-        fields: ['documentId', 'status', 'name', 'slug'],
+        fields: ['documentId', 'moderationStatus', 'name', 'slug'],
       })
       if (!existing) return ctx.notFound('Company not found')
 
-      const existingStatus = existing.status as string
+      const existingStatus = (existing as any).moderationStatus as string
       if (existingStatus !== 'draft' && existingStatus !== 'rejected') {
         return ctx.badRequest(
           `Cannot edit company with status "${existingStatus}". Must be draft or rejected.`
@@ -296,7 +296,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           'country',
           'city',
           'companySize',
-          'status',
+          'moderationStatus',
           'createdAt',
         ],
       })
@@ -312,11 +312,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const company = await strapi.documents('api::company.company').findOne({
         documentId: id,
-        fields: ['documentId', 'status'],
+        fields: ['documentId', 'moderationStatus'],
       })
       if (!company) return ctx.notFound('Company not found')
 
-      const status = company.status as string
+      const status = (company as any).moderationStatus as string
       if (status !== 'draft' && status !== 'rejected') {
         return ctx.badRequest(
           `Cannot delete company with status "${status}". Must be draft or rejected.`
@@ -326,7 +326,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const activeVacancies = await strapi.documents('api::vacancy.vacancy').count({
         filters: {
           company: { documentId: { $eq: id } },
-          status: { $in: ['published', 'moderation'] },
+          moderationStatus: { $in: ['published', 'moderation'] },
         },
       })
       if (!canDelete(activeVacancies)) {
@@ -361,7 +361,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           'country',
           'city',
           'companySize',
-          'status',
+          'moderationStatus',
           'createdAt',
           'rejectionReason',
           'rejectionComment',
@@ -401,7 +401,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             'country',
             'city',
             'companySize',
-            'status',
+            'moderationStatus',
             'createdAt',
             'rejectionReason',
             'rejectionComment',

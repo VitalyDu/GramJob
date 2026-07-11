@@ -39,7 +39,7 @@ const mockCompany = {
   country: 'RU',
   city: 'Москва',
   companySize: 'size_51_200' as const,
-  status: 'published' as const,
+  moderationStatus: 'published' as const,
   description: 'Мы делаем крутые продукты',
   website: 'https://acme.com',
   telegram: '@acmecorp',

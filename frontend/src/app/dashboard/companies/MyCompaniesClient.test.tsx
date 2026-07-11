@@ -30,7 +30,7 @@ const draftCompany = {
   country: 'RU',
   city: 'Москва',
   companySize: 'size_1_10' as const,
-  status: 'draft' as const,
+  moderationStatus: 'draft' as const,
   logo: null,
   cover: null,
   owner: null,
@@ -41,7 +41,7 @@ const publishedCompany = {
   ...draftCompany,
   documentId: 'pub1',
   name: 'Published Corp',
-  status: 'published' as const,
+  moderationStatus: 'published' as const,
 }
 
 function makeStore(overrides = {}) {

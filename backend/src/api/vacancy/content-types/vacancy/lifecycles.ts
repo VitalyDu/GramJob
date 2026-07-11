@@ -20,7 +20,7 @@ type VacancyBeforeUpdateEvent = {
 }
 
 type VacancyAfterEvent = {
-  result: { documentId?: string; id?: number; status?: string; expiresAt?: string | null }
+  result: { documentId?: string; id?: number; moderationStatus?: string; expiresAt?: string | null }
   params: { data?: Record<string, unknown> }
   state?: Record<string, unknown>
 }
@@ -34,8 +34,8 @@ async function findPreviousStatus(
   if (!where || Object.keys(where).length === 0) return null
   const previous = (await (globalThis.strapi.db as any)
     .query(uid)
-    .findOne({ where, select: ['status'] })) as { status?: string } | null
-  return previous?.status ?? null
+    .findOne({ where, select: ['moderationStatus'] })) as { moderationStatus?: string } | null
+  return previous?.moderationStatus ?? null
 }
 
 function sanitizeJsonFields(data: Record<string, unknown>) {
@@ -73,7 +73,7 @@ export default {
     const { data } = event.params
     sanitizeJsonFields(data)
 
-    const statusSet = data?.status as string | undefined
+    const statusSet = data?.moderationStatus as string | undefined
     if (!MODERATION_STATUSES.includes(statusSet as (typeof MODERATION_STATUSES)[number])) {
       return
     }
@@ -95,8 +95,8 @@ export default {
     // No await: raw SQL runs after Strapi commits the transaction to avoid lock deadlock
     updateSearchVector(event.result.id)
 
-    // Вакансии создаются сразу в status=moderation — audit-лог как при submit
-    if (event.result.status !== 'moderation') return
+    // Вакансии создаются сразу в moderationStatus=moderation — audit-лог как при submit
+    if (event.result.moderationStatus !== 'moderation') return
     const s = globalThis.strapi as Core.Strapi
     const documentId = event.result.documentId
     if (!documentId) return
@@ -121,7 +121,7 @@ export default {
     // No await: raw SQL runs after Strapi commits the transaction to avoid lock deadlock
     updateSearchVector(event.result.id)
 
-    const statusSet = (event.params as any)?.data?.['status']
+    const statusSet = (event.params as any)?.data?.['moderationStatus']
     if (statusSet !== 'moderation' && statusSet !== 'published' && statusSet !== 'rejected') {
       return
     }

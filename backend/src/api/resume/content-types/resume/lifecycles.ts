@@ -20,7 +20,7 @@ type ResumeAfterEvent = {
 
 export default {
   async beforeUpdate(event: ResumeBeforeUpdateEvent) {
-    const statusSet = event.params.data?.['status']
+    const statusSet = event.params.data?.['moderationStatus']
     if (statusSet !== 'moderation' && statusSet !== 'published' && statusSet !== 'rejected') {
       return
     }
@@ -28,19 +28,19 @@ export default {
     if (!where || Object.keys(where).length === 0) return
 
     // Content Manager saves send the whole document including an unchanged
-    // status — remember the previous one so afterUpdate reacts to real
+    // moderationStatus — remember the previous one so afterUpdate reacts to real
     // transitions only (no duplicate notifications / audit logs)
     const previous = (await (globalThis.strapi.db as any)
       .query('api::resume.resume')
-      .findOne({ where, select: ['status'] })) as { status?: string } | null
-    event.state['previousStatus'] = previous?.status ?? null
+      .findOne({ where, select: ['moderationStatus'] })) as { moderationStatus?: string } | null
+    event.state['previousStatus'] = previous?.moderationStatus ?? null
   },
 
   async afterUpdate(event: ResumeAfterEvent) {
     const s = globalThis.strapi as Core.Strapi
 
     // Counter updates (views++) on published resumes must not re-trigger this.
-    const statusSet = (event.params as any)?.data?.['status']
+    const statusSet = (event.params as any)?.data?.['moderationStatus']
     if (statusSet !== 'moderation' && statusSet !== 'published' && statusSet !== 'rejected') {
       return
     }

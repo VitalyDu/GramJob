@@ -56,7 +56,7 @@ export function ApplyDialog({
     api
       .get<{ data: Resume[] }>('/resumes/my?pageSize=100')
       .then((res) => {
-        const published = res.data.filter((r) => r.status === 'published')
+        const published = res.data.filter((r) => r.moderationStatus === 'published')
         setResumes(published)
         if (published[0]) setResumeId(published[0].documentId)
       })

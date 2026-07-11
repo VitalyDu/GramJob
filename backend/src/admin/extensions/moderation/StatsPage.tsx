@@ -10,7 +10,7 @@ interface ModerationStats {
 }
 
 const cmModerationUrl = (uid: string) =>
-  `/admin/content-manager/collection-types/${uid}?page=1&pageSize=20&filters[$and][0][status][$eq]=moderation`
+  `/admin/content-manager/collection-types/${uid}?page=1&pageSize=20&filters[$and][0][moderationStatus][$eq]=moderation`
 
 const QUEUES: { key: keyof ModerationStats['queue']; label: string; href: string }[] = [
   { key: 'vacancies', label: 'Вакансии', href: cmModerationUrl('api::vacancy.vacancy') },

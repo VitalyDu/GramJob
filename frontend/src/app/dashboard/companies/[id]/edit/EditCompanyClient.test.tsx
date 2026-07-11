@@ -37,7 +37,7 @@ const existingCompany = {
   country: 'RU',
   city: 'Москва',
   companySize: 'size_11_50' as const,
-  status: 'draft' as const,
+  moderationStatus: 'draft' as const,
   website: 'https://acme.com',
   telegram: '',
   linkedin: '',

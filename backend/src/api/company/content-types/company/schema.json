@@ -63,7 +63,7 @@
       "enum": ["size_1_10", "size_11_50", "size_51_200", "size_201_500", "size_500_plus"],
       "required": true
     },
-    "status": {
+    "moderationStatus": {
       "type": "enumeration",
       "enum": ["draft", "moderation", "published", "rejected"],
       "default": "draft",

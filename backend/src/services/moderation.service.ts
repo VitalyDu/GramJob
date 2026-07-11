@@ -72,14 +72,14 @@ export async function approveEntity(
 
   const doc = await (strapi.documents as any)(uid).findOne({
     documentId,
-    fields: ['documentId', 'status', titleField],
+    fields: ['documentId', 'moderationStatus', titleField],
   })
   if (!doc) return { ok: false, code: 'NOT_FOUND' }
-  if (doc.status !== 'moderation') return { ok: false, code: 'INVALID_STATUS' }
+  if (doc.moderationStatus !== 'moderation') return { ok: false, code: 'INVALID_STATUS' }
 
   await (strapi.documents as any)(uid).update({
     documentId,
-    data: { status: 'published', rejectionReason: null, rejectionComment: null },
+    data: { moderationStatus: 'published', rejectionReason: null, rejectionComment: null },
   })
 
   await logModeration(strapi, {
@@ -105,14 +105,18 @@ export async function rejectEntity(
 
   const doc = await (strapi.documents as any)(uid).findOne({
     documentId,
-    fields: ['documentId', 'status', titleField],
+    fields: ['documentId', 'moderationStatus', titleField],
   })
   if (!doc) return { ok: false, code: 'NOT_FOUND' }
-  if (doc.status !== 'moderation') return { ok: false, code: 'INVALID_STATUS' }
+  if (doc.moderationStatus !== 'moderation') return { ok: false, code: 'INVALID_STATUS' }
 
   await (strapi.documents as any)(uid).update({
     documentId,
-    data: { status: 'rejected', rejectionReason: reason, rejectionComment: comment ?? null },
+    data: {
+      moderationStatus: 'rejected',
+      rejectionReason: reason,
+      rejectionComment: comment ?? null,
+    },
   })
 
   await logModeration(strapi, {
@@ -157,7 +161,7 @@ export async function decideReport(
 
 export async function getModerationStats(strapi: Core.Strapi): Promise<ModerationStats> {
   const countInModeration = (uid: string) =>
-    (strapi.documents as any)(uid).count({ filters: { status: 'moderation' } })
+    (strapi.documents as any)(uid).count({ filters: { moderationStatus: 'moderation' } })
 
   const weekAgo = new Date(Date.now() - 7 * 24 * 3_600_000).toISOString()
   const monthAgo = new Date(Date.now() - 30 * 24 * 3_600_000).toISOString()

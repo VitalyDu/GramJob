@@ -118,7 +118,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="truncate font-semibold text-card-foreground">{v.title}</p>
-                  <VacancyStatusBadge status={v.status} />
+                  <VacancyStatusBadge status={v.moderationStatus} />
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {v.company?.name} · {t(`enums.seniority.${v.seniority}`)} ·{' '}
@@ -127,7 +127,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
               </div>
 
               <div className="flex flex-wrap gap-2 sm:shrink-0 sm:justify-end">
-                {canEditVacancy(v.status) && (
+                {canEditVacancy(v.moderationStatus) && (
                   <Link
                     href={`/dashboard/vacancies/${v.documentId}/edit`}
                     className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
@@ -135,7 +135,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                     {t('dashboard.vacancies.edit')}
                   </Link>
                 )}
-                {canPublishVacancy(v.status) && (
+                {canPublishVacancy(v.moderationStatus) && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -145,7 +145,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                     {t('dashboard.vacancies.toModeration')}
                   </Button>
                 )}
-                {canBoostVacancy(v.status) && (
+                {canBoostVacancy(v.moderationStatus) && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -158,7 +158,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                     )}
                   </Button>
                 )}
-                {canArchiveVacancy(v.status) && (
+                {canArchiveVacancy(v.moderationStatus) && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -193,7 +193,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                 </span>
               )}
             </div>
-            {v.status === 'rejected' && (
+            {v.moderationStatus === 'rejected' && (
               <RejectionNotice
                 {...(v.rejectionReason != null ? { reason: v.rejectionReason } : {})}
                 {...(v.rejectionComment != null ? { comment: v.rejectionComment } : {})}

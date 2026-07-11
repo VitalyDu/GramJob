@@ -32,12 +32,12 @@ const MODERATED_MODELS: Record<string, string> = {
 interface ActionProps {
   model: string
   documentId?: string
-  document?: { status?: string } & Record<string, unknown>
+  document?: { moderationStatus?: string; status?: string } & Record<string, unknown>
 }
 
 export const ApproveAction = ({ model, documentId, document }: ActionProps) => {
   const entityType = MODERATED_MODELS[model]
-  if (!entityType || !documentId || document?.status !== 'moderation') return null
+  if (!entityType || !documentId || document?.moderationStatus !== 'moderation') return null
 
   return {
     label: 'Одобрить',
@@ -126,7 +126,7 @@ const RejectForm = ({
 
 export const RejectAction = ({ model, documentId, document }: ActionProps) => {
   const entityType = MODERATED_MODELS[model]
-  if (!entityType || !documentId || document?.status !== 'moderation') return null
+  if (!entityType || !documentId || document?.moderationStatus !== 'moderation') return null
 
   return {
     label: 'Отклонить',

@@ -27,7 +27,7 @@ import { ApplicationStore } from './ApplicationStore'
 const mockVacancyRef = {
   documentId: 'vac123',
   title: 'Senior Developer',
-  status: 'published' as const,
+  moderationStatus: 'published' as const,
   sourceType: 'internal' as const,
   company: { documentId: 'comp1', name: 'Test Co', slug: 'test-co' },
 }
@@ -37,7 +37,7 @@ const mockResumeRef = {
   title: 'My Resume',
   firstName: 'Иван',
   lastName: 'Иванов',
-  status: 'published' as const,
+  moderationStatus: 'published' as const,
 }
 
 const mockUserRef = { id: 1, firstName: 'Иван', lastName: 'Иванов' }

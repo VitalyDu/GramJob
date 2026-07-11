@@ -8,14 +8,14 @@ import {
 
 const APPLICATION_POPULATE = {
   vacancy: {
-    fields: ['documentId', 'title', 'status', 'sourceType'],
+    fields: ['documentId', 'title', 'moderationStatus', 'sourceType'],
     populate: {
       company: { fields: ['documentId', 'name', 'slug'] },
       postedBy: { fields: ['id'] },
     },
   },
   resume: {
-    fields: ['documentId', 'title', 'firstName', 'lastName', 'status'],
+    fields: ['documentId', 'title', 'firstName', 'lastName', 'moderationStatus'],
     populate: { user: { fields: ['id'] } },
   },
   user: { fields: ['id', 'firstName', 'lastName'] },
@@ -36,11 +36,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // Validate vacancy is published and internal
     const vacancy = await (strapi.documents as any)('api::vacancy.vacancy').findOne({
       documentId: vacancyId as string,
-      fields: ['documentId', 'status', 'sourceType'],
+      fields: ['documentId', 'moderationStatus', 'sourceType'],
       populate: { postedBy: { fields: ['id'] } },
     })
     if (!vacancy) return ctx.notFound('Vacancy not found')
-    if (vacancy.status !== 'published') {
+    if (vacancy.moderationStatus !== 'published') {
       return ctx.badRequest('Vacancy is not published')
     }
     if (vacancy.sourceType === 'external') {
@@ -50,14 +50,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // Validate resume ownership and published status
     const resume = await (strapi.documents as any)('api::resume.resume').findOne({
       documentId: resumeId as string,
-      fields: ['documentId', 'status'],
+      fields: ['documentId', 'moderationStatus'],
       populate: { user: { fields: ['id'] } },
     })
     if (!resume) return ctx.notFound('Resume not found')
     if (resume.user?.id !== user.id) {
       return ctx.forbidden('You do not own this resume')
     }
-    if (resume.status !== 'published') {
+    if (resume.moderationStatus !== 'published') {
       return ctx.badRequest('Resume must be published to apply')
     }
 

@@ -11,7 +11,7 @@ const mockCompany: Company = {
   country: 'RU',
   city: 'Москва',
   companySize: 'size_11_50',
-  status: 'published',
+  moderationStatus: 'published',
   logo: null,
   cover: null,
   owner: null,

@@ -115,7 +115,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="truncate font-semibold text-card-foreground">{company.name}</p>
-                      <StatusBadge status={company.status} />
+                      <StatusBadge status={company.moderationStatus} />
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {company.country} · {COMPANY_SIZE_LABELS[company.companySize]}
@@ -131,7 +131,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
                     {t('dashboard.companies.edit')}
                   </Link>
 
-                  {canSubmitCompany(company.status) && (
+                  {canSubmitCompany(company.moderationStatus) && (
                     <Button
                       size="sm"
                       variant="outline"
@@ -142,7 +142,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
                     </Button>
                   )}
 
-                  {canDeleteCompany(company.status) && (
+                  {canDeleteCompany(company.moderationStatus) && (
                     <Button
                       size="sm"
                       variant="outline"
@@ -155,7 +155,7 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
                   )}
                 </div>
               </div>
-              {company.status === 'rejected' && (
+              {company.moderationStatus === 'rejected' && (
                 <RejectionNotice
                   {...(company.rejectionReason != null ? { reason: company.rejectionReason } : {})}
                   {...(company.rejectionComment != null

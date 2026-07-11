@@ -59,7 +59,7 @@ describe('PublicationsClient', () => {
 
   it('отображает вакансию со статусом и названием', () => {
     vacancyStore.myVacancies = [
-      { documentId: 'v1', title: 'Frontend Developer', status: 'moderation' },
+      { documentId: 'v1', title: 'Frontend Developer', moderationStatus: 'moderation' },
     ]
     render(<PublicationsClient />)
     expect(screen.getByText('Frontend Developer')).toBeDefined()
@@ -72,7 +72,7 @@ describe('PublicationsClient', () => {
       {
         documentId: 'r1',
         title: 'QA Engineer',
-        status: 'rejected',
+        moderationStatus: 'rejected',
         rejectionReason: 'incomplete',
         rejectionComment: 'Добавьте опыт работы',
       },
@@ -83,7 +83,9 @@ describe('PublicationsClient', () => {
   })
 
   it('отображает компанию с бейджем статуса', () => {
-    companyStore.myCompanies = [{ documentId: 'c1', name: 'Acme Inc', status: 'published' }]
+    companyStore.myCompanies = [
+      { documentId: 'c1', name: 'Acme Inc', moderationStatus: 'published' },
+    ]
     render(<PublicationsClient />)
     expect(screen.getByText('Acme Inc')).toBeDefined()
     expect(screen.getByText('Опубликована')).toBeDefined()

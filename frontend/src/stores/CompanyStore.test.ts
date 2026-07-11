@@ -20,7 +20,7 @@ const mockCompany = {
   country: 'RU',
   city: 'Москва',
   companySize: 'size_1_10' as const,
-  status: 'draft' as const,
+  moderationStatus: 'draft' as const,
   logo: null,
   cover: null,
   owner: null,
@@ -186,12 +186,12 @@ describe('CompanyStore', () => {
   describe('submitCompany', () => {
     it('обновляет статус компании в myCompanies на moderation', async () => {
       store.myCompanies = [mockCompany]
-      const submitted = { ...mockCompany, status: 'moderation' as const }
+      const submitted = { ...mockCompany, moderationStatus: 'moderation' as const }
       vi.mocked(api.post).mockResolvedValue({ data: submitted })
 
       await store.submitCompany('abc123')
 
-      expect(store.myCompanies[0]?.status).toBe('moderation')
+      expect(store.myCompanies[0]?.moderationStatus).toBe('moderation')
     })
 
     it('вызывает POST /companies/abc123/submit', async () => {

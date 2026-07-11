@@ -85,7 +85,7 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold text-card-foreground">{company.name}</h1>
-                <StatusBadge status={company.status} />
+                <StatusBadge status={company.moderationStatus} />
               </div>
 
               <div className="mt-2 flex flex-wrap gap-2">

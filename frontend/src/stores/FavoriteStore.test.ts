@@ -35,7 +35,7 @@ const mockVacancyEntity = {
   topPlacement: false,
   highlighted: false,
   sourceType: 'internal' as const,
-  status: 'published' as const,
+  moderationStatus: 'published' as const,
   createdAt: '2026-01-01T00:00:00Z',
   company: { documentId: 'comp1', name: 'Test Co', slug: 'test-co' },
 }

@@ -41,7 +41,7 @@ const mockCompany = {
   slug: 'new-corp',
   country: 'RU',
   companySize: 'size_1_10' as const,
-  status: 'draft' as const,
+  moderationStatus: 'draft' as const,
   logo: null,
   cover: null,
   owner: null,
