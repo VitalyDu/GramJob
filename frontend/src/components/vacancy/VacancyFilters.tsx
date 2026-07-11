@@ -15,9 +15,15 @@ import { WORK_FORMAT_VALUES, EMPLOYMENT_TYPE_VALUES, SENIORITY_VALUES } from '@/
 import { api } from '@/services/api'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import {
   Select,
   SelectContent,
@@ -25,7 +31,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { MultiSelect } from '@/components/ui/multi-select'
 import {
   Sheet,
   SheetContent,
@@ -92,6 +97,57 @@ function countActive(draft: Draft): number {
   ].filter(Boolean).length
 }
 
+function SectionLabel({ label, count }: { label: string; count: number }) {
+  return (
+    <span className="flex items-center gap-2">
+      {label}
+      {count > 0 && (
+        <Badge variant="secondary" className="h-4.5 min-w-4.5 px-1 text-[10px] leading-none">
+          {count}
+        </Badge>
+      )}
+    </span>
+  )
+}
+
+function CheckboxList<T extends string>({
+  prefix,
+  values,
+  selected,
+  getLabel,
+  onChange,
+}: {
+  prefix: string
+  values: readonly T[]
+  selected: T[]
+  getLabel: (v: T) => string
+  onChange: (v: T[]) => void
+}) {
+  return (
+    <div className="space-y-2.5">
+      {values.map((v) => (
+        <div key={v} className="flex items-center gap-2.5">
+          <Checkbox
+            id={`${prefix}-${v}`}
+            checked={selected.includes(v)}
+            onCheckedChange={(checked) =>
+              onChange(checked ? [...selected, v] : selected.filter((x) => x !== v))
+            }
+          />
+          <label
+            htmlFor={`${prefix}-${v}`}
+            className="cursor-pointer text-sm leading-none select-none"
+          >
+            {getLabel(v)}
+          </label>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+const DEFAULT_OPEN = ['location', 'category', 'format', 'employment', 'seniority']
+
 function FilterFields({
   draft,
   setDraft,
@@ -105,133 +161,12 @@ function FilterFields({
   const lang = i18n.language === 'en' ? 'en' : 'ru'
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-1.5">
-        <Label>{t('filters.country')}</Label>
-        <CountrySelect
-          value={draft.country}
-          onChange={(v) => setDraft({ ...draft, country: v })}
-          placeholder={t('filters.anyCountry')}
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label>{t('filters.industry')}</Label>
-        <Select
-          value={draft.industry || ALL}
-          onValueChange={(v) =>
-            setDraft({ ...draft, industry: v === ALL ? '' : v, specialization: '' })
-          }
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>{t('filters.allIndustries')}</SelectItem>
-            {industries.map((ind) => (
-              <SelectItem key={ind.documentId} value={ind.documentId}>
-                {ind.name[lang]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-1.5">
-        <Label>{t('filters.specialization')}</Label>
-        <Select
-          value={draft.specialization || ALL}
-          onValueChange={(v) => setDraft({ ...draft, specialization: v === ALL ? '' : v })}
-          disabled={!draft.industry}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>{t('filters.allSpecializations')}</SelectItem>
-            {(industries.find((i) => i.documentId === draft.industry)?.specializations ?? []).map(
-              (spec) => (
-                <SelectItem key={spec.documentId} value={spec.documentId}>
-                  {spec.name[lang]}
-                </SelectItem>
-              )
-            )}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-1.5">
-        <Label>{t('filters.salary')}</Label>
-        <div className="flex gap-2">
-          <Input
-            type="number"
-            inputMode="numeric"
-            min={0}
-            placeholder={t('filters.from')}
-            value={draft.salaryFrom}
-            onChange={(e) => setDraft({ ...draft, salaryFrom: e.target.value })}
-          />
-          <Input
-            type="number"
-            inputMode="numeric"
-            min={0}
-            placeholder={t('filters.to')}
-            value={draft.salaryTo}
-            onChange={(e) => setDraft({ ...draft, salaryTo: e.target.value })}
-          />
-        </div>
-        <Select
-          value={draft.salaryCurrency || ALL}
-          onValueChange={(v) => setDraft({ ...draft, salaryCurrency: v === ALL ? '' : v })}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>{t('filters.anyCurrency')}</SelectItem>
-            {(['USD', 'EUR', 'RUB', 'GBP'] as SalaryCurrencyEnum[]).map((c) => (
-              <SelectItem key={c} value={c}>
-                {c}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-1.5">
-        <Label>{t('filters.workFormat')}</Label>
-        <MultiSelect
-          label={t('filters.allFormats')}
-          options={(WORK_FORMAT_VALUES as readonly WorkFormatEnum[]).map((value) => ({
-            value,
-            label: t(`enums.workFormat.${value}`),
-          }))}
-          value={draft.workFormat}
-          onChange={(v) => setDraft({ ...draft, workFormat: v })}
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label>{t('filters.employment')}</Label>
-        <MultiSelect
-          label={t('filters.allTypes')}
-          options={(EMPLOYMENT_TYPE_VALUES as readonly EmploymentTypeEnum[]).map((value) => ({
-            value,
-            label: t(`enums.employmentType.${value}`),
-          }))}
-          value={draft.employmentType}
-          onChange={(v) => setDraft({ ...draft, employmentType: v })}
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label>{t('filters.seniority')}</Label>
-        <MultiSelect
-          label={t('filters.allLevels')}
-          options={(SENIORITY_VALUES as readonly SeniorityEnum[]).map((value) => ({
-            value,
-            label: t(`enums.seniority.${value}`),
-          }))}
-          value={draft.seniority}
-          onChange={(v) => setDraft({ ...draft, seniority: v })}
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label>{t('filters.sort')}</Label>
+    <div>
+      {/* Sort — always visible */}
+      <div className="px-1 py-3">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {t('filters.sort')}
+        </p>
         <Select
           value={draft.sort || ALL}
           onValueChange={(v) => setDraft({ ...draft, sort: v === ALL ? '' : v })}
@@ -248,6 +183,167 @@ function FilterFields({
           </SelectContent>
         </Select>
       </div>
+
+      <Accordion type="multiple" defaultValue={DEFAULT_OPEN}>
+        {/* Location */}
+        <AccordionItem value="location">
+          <AccordionTrigger className="px-1 py-3 text-sm hover:no-underline">
+            <SectionLabel label={t('filters.country')} count={draft.country ? 1 : 0} />
+          </AccordionTrigger>
+          <AccordionContent className="px-1 pb-3">
+            <CountrySelect
+              value={draft.country}
+              onChange={(v) => setDraft({ ...draft, country: v })}
+              placeholder={t('filters.anyCountry')}
+            />
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Category */}
+        <AccordionItem value="category">
+          <AccordionTrigger className="px-1 py-3 text-sm hover:no-underline">
+            <SectionLabel
+              label={t('filters.industry')}
+              count={(draft.industry ? 1 : 0) + (draft.specialization ? 1 : 0)}
+            />
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2 px-1 pb-3">
+            <Select
+              value={draft.industry || ALL}
+              onValueChange={(v) =>
+                setDraft({ ...draft, industry: v === ALL ? '' : v, specialization: '' })
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>{t('filters.allIndustries')}</SelectItem>
+                {industries.map((ind) => (
+                  <SelectItem key={ind.documentId} value={ind.documentId}>
+                    {ind.name[lang]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={draft.specialization || ALL}
+              onValueChange={(v) => setDraft({ ...draft, specialization: v === ALL ? '' : v })}
+              disabled={!draft.industry}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>{t('filters.allSpecializations')}</SelectItem>
+                {(
+                  industries.find((i) => i.documentId === draft.industry)?.specializations ?? []
+                ).map((spec) => (
+                  <SelectItem key={spec.documentId} value={spec.documentId}>
+                    {spec.name[lang]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Salary */}
+        <AccordionItem value="salary">
+          <AccordionTrigger className="px-1 py-3 text-sm hover:no-underline">
+            <SectionLabel
+              label={t('filters.salary')}
+              count={
+                [draft.salaryFrom, draft.salaryTo, draft.salaryCurrency].filter(Boolean).length
+              }
+            />
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2 px-1 pb-3">
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                inputMode="numeric"
+                min={0}
+                placeholder={t('filters.from')}
+                value={draft.salaryFrom}
+                onChange={(e) => setDraft({ ...draft, salaryFrom: e.target.value })}
+              />
+              <Input
+                type="number"
+                inputMode="numeric"
+                min={0}
+                placeholder={t('filters.to')}
+                value={draft.salaryTo}
+                onChange={(e) => setDraft({ ...draft, salaryTo: e.target.value })}
+              />
+            </div>
+            <Select
+              value={draft.salaryCurrency || ALL}
+              onValueChange={(v) => setDraft({ ...draft, salaryCurrency: v === ALL ? '' : v })}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>{t('filters.anyCurrency')}</SelectItem>
+                {(['USD', 'EUR', 'RUB', 'GBP'] as SalaryCurrencyEnum[]).map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Work Format */}
+        <AccordionItem value="format">
+          <AccordionTrigger className="px-1 py-3 text-sm hover:no-underline">
+            <SectionLabel label={t('filters.workFormat')} count={draft.workFormat.length} />
+          </AccordionTrigger>
+          <AccordionContent className="px-1 pb-3">
+            <CheckboxList
+              prefix="wf"
+              values={WORK_FORMAT_VALUES as readonly WorkFormatEnum[]}
+              selected={draft.workFormat}
+              getLabel={(v) => t(`enums.workFormat.${v}`)}
+              onChange={(v) => setDraft({ ...draft, workFormat: v })}
+            />
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Employment Type */}
+        <AccordionItem value="employment">
+          <AccordionTrigger className="px-1 py-3 text-sm hover:no-underline">
+            <SectionLabel label={t('filters.employment')} count={draft.employmentType.length} />
+          </AccordionTrigger>
+          <AccordionContent className="px-1 pb-3">
+            <CheckboxList
+              prefix="et"
+              values={EMPLOYMENT_TYPE_VALUES as readonly EmploymentTypeEnum[]}
+              selected={draft.employmentType}
+              getLabel={(v) => t(`enums.employmentType.${v}`)}
+              onChange={(v) => setDraft({ ...draft, employmentType: v })}
+            />
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Seniority */}
+        <AccordionItem value="seniority">
+          <AccordionTrigger className="px-1 py-3 text-sm hover:no-underline">
+            <SectionLabel label={t('filters.seniority')} count={draft.seniority.length} />
+          </AccordionTrigger>
+          <AccordionContent className="px-1 pb-3">
+            <CheckboxList
+              prefix="sn"
+              values={SENIORITY_VALUES as readonly SeniorityEnum[]}
+              selected={draft.seniority}
+              getLabel={(v) => t(`enums.seniority.${v}`)}
+              onChange={(v) => setDraft({ ...draft, seniority: v })}
+            />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   )
 }
@@ -297,7 +393,7 @@ export function VacancyFilters({ params, onChange }: Props) {
 
   return (
     <div>
-      {/* Mobile-кнопка «Фильтры» */}
+      {/* Mobile */}
       <div className="mb-3 md:hidden">
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
@@ -313,10 +409,10 @@ export function VacancyFilters({ params, onChange }: Props) {
             <SheetHeader>
               <SheetTitle>{t('filters.title')}</SheetTitle>
             </SheetHeader>
-            <div className="px-4 pb-2">
+            <div className="px-4">
               <FilterFields draft={draft} setDraft={setDraft} industries={industries} />
             </div>
-            <SheetFooter className="flex-row gap-2">
+            <SheetFooter className="flex-row gap-2 px-4 pt-2">
               <Button
                 variant="outline"
                 className="flex-1"
@@ -333,19 +429,25 @@ export function VacancyFilters({ params, onChange }: Props) {
         </Sheet>
       </div>
 
-      {/* Desktop-панель */}
-      <Card className="hidden md:block">
-        <CardContent>
+      {/* Desktop */}
+      <Card className="hidden overflow-hidden md:block">
+        <div className="px-4">
           <FilterFields draft={draft} setDraft={setDraft} industries={industries} />
-          <div className="mt-4 flex gap-2">
-            <Button size="sm" onClick={() => apply()}>
-              {t('filters.apply')}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={reset} data-testid="filters-reset">
-              {t('common.reset')}
-            </Button>
-          </div>
-        </CardContent>
+        </div>
+        <div className="flex gap-2 border-t p-3">
+          <Button size="sm" className="flex-1" onClick={() => apply()}>
+            {t('filters.apply')}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="shrink-0"
+            onClick={reset}
+            data-testid="filters-reset"
+          >
+            {t('common.reset')}
+          </Button>
+        </div>
       </Card>
     </div>
   )

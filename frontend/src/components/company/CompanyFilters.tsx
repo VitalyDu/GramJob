@@ -7,8 +7,13 @@ import type { CompanyListParams, CompanySizeEnum } from '@/types/api'
 import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
+import { Card } from '@/components/ui/card'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import {
   Select,
   SelectContent,
@@ -49,41 +54,65 @@ function countActive(draft: Draft): number {
   return [draft.country, draft.companySize].filter(Boolean).length
 }
 
+function SectionLabel({ label, count }: { label: string; count: number }) {
+  return (
+    <span className="flex items-center gap-2">
+      {label}
+      {count > 0 && (
+        <Badge variant="secondary" className="h-4.5 min-w-4.5 px-1 text-[10px] leading-none">
+          {count}
+        </Badge>
+      )}
+    </span>
+  )
+}
+
 function FilterFields({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft) => void }) {
   const { t } = useTranslation()
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-1.5">
-        <Label>{t('filters.country')}</Label>
-        <CountrySelect
-          value={draft.country}
-          onChange={(v) => setDraft({ ...draft, country: v })}
-          placeholder={t('filters.anyCountry')}
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label>{t('filters.companySize')}</Label>
-        <Select
-          value={draft.companySize || ALL}
-          onValueChange={(v) =>
-            setDraft({ ...draft, companySize: v === ALL ? '' : (v as CompanySizeEnum) })
-          }
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>{t('filters.anySize')}</SelectItem>
-            {(Object.entries(COMPANY_SIZE_LABELS) as [CompanySizeEnum, string][]).map(([k, v]) => (
-              <SelectItem key={k} value={k}>
-                {v}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+    <Accordion type="multiple" defaultValue={['location', 'size']}>
+      <AccordionItem value="location">
+        <AccordionTrigger className="px-1 py-3 text-sm hover:no-underline">
+          <SectionLabel label={t('filters.country')} count={draft.country ? 1 : 0} />
+        </AccordionTrigger>
+        <AccordionContent className="px-1 pb-3">
+          <CountrySelect
+            value={draft.country}
+            onChange={(v) => setDraft({ ...draft, country: v })}
+            placeholder={t('filters.anyCountry')}
+          />
+        </AccordionContent>
+      </AccordionItem>
+
+      <AccordionItem value="size">
+        <AccordionTrigger className="px-1 py-3 text-sm hover:no-underline">
+          <SectionLabel label={t('filters.companySize')} count={draft.companySize ? 1 : 0} />
+        </AccordionTrigger>
+        <AccordionContent className="px-1 pb-3">
+          <Select
+            value={draft.companySize || ALL}
+            onValueChange={(v) =>
+              setDraft({ ...draft, companySize: v === ALL ? '' : (v as CompanySizeEnum) })
+            }
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>{t('filters.anySize')}</SelectItem>
+              {(Object.entries(COMPANY_SIZE_LABELS) as [CompanySizeEnum, string][]).map(
+                ([k, v]) => (
+                  <SelectItem key={k} value={k}>
+                    {v}
+                  </SelectItem>
+                )
+              )}
+            </SelectContent>
+          </Select>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   )
 }
 
@@ -115,6 +144,7 @@ export function CompanyFilters({ params, onChange }: Props) {
 
   return (
     <div>
+      {/* Mobile */}
       <div className="mb-3 md:hidden">
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
@@ -130,10 +160,10 @@ export function CompanyFilters({ params, onChange }: Props) {
             <SheetHeader>
               <SheetTitle>{t('filters.title')}</SheetTitle>
             </SheetHeader>
-            <div className="px-4 pb-2">
+            <div className="px-4">
               <FilterFields draft={draft} setDraft={setDraft} />
             </div>
-            <SheetFooter className="flex-row gap-2">
+            <SheetFooter className="flex-row gap-2 px-4 pt-2">
               <Button variant="outline" className="flex-1" onClick={reset}>
                 {t('common.reset')}
               </Button>
@@ -145,18 +175,19 @@ export function CompanyFilters({ params, onChange }: Props) {
         </Sheet>
       </div>
 
-      <Card className="hidden md:block">
-        <CardContent>
+      {/* Desktop */}
+      <Card className="hidden overflow-hidden md:block">
+        <div className="px-4">
           <FilterFields draft={draft} setDraft={setDraft} />
-          <div className="mt-4 flex gap-2">
-            <Button size="sm" onClick={() => apply()}>
-              {t('filters.apply')}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={reset}>
-              {t('common.reset')}
-            </Button>
-          </div>
-        </CardContent>
+        </div>
+        <div className="flex gap-2 border-t p-3">
+          <Button size="sm" className="flex-1" onClick={() => apply()}>
+            {t('filters.apply')}
+          </Button>
+          <Button size="sm" variant="ghost" className="shrink-0" onClick={reset}>
+            {t('common.reset')}
+          </Button>
+        </div>
       </Card>
     </div>
   )
