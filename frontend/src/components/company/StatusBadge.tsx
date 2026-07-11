@@ -26,6 +26,7 @@ interface Props {
 export function StatusBadge({ status }: Props) {
   const { t } = useTranslation()
   const config = STATUS_CONFIG[status]
+  if (!config) return null
   return (
     <Badge variant={config.variant} className={cn(config.className)}>
       {t(`enums.companyStatus.${status}`)}
