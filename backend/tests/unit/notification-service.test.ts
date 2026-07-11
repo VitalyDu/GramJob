@@ -24,6 +24,52 @@ describe('buildNotificationTitle', () => {
   it('неизвестный тип возвращает строку', () => {
     expect(typeof buildNotificationTitle('unknown')).toBe('string')
   })
+
+  it('moderation_approved + vacancy → "Публикация вакансии одобрена"', () => {
+    expect(
+      buildNotificationTitle('moderation_approved', { entityType: 'vacancy', entityId: 'v1' })
+    ).toBe('Публикация вакансии одобрена')
+  })
+
+  it('moderation_approved + resume → "Публикация резюме одобрена"', () => {
+    expect(
+      buildNotificationTitle('moderation_approved', { entityType: 'resume', entityId: 'r1' })
+    ).toBe('Публикация резюме одобрена')
+  })
+
+  it('moderation_approved + company → "Публикация компании одобрена"', () => {
+    expect(
+      buildNotificationTitle('moderation_approved', { entityType: 'company', entityId: 'c1' })
+    ).toBe('Публикация компании одобрена')
+  })
+
+  it('moderation_rejected + vacancy → "Публикация вакансии отклонена"', () => {
+    expect(
+      buildNotificationTitle('moderation_rejected', { entityType: 'vacancy', entityId: 'v1' })
+    ).toBe('Публикация вакансии отклонена')
+  })
+
+  it('moderation_rejected + resume → "Публикация резюме отклонена"', () => {
+    expect(
+      buildNotificationTitle('moderation_rejected', { entityType: 'resume', entityId: 'r1' })
+    ).toBe('Публикация резюме отклонена')
+  })
+
+  it('moderation_rejected + company → "Публикация компании отклонена"', () => {
+    expect(
+      buildNotificationTitle('moderation_rejected', { entityType: 'company', entityId: 'c1' })
+    ).toBe('Публикация компании отклонена')
+  })
+
+  it('moderation_approved без templateData → fallback строка', () => {
+    expect(buildNotificationTitle('moderation_approved')).toBe('Публикация одобрена')
+  })
+
+  it('moderation_approved с неизвестным entityType → fallback строка', () => {
+    expect(
+      buildNotificationTitle('moderation_approved', { entityType: 'unknown_type', entityId: 'x' })
+    ).toBe('Публикация одобрена')
+  })
 })
 
 describe('buildNotificationData', () => {

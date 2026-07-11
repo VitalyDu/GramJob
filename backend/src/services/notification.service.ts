@@ -30,7 +30,22 @@ const NOTIFICATION_TITLES: Record<string, string> = {
   moderation_rejected: 'Публикация отклонена',
 }
 
-export function buildNotificationTitle(type: string): string {
+const ENTITY_TYPE_LABELS: Record<string, string> = {
+  vacancy: 'вакансии',
+  resume: 'резюме',
+  company: 'компании',
+}
+
+export function buildNotificationTitle(
+  type: string,
+  templateData?: Record<string, unknown>
+): string {
+  if (type === 'moderation_approved' || type === 'moderation_rejected') {
+    const entityType = templateData?.['entityType'] as string | undefined
+    const entityLabel = entityType ? (ENTITY_TYPE_LABELS[entityType] ?? null) : null
+    const action = type === 'moderation_approved' ? 'одобрена' : 'отклонена'
+    if (entityLabel) return `Публикация ${entityLabel} ${action}`
+  }
   return NOTIFICATION_TITLES[type] ?? 'Уведомление'
 }
 
@@ -94,7 +109,7 @@ export async function sendNotification(
       data: {
         user: userId,
         type,
-        title: buildNotificationTitle(type),
+        title: buildNotificationTitle(type, templateData),
         body: stripLeadingEmoji(message.text),
         isRead: false,
         data: buildNotificationData(type, templateData),
