@@ -17,6 +17,14 @@ vi.mock('@/stores/StoreProvider', () => ({
         telegramNotificationsEnabled: true,
       },
     },
+    payment: {
+      plans: [],
+      fetchPlans: vi.fn(),
+    },
+    resume: {
+      total: 0,
+      fetchMyResumes: vi.fn(),
+    },
   }),
 }))
 
@@ -32,7 +40,7 @@ describe('DashboardClient', () => {
       'Мои вакансии',
       'Мои резюме',
       'Мои компании',
-      'Отклики',
+      'Мои отклики',
       'Мои публикации',
       'Блокировки',
     ]) {
