@@ -16,9 +16,10 @@ import { LanguageDrawer } from './LanguageDrawer'
 import { UserMenuDrawer } from './UserMenuDrawer'
 
 const iconBtnBase =
-  'flex h-8 w-8 items-center justify-center rounded-full transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring'
-const iconBtnInactive = 'text-muted-foreground hover:bg-muted hover:text-foreground'
-const iconBtnActive = 'bg-primary/10 text-primary'
+  'flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring'
+const iconBtnInactive =
+  'bg-background/75 text-foreground/70 hover:bg-background/95 hover:text-foreground'
+const iconBtnActive = 'bg-primary/20 text-primary'
 
 function IconButton({
   active,
@@ -71,7 +72,7 @@ export const TelegramTopBar = observer(function TelegramTopBar() {
               type="button"
               aria-label={t('nav.userMenu')}
               onClick={() => setUserMenuOpen(true)}
-              className="flex min-w-0 items-center gap-2 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex min-w-0 items-center gap-2 rounded-full shadow-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <UserAvatar user={user} className="h-8 w-8 shrink-0" />
               <SubscriptionBadge plan={user.subscriptionPlan} />
@@ -118,7 +119,7 @@ export const TelegramTopBar = observer(function TelegramTopBar() {
               href="/dashboard"
               aria-label={t('nav.dashboard')}
               className={cn(
-                'flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                'flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium backdrop-blur-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 isDashboard ? iconBtnActive : iconBtnInactive
               )}
             >
