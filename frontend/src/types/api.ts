@@ -97,7 +97,7 @@ export interface Company {
   country: string
   city?: string
   companySize: CompanySizeEnum
-  status: CompanyStatusEnum
+  moderationStatus: CompanyStatusEnum
   rejectionReason?: ModerationRejectionReason | null
   rejectionComment?: string | null
   logo?: StrapiMedia | null
@@ -185,9 +185,9 @@ export interface Vacancy {
   title: string
   country: string
   city?: string | null
-  workFormat: WorkFormatEnum
-  employmentType: EmploymentTypeEnum
-  seniority: SeniorityEnum
+  workFormat: WorkFormatEnum[]
+  employmentType: EmploymentTypeEnum[]
+  seniority: SeniorityEnum[]
   salaryFrom?: number | null
   salaryTo?: number | null
   salaryCurrency?: SalaryCurrencyEnum | null
@@ -207,7 +207,7 @@ export interface Vacancy {
   views?: number
   uniqueViews?: number
   applicationsCount?: number
-  status: VacancyStatusEnum
+  moderationStatus: VacancyStatusEnum
   rejectionReason?: ModerationRejectionReason | null
   rejectionComment?: string | null
   expiresAt?: string | null
@@ -242,9 +242,9 @@ export interface VacancyCreateInput {
   title: string
   industryId: string
   specializationId: string
-  employmentType: EmploymentTypeEnum
-  workFormat: WorkFormatEnum
-  seniority: SeniorityEnum
+  employmentType: EmploymentTypeEnum[]
+  workFormat: WorkFormatEnum[]
+  seniority: SeniorityEnum[]
   country: string
   city?: string
   salaryFrom?: number
@@ -320,8 +320,8 @@ export interface Resume {
   city?: string | null
   desiredSalary?: number | null
   currency?: ResumeCurrencyEnum | null
-  workFormat: ResumeWorkFormatEnum
-  employmentType: EmploymentTypeEnum
+  workFormat: ResumeWorkFormatEnum[]
+  employmentType: EmploymentTypeEnum[]
   experienceYears?: number | null
   about?: string | null
   skills?: string[] | null
@@ -331,7 +331,7 @@ export interface Resume {
   education?: Education[]
   views?: number
   invitations?: number
-  status: ResumeStatusEnum
+  moderationStatus: ResumeStatusEnum
   rejectionReason?: ModerationRejectionReason | null
   rejectionComment?: string | null
   user?: ResumeUserRef | null
@@ -358,8 +358,8 @@ export interface ResumeCreateInput {
   city?: string
   desiredSalary?: number
   currency?: ResumeCurrencyEnum
-  workFormat: ResumeWorkFormatEnum
-  employmentType: EmploymentTypeEnum
+  workFormat: ResumeWorkFormatEnum[]
+  employmentType: EmploymentTypeEnum[]
   experienceYears?: number
   about?: string
   skills?: string[]
@@ -386,7 +386,7 @@ export type ApplicationStatusEnum =
 export interface ApplicationVacancyRef {
   documentId: string
   title: string
-  status: VacancyStatusEnum
+  moderationStatus: VacancyStatusEnum
   sourceType: SourceTypeEnum
   company: {
     documentId: string
@@ -400,7 +400,7 @@ export interface ApplicationResumeRef {
   title: string
   firstName: string
   lastName: string
-  status: ResumeStatusEnum
+  moderationStatus: ResumeStatusEnum
 }
 
 export interface ApplicationUserRef {
@@ -435,9 +435,9 @@ export interface FavoriteVacancyCard {
   title: string
   country: string
   city?: string | null
-  workFormat: WorkFormatEnum
-  employmentType: EmploymentTypeEnum
-  seniority: SeniorityEnum
+  workFormat: WorkFormatEnum[]
+  employmentType: EmploymentTypeEnum[]
+  seniority: SeniorityEnum[]
   salaryFrom?: number | null
   salaryTo?: number | null
   salaryCurrency?: SalaryCurrencyEnum | null
@@ -445,7 +445,7 @@ export interface FavoriteVacancyCard {
   topPlacement: boolean
   highlighted: boolean
   sourceType: SourceTypeEnum
-  status: VacancyStatusEnum
+  moderationStatus: VacancyStatusEnum
   expiresAt?: string | null
   createdAt: string
   industry?: IndustryRef | null
@@ -467,7 +467,7 @@ export interface FavoriteResumeCard {
   experienceYears?: number | null
   skills?: string[] | null
   views?: number
-  status: ResumeStatusEnum
+  moderationStatus: ResumeStatusEnum
   createdAt: string
 }
 
@@ -478,7 +478,7 @@ export interface FavoriteCompanyCard {
   country: string
   city?: string | null
   companySize: CompanySizeEnum
-  status: CompanyStatusEnum
+  moderationStatus: CompanyStatusEnum
   createdAt: string
   logo?: StrapiMedia | null
 }

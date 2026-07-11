@@ -84,7 +84,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({
   }
   const salary = formatSalary(v.salaryFrom, v.salaryTo, v.salaryCurrency)
   const isInternal = v.sourceType === 'internal'
-  const isPublished = v.status === 'published'
+  const isPublished = v.moderationStatus === 'published'
   const logoUrl = getMediaUrl(v.company?.logo?.url)
 
   return (
@@ -106,7 +106,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-3">
                 <h1 className="text-2xl font-bold text-card-foreground">{v.title}</h1>
-                <VacancyStatusBadge status={v.status} />
+                <VacancyStatusBadge status={v.moderationStatus} />
               </div>
               {v.company && (
                 <Link
@@ -127,9 +127,21 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({
                 {v.city ? `, ${v.city}` : ''}
               </Badge>
             )}
-            <Badge variant="outline">{t(`enums.workFormat.${v.workFormat}`)}</Badge>
-            <Badge variant="outline">{t(`enums.employmentType.${v.employmentType}`)}</Badge>
-            <Badge variant="outline">{t(`enums.seniority.${v.seniority}`)}</Badge>
+            {v.workFormat.map((wf) => (
+              <Badge key={wf} variant="outline">
+                {t(`enums.workFormat.${wf}`)}
+              </Badge>
+            ))}
+            {v.employmentType.map((et) => (
+              <Badge key={et} variant="outline">
+                {t(`enums.employmentType.${et}`)}
+              </Badge>
+            ))}
+            {v.seniority.map((s) => (
+              <Badge key={s} variant="outline">
+                {t(`enums.seniority.${s}`)}
+              </Badge>
+            ))}
             {v.urgent && (
               <Badge className="bg-red-100 text-red-700 hover:bg-red-100">🔥 Urgent</Badge>
             )}

@@ -8,8 +8,8 @@ type CreateResumeInput = {
   city?: string
   desiredSalary?: number
   currency?: string
-  workFormat: string
-  employmentType: string
+  workFormat: string[]
+  employmentType: string[]
   experienceYears?: number
   about?: string
   skills?: string[]
@@ -39,6 +39,23 @@ type CreateResumeInput = {
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
+  async getIdsByJsonArrayFilters(filters: Record<string, string[]>): Promise<string[]> {
+    const entries = Object.entries(filters).filter(([, v]) => v.length > 0)
+    if (entries.length === 0) return []
+    const conditions: string[] = []
+    const params: unknown[] = []
+    for (const [field, values] of entries) {
+      const col = field.replace(/([A-Z])/g, '_$1').toLowerCase()
+      const jsonValues = values.map((v) => JSON.stringify([v]))
+      const placeholders = jsonValues.map(() => '?::jsonb').join(', ')
+      conditions.push(`(${col}::jsonb @> ANY(ARRAY[${placeholders}]))`)
+      params.push(...jsonValues)
+    }
+    const sql = `SELECT document_id FROM resumes WHERE ${conditions.join(' AND ')} LIMIT 10000`
+    const result = await (strapi.db.connection as any).raw(sql, params)
+    return (result.rows as { document_id: string }[]).map((r) => r.document_id)
+  },
+
   async createResume(userId: number, input: CreateResumeInput) {
     return (strapi.documents as any)('api::resume.resume').create({
       data: {
@@ -50,13 +67,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         city: input.city,
         desiredSalary: input.desiredSalary,
         currency: input.currency as 'USD' | 'EUR' | 'RUB' | 'GBP' | undefined,
-        workFormat: input.workFormat as 'office' | 'remote' | 'hybrid' | 'any',
-        employmentType: input.employmentType as
-          | 'full-time'
-          | 'part-time'
-          | 'contract'
-          | 'internship'
-          | 'freelance',
+        workFormat: input.workFormat as any,
+        employmentType: input.employmentType as any,
         experienceYears: input.experienceYears,
         about: input.about,
         skills: input.skills ?? [],
@@ -66,7 +78,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         education: input.education ?? [],
         views: 0,
         invitations: 0,
-        status: 'draft',
+        moderationStatus: 'draft',
       },
     })
   },

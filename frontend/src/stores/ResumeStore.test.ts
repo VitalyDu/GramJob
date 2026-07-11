@@ -23,6 +23,7 @@ vi.mock('@/services/api', () => {
 })
 
 import { api, ApiClientError } from '@/services/api'
+import type { ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 import { ResumeStore } from './ResumeStore'
 
 const mockResume = {
@@ -32,9 +33,9 @@ const mockResume = {
   firstName: 'Иван',
   lastName: 'Иванов',
   country: 'RU',
-  workFormat: 'remote' as const,
-  employmentType: 'full-time' as const,
-  status: 'draft' as const,
+  workFormat: ['remote'] as ResumeWorkFormatEnum[],
+  employmentType: ['full-time'] as EmploymentTypeEnum[],
+  moderationStatus: 'draft' as const,
   createdAt: '2026-01-01T00:00:00Z',
 }
 
@@ -131,8 +132,8 @@ describe('ResumeStore', () => {
         firstName: 'Иван',
         lastName: 'Иванов',
         country: 'RU',
-        workFormat: 'remote',
-        employmentType: 'full-time',
+        workFormat: ['remote'],
+        employmentType: ['full-time'],
       })
       expect(result).toEqual(mockResume)
       expect(store.myResumes[0]).toEqual(mockResume)
@@ -146,8 +147,8 @@ describe('ResumeStore', () => {
           firstName: 'А',
           lastName: 'Б',
           country: 'RU',
-          workFormat: 'remote',
-          employmentType: 'full-time',
+          workFormat: ['remote'],
+          employmentType: ['full-time'],
         })
       ).rejects.toThrow('Bad request')
       expect(store.error).toBe('Bad request')
@@ -168,21 +169,21 @@ describe('ResumeStore', () => {
 
   describe('publishResume', () => {
     it('обновляет резюме в myResumes после публикации', async () => {
-      const published = { ...mockResume, status: 'moderation' as const }
+      const published = { ...mockResume, moderationStatus: 'moderation' as const }
       store.myResumes = [mockResume]
       vi.mocked(api.post).mockResolvedValue({ data: published })
       await store.publishResume('res123')
-      expect(store.myResumes[0]?.status).toBe('moderation')
+      expect(store.myResumes[0]?.moderationStatus).toBe('moderation')
     })
   })
 
   describe('archiveResume', () => {
     it('обновляет резюме в myResumes после архивации', async () => {
-      const archived = { ...mockResume, status: 'archived' as const }
+      const archived = { ...mockResume, moderationStatus: 'archived' as const }
       store.myResumes = [mockResume]
       vi.mocked(api.delete).mockResolvedValue({ data: archived })
       await store.archiveResume('res123')
-      expect(store.myResumes[0]?.status).toBe('archived')
+      expect(store.myResumes[0]?.moderationStatus).toBe('archived')
     })
   })
 

@@ -8,8 +8,8 @@ const baseDefaults: Partial<ResumeCreateInput> = {
   firstName: 'Иван',
   lastName: 'Петров',
   country: 'RU',
-  workFormat: 'remote',
-  employmentType: 'full-time',
+  workFormat: ['remote'],
+  employmentType: ['full-time'],
 }
 
 describe('ResumeForm — languages (BUG-11)', () => {

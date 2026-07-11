@@ -48,7 +48,7 @@ export function VacancyCard({ vacancy }: Props) {
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <p className="truncate font-semibold group-hover:text-primary">{vacancy.title}</p>
-              <VacancyStatusBadge status={vacancy.status} />
+              <VacancyStatusBadge status={vacancy.moderationStatus} />
             </div>
 
             <p className="mt-0.5 text-sm text-muted-foreground">{vacancy.company?.name}</p>
@@ -59,11 +59,21 @@ export function VacancyCard({ vacancy }: Props) {
                   ? `${getCountryName(vacancy.country, i18n.language)}, ${vacancy.city}`
                   : getCountryName(vacancy.country, i18n.language)}
               </Badge>
-              <Badge variant="secondary">{t(`enums.workFormat.${vacancy.workFormat}`)}</Badge>
-              <Badge variant="secondary">
-                {t(`enums.employmentType.${vacancy.employmentType}`)}
-              </Badge>
-              <Badge variant="secondary">{t(`enums.seniority.${vacancy.seniority}`)}</Badge>
+              {vacancy.workFormat.map((wf) => (
+                <Badge key={wf} variant="secondary">
+                  {t(`enums.workFormat.${wf}`)}
+                </Badge>
+              ))}
+              {vacancy.employmentType.map((et) => (
+                <Badge key={et} variant="secondary">
+                  {t(`enums.employmentType.${et}`)}
+                </Badge>
+              ))}
+              {vacancy.seniority.map((s) => (
+                <Badge key={s} variant="secondary">
+                  {t(`enums.seniority.${s}`)}
+                </Badge>
+              ))}
               {vacancy.urgent && <Badge variant="destructive">🔥 Urgent</Badge>}
             </div>
 

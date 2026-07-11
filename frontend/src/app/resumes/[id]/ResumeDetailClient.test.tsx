@@ -9,9 +9,9 @@ const resume: Partial<Resume> = {
   firstName: 'Иван',
   lastName: 'Петров',
   country: 'RU',
-  workFormat: 'remote',
-  employmentType: 'full-time',
-  status: 'published',
+  workFormat: ['remote'],
+  employmentType: ['full-time'],
+  moderationStatus: 'published',
   languages: [
     { lang: 'Английский', level: 'B2' },
     { lang: 'Немецкий', level: '' },

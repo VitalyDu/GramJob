@@ -4,9 +4,9 @@ type CreateVacancyInput = {
   title: string
   industryId: string
   specializationId: string
-  employmentType: string
-  workFormat: string
-  seniority: string
+  employmentType: string[]
+  workFormat: string[]
+  seniority: string[]
   country: string
   city?: string
   salaryFrom?: number
@@ -34,20 +34,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         title: input.title,
         industry: input.industryId,
         specialization: input.specializationId,
-        employmentType: input.employmentType as
-          | 'full-time'
-          | 'part-time'
-          | 'contract'
-          | 'internship'
-          | 'freelance',
-        workFormat: input.workFormat as 'office' | 'remote' | 'hybrid',
-        seniority: input.seniority as
-          | 'intern'
-          | 'junior'
-          | 'middle'
-          | 'senior'
-          | 'lead'
-          | 'principal',
+        employmentType: input.employmentType as any,
+        workFormat: input.workFormat as any,
+        seniority: input.seniority as any,
         country: input.country,
         city: input.city,
         salaryFrom: input.salaryFrom,
@@ -70,11 +59,28 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         uniqueViews: 0,
         applicationsCount: 0,
         // Спека redesign §8: вакансия сразу уходит на модерацию, минуя draft
-        status: 'moderation',
+        moderationStatus: 'moderation',
         postedBy: postedById,
         company: input.companyId ?? null,
       },
     })
+  },
+
+  async getIdsByJsonArrayFilters(filters: Record<string, string[]>): Promise<string[]> {
+    const entries = Object.entries(filters).filter(([, v]) => v.length > 0)
+    if (entries.length === 0) return []
+    const conditions: string[] = []
+    const params: unknown[] = []
+    for (const [field, values] of entries) {
+      const col = field.replace(/([A-Z])/g, '_$1').toLowerCase()
+      const jsonValues = values.map((v) => JSON.stringify([v]))
+      const placeholders = jsonValues.map(() => '?::jsonb').join(', ')
+      conditions.push(`(${col}::jsonb @> ANY(ARRAY[${placeholders}]))`)
+      params.push(...jsonValues)
+    }
+    const sql = `SELECT document_id FROM vacancies WHERE ${conditions.join(' AND ')} LIMIT 10000`
+    const result = await (strapi.db.connection as any).raw(sql, params)
+    return (result.rows as { document_id: string }[]).map((r) => r.document_id)
   },
 
   /**
@@ -93,7 +99,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const rows = await strapi.db.connection.raw(
       `SELECT document_id
        FROM vacancies
-       WHERE status = 'published'
+       WHERE moderation_status = 'published'
          AND expires_at > NOW()
          AND search_vector @@ ${tsQuery}
          ${extraFilters}
@@ -106,7 +112,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const countRows = await strapi.db.connection.raw(
       `SELECT COUNT(*) AS total
        FROM vacancies
-       WHERE status = 'published'
+       WHERE moderation_status = 'published'
          AND expires_at > NOW()
          AND search_vector @@ ${tsQuery}
          ${extraFilters}`,

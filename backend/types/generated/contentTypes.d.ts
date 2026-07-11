@@ -504,6 +504,11 @@ export interface ApiCompanyCompany extends Struct.CollectionTypeSchema {
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::company.company'> &
       Schema.Attribute.Private
     logo: Schema.Attribute.Media<'images'>
+    moderationStatus: Schema.Attribute.Enumeration<
+      ['draft', 'moderation', 'published', 'rejected']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'draft'>
     name: Schema.Attribute.String & Schema.Attribute.Required
     owner: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'>
     publishedAt: Schema.Attribute.DateTime
@@ -521,9 +526,6 @@ export interface ApiCompanyCompany extends Struct.CollectionTypeSchema {
       ]
     >
     slug: Schema.Attribute.String & Schema.Attribute.Required & Schema.Attribute.Unique
-    status: Schema.Attribute.Enumeration<['draft', 'moderation', 'published', 'rejected']> &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'draft'>
     telegram: Schema.Attribute.String
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
@@ -811,6 +813,11 @@ export interface ApiResumeResume extends Struct.CollectionTypeSchema {
     locale: Schema.Attribute.String & Schema.Attribute.Private
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::resume.resume'> &
       Schema.Attribute.Private
+    moderationStatus: Schema.Attribute.Enumeration<
+      ['draft', 'moderation', 'published', 'rejected', 'archived']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'draft'>
     publishedAt: Schema.Attribute.DateTime
     rejectionComment: Schema.Attribute.Text
     rejectionReason: Schema.Attribute.Enumeration<
@@ -826,11 +833,6 @@ export interface ApiResumeResume extends Struct.CollectionTypeSchema {
       ]
     >
     skills: Schema.Attribute.JSON
-    status: Schema.Attribute.Enumeration<
-      ['draft', 'moderation', 'published', 'rejected', 'archived']
-    > &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'draft'>
     title: Schema.Attribute.String & Schema.Attribute.Required
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
@@ -1026,6 +1028,11 @@ export interface ApiVacancyVacancy extends Struct.CollectionTypeSchema {
     locale: Schema.Attribute.String & Schema.Attribute.Private
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::vacancy.vacancy'> &
       Schema.Attribute.Private
+    moderationStatus: Schema.Attribute.Enumeration<
+      ['draft', 'moderation', 'published', 'rejected', 'expired', 'archived']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'draft'>
     postedBy: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'> &
       Schema.Attribute.Required
     publishedAt: Schema.Attribute.DateTime
@@ -1059,11 +1066,6 @@ export interface ApiVacancyVacancy extends Struct.CollectionTypeSchema {
     sourceUrl: Schema.Attribute.String
     specialization: Schema.Attribute.Relation<'manyToOne', 'api::specialization.specialization'> &
       Schema.Attribute.Required
-    status: Schema.Attribute.Enumeration<
-      ['draft', 'moderation', 'published', 'rejected', 'expired', 'archived']
-    > &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'draft'>
     title: Schema.Attribute.String & Schema.Attribute.Required
     topPlacement: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>
     uniqueViews: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>

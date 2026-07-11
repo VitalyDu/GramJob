@@ -35,7 +35,7 @@ const RESUME_CARD_FIELDS = [
   'skills',
   'languages',
   'views',
-  'status',
+  'moderationStatus',
   'createdAt',
 ] as const
 
@@ -71,11 +71,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         )
       }
 
-      if (!VALID_WORK_FORMATS.includes(workFormat as any)) {
-        return ctx.badRequest(`workFormat must be one of: ${VALID_WORK_FORMATS.join(', ')}`)
+      if (
+        !Array.isArray(workFormat) ||
+        (workFormat as any[]).length === 0 ||
+        (workFormat as any[]).some((v: unknown) => !VALID_WORK_FORMATS.includes(v as any))
+      ) {
+        return ctx.badRequest(
+          `workFormat must be a non-empty array with values from: ${VALID_WORK_FORMATS.join(', ')}`
+        )
       }
-      if (!VALID_EMPLOYMENT_TYPES.includes(employmentType as any)) {
-        return ctx.badRequest(`employmentType must be one of: ${VALID_EMPLOYMENT_TYPES.join(', ')}`)
+      if (
+        !Array.isArray(employmentType) ||
+        (employmentType as any[]).length === 0 ||
+        (employmentType as any[]).some((v: unknown) => !VALID_EMPLOYMENT_TYPES.includes(v as any))
+      ) {
+        return ctx.badRequest(
+          `employmentType must be a non-empty array with values from: ${VALID_EMPLOYMENT_TYPES.join(', ')}`
+        )
       }
 
       const resume = await svc().createResume(user.id, {
@@ -86,8 +98,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         city: body.city as string | undefined,
         desiredSalary: body.desiredSalary as number | undefined,
         currency: body.currency as string | undefined,
-        workFormat: workFormat as string,
-        employmentType: employmentType as string,
+        workFormat: workFormat as string[],
+        employmentType: employmentType as string[],
         experienceYears: body.experienceYears as number | undefined,
         about: body.about as string | undefined,
         skills: body.skills as string[] | undefined,
@@ -108,11 +120,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const resume = await (strapi.documents as any)('api::resume.resume').findOne({
         documentId: id,
-        fields: ['documentId', 'status'],
+        fields: ['documentId', 'moderationStatus'],
       })
       if (!resume) return ctx.notFound('Resume not found')
 
-      const status = resume.status as string
+      const status = resume.moderationStatus as string
       if (!canPublishResume(status)) {
         return ctx.badRequest(
           `Cannot publish resume with status "${status}". Must be "draft" or "rejected".`
@@ -121,7 +133,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const updated = await (strapi.documents as any)('api::resume.resume').update({
         documentId: id,
-        data: { status: 'moderation' },
+        data: { moderationStatus: 'moderation' },
         fields: RESUME_OWNER_CARD_FIELDS,
         populate: RESUME_POPULATE,
       })
@@ -146,12 +158,26 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const pageNum = Math.max(1, parseInt(page, 10) || 1)
       const pageSizeNum = Math.min(50, Math.max(1, parseInt(pageSize, 10) || 20))
 
-      const filters: Record<string, unknown> = { status: { $eq: 'published' } }
+      // Pre-query JSON array filters
+      let jsonFilterIds: string[] | null = null
+      if (workFormats.length > 0 || employmentTypes.length > 0) {
+        jsonFilterIds = await svc().getIdsByJsonArrayFilters({
+          ...(workFormats.length > 0 ? { workFormat: workFormats } : {}),
+          ...(employmentTypes.length > 0 ? { employmentType: employmentTypes } : {}),
+        })
+        if (jsonFilterIds.length === 0) {
+          return ctx.send({
+            data: [],
+            meta: { total: 0, page: pageNum, pageSize: pageSizeNum, pageCount: 0 },
+          })
+        }
+      }
 
+      const filters: Record<string, unknown> = { moderationStatus: { $eq: 'published' } }
+
+      if (jsonFilterIds !== null) filters.documentId = { $in: jsonFilterIds }
       if (country) filters.country = { $eq: country }
       if (city) filters.city = { $containsi: city }
-      if (workFormats.length > 0) filters.workFormat = { $in: workFormats }
-      if (employmentTypes.length > 0) filters.employmentType = { $in: employmentTypes }
       if (experienceYears) {
         const years = parseInt(experienceYears, 10)
         if (!isNaN(years)) filters.experienceYears = { $lte: years }
@@ -207,7 +233,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const isOwner = requestUser.id === resumeOwnerId
 
       // Owner can open their own resume in any status (edit flow); others see only published
-      if (!isOwner && resume.status !== 'published') {
+      if (!isOwner && resume.moderationStatus !== 'published') {
         return ctx.notFound('Resume not found')
       }
 
@@ -276,11 +302,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const existing = await (strapi.documents as any)('api::resume.resume').findOne({
         documentId: id,
-        fields: ['documentId', 'status'],
+        fields: ['documentId', 'moderationStatus'],
       })
       if (!existing) return ctx.notFound('Resume not found')
 
-      const status = existing.status as string
+      const status = existing.moderationStatus as string
       if (!canEditResume(status)) {
         return ctx.badRequest(`Cannot edit resume with status "${status}".`)
       }
@@ -313,8 +339,33 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return ctx.badRequest('No updatable fields provided.')
       }
 
+      if ('workFormat' in updateData) {
+        const wf = updateData.workFormat as unknown
+        if (
+          !Array.isArray(wf) ||
+          (wf as any[]).length === 0 ||
+          (wf as any[]).some((v: unknown) => !VALID_WORK_FORMATS.includes(v as any))
+        ) {
+          return ctx.badRequest(
+            `workFormat must be a non-empty array with values from: ${VALID_WORK_FORMATS.join(', ')}`
+          )
+        }
+      }
+      if ('employmentType' in updateData) {
+        const et = updateData.employmentType as unknown
+        if (
+          !Array.isArray(et) ||
+          (et as any[]).length === 0 ||
+          (et as any[]).some((v: unknown) => !VALID_EMPLOYMENT_TYPES.includes(v as any))
+        ) {
+          return ctx.badRequest(
+            `employmentType must be a non-empty array with values from: ${VALID_EMPLOYMENT_TYPES.join(', ')}`
+          )
+        }
+      }
+
       if (publishedTransitionsOnEditResume(status)) {
-        updateData.status = 'draft'
+        updateData.moderationStatus = 'draft'
       }
 
       const updated = await (strapi.documents as any)('api::resume.resume').update({
@@ -335,17 +386,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const resume = await (strapi.documents as any)('api::resume.resume').findOne({
         documentId: id,
-        fields: ['documentId', 'status'],
+        fields: ['documentId', 'moderationStatus'],
       })
       if (!resume) return ctx.notFound('Resume not found')
 
-      if (!canArchiveResume(resume.status as string)) {
-        return ctx.badRequest(`Cannot archive resume with status "${resume.status}".`)
+      if (!canArchiveResume(resume.moderationStatus as string)) {
+        return ctx.badRequest(`Cannot archive resume with status "${resume.moderationStatus}".`)
       }
 
       const updated = await (strapi.documents as any)('api::resume.resume').update({
         documentId: id,
-        data: { status: 'archived' },
+        data: { moderationStatus: 'archived' },
         fields: RESUME_OWNER_CARD_FIELDS,
         populate: RESUME_POPULATE,
       })
@@ -363,7 +414,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const pageSizeNum = Math.min(100, Math.max(1, parseInt(pageSize, 10) || 20))
 
       const filters: Record<string, unknown> = { user: { id: { $eq: user.id } } }
-      if (status) filters.status = { $eq: status }
+      if (status) filters.moderationStatus = { $eq: status }
 
       const [resumes, total] = await Promise.all([
         (strapi.documents as any)('api::resume.resume').findMany({

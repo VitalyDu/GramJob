@@ -46,18 +46,15 @@
       "required": true
     },
     "employmentType": {
-      "type": "enumeration",
-      "enum": ["full-time", "part-time", "contract", "internship", "freelance"],
+      "type": "json",
       "required": true
     },
     "workFormat": {
-      "type": "enumeration",
-      "enum": ["office", "remote", "hybrid"],
+      "type": "json",
       "required": true
     },
     "seniority": {
-      "type": "enumeration",
-      "enum": ["intern", "junior", "middle", "senior", "lead", "principal"],
+      "type": "json",
       "required": true
     },
     "country": {
@@ -137,7 +134,7 @@
       "type": "integer",
       "default": 0
     },
-    "status": {
+    "moderationStatus": {
       "type": "enumeration",
       "enum": ["draft", "moderation", "published", "rejected", "expired", "archived"],
       "default": "draft",

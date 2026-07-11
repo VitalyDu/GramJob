@@ -11,11 +11,11 @@ const mockResume: Resume = {
   lastName: 'Петров',
   country: 'RU',
   city: 'Москва',
-  workFormat: 'remote',
-  employmentType: 'full-time',
+  workFormat: ['remote'],
+  employmentType: ['full-time'],
   experienceYears: 3,
   skills: ['React', 'TypeScript', 'CSS', 'Node.js', 'GraphQL', 'Docker'],
-  status: 'published',
+  moderationStatus: 'published',
   createdAt: '2026-01-01T00:00:00Z',
 }
 

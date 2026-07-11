@@ -34,7 +34,6 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { RESUME_WORK_FORMAT_VALUES, RESUME_EMPLOYMENT_TYPE_VALUES } from '@/lib/resume-utils'
 import { CountrySelect } from '@/components/ui/country-select'
@@ -42,42 +41,51 @@ import { CitySelect } from '@/components/ui/city-select'
 import type { ResumeCreateInput, ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
 
-function EnumPills<T extends string>({
+function EnumMultiPills<T extends string>({
   id,
   values,
-  value,
+  selected,
   onChange,
   getLabel,
 }: {
   id: string
   values: readonly T[]
-  value: T
-  onChange: (v: T) => void
+  selected: T[]
+  onChange: (selected: T[]) => void
   getLabel: (v: T) => string
 }) {
+  const toggle = (v: T) => {
+    if (selected.includes(v)) {
+      onChange(selected.filter((s) => s !== v))
+    } else {
+      onChange([...selected, v])
+    }
+  }
   return (
-    <RadioGroup
-      value={value}
-      onValueChange={(v) => onChange(v as T)}
-      className="flex flex-wrap gap-1.5"
-    >
-      {values.map((v) => (
-        <div key={v} className="flex">
-          <RadioGroupItem value={v} id={`${id}-${v}`} className="peer sr-only" />
-          <Label
-            htmlFor={`${id}-${v}`}
+    <div className="flex flex-wrap gap-1.5" role="group" aria-labelledby={id}>
+      {values.map((v) => {
+        const checked = selected.includes(v)
+        return (
+          <button
+            key={v}
+            type="button"
+            role="checkbox"
+            aria-checked={checked}
+            onClick={() => toggle(v)}
             className={cn(
               'flex h-8 cursor-pointer select-none items-center rounded-full border px-4 text-sm font-medium transition-colors',
               'hover:bg-muted',
-              'peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 peer-data-[state=checked]:text-primary',
-              'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-1'
+              checked
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border bg-transparent text-foreground',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1'
             )}
           >
             {getLabel(v)}
-          </Label>
-        </div>
-      ))}
-    </RadioGroup>
+          </button>
+        )
+      })}
+    </div>
   )
 }
 
@@ -171,8 +179,10 @@ const _baseSchema = z.object({
     z.number().positive().optional()
   ),
   currency: z.enum(['USD', 'EUR', 'RUB', 'GBP']).optional(),
-  workFormat: z.enum(['office', 'remote', 'hybrid', 'any']),
-  employmentType: z.enum(['full-time', 'part-time', 'contract', 'internship', 'freelance']),
+  workFormat: z.array(z.enum(['office', 'remote', 'hybrid', 'any'])).min(1),
+  employmentType: z
+    .array(z.enum(['full-time', 'part-time', 'contract', 'internship', 'freelance']))
+    .min(1),
   experienceYears: z.preprocess(
     (v) => (v === '' || v === undefined ? undefined : Number(v)),
     z.number().int().nonnegative().optional()
@@ -238,8 +248,10 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
           z.number().positive().optional()
         ),
         currency: z.enum(['USD', 'EUR', 'RUB', 'GBP']).optional(),
-        workFormat: z.enum(['office', 'remote', 'hybrid', 'any']),
-        employmentType: z.enum(['full-time', 'part-time', 'contract', 'internship', 'freelance']),
+        workFormat: z.array(z.enum(['office', 'remote', 'hybrid', 'any'])).min(1),
+        employmentType: z
+          .array(z.enum(['full-time', 'part-time', 'contract', 'internship', 'freelance']))
+          .min(1),
         experienceYears: z.preprocess(
           (v) => (v === '' || v === undefined ? undefined : Number(v)),
           z.number().int().nonnegative().optional()
@@ -275,8 +287,8 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
         ? { desiredSalary: defaultValues.desiredSalary }
         : {}),
       currency: defaultValues?.currency ?? 'USD',
-      workFormat: (defaultValues?.workFormat as ResumeWorkFormatEnum) ?? 'remote',
-      employmentType: (defaultValues?.employmentType as EmploymentTypeEnum) ?? 'full-time',
+      workFormat: (defaultValues?.workFormat as ResumeWorkFormatEnum[]) ?? ['remote'],
+      employmentType: (defaultValues?.employmentType as EmploymentTypeEnum[]) ?? ['full-time'],
       ...(defaultValues?.experienceYears !== undefined
         ? { experienceYears: defaultValues.experienceYears }
         : {}),
@@ -463,10 +475,10 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
               control={control}
               name="workFormat"
               render={({ field }) => (
-                <EnumPills
+                <EnumMultiPills
                   id="resumeWorkFormat"
                   values={RESUME_WORK_FORMAT_VALUES as readonly ResumeWorkFormatEnum[]}
-                  value={field.value}
+                  selected={field.value}
                   onChange={field.onChange}
                   getLabel={(v) => t(`enums.resumeWorkFormat.${v}`)}
                 />
@@ -480,10 +492,10 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
               control={control}
               name="employmentType"
               render={({ field }) => (
-                <EnumPills
+                <EnumMultiPills
                   id="resumeEmploymentType"
                   values={RESUME_EMPLOYMENT_TYPE_VALUES as readonly EmploymentTypeEnum[]}
-                  value={field.value}
+                  selected={field.value}
                   onChange={field.onChange}
                   getLabel={(v) => t(`enums.employmentType.${v}`)}
                 />

@@ -51,13 +51,11 @@
       "enum": ["USD", "EUR", "RUB", "GBP"]
     },
     "workFormat": {
-      "type": "enumeration",
-      "enum": ["office", "remote", "hybrid", "any"],
+      "type": "json",
       "required": true
     },
     "employmentType": {
-      "type": "enumeration",
-      "enum": ["full-time", "part-time", "contract", "internship", "freelance"],
+      "type": "json",
       "required": true
     },
     "experienceYears": {
@@ -93,7 +91,7 @@
       "type": "integer",
       "default": 0
     },
-    "status": {
+    "moderationStatus": {
       "type": "enumeration",
       "enum": ["draft", "moderation", "published", "rejected", "archived"],
       "default": "draft",

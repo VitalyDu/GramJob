@@ -84,7 +84,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-xl font-bold text-card-foreground">{r.title}</h1>
-                <ResumeStatusBadge status={r.status} />
+                <ResumeStatusBadge status={r.moderationStatus} />
               </div>
               <p className="mt-0.5 text-base font-medium text-foreground">{name}</p>
 

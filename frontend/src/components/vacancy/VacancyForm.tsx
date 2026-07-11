@@ -20,7 +20,6 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { WORK_FORMAT_VALUES, EMPLOYMENT_TYPE_VALUES, SENIORITY_VALUES } from '@/lib/vacancy-utils'
 import { CountrySelect } from '@/components/ui/country-select'
@@ -38,42 +37,51 @@ import type {
 import { api } from '@/services/api'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
 
-function EnumPills<T extends string>({
+function EnumMultiPills<T extends string>({
   id,
   values,
-  value,
+  selected,
   onChange,
   getLabel,
 }: {
   id: string
   values: readonly T[]
-  value: T
-  onChange: (v: T) => void
+  selected: T[]
+  onChange: (selected: T[]) => void
   getLabel: (v: T) => string
 }) {
+  const toggle = (v: T) => {
+    if (selected.includes(v)) {
+      onChange(selected.filter((s) => s !== v))
+    } else {
+      onChange([...selected, v])
+    }
+  }
   return (
-    <RadioGroup
-      value={value}
-      onValueChange={(v) => onChange(v as T)}
-      className="flex flex-wrap gap-1.5"
-    >
-      {values.map((v) => (
-        <div key={v} className="flex">
-          <RadioGroupItem value={v} id={`${id}-${v}`} className="peer sr-only" />
-          <Label
-            htmlFor={`${id}-${v}`}
+    <div className="flex flex-wrap gap-1.5" role="group" aria-labelledby={id}>
+      {values.map((v) => {
+        const checked = selected.includes(v)
+        return (
+          <button
+            key={v}
+            type="button"
+            role="checkbox"
+            aria-checked={checked}
+            onClick={() => toggle(v)}
             className={cn(
               'flex h-8 cursor-pointer select-none items-center rounded-full border px-4 text-sm font-medium transition-colors',
               'hover:bg-muted',
-              'peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 peer-data-[state=checked]:text-primary',
-              'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-1'
+              checked
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border bg-transparent text-foreground',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1'
             )}
           >
             {getLabel(v)}
-          </Label>
-        </div>
-      ))}
-    </RadioGroup>
+          </button>
+        )
+      })}
+    </div>
   )
 }
 
@@ -83,9 +91,11 @@ const _baseSchema = z.object({
   companyId: z.string().optional().default(''),
   industryId: z.string().min(1),
   specializationId: z.string().min(1),
-  workFormat: z.enum(['office', 'remote', 'hybrid']),
-  employmentType: z.enum(['full-time', 'part-time', 'contract', 'internship', 'freelance']),
-  seniority: z.enum(['intern', 'junior', 'middle', 'senior', 'lead', 'principal']),
+  workFormat: z.array(z.enum(['office', 'remote', 'hybrid'])).min(1),
+  employmentType: z
+    .array(z.enum(['full-time', 'part-time', 'contract', 'internship', 'freelance']))
+    .min(1),
+  seniority: z.array(z.enum(['intern', 'junior', 'middle', 'senior', 'lead', 'principal'])).min(1),
   country: z.string().min(1),
   city: z.string().optional().default(''),
   salaryFrom: z.preprocess(
@@ -131,9 +141,13 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
         companyId: z.string().optional().default(''),
         industryId: z.string().min(1, t('forms.vacancy.industryRequired')),
         specializationId: z.string().min(1, t('forms.vacancy.specializationRequired')),
-        workFormat: z.enum(['office', 'remote', 'hybrid']),
-        employmentType: z.enum(['full-time', 'part-time', 'contract', 'internship', 'freelance']),
-        seniority: z.enum(['intern', 'junior', 'middle', 'senior', 'lead', 'principal']),
+        workFormat: z.array(z.enum(['office', 'remote', 'hybrid'])).min(1),
+        employmentType: z
+          .array(z.enum(['full-time', 'part-time', 'contract', 'internship', 'freelance']))
+          .min(1),
+        seniority: z
+          .array(z.enum(['intern', 'junior', 'middle', 'senior', 'lead', 'principal']))
+          .min(1),
         country: z.string().min(1, t('forms.vacancy.countryRequired')),
         city: z.string().optional().default(''),
         salaryFrom: z.preprocess(
@@ -174,9 +188,9 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
       companyId: defaultValues?.companyId ?? myCompanies[0]?.documentId ?? '',
       industryId: defaultValues?.industryId ?? '',
       specializationId: defaultValues?.specializationId ?? '',
-      workFormat: (defaultValues?.workFormat as WorkFormatEnum) ?? 'remote',
-      employmentType: (defaultValues?.employmentType as EmploymentTypeEnum) ?? 'full-time',
-      seniority: (defaultValues?.seniority as SeniorityEnum) ?? 'middle',
+      workFormat: (defaultValues?.workFormat as WorkFormatEnum[]) ?? ['remote'],
+      employmentType: (defaultValues?.employmentType as EmploymentTypeEnum[]) ?? ['full-time'],
+      seniority: (defaultValues?.seniority as SeniorityEnum[]) ?? ['middle'],
       country: defaultValues?.country ?? 'RU',
       city: defaultValues?.city ?? '',
       ...(defaultValues?.salaryFrom !== undefined ? { salaryFrom: defaultValues.salaryFrom } : {}),
@@ -291,7 +305,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
                   <SelectContent>
                     <SelectItem value="">{t('forms.vacancy.noCompany')}</SelectItem>
                     {myCompanies
-                      .filter((c) => c.status === 'published')
+                      .filter((c) => c.moderationStatus === 'published')
                       .map((c) => (
                         <SelectItem key={c.documentId} value={c.documentId}>
                           {c.name}
@@ -372,10 +386,10 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
               control={control}
               name="workFormat"
               render={({ field }) => (
-                <EnumPills
+                <EnumMultiPills
                   id="workFormat"
                   values={WORK_FORMAT_VALUES as readonly WorkFormatEnum[]}
-                  value={field.value}
+                  selected={field.value}
                   onChange={field.onChange}
                   getLabel={(v) => t(`enums.workFormat.${v}`)}
                 />
@@ -389,10 +403,10 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
               control={control}
               name="employmentType"
               render={({ field }) => (
-                <EnumPills
+                <EnumMultiPills
                   id="employmentType"
                   values={EMPLOYMENT_TYPE_VALUES as readonly EmploymentTypeEnum[]}
-                  value={field.value}
+                  selected={field.value}
                   onChange={field.onChange}
                   getLabel={(v) => t(`enums.employmentType.${v}`)}
                 />
@@ -406,10 +420,10 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
               control={control}
               name="seniority"
               render={({ field }) => (
-                <EnumPills
+                <EnumMultiPills
                   id="seniority"
                   values={SENIORITY_VALUES as readonly SeniorityEnum[]}
-                  value={field.value}
+                  selected={field.value}
                   onChange={field.onChange}
                   getLabel={(v) => t(`enums.seniority.${v}`)}
                 />

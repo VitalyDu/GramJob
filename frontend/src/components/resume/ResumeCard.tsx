@@ -36,7 +36,7 @@ export function ResumeCard({ resume }: Props) {
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <p className="truncate font-semibold group-hover:text-primary">{resume.title}</p>
-              <ResumeStatusBadge status={resume.status} />
+              <ResumeStatusBadge status={resume.moderationStatus} />
             </div>
             {(resume.firstName || resume.lastName) && (
               <p className="mt-0.5 text-sm text-muted-foreground">
@@ -51,16 +51,16 @@ export function ResumeCard({ resume }: Props) {
                     : getCountryName(resume.country, i18n.language)}
                 </Badge>
               )}
-              {resume.workFormat && (
-                <Badge variant="secondary">
-                  {t(`enums.resumeWorkFormat.${resume.workFormat}`)}
+              {resume.workFormat?.map((wf) => (
+                <Badge key={wf} variant="secondary">
+                  {t(`enums.resumeWorkFormat.${wf}`)}
                 </Badge>
-              )}
-              {resume.employmentType && (
-                <Badge variant="secondary">
-                  {t(`enums.employmentType.${resume.employmentType}`)}
+              ))}
+              {resume.employmentType?.map((et) => (
+                <Badge key={et} variant="secondary">
+                  {t(`enums.employmentType.${et}`)}
                 </Badge>
-              )}
+              ))}
               {visibleSkills.map((skill) => (
                 <Badge key={skill} variant="outline">
                   {skill}

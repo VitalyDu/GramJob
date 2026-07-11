@@ -48,7 +48,7 @@ const VACANCY_CARD_FIELDS = [
   'topPlacement',
   'highlighted',
   'sourceType',
-  'status',
+  'moderationStatus',
   'expiresAt',
   'createdAt',
   'views',
@@ -121,26 +121,44 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         )
       }
 
-      if (!VALID_EMPLOYMENT_TYPES.includes(employmentType as any)) {
-        return ctx.badRequest(`employmentType must be one of: ${VALID_EMPLOYMENT_TYPES.join(', ')}`)
+      if (
+        !Array.isArray(workFormat) ||
+        (workFormat as any[]).length === 0 ||
+        (workFormat as any[]).some((v) => !VALID_WORK_FORMATS.includes(v))
+      ) {
+        return ctx.badRequest(
+          `workFormat must be a non-empty array with values from: ${VALID_WORK_FORMATS.join(', ')}`
+        )
       }
-      if (!VALID_WORK_FORMATS.includes(workFormat as any)) {
-        return ctx.badRequest(`workFormat must be one of: ${VALID_WORK_FORMATS.join(', ')}`)
+      if (
+        !Array.isArray(employmentType) ||
+        (employmentType as any[]).length === 0 ||
+        (employmentType as any[]).some((v) => !VALID_EMPLOYMENT_TYPES.includes(v))
+      ) {
+        return ctx.badRequest(
+          `employmentType must be a non-empty array with values from: ${VALID_EMPLOYMENT_TYPES.join(', ')}`
+        )
       }
-      if (!VALID_SENIORITIES.includes(seniority as any)) {
-        return ctx.badRequest(`seniority must be one of: ${VALID_SENIORITIES.join(', ')}`)
+      if (
+        !Array.isArray(seniority) ||
+        (seniority as any[]).length === 0 ||
+        (seniority as any[]).some((v) => !VALID_SENIORITIES.includes(v))
+      ) {
+        return ctx.badRequest(
+          `seniority must be a non-empty array with values from: ${VALID_SENIORITIES.join(', ')}`
+        )
       }
 
       if (body.companyId) {
         const company = await strapi.documents('api::company.company').findOne({
           documentId: body.companyId as string,
           populate: { owner: { fields: ['id'] } },
-          fields: ['documentId', 'status'],
+          fields: ['documentId', 'moderationStatus'],
         })
         if (!company || (company as any).owner?.id !== user.id) {
           return ctx.forbidden('You do not own this company')
         }
-        if ((company as any).status !== 'published') {
+        if ((company as any).moderationStatus !== 'published') {
           return ctx.badRequest('Company must be published to post vacancies')
         }
       }
@@ -171,9 +189,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           title: title as string,
           industryId: industryId as string,
           specializationId: specializationId as string,
-          employmentType: employmentType as string,
-          workFormat: workFormat as string,
-          seniority: seniority as string,
+          employmentType: employmentType as string[],
+          workFormat: workFormat as string[],
+          seniority: seniority as string[],
           country: country as string,
           city: body.city as string | undefined,
           salaryFrom: body.salaryFrom as number | undefined,
@@ -216,11 +234,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const vacancy = await strapi.documents('api::vacancy.vacancy').findOne({
         documentId: id,
-        fields: ['documentId', 'status'],
+        fields: ['documentId', 'moderationStatus'],
       })
       if (!vacancy) return ctx.notFound('Vacancy not found')
 
-      const status = vacancy.status as string
+      const status = (vacancy as any).moderationStatus as string
       if (!canPublish(status)) {
         return ctx.badRequest(
           `Cannot publish vacancy with status "${status}". Must be "draft", "rejected", or "expired".`
@@ -247,7 +265,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const updated = await strapi.documents('api::vacancy.vacancy').update({
         documentId: id,
-        data: { status: 'moderation' },
+        data: { moderationStatus: 'moderation' } as any,
         fields: VACANCY_CARD_FIELDS as any,
         populate: VACANCY_POPULATE as any,
       })
@@ -281,6 +299,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const pageNum = Math.max(1, parseInt(page, 10) || 1)
       const pageSizeNum = Math.min(50, Math.max(1, parseInt(pageSize, 10) || 20))
       const offset = (pageNum - 1) * pageSizeNum
+
+      // Pre-query JSON array filters (workFormat/employmentType/seniority are JSON arrays)
+      let jsonFilterIds: string[] | null = null
+      if (workFormats.length > 0 || employmentTypes.length > 0 || seniorities.length > 0) {
+        jsonFilterIds = await svc().getIdsByJsonArrayFilters({
+          ...(workFormats.length > 0 ? { workFormat: workFormats } : {}),
+          ...(employmentTypes.length > 0 ? { employmentType: employmentTypes } : {}),
+          ...(seniorities.length > 0 ? { seniority: seniorities } : {}),
+        })
+        if (jsonFilterIds.length === 0) {
+          return ctx.send({
+            data: [],
+            meta: { total: 0, page: pageNum, pageSize: pageSizeNum, pageCount: 0 },
+          })
+        }
+      }
 
       // Block filter: hide vacancies from users the current user has blocked
       let blockedUserIds: number[] = []
@@ -321,19 +355,32 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           })
         }
 
+        // Intersect FTS IDs with format pre-query IDs (if format filters active)
+        const idsForFts =
+          jsonFilterIds !== null
+            ? (() => {
+                const s = new Set(jsonFilterIds)
+                return allFtsIds.filter((id) => s.has(id))
+              })()
+            : allFtsIds
+
+        if (idsForFts.length === 0) {
+          return ctx.send({
+            data: [],
+            meta: { total: 0, page: pageNum, pageSize: pageSizeNum, pageCount: 0 },
+          })
+        }
+
         // Build filters that include FTS IDs + all user-requested filters
         const baseFilters: Record<string, unknown> = {
-          documentId: { $in: allFtsIds },
-          status: { $eq: 'published' },
+          documentId: { $in: idsForFts },
+          moderationStatus: { $eq: 'published' },
           expiresAt: { $gt: new Date().toISOString() },
         }
         if (industry) baseFilters.industry = { documentId: { $eq: industry } }
         if (specialization) baseFilters.specialization = { documentId: { $eq: specialization } }
         if (country) baseFilters.country = { $eq: country }
         if (city) baseFilters.city = { $containsi: city }
-        if (workFormats.length > 0) baseFilters.workFormat = { $in: workFormats }
-        if (employmentTypes.length > 0) baseFilters.employmentType = { $in: employmentTypes }
-        if (seniorities.length > 0) baseFilters.seniority = { $in: seniorities }
         if (salaryCurrency) baseFilters.salaryCurrency = { $eq: salaryCurrency }
         if (salaryFrom) baseFilters.salaryTo = { $gte: parseInt(salaryFrom, 10) }
         if (salaryTo) baseFilters.salaryFrom = { $lte: parseInt(salaryTo, 10) }
@@ -396,14 +443,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           })
         }
 
+        // Intersect page IDs with format filter (if active) before hydrating
+        const hydrateIds =
+          jsonFilterIds !== null
+            ? (() => {
+                const s = new Set(jsonFilterIds)
+                return pageIds.filter((id) => s.has(id))
+              })()
+            : pageIds
+
         const vacancies = await strapi.documents('api::vacancy.vacancy').findMany({
-          filters: { ...baseFilters, documentId: { $in: pageIds } },
+          filters: { ...baseFilters, documentId: { $in: hydrateIds } },
           fields: VACANCY_CARD_FIELDS as any,
           populate: VACANCY_POPULATE as any,
         })
 
         // Re-sort to match SQL relevance order
-        const sorted = pageIds
+        const sorted = hydrateIds
           .map((docId) => vacancies.find((v) => v.documentId === docId))
           .filter((v): v is NonNullable<typeof v> => v != null)
 
@@ -420,17 +476,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Standard filter-based listing
       const filters: Record<string, unknown> = {
-        status: { $eq: 'published' },
+        moderationStatus: { $eq: 'published' },
         expiresAt: { $gt: new Date().toISOString() },
       }
 
+      if (jsonFilterIds !== null) filters.documentId = { $in: jsonFilterIds }
       if (industry) filters.industry = { documentId: { $eq: industry } }
       if (specialization) filters.specialization = { documentId: { $eq: specialization } }
       if (country) filters.country = { $eq: country }
       if (city) filters.city = { $containsi: city }
-      if (workFormats.length > 0) filters.workFormat = { $in: workFormats }
-      if (employmentTypes.length > 0) filters.employmentType = { $in: employmentTypes }
-      if (seniorities.length > 0) filters.seniority = { $in: seniorities }
       if (salaryCurrency) filters.salaryCurrency = { $eq: salaryCurrency }
       if (salaryFrom) filters.salaryTo = { $gte: parseInt(salaryFrom, 10) }
       if (salaryTo) filters.salaryFrom = { $lte: parseInt(salaryTo, 10) }
@@ -471,7 +525,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const vacancy = await strapi.documents('api::vacancy.vacancy').findFirst({
         filters: {
           documentId: { $eq: id },
-          status: { $eq: 'published' },
+          moderationStatus: { $eq: 'published' },
           expiresAt: { $gt: new Date().toISOString() },
         },
         fields: VACANCY_FULL_FIELDS as any,
@@ -514,11 +568,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const existing = await strapi.documents('api::vacancy.vacancy').findOne({
         documentId: id,
-        fields: ['documentId', 'status'],
+        fields: ['documentId', 'moderationStatus'],
       })
       if (!existing) return ctx.notFound('Vacancy not found')
 
-      const status = existing.status as string
+      const status = (existing as any).moderationStatus as string
       if (!canEdit(status)) {
         return ctx.badRequest(`Cannot edit vacancy with status "${status}".`)
       }
@@ -548,6 +602,43 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         if (field in body) updateData[field] = body[field]
       }
 
+      if ('workFormat' in updateData) {
+        const wf = updateData.workFormat as unknown
+        if (
+          !Array.isArray(wf) ||
+          (wf as any[]).length === 0 ||
+          (wf as any[]).some((v) => !VALID_WORK_FORMATS.includes(v))
+        ) {
+          return ctx.badRequest(
+            `workFormat must be a non-empty array with values from: ${VALID_WORK_FORMATS.join(', ')}`
+          )
+        }
+      }
+      if ('employmentType' in updateData) {
+        const et = updateData.employmentType as unknown
+        if (
+          !Array.isArray(et) ||
+          (et as any[]).length === 0 ||
+          (et as any[]).some((v) => !VALID_EMPLOYMENT_TYPES.includes(v))
+        ) {
+          return ctx.badRequest(
+            `employmentType must be a non-empty array with values from: ${VALID_EMPLOYMENT_TYPES.join(', ')}`
+          )
+        }
+      }
+      if ('seniority' in updateData) {
+        const s = updateData.seniority as unknown
+        if (
+          !Array.isArray(s) ||
+          (s as any[]).length === 0 ||
+          (s as any[]).some((v) => !VALID_SENIORITIES.includes(v))
+        ) {
+          return ctx.badRequest(
+            `seniority must be a non-empty array with values from: ${VALID_SENIORITIES.join(', ')}`
+          )
+        }
+      }
+
       if ('industryId' in body) {
         const industry = await strapi.documents('api::industry.industry').findOne({
           documentId: body.industryId as string,
@@ -573,12 +664,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           const company = await strapi.documents('api::company.company').findOne({
             documentId: body.companyId as string,
             populate: { owner: { fields: ['id'] } },
-            fields: ['documentId', 'status'],
+            fields: ['documentId', 'moderationStatus'],
           })
           if (!company || (company as any).owner?.id !== user.id) {
             return ctx.forbidden('You do not own this company')
           }
-          if ((company as any).status !== 'published') {
+          if ((company as any).moderationStatus !== 'published') {
             return ctx.badRequest('Company must be published to post vacancies')
           }
           updateData.company = body.companyId
@@ -592,7 +683,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       // Спека redesign §9: любое редактирование возвращает вакансию на модерацию
-      updateData.status = 'moderation'
+      updateData.moderationStatus = 'moderation'
       updateData.expiresAt = null
 
       // For draft/rejected vacancies: they are not counted in the plan limit yet,
@@ -645,13 +736,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const vacancy = await strapi.documents('api::vacancy.vacancy').findOne({
         documentId: id,
-        fields: ['documentId', 'status'],
+        fields: ['documentId', 'moderationStatus'],
       })
       if (!vacancy) return ctx.notFound('Vacancy not found')
 
-      if (!canBoost(vacancy.status as string)) {
+      if (!canBoost((vacancy as any).moderationStatus as string)) {
         return ctx.badRequest(
-          `Cannot boost vacancy with status "${vacancy.status}". Must be "published".`
+          `Cannot boost vacancy with status "${(vacancy as any).moderationStatus}". Must be "published".`
         )
       }
 
@@ -690,17 +781,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const vacancy = await strapi.documents('api::vacancy.vacancy').findOne({
         documentId: id,
-        fields: ['documentId', 'status'],
+        fields: ['documentId', 'moderationStatus'],
       })
       if (!vacancy) return ctx.notFound('Vacancy not found')
 
-      if (!canArchive(vacancy.status as string)) {
-        return ctx.badRequest(`Cannot archive vacancy with status "${vacancy.status}".`)
+      if (!canArchive((vacancy as any).moderationStatus as string)) {
+        return ctx.badRequest(
+          `Cannot archive vacancy with status "${(vacancy as any).moderationStatus}".`
+        )
       }
 
       const updated = await strapi.documents('api::vacancy.vacancy').update({
         documentId: id,
-        data: { status: 'archived' },
+        data: { moderationStatus: 'archived' } as any,
         fields: VACANCY_CARD_FIELDS as any,
         populate: VACANCY_POPULATE as any,
       })
@@ -740,7 +833,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const filters: Record<string, unknown> = {
         postedBy: { id: { $eq: user.id } },
       }
-      if (status) filters.status = { $eq: status }
+      if (status) filters.moderationStatus = { $eq: status }
 
       const [vacancies, total] = await Promise.all([
         strapi.documents('api::vacancy.vacancy').findMany({

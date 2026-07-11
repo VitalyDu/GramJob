@@ -23,6 +23,7 @@ vi.mock('@/services/api', () => {
 })
 
 import { api, ApiClientError } from '@/services/api'
+import type { WorkFormatEnum, EmploymentTypeEnum, SeniorityEnum } from '@/types/api'
 import { VacancyStore } from './VacancyStore'
 
 const mockVacancy = {
@@ -31,14 +32,14 @@ const mockVacancy = {
   title: 'Senior Frontend Developer',
   country: 'RU',
   city: 'Москва',
-  workFormat: 'remote' as const,
-  employmentType: 'full-time' as const,
-  seniority: 'senior' as const,
+  workFormat: ['remote'] as WorkFormatEnum[],
+  employmentType: ['full-time'] as EmploymentTypeEnum[],
+  seniority: ['senior'] as SeniorityEnum[],
   sourceType: 'internal' as const,
   highlighted: false,
   urgent: false,
   topPlacement: false,
-  status: 'draft' as const,
+  moderationStatus: 'draft' as const,
   createdAt: '2026-01-01T00:00:00Z',
   industry: { documentId: 'ind1', slug: 'it', name: { ru: 'IT', en: 'IT' } },
   specialization: {
@@ -149,9 +150,9 @@ describe('VacancyStore', () => {
         title: 'Senior Frontend Developer',
         industryId: 'ind1',
         specializationId: 'spec1',
-        employmentType: 'full-time',
-        workFormat: 'remote',
-        seniority: 'senior',
+        employmentType: ['full-time'],
+        workFormat: ['remote'],
+        seniority: ['senior'],
         country: 'RU',
         description: 'Description',
         responsibilities: 'Responsibilities',
@@ -170,9 +171,9 @@ describe('VacancyStore', () => {
           title: '',
           industryId: 'ind1',
           specializationId: 'spec1',
-          employmentType: 'full-time',
-          workFormat: 'remote',
-          seniority: 'senior',
+          employmentType: ['full-time'],
+          workFormat: ['remote'],
+          seniority: ['senior'],
           country: 'RU',
           description: '',
           responsibilities: '',
@@ -192,9 +193,9 @@ describe('VacancyStore', () => {
         title: 'Senior Frontend Developer',
         industryId: 'ind1',
         specializationId: 'spec1',
-        employmentType: 'full-time',
-        workFormat: 'remote',
-        seniority: 'senior',
+        employmentType: ['full-time'],
+        workFormat: ['remote'],
+        seniority: ['senior'],
         country: 'RU',
         description: 'Description',
         responsibilities: 'Responsibilities',
@@ -262,13 +263,13 @@ describe('VacancyStore', () => {
   describe('publishVacancy', () => {
     it('вызывает POST /vacancies/:id/publish и обновляет статус в myVacancies', async () => {
       store.myVacancies = [mockVacancy]
-      const published = { ...mockVacancy, status: 'moderation' as const }
+      const published = { ...mockVacancy, moderationStatus: 'moderation' as const }
       vi.mocked(api.post).mockResolvedValue({ data: published })
 
       await store.publishVacancy('vac123')
 
       expect(api.post).toHaveBeenCalledWith('/vacancies/vac123/publish', {})
-      expect(store.myVacancies[0]?.status).toBe('moderation')
+      expect(store.myVacancies[0]?.moderationStatus).toBe('moderation')
     })
 
     it('устанавливает limitReached=true при ошибке LIMIT_REACHED и не выбрасывает', async () => {
@@ -286,13 +287,13 @@ describe('VacancyStore', () => {
   describe('archiveVacancy', () => {
     it('вызывает POST /vacancies/:id/archive и обновляет статус в myVacancies', async () => {
       store.myVacancies = [mockVacancy]
-      const archived = { ...mockVacancy, status: 'archived' as const }
+      const archived = { ...mockVacancy, moderationStatus: 'archived' as const }
       vi.mocked(api.post).mockResolvedValue({ data: archived })
 
       await store.archiveVacancy('vac123')
 
       expect(api.post).toHaveBeenCalledWith('/vacancies/vac123/archive', {})
-      expect(store.myVacancies[0]?.status).toBe('archived')
+      expect(store.myVacancies[0]?.moderationStatus).toBe('archived')
     })
   })
 

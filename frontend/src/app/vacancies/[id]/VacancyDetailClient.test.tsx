@@ -23,6 +23,7 @@ vi.mock('next/navigation', () => ({
 }))
 
 import { useStores } from '@/stores/StoreProvider'
+import type { WorkFormatEnum, EmploymentTypeEnum, SeniorityEnum } from '@/types/api'
 
 const mockVacancy = {
   id: 1,
@@ -30,14 +31,14 @@ const mockVacancy = {
   title: 'Senior Frontend Developer',
   country: 'RU',
   city: 'Москва',
-  workFormat: 'remote' as const,
-  employmentType: 'full-time' as const,
-  seniority: 'senior' as const,
+  workFormat: ['remote'] as WorkFormatEnum[],
+  employmentType: ['full-time'] as EmploymentTypeEnum[],
+  seniority: ['senior'] as SeniorityEnum[],
   sourceType: 'internal' as const,
   highlighted: false,
   urgent: false,
   topPlacement: false,
-  status: 'published' as const,
+  moderationStatus: 'published' as const,
   description: 'Мы ищем опытного разработчика.',
   responsibilities: 'Разработка фронтенда.',
   requirements: 'Знание React.',
