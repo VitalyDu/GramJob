@@ -237,23 +237,38 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return ctx.notFound('Resume not found')
       }
 
-      // Resume database is a Max/VIP feature — the detail card must not bypass the gate
+      // Resume database is a Max/VIP feature, but employers can always view resumes
+      // of candidates who applied to their vacancies (regardless of plan)
       if (!isOwner) {
-        const viewer = (await strapi.db.query('plugin::users-permissions.user').findOne({
-          where: { id: requestUser.id },
-          select: ['subscriptionPlan'],
-        })) as { subscriptionPlan: string } | null
+        const applicationResult = await strapi.db.connection.raw(
+          `SELECT a.id
+           FROM applications a
+           JOIN resumes r ON r.id = a.resume_id
+           JOIN vacancies v ON v.id = a.vacancy_id
+           WHERE r.document_id = ?
+             AND v.posted_by_id = ?
+           LIMIT 1`,
+          [id, requestUser.id]
+        )
+        const hasIncomingApplication = (applicationResult.rows?.length ?? 0) > 0
 
-        if (!checkIsMaxPlan(viewer ?? { subscriptionPlan: 'free' })) {
-          return ctx.send(
-            {
-              error: {
-                code: 'SUBSCRIPTION_REQUIRED',
-                message: 'Max subscription plan required to access resume database',
+        if (!hasIncomingApplication) {
+          const viewer = (await strapi.db.query('plugin::users-permissions.user').findOne({
+            where: { id: requestUser.id },
+            select: ['subscriptionPlan'],
+          })) as { subscriptionPlan: string } | null
+
+          if (!checkIsMaxPlan(viewer ?? { subscriptionPlan: 'free' })) {
+            return ctx.send(
+              {
+                error: {
+                  code: 'SUBSCRIPTION_REQUIRED',
+                  message: 'Max subscription plan required to access resume database',
+                },
               },
-            },
-            403
-          )
+              403
+            )
+          }
         }
       }
 
