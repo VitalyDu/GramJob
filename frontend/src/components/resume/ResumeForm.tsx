@@ -1,13 +1,13 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useFieldArray, useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
   AlignLeft,
   Briefcase,
-  FileText,
+  CalendarIcon,
   GraduationCap,
   Globe,
   Phone,
@@ -15,6 +15,8 @@ import {
   Trash2,
   User,
 } from 'lucide-react'
+import { format, parse, isValid, type Locale } from 'date-fns'
+import { ru, enUS } from 'date-fns/locale'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -23,6 +25,8 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   Select,
   SelectTrigger,
@@ -73,6 +77,61 @@ function EnumPills<T extends string>({
         </div>
       ))}
     </RadioGroup>
+  )
+}
+
+function DatePicker({
+  value,
+  onChange,
+  placeholder,
+  disabled,
+  locale,
+}: {
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+  disabled?: boolean
+  locale?: Locale
+}) {
+  const [open, setOpen] = useState(false)
+  const selected = useMemo(() => {
+    if (!value) return undefined
+    const d = parse(value, 'yyyy-MM-dd', new Date())
+    return isValid(d) ? d : undefined
+  }, [value])
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={disabled}
+          className={cn(
+            'w-full justify-start text-left font-normal',
+            !value && 'text-muted-foreground'
+          )}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+          {selected ? format(selected, 'dd.MM.yyyy') : <span>{placeholder}</span>}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={selected}
+          onSelect={(date) => {
+            onChange(date ? format(date, 'yyyy-MM-dd') : '')
+            setOpen(false)
+          }}
+          captionLayout="dropdown"
+          startMonth={new Date(1950, 0)}
+          endMonth={new Date(new Date().getFullYear() + 1, 11)}
+          locale={locale}
+          defaultMonth={selected ?? new Date()}
+        />
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -136,7 +195,8 @@ interface Props {
 }
 
 export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const dateLocale = i18n.language === 'en' ? enUS : ru
 
   const workExperienceSchema = useMemo(
     () =>
@@ -540,19 +600,36 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <Field>
                     <FieldLabel>{t('forms.resume.startDateLabel')} *</FieldLabel>
-                    <Input
-                      type="date"
-                      className="min-w-0"
-                      {...register(`workExperience.${index}.startDate`)}
+                    <Controller
+                      control={control}
+                      name={`workExperience.${index}.startDate`}
+                      render={({ field }) => (
+                        <DatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder={t('forms.resume.startDateLabel')}
+                          locale={dateLocale}
+                        />
+                      )}
                     />
+                    {errors.workExperience?.[index]?.startDate && (
+                      <FieldError errors={[errors.workExperience[index].startDate]} />
+                    )}
                   </Field>
                   <Field>
                     <FieldLabel>{t('forms.resume.endDateLabel')}</FieldLabel>
-                    <Input
-                      type="date"
-                      className="min-w-0"
-                      {...register(`workExperience.${index}.endDate`)}
-                      disabled={watchWorkExperience[index]?.current}
+                    <Controller
+                      control={control}
+                      name={`workExperience.${index}.endDate`}
+                      render={({ field }) => (
+                        <DatePicker
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          placeholder={t('forms.resume.endDateLabel')}
+                          disabled={!!watchWorkExperience[index]?.current}
+                          locale={dateLocale}
+                        />
+                      )}
                     />
                   </Field>
                 </div>
@@ -655,18 +732,35 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <Field>
                     <FieldLabel>{t('forms.resume.startDateLabel')} *</FieldLabel>
-                    <Input
-                      type="date"
-                      className="min-w-0"
-                      {...register(`education.${index}.startDate`)}
+                    <Controller
+                      control={control}
+                      name={`education.${index}.startDate`}
+                      render={({ field }) => (
+                        <DatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder={t('forms.resume.startDateLabel')}
+                          locale={dateLocale}
+                        />
+                      )}
                     />
+                    {errors.education?.[index]?.startDate && (
+                      <FieldError errors={[errors.education[index].startDate]} />
+                    )}
                   </Field>
                   <Field>
                     <FieldLabel>{t('forms.resume.endDateLabel')}</FieldLabel>
-                    <Input
-                      type="date"
-                      className="min-w-0"
-                      {...register(`education.${index}.endDate`)}
+                    <Controller
+                      control={control}
+                      name={`education.${index}.endDate`}
+                      render={({ field }) => (
+                        <DatePicker
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          placeholder={t('forms.resume.endDateLabel')}
+                          locale={dateLocale}
+                        />
+                      )}
                     />
                   </Field>
                 </div>
