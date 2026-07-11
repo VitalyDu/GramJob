@@ -205,6 +205,7 @@ export class AuthStore {
   }
 
   async fetchMe(): Promise<void> {
+    const jwtAtStart = this.jwt
     try {
       const user = await api.get<User>('/users/me')
       runInAction(() => {
@@ -212,8 +213,14 @@ export class AuthStore {
       })
     } catch (e) {
       // Only an invalid/expired token warrants a logout — network errors and
-      // 5xx must not destroy the session on a flaky connection
-      if (e instanceof ApiClientError && (e.status === 401 || e.status === 403)) {
+      // 5xx must not destroy the session on a flaky connection.
+      // Guard against race: if JWT was replaced (e.g. by loginWithTelegram) while
+      // this request was in-flight, the 401 belongs to the old token — don't logout.
+      if (
+        e instanceof ApiClientError &&
+        (e.status === 401 || e.status === 403) &&
+        this.jwt === jwtAtStart
+      ) {
         this.logout()
       }
     }
