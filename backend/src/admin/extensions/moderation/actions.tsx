@@ -157,8 +157,12 @@ export const ResolveReportAction = ({ model, documentId }: ActionProps) => {
       content:
         'Статус жалобы станет resolved. Действие над сущностью (отклонение) выполните отдельно на её странице.',
       onConfirm: async () => {
-        const { post } = getFetchClient()
-        await post(`/moderation/reports/${documentId}/resolve`)
+        try {
+          const { post } = getFetchClient()
+          await post(`/moderation/reports/${documentId}/resolve`)
+        } catch {
+          window.alert('Не удалось обработать жалобу. Возможно, она уже была рассмотрена.')
+        }
         window.location.reload()
       },
     },
@@ -177,8 +181,12 @@ export const DismissReportAction = ({ model, documentId }: ActionProps) => {
       title: 'Отклонить жалобу?',
       content: 'Статус жалобы станет dismissed, сущность останется без изменений.',
       onConfirm: async () => {
-        const { post } = getFetchClient()
-        await post(`/moderation/reports/${documentId}/dismiss`)
+        try {
+          const { post } = getFetchClient()
+          await post(`/moderation/reports/${documentId}/dismiss`)
+        } catch {
+          window.alert('Не удалось обработать жалобу. Возможно, она уже была рассмотрена.')
+        }
         window.location.reload()
       },
     },
