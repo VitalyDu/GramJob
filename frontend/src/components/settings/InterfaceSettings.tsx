@@ -36,7 +36,7 @@ export function InterfaceSettings() {
           <CardTitle className="text-base">{t('settings.interface.languageTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
             {LANGUAGES.map(({ code, label }) => (
               <button
                 key={code}
@@ -61,7 +61,7 @@ export function InterfaceSettings() {
           <CardTitle className="text-base">{t('settings.interface.themeTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             {THEMES.map(({ value, icon: Icon }) => (
               <button
                 key={value}
