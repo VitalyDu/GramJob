@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { FileText, Lock } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
@@ -27,24 +26,31 @@ import type { ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
 export const ResumesClient = observer(function ResumesClient() {
   const { resume: store, auth } = useStores()
   const { t } = useTranslation()
-  const searchParams = useSearchParams()
-  const [search, setSearch] = useState(() => searchParams.get('search') ?? '')
-  const [country, setCountry] = useState(() => searchParams.get('country') ?? '')
-  const [city, setCity] = useState(() => searchParams.get('city') ?? '')
-  const [workFormats, setWorkFormats] = useState<ResumeWorkFormatEnum[]>(
-    () =>
-      searchParams
-        .getAll('workFormat')
-        .flatMap((v) => v.split(','))
-        .filter(Boolean) as ResumeWorkFormatEnum[]
-  )
-  const [employmentTypes, setEmploymentTypes] = useState<EmploymentTypeEnum[]>(
-    () =>
-      searchParams
-        .getAll('employmentType')
-        .flatMap((v) => v.split(','))
-        .filter(Boolean) as EmploymentTypeEnum[]
-  )
+  const [search, setSearch] = useState('')
+  const [country, setCountry] = useState('')
+  const [city, setCity] = useState('')
+  const [workFormats, setWorkFormats] = useState<ResumeWorkFormatEnum[]>([])
+  const [employmentTypes, setEmploymentTypes] = useState<EmploymentTypeEnum[]>([])
+
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search)
+    const searchVal = sp.get('search') ?? ''
+    const countryVal = sp.get('country') ?? ''
+    const cityVal = sp.get('city') ?? ''
+    const wf = sp
+      .getAll('workFormat')
+      .flatMap((v) => v.split(','))
+      .filter(Boolean) as ResumeWorkFormatEnum[]
+    const et = sp
+      .getAll('employmentType')
+      .flatMap((v) => v.split(','))
+      .filter(Boolean) as EmploymentTypeEnum[]
+    if (searchVal) setSearch(searchVal)
+    if (countryVal) setCountry(countryVal)
+    if (cityVal) setCity(cityVal)
+    if (wf.length) setWorkFormats(wf)
+    if (et.length) setEmploymentTypes(et)
+  }, [])
 
   useEffect(() => {
     if (!auth.user) return // don't fetch before auth is resolved; avoids spurious 403 → accessDenied

@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { ResumesClient } from './ResumesClient'
 
@@ -9,9 +8,5 @@ export const metadata: Metadata = {
 }
 
 export default function ResumesPage() {
-  return (
-    <Suspense>
-      <ResumesClient />
-    </Suspense>
-  )
+  return <ResumesClient />
 }

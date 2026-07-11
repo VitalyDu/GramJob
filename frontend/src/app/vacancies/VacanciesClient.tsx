@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { Briefcase, Plus, Search } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
@@ -35,22 +34,19 @@ export const VacanciesClient = observer(function VacanciesClient({
 }: Props) {
   const { vacancy: store, auth } = useStores()
   const { t, i18n } = useTranslation()
-  const searchParams = useSearchParams()
-  const initialParamsRef = useRef<VacancyListParams | null>(null)
-  if (initialParamsRef.current === null) {
-    initialParamsRef.current = parseVacancySearchParams(searchParams)
-  }
-  const [params, setParams] = useState<VacancyListParams>(initialParamsRef.current)
-  const [searchInput, setSearchInput] = useState(initialParamsRef.current.search ?? '')
+  const [params, setParams] = useState<VacancyListParams>({ page: 1 })
+  const [searchInput, setSearchInput] = useState('')
   const [loadedOnce, setLoadedOnce] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [industries, setIndustries] = useState<Industry[]>([])
 
   useEffect(() => {
+    const sp = new URLSearchParams(window.location.search)
+    const urlParams = parseVacancySearchParams(sp)
+    setParams(urlParams)
+    setSearchInput(urlParams.search ?? '')
     setMounted(true)
-    void store
-      .fetchVacancies(initialParamsRef.current ?? { page: 1 })
-      .finally(() => setLoadedOnce(true))
+    void store.fetchVacancies(urlParams).finally(() => setLoadedOnce(true))
   }, [store])
 
   useEffect(() => {
