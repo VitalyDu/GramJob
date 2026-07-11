@@ -434,14 +434,14 @@ export function VacancyFilters({ params, onChange }: Props) {
         <div className="px-4">
           <FilterFields draft={draft} setDraft={setDraft} industries={industries} />
         </div>
-        <div className="flex gap-2 border-t p-3">
-          <Button size="sm" className="flex-1" onClick={() => apply()}>
+        <div className="flex flex-col gap-2 border-t p-3">
+          <Button size="sm" className="w-full" onClick={() => apply()}>
             {t('filters.apply')}
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            className="shrink-0"
+            className="w-full"
             onClick={reset}
             data-testid="filters-reset"
           >
