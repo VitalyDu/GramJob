@@ -735,8 +735,7 @@ export interface ApiReportReport extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime
     reason: Schema.Attribute.Enumeration<['spam', 'fraud', 'inappropriate', 'other']> &
       Schema.Attribute.Required
-    reporter: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'> &
-      Schema.Attribute.Required
+    reporter: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'>
     status: Schema.Attribute.Enumeration<['pending', 'resolved', 'dismissed']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'pending'>
