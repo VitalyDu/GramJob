@@ -282,6 +282,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         updateData.slug = await svc().generateUniqueSlug(baseSlug, id)
       }
 
+      updateData.moderationStatus = 'moderation'
+
       const updated = await strapi.documents('api::company.company').update({
         documentId: id,
         data: updateData as any,
