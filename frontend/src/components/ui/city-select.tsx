@@ -33,10 +33,13 @@ export function CitySelect({
   className,
   disabled,
 }: CitySelectProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [open, setOpen] = useState(false)
 
-  const cities = useMemo(() => getCitiesForCountry(country), [country])
+  const cities = useMemo(
+    () => getCitiesForCountry(country, i18n.language),
+    [country, i18n.language]
+  )
   const defaultPlaceholder = placeholder ?? t('citySelect.placeholder')
   const isDisabled = disabled || !country
 
