@@ -102,8 +102,16 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
                     {r.city ? `, ${r.city}` : ''}
                   </Badge>
                 )}
-                <Badge variant="secondary">{t(`enums.resumeWorkFormat.${r.workFormat}`)}</Badge>
-                <Badge variant="secondary">{t(`enums.employmentType.${r.employmentType}`)}</Badge>
+                {r.workFormat?.map((wf) => (
+                  <Badge key={wf} variant="secondary">
+                    {t(`enums.resumeWorkFormat.${wf}`)}
+                  </Badge>
+                ))}
+                {r.employmentType?.map((et) => (
+                  <Badge key={et} variant="secondary">
+                    {t(`enums.employmentType.${et}`)}
+                  </Badge>
+                ))}
                 {r.experienceYears !== null && r.experienceYears !== undefined && (
                   <Badge variant="outline">
                     {t('resumeDetail.experienceYears', { count: r.experienceYears })}

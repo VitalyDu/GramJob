@@ -462,8 +462,8 @@ export interface FavoriteResumeCard {
   city?: string | null
   desiredSalary?: number | null
   currency?: ResumeCurrencyEnum | null
-  workFormat: ResumeWorkFormatEnum
-  employmentType: EmploymentTypeEnum
+  workFormat: ResumeWorkFormatEnum[]
+  employmentType: EmploymentTypeEnum[]
   experienceYears?: number | null
   skills?: string[] | null
   views?: number

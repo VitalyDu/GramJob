@@ -112,8 +112,10 @@ export const MyFavoritesClient = observer(function MyFavoritesClient() {
                         {(fav.entity as FavoriteVacancyCard).company?.name}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {t(`enums.workFormat.${(fav.entity as FavoriteVacancyCard).workFormat}`)} ·{' '}
-                        {(fav.entity as FavoriteVacancyCard).country}
+                        {(fav.entity as FavoriteVacancyCard).workFormat
+                          .map((wf) => t(`enums.workFormat.${wf}`))
+                          .join(', ')}{' '}
+                        · {(fav.entity as FavoriteVacancyCard).country}
                         {(() => {
                           const e = fav.entity as FavoriteVacancyCard
                           const salary = formatSalary(e.salaryFrom, e.salaryTo, e.salaryCurrency)
@@ -131,9 +133,9 @@ export const MyFavoritesClient = observer(function MyFavoritesClient() {
                         {(fav.entity as FavoriteResumeCard).lastName}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {t(
-                          `enums.resumeWorkFormat.${(fav.entity as FavoriteResumeCard).workFormat}`
-                        )}{' '}
+                        {(fav.entity as FavoriteResumeCard).workFormat
+                          .map((wf) => t(`enums.resumeWorkFormat.${wf}`))
+                          .join(', ')}{' '}
                         · {(fav.entity as FavoriteResumeCard).country}
                       </p>
                     </Link>
