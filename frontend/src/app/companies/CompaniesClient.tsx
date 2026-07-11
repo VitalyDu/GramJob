@@ -32,7 +32,7 @@ export const CompaniesClient = observer(function CompaniesClient({
   initialTotal,
 }: Props) {
   const { company: store, auth } = useStores()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [params, setParams] = useState<CompanyListParams>({ page: 1 })
   const [searchInput, setSearchInput] = useState('')
   const [loadedOnce, setLoadedOnce] = useState(false)
@@ -72,7 +72,7 @@ export const CompaniesClient = observer(function CompaniesClient({
     if (params.country) {
       chips.push({
         key: 'country',
-        label: getCountryName(params.country),
+        label: getCountryName(params.country, i18n.language),
         onRemove: () => {
           const next = { ...params, page: 1 }
           delete next.country

@@ -96,7 +96,7 @@ export const VacanciesClient = observer(function VacanciesClient({
       const country = params.country
       chips.push({
         key: 'country',
-        label: getCountryName(country),
+        label: getCountryName(country, i18n.language),
         onRemove: () => {
           const next = { ...params, page: 1 }
           delete next.country

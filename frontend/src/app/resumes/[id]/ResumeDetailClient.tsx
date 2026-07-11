@@ -26,7 +26,7 @@ interface Props {
 
 export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: Props) {
   const { resume: store, auth } = useStores()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [reportOpen, setReportOpen] = useState(false)
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
               <div className="mt-2 flex flex-wrap gap-2">
                 {r.country && (
                   <Badge variant="secondary">
-                    {getCountryName(r.country)}
+                    {getCountryName(r.country, i18n.language)}
                     {r.city ? `, ${r.city}` : ''}
                   </Badge>
                 )}

@@ -16,7 +16,7 @@ interface Props {
 }
 
 export function VacancyCard({ vacancy }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const logoUrl = getMediaUrl(vacancy.company?.logo?.url)
   const salary = formatSalary(vacancy.salaryFrom, vacancy.salaryTo, vacancy.salaryCurrency)
 
@@ -56,8 +56,8 @@ export function VacancyCard({ vacancy }: Props) {
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               <Badge variant="secondary">
                 {vacancy.city
-                  ? `${getCountryName(vacancy.country)}, ${vacancy.city}`
-                  : getCountryName(vacancy.country)}
+                  ? `${getCountryName(vacancy.country, i18n.language)}, ${vacancy.city}`
+                  : getCountryName(vacancy.country, i18n.language)}
               </Badge>
               <Badge variant="secondary">{t(`enums.workFormat.${vacancy.workFormat}`)}</Badge>
               <Badge variant="secondary">

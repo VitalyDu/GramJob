@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
@@ -14,7 +14,7 @@ import {
   CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { COUNTRIES_LIST, getCountryName } from '@/lib/countries'
+import { getCountriesList, getCountryName } from '@/lib/countries'
 
 interface CountrySelectProps {
   value: string
@@ -31,9 +31,10 @@ export function CountrySelect({
   className,
   disabled,
 }: CountrySelectProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [open, setOpen] = useState(false)
 
+  const countriesList = useMemo(() => getCountriesList(i18n.language), [i18n.language])
   const defaultPlaceholder = placeholder ?? t('countrySelect.placeholder')
 
   return (
@@ -46,7 +47,7 @@ export function CountrySelect({
           disabled={disabled}
           className={cn('w-full justify-between font-normal', className)}
         >
-          {value ? getCountryName(value) : defaultPlaceholder}
+          {value ? getCountryName(value, i18n.language) : defaultPlaceholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -67,7 +68,7 @@ export function CountrySelect({
                   <span className="text-muted-foreground">{t('countrySelect.notSpecified')}</span>
                 </CommandItem>
               )}
-              {COUNTRIES_LIST.map((country) => (
+              {countriesList.map((country) => (
                 <CommandItem
                   key={country.code}
                   value={country.name}

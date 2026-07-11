@@ -35,7 +35,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({
   initialVacancy,
 }: Props) {
   const { vacancy: store, application: appStore, auth } = useStores()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [applyOpen, setApplyOpen] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)
 
@@ -123,7 +123,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({
           <div className="mt-4 flex flex-wrap gap-2">
             {(v.country || v.city) && (
               <Badge variant="outline">
-                {v.country ? getCountryName(v.country) : ''}
+                {v.country ? getCountryName(v.country, i18n.language) : ''}
                 {v.city ? `, ${v.city}` : ''}
               </Badge>
             )}

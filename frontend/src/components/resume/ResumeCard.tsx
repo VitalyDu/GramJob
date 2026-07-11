@@ -12,7 +12,7 @@ interface Props {
 }
 
 export function ResumeCard({ resume }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const initials =
     [resume.firstName, resume.lastName]
       .filter(Boolean)
@@ -47,8 +47,8 @@ export function ResumeCard({ resume }: Props) {
               {resume.country && (
                 <Badge variant="secondary">
                   {resume.city
-                    ? `${getCountryName(resume.country)}, ${resume.city}`
-                    : getCountryName(resume.country)}
+                    ? `${getCountryName(resume.country, i18n.language)}, ${resume.city}`
+                    : getCountryName(resume.country, i18n.language)}
                 </Badge>
               )}
               {resume.workFormat && (

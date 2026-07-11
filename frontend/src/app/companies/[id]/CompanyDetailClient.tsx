@@ -29,7 +29,7 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({
   initialCompany,
 }: Props) {
   const { company: store, auth } = useStores()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [reportOpen, setReportOpen] = useState(false)
 
   useEffect(() => {
@@ -90,7 +90,9 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({
 
               <div className="mt-2 flex flex-wrap gap-2">
                 {company.country && (
-                  <Badge variant="secondary">{getCountryName(company.country)}</Badge>
+                  <Badge variant="secondary">
+                    {getCountryName(company.country, i18n.language)}
+                  </Badge>
                 )}
                 {company.city && <Badge variant="secondary">{company.city}</Badge>}
                 <Badge variant="outline">{COMPANY_SIZE_LABELS[company.companySize]}</Badge>

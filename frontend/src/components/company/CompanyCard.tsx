@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import type { Company } from '@/types/api'
 import { getMediaUrl } from '@/lib/media'
 import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function CompanyCard({ company }: Props) {
+  const { i18n } = useTranslation()
   const logoUrl = getMediaUrl(company.logo?.url)
 
   return (
@@ -37,7 +39,7 @@ export function CompanyCard({ company }: Props) {
             <p className="truncate font-semibold group-hover:text-primary">{company.name}</p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {company.country && (
-                <Badge variant="secondary">{getCountryName(company.country)}</Badge>
+                <Badge variant="secondary">{getCountryName(company.country, i18n.language)}</Badge>
               )}
               {company.companySize && (
                 <Badge variant="secondary">{COMPANY_SIZE_LABELS[company.companySize]}</Badge>
