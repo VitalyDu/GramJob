@@ -4,6 +4,7 @@ import { type ReactNode, useEffect } from 'react'
 import { Toaster } from 'sonner'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTelegramInit } from '@/hooks/useTelegramInit'
+import { useKeyboardBehavior } from '@/hooks/useKeyboardBehavior'
 import { getTelegramWebApp } from '@/lib/telegram'
 import { WebHeader } from './WebHeader'
 import { TelegramTopBar } from './TelegramTopBar'
@@ -22,6 +23,7 @@ const ROOT_PATHS = new Set([
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { isMiniApp } = useTelegramInit()
+  const { isKeyboardOpen } = useKeyboardBehavior()
   const pathname = usePathname()
   const router = useRouter()
   const isHome = pathname === '/'
@@ -55,7 +57,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {children}
         </div>
       </main>
-      <BottomNav isMiniApp={isMiniApp} />
+      <BottomNav isMiniApp={isMiniApp} isKeyboardOpen={isKeyboardOpen} />
       <StartParamRouter />
       <ModerationToastWatcher />
       <Toaster position="top-center" richColors closeButton />

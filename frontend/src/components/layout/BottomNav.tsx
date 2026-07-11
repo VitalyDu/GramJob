@@ -13,7 +13,13 @@ type NavLink = {
   isActive: (pathname: string) => boolean
 } & ({ icon: typeof Briefcase; imageSrc?: never } | { imageSrc: string; icon?: never })
 
-export function BottomNav({ isMiniApp }: { isMiniApp: boolean }) {
+export function BottomNav({
+  isMiniApp,
+  isKeyboardOpen,
+}: {
+  isMiniApp: boolean
+  isKeyboardOpen?: boolean
+}) {
   const { t } = useTranslation('common')
   const pathname = usePathname()
 
@@ -96,6 +102,8 @@ export function BottomNav({ isMiniApp }: { isMiniApp: boolean }) {
       aria-label={t('nav.main')}
       className={cn(
         'fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80',
+        'transition-transform duration-200',
+        isKeyboardOpen && 'translate-y-full',
         !isMiniApp && 'md:hidden'
       )}
     >
