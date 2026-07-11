@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
+import { useIsDesktop } from '@/hooks/useIsDesktop'
 import { api } from '@/services/api'
 import type { ReportType, ReportReason } from '@/types/api'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerFooter,
+} from '@/components/ui/drawer'
 
 const REASON_KEYS: ReportReason[] = ['spam', 'fraud', 'inappropriate', 'other']
 
@@ -27,13 +35,13 @@ interface Props {
 export function ReportDialog({ type, targetId, isOpen, onClose }: Props) {
   const { auth } = useStores()
   const { t } = useTranslation()
+  const isDesktop = useIsDesktop()
   const [reason, setReason] = useState<ReportReason>('spam')
   const [comment, setComment] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
-  if (!isOpen) return null
   if (!auth.user) return null
 
   const handleSubmit = async () => {
@@ -54,30 +62,32 @@ export function ReportDialog({ type, targetId, isOpen, onClose }: Props) {
     }
   }
 
-  const handleClose = () => {
-    setSent(false)
-    setComment('')
-    setReason('spam')
-    setSubmitError(null)
-    onClose()
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setSent(false)
+      setComment('')
+      setReason('spam')
+      setSubmitError(null)
+      onClose()
+    }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-xl">
-        {sent ? (
-          <>
-            <h2 className="text-lg font-semibold text-card-foreground">{t('report.sentTitle')}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{t('report.sentText')}</p>
-            <Button className="mt-4" onClick={handleClose}>
-              {t('common.close')}
-            </Button>
-          </>
-        ) : (
-          <>
-            <h2 className="text-lg font-semibold text-card-foreground">{t('report.title')}</h2>
+    <Drawer
+      open={isOpen}
+      onOpenChange={handleOpenChange}
+      direction={isDesktop ? 'right' : 'bottom'}
+    >
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>{sent ? t('report.sentTitle') : t('report.title')}</DrawerTitle>
+        </DrawerHeader>
 
-            <div className="mt-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 pb-2">
+          {sent ? (
+            <p className="text-sm text-muted-foreground">{t('report.sentText')}</p>
+          ) : (
+            <div className="space-y-4">
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">
                   {t('report.reason')}
@@ -107,21 +117,27 @@ export function ReportDialog({ type, targetId, isOpen, onClose }: Props) {
                   placeholder={t('report.commentPlaceholder')}
                 />
               </div>
+
+              {submitError && <p className="text-sm text-destructive">{submitError}</p>}
             </div>
+          )}
+        </div>
 
-            {submitError && <p className="mt-3 text-sm text-destructive">{submitError}</p>}
-
-            <div className="mt-5 flex gap-3">
+        <DrawerFooter>
+          {sent ? (
+            <Button onClick={() => handleOpenChange(false)}>{t('common.close')}</Button>
+          ) : (
+            <>
               <Button onClick={() => void handleSubmit()} disabled={isLoading}>
                 {isLoading ? t('report.sending') : t('report.submit')}
               </Button>
-              <Button variant="outline" onClick={handleClose}>
+              <Button variant="outline" onClick={() => handleOpenChange(false)}>
                 {t('common.cancel')}
               </Button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+            </>
+          )}
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
