@@ -10,7 +10,7 @@ const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
 
 function okResponse(body: unknown) {
-  return { ok: true, json: () => Promise.resolve(body) }
+  return { ok: true, status: 200, json: () => Promise.resolve(body) }
 }
 
 describe('server-api', () => {
@@ -22,11 +22,14 @@ describe('server-api', () => {
     mockFetch.mockResolvedValue(okResponse({ data: { documentId: 'v1', title: 'Dev' } }))
     const result = await fetchVacancyServer('v1')
     expect(result).toEqual({
-      documentId: 'v1',
-      title: 'Dev',
-      workFormat: [],
-      employmentType: [],
-      seniority: [],
+      data: {
+        documentId: 'v1',
+        title: 'Dev',
+        workFormat: [],
+        employmentType: [],
+        seniority: [],
+      },
+      notFound: false,
     })
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/vacancies/v1?skipViewCount=true'),
@@ -34,20 +37,20 @@ describe('server-api', () => {
     )
   })
 
-  it('fetchVacancyServer returns null on non-ok response', async () => {
-    mockFetch.mockResolvedValue({ ok: false })
-    expect(await fetchVacancyServer('missing')).toBeNull()
+  it('fetchVacancyServer marks notFound on 404 response', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 404 })
+    expect(await fetchVacancyServer('missing')).toEqual({ data: null, notFound: true })
   })
 
-  it('fetchVacancyServer returns null when fetch throws', async () => {
+  it('fetchVacancyServer does not mark notFound when fetch throws', async () => {
     mockFetch.mockRejectedValue(new Error('network'))
-    expect(await fetchVacancyServer('v1')).toBeNull()
+    expect(await fetchVacancyServer('v1')).toEqual({ data: null, notFound: false })
   })
 
   it('fetchCompanyServer returns company data', async () => {
     mockFetch.mockResolvedValue(okResponse({ data: { documentId: 'c1', name: 'Acme' } }))
     const result = await fetchCompanyServer('c1')
-    expect(result).toEqual({ documentId: 'c1', name: 'Acme' })
+    expect(result).toEqual({ data: { documentId: 'c1', name: 'Acme' }, notFound: false })
     expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/companies/c1'), {
       next: { revalidate: 300 },
     })

@@ -2,13 +2,18 @@ import type { Company, Vacancy } from '@/types/api'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:1337/api'
 
-async function fetchJson<T>(path: string, revalidate: number): Promise<T | null> {
+// status: 0 — сетевой сбой; нужен, чтобы страницы отдавали 404 только на
+// настоящий 404 API, а не кэшировали его при недоступном backend
+async function fetchJson<T>(
+  path: string,
+  revalidate: number
+): Promise<{ body: T | null; status: number }> {
   try {
     const res = await fetch(`${API_URL}${path}`, { next: { revalidate } })
-    if (!res.ok) return null
-    return (await res.json()) as T
+    if (!res.ok) return { body: null, status: res.status }
+    return { body: (await res.json()) as T, status: res.status }
   } catch {
-    return null
+    return { body: null, status: 0 }
   }
 }
 
@@ -35,14 +40,22 @@ export interface ListPage<T> {
 
 type ListResponse<T> = { data?: T[]; meta?: { total?: number } }
 
-export async function fetchVacancyServer(id: string): Promise<Vacancy | null> {
-  const res = await fetchJson<{ data?: unknown }>(`/vacancies/${id}?skipViewCount=true`, 300)
-  return res?.data ? normalizeVacancy(res.data) : null
+export interface ServerFetchResult<T> {
+  data: T | null
+  notFound: boolean
 }
 
-export async function fetchCompanyServer(id: string): Promise<Company | null> {
+export async function fetchVacancyServer(id: string): Promise<ServerFetchResult<Vacancy>> {
+  const res = await fetchJson<{ data?: unknown }>(`/vacancies/${id}?skipViewCount=true`, 300)
+  return {
+    data: res.body?.data ? normalizeVacancy(res.body.data) : null,
+    notFound: res.status === 404,
+  }
+}
+
+export async function fetchCompanyServer(id: string): Promise<ServerFetchResult<Company>> {
   const res = await fetchJson<{ data?: Company }>(`/companies/${id}`, 300)
-  return res?.data ?? null
+  return { data: res.body?.data ?? null, notFound: res.status === 404 }
 }
 
 export async function fetchVacanciesPageServer(
@@ -54,8 +67,8 @@ export async function fetchVacanciesPageServer(
     3600
   )
   return {
-    items: (res?.data ?? []).map(normalizeVacancy),
-    total: res?.meta?.total ?? 0,
+    items: (res.body?.data ?? []).map(normalizeVacancy),
+    total: res.body?.meta?.total ?? 0,
   }
 }
 
@@ -67,5 +80,5 @@ export async function fetchCompaniesPageServer(
     `/companies?page=${page}&pageSize=${pageSize}`,
     3600
   )
-  return { items: res?.data ?? [], total: res?.meta?.total ?? 0 }
+  return { items: res.body?.data ?? [], total: res.body?.meta?.total ?? 0 }
 }

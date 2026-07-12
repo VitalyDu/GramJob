@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { fetchVacancyServer } from '@/lib/server-api'
 import { getMediaUrl } from '@/lib/media'
 import { VacancyDetailClient } from './VacancyDetailClient'
@@ -11,7 +12,7 @@ export const revalidate = 300
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
-  const vacancy = await fetchVacancyServer(id)
+  const { data: vacancy } = await fetchVacancyServer(id)
   if (!vacancy) return { title: 'Вакансия | GramJob' }
 
   const description =
@@ -35,6 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function VacancyPage({ params }: Props) {
   const { id } = await params
-  const vacancy = await fetchVacancyServer(id)
+  const { data: vacancy, notFound: missing } = await fetchVacancyServer(id)
+  if (missing) notFound()
   return <VacancyDetailClient id={id} {...(vacancy ? { initialVacancy: vacancy } : {})} />
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { fetchCompanyServer } from '@/lib/server-api'
 import { getMediaUrl } from '@/lib/media'
 import { CompanyDetailClient } from './CompanyDetailClient'
@@ -11,7 +12,7 @@ export const revalidate = 300
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
-  const company = await fetchCompanyServer(id)
+  const { data: company } = await fetchCompanyServer(id)
   if (!company) return { title: 'Компания | GramJob' }
 
   const description =
@@ -35,6 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CompanyPage({ params }: Props) {
   const { id } = await params
-  const company = await fetchCompanyServer(id)
+  const { data: company, notFound: missing } = await fetchCompanyServer(id)
+  if (missing) notFound()
   return <CompanyDetailClient id={id} {...(company ? { initialCompany: company } : {})} />
 }
