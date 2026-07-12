@@ -11,6 +11,10 @@
 
 Оба создаются одновременно одним вызовом `sendNotification()`.
 
+Telegram push отправляется только если у пользователя есть `telegramId` **и** включён тумблер `telegramNotificationsEnabled` (настройки профиля; проверка `!== false` в `notification.service`). In-app уведомление создаётся всегда.
+
+Отдельный канал — **уведомления администраторам** (`admin-notify.ts`): при попадании новой сущности в очередь модерации отправляется Telegram-сообщение на chat id из env `ADMIN_TELEGRAM_CHAT_IDS` (список через запятую). В БД не сохраняется.
+
 ---
 
 ## Сервис sendNotification
@@ -147,9 +151,10 @@ async function sendWithRetry(chatId: string, message: TelegramMessage, retries =
 | `test_task`             | Тестовое задание        | «Вам отправили тестовое задание по вакансии «{vacancyTitle}»»      |
 | `offer_received`        | Получен оффер           | «🎉 Вам сделали оффер по вакансии «{vacancyTitle}»!»               |
 | `subscription_expiring` | Подписка истекает       | «Ваша подписка {plan} истекает через 7 дней»                       |
-| `saved_search_match`    | Новые вакансии          | «{count} новых вакансий по вашему запросу «{query}»»               |
 | `moderation_approved`   | Публикация одобрена     | «Ваше резюме/вакансия «{title}» опубликована»                      |
 | `moderation_rejected`   | Публикация отклонена    | «Вакансия/Резюме «{title}» отклонена. Причина: {reason}»           |
+
+Тип `saved_search_match` остался в enum как legacy (модуль сохранённых поисков удалён), новые уведомления этого типа не создаются.
 
 ### Для работодателя
 
@@ -196,7 +201,6 @@ function getButtonText(type: string): string {
     application_approved: '✅ Открыть контакты',
     offer_received: '🎉 Посмотреть оффер',
     subscription_expiring: '💳 Продлить подписку',
-    saved_search_match: '🔍 Посмотреть вакансии',
   }
   return map[type] || '📋 Открыть'
 }
@@ -208,8 +212,7 @@ function getButtonText(type: string): string {
 
 Некоторые события объединяются в одно сообщение, чтобы не спамить:
 
-- **VacancyViewed** — отправляется раз в день (cron), если было > 5 просмотров за день
-- **SavedSearch** — не чаще 1 раза в 2 часа на один поисковый запрос
+- **VacancyViewed** — отправляется раз в день (cron 18:00 UTC), если было ≥ 5 просмотров за вчерашний день
 
 ---
 
@@ -224,11 +227,12 @@ function getButtonText(type: string): string {
 
 ## Cron-задачи уведомлений
 
-| Задача                        | Расписание                |
-| ----------------------------- | ------------------------- |
-| Subscription expiry warning   | Ежедневно 09:00 UTC       |
-| Vacancy expiring soon (3 дня) | Ежедневно 09:00 UTC       |
-| Vacancy expiry (sets expired) | Каждый час                |
-| Saved search check            | Каждые 2 часа             |
-| Daily vacancy views digest    | Ежедневно 18:00 UTC       |
-| Clean old notifications       | Еженедельно (воскресенье) |
+| Задача                                                 | Расписание                         |
+| ------------------------------------------------------ | ---------------------------------- |
+| Vacancy expiry (published → expired)                   | Каждый час                         |
+| Subscription expiry (откат на Free + isVip=false)      | Ежедневно 02:00 UTC                |
+| Subscription expiry warning (за 7 дней)                | Ежедневно 09:00 UTC                |
+| Vacancy expiring soon (за 3 дня)                       | Ежедневно 09:00 UTC                |
+| Daily vacancy views digest (≥5 просмотров)             | Ежедневно 18:00 UTC                |
+| Clean old notifications (прочитанные > 30 дн)          | Еженедельно, воскресенье 00:00 UTC |
+| Аналитика (агрегация VacancyAnalytics/ResumeAnalytics) | Ежедневно 01:00 UTC                |

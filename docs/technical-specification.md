@@ -62,12 +62,16 @@ email
 telegramId
 firstName
 lastName
-avatar
+avatar // string URL (Telegram CDN или S3, allowlist)
 language
-subscriptionPlan
+subscriptionPlan // free | pro | max | vip
 subscriptionExpiresAt
 vacancyCredits
 applyCredits
+boostCredits
+isVip
+telegramNotificationsEnabled
+confirmed // email подтверждён (users-permissions)
 createdAt
 }
 
@@ -89,7 +93,9 @@ linkedin
 country
 city
 companySize
-status
+moderationStatus // draft (legacy) | moderation | published | rejected
+rejectionReason
+rejectionComment
 createdAt
 }
 
@@ -127,8 +133,11 @@ topPlacement
 views
 uniqueViews
 applicationsCount
-status
+moderationStatus // draft (legacy) | moderation | published | rejected | expired | archived
+rejectionReason
+rejectionComment
 expiresAt
+boostedAt
 createdAt
 }
 
@@ -156,7 +165,9 @@ languages[]
 contacts
 views
 invitations
-status
+moderationStatus // draft (legacy) | moderation | published | rejected | archived
+rejectionReason
+rejectionComment
 createdAt
 }
 
@@ -180,13 +191,16 @@ createdAt
 
 SubscriptionPlan {
 id
-code
+code // free | pro | max | vip
+name
 vacanciesPerMonth
 activeVacanciesLimit
 vacancyBoostsPerDay
 applicationsPerDay
 resumesLimit
 resumeDatabaseAccess
+starsPrice
+durationDays
 }
 
 ⸻
@@ -263,6 +277,40 @@ type
 title
 body
 isRead
+data // json: {entityType, entityId} для deep link
+createdAt
+}
+
+⸻
+
+13a. Payments
+
+Payment {
+id
+userId
+telegramChargeId // unique, идемпотентность webhook
+payloadType // subscription | vacancy_pack | apply_pack
+planCode
+packageId
+starsAmount
+status // processing | completed | failed
+createdAt
+}
+
+⸻
+
+13b. Moderation Log
+
+ModerationLog {
+id
+entityType // vacancy | resume | company | report
+entityDocumentId
+entityTitle
+action // submitted | approved | rejected | report_resolved | report_dismissed
+reason
+comment
+moderatorId
+moderatorName
 createdAt
 }
 
@@ -331,13 +379,15 @@ Resume Filters
 
 16. Moderation
 
-Все сущности проходят обязательную модерацию.
+Все сущности проходят обязательную модерацию (поле `moderationStatus`).
 
 Под модерацию попадают:
 
 - вакансии;
 - резюме;
 - компании.
+
+Флоу автоматический: создание и любое редактирование переводят сущность в `moderation`. Решение модератора — в Strapi Admin (Document Actions «Одобрить»/«Отклонить»). Детали: docs/moderation-system.md.
 
 ⸻
 
@@ -393,6 +443,12 @@ api-specification.md
 subscription-system.md
 moderation-system.md
 telegram-bot-specification.md
+notification-system.md
+search-specification.md
+development-guide.md
+seed-data.md
+sprint-plan.md
+roadmap.md
 
 /.claude/agents
 product-manager.md

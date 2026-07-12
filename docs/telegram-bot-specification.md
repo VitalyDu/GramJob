@@ -28,9 +28,10 @@ Telegram-интеграция включает три компонента:
 
 ### Авторизация
 
-- При первом `/start` с `initData` — создаётся или привязывается аккаунт GramJob
+- При первом входе в Mini App (`POST /auth/telegram` с initData) — создаётся или привязывается аккаунт GramJob
 - Telegram ID сохраняется в `User.telegramId`
 - Для Web Platform Telegram Login Widget использует тот же механизм
+- В Mini App все API-запросы идут с заголовком `X-Telegram-Init-Data`: middleware `global::telegram-auth` валидирует initData и инъектирует штатный JWT — permissions/policies работают без изменений; запросы с существующим `Authorization` не трогаются
 
 ### initData Validation
 
@@ -118,16 +119,14 @@ Bottom navigation:
 
 ### Telegram MainButton
 
-Используется для основных действий на каждом экране:
+Используется для основных действий (хук `useTelegramMainButton`, подключён в CompanyForm, VacancyForm, ResumeForm, ApplyDialog):
 
-- Список вакансий: нет (или «Создать алерт»)
-- Карточка вакансии: «Откликнуться» / «Apply on Source»
-- Форма создания: «Опубликовать»
+- Форма создания/редактирования: submit-действие формы (своя кнопка формы скрывается в Mini App)
 - Форма отклика: «Отправить отклик»
 
 ### BackButton
 
-Всегда используется для навигации назад вместо браузерной истории.
+Нативный BackButton (хук `useTelegramBackButton`, `router.back()`) подключён точечно на вложенных экранах вместо браузерной истории.
 
 ---
 
@@ -206,22 +205,15 @@ Backend отправляет сообщения через `sendMessage(chat_id,
 
 Формат: `https://t.me/GramJobBot/app?startapp={page}`
 
-| Страница    | startapp параметр |
-| ----------- | ----------------- |
-| Вакансия    | `vacancy_{id}`    |
-| Резюме      | `resume_{id}`     |
-| Компания    | `company_{slug}`  |
-| Мои отклики | `applications`    |
-| Подписка    | `subscription`    |
-| Профиль     | `profile`         |
+Обрабатываются на фронте (`parseStartParam` + `StartParamRouter`):
 
----
+| Страница | startapp параметр          | Маршрут                                |
+| -------- | -------------------------- | -------------------------------------- |
+| Вакансия | `vacancy_{documentId}`     | `/vacancies/{documentId}`              |
+| Отклик   | `application_{documentId}` | `/dashboard/applications/{documentId}` |
+| Подписка | `subscription`             | `/subscription`                        |
 
-## Saved Searches + Уведомления
-
-1. Пользователь сохраняет поисковый запрос с фильтрами
-2. Cron job проверяет новые результаты (каждые 1-6 часов, TBD)
-3. При появлении новых вакансий/резюме под критерии → Telegram уведомление со ссылкой на список
+Прочие значения `startapp` (например, `profile`, `vacancies` из кнопок бот-команд) открывают Mini App на главной странице.
 
 ---
 

@@ -22,8 +22,8 @@ gramjob/
 │   │   ├── app/               # Next.js App Router
 │   │   ├── components/        # Компоненты
 │   │   │   ├── ui/            # Shadcn/UI базовые
-│   │   │   ├── forms/         # Формы с React Hook Form
-│   │   │   └── features/      # Фиче-компоненты
+│   │   │   ├── layout/        # AppShell, WebHeader, MiniAppBottomNav
+│   │   │   └── <domain>/      # Фиче-компоненты по доменам (vacancy/, resume/, company/, ...)
 │   │   ├── stores/            # MobX stores
 │   │   ├── services/          # API-клиент
 │   │   ├── hooks/             # React hooks
@@ -58,10 +58,11 @@ cd backend && pnpm install
 cd ../frontend && pnpm install
 ```
 
-### 2. Запустить PostgreSQL через Docker
+### 2. Запустить инфраструктуру через Docker
 
 ```bash
-docker-compose up -d postgres
+docker compose up -d
+# postgres (5432) + minio (9000, console 9001) + mailpit (SMTP 1025, web UI 8025)
 ```
 
 ### 3. Настроить ENV
@@ -107,19 +108,34 @@ APP_KEYS=key1,key2,key3,key4
 API_TOKEN_SALT=salt
 ADMIN_JWT_SECRET=secret
 TRANSFER_TOKEN_SALT=salt
+ENCRYPTION_KEY=key
 JWT_SECRET=secret
 
-# S3 Storage
+# S3 Storage (MinIO local / Cloudflare R2 prod)
 S3_ACCESS_KEY_ID=
 S3_SECRET_ACCESS_KEY=
 S3_REGION=
 S3_BUCKET=
 S3_ENDPOINT=           # Для не-AWS S3
+S3_FORCE_PATH_STYLE=true
+S3_PUBLIC_URL=         # Публичный префикс media URL (prod)
+S3_PUBLIC_HOSTNAME=    # Хост media-домена для CSP (prod)
 
 # Telegram
 TELEGRAM_BOT_TOKEN=
-TELEGRAM_BOT_USERNAME=GramJobBot
-TELEGRAM_WEBHOOK_URL=https://api.gramjob.com/telegram/webhook
+TELEGRAM_BOT_USERNAME=gramjob_bot
+TELEGRAM_WEBHOOK_URL=https://api.gramjob.com/api/telegram/webhook
+TELEGRAM_WEBHOOK_SECRET=secret
+ADMIN_TELEGRAM_CHAT_IDS=     # Chat ID администраторов (через запятую) — уведомления о модерации
+ADMIN_URL=                   # Базовый URL Strapi Admin для ссылок в уведомлениях
+
+# Email (SMTP; локально — Mailpit из docker-compose)
+SMTP_HOST=localhost
+SMTP_PORT=1025
+SMTP_SECURE=false
+SMTP_USER=
+SMTP_PASS=
+EMAIL_FROM=noreply@gramjob.com
 
 # App
 FRONTEND_URL=http://localhost:3000
@@ -131,12 +147,9 @@ NODE_ENV=development
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:1337/api
 NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
-NEXT_PUBLIC_BOT_USERNAME=GramJobBot
-NEXT_PUBLIC_MINI_APP_URL=https://t.me/GramJobBot/app
-
-# Auth
-NEXTAUTH_SECRET=secret
-NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_BOT_USERNAME=gramjob_bot
+NEXT_PUBLIC_MINI_APP_URL=https://t.me/gramjob_bot/app
 ```
 
 ---
@@ -184,7 +197,7 @@ class VacancyStore {
   }
 
   get publishedVacancies() {
-    return this.vacancies.filter((v) => v.status === 'published')
+    return this.vacancies.filter((v) => v.moderationStatus === 'published')
   }
 
   async fetchVacancies(filters: VacancyFilters) {
@@ -301,25 +314,20 @@ pnpm e2e
 ### Инфраструктура (Production)
 
 ```
-Frontend: Vercel (Next.js)
-Backend:  VPS / Hetzner / Railway (Strapi + PostgreSQL)
-Storage:  Cloudflare R2 (S3-compatible)
+Frontend: VPS (Next.js), gramjob.com
+Backend:  VPS (Strapi + PostgreSQL), api.gramjob.com
+Storage:  MinIO на VPS (план: Cloudflare R2)
 CDN:      Cloudflare
 ```
 
 ### CI/CD (GitHub Actions)
 
-```yaml
-# .github/workflows/deploy.yml
-on: [push to main]
-jobs:
-  frontend: deploy to Vercel
-  backend: deploy to server via SSH
-```
+- `ci.yml` — lint + typecheck + test на PR и push в main
+- `deploy.yml` — push в main: paths-filter определяет изменённую часть (backend/frontend), деплой по SSH (`appleboy/ssh-action`) — запускает `/opt/gramjob/deploy-backend.sh` / `deploy-frontend.sh` на соответствующем VPS
 
 ### Переменные продакшн-окружения
 
-Хранятся в GitHub Secrets / Vercel Environment Variables.
+Хранятся в GitHub Secrets (SSH-ключи, хосты) и `.env` на VPS.
 Никаких .env файлов в репозитории (кроме .env.example).
 
 ---

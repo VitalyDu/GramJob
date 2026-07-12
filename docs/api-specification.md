@@ -3,8 +3,10 @@
 Strapi 5 REST API.
 
 **Base URL:** `https://api.gramjob.com/api`
-**Auth:** `Authorization: Bearer <jwt>`
+**Auth:** `Authorization: Bearer <jwt>` или заголовок `X-Telegram-Init-Data` (Mini App)
 **Content-Type:** `application/json`
+
+Mini App-запросы с валидным заголовком `X-Telegram-Init-Data` аутентифицируются middleware `global::telegram-auth`: он проверяет подпись initData и инъектирует штатный JWT — все endpoints работают без изменений. Если передан `Authorization`, он имеет приоритет.
 
 ---
 
@@ -48,12 +50,15 @@ Response: `{ "jwt": "...", "user": {...} }`
 ### POST /auth/local/register
 
 Request: `{ "email": "...", "password": "...", "firstName": "...", "lastName": "..." }`
-Response: `{ "jwt": "...", "user": {...} }`
+Response: `{ "user": {...} }` — JWT не выдаётся до подтверждения email (письмо со ссылкой отправляется автоматически).
 
-### POST /auth/refresh
+### Email-верификация и пароль (users-permissions built-in)
 
-Request: `{ "refreshToken": "..." }` (если реализован refresh token)
-Response: `{ "jwt": "..." }`
+- `GET /auth/email-confirmation?confirmation=<token>` — подтверждение email (редирект на `{FRONTEND_URL}/email-confirmed`)
+- `POST /auth/send-email-confirmation` — повторная отправка письма. Request: `{ "email": "..." }`
+- `POST /auth/forgot-password` — запрос сброса пароля. Request: `{ "email": "..." }`
+- `POST /auth/reset-password` — сброс по коду из письма. Request: `{ "code": "...", "password": "...", "passwordConfirmation": "..." }`. Response: `{ "jwt": "...", "user": {...} }` (авто-логин)
+- `POST /auth/change-password` — смена пароля (auth). Request: `{ "currentPassword": "...", "password": "...", "passwordConfirmation": "..." }`
 
 ---
 
@@ -87,7 +92,26 @@ Response:
 
 Обновить профиль.
 
-Request: `{ "firstName": "...", "lastName": "...", "language": "en" }`
+Request: `{ "firstName": "...", "lastName": "...", "language": "en", "avatar": "https://...", "telegramNotificationsEnabled": true }`
+
+`avatar` — строка-URL; допускаются только t.me / telegram.org / telegram-cdn.org / собственный S3 (allowlist-валидация).
+
+### GET /users/me/limits
+
+Текущее использование лимитов плана (для прогресс-баров в UI).
+
+Response:
+
+```json
+{
+  "applications": { "remaining": 1, "limit": 3, "resetsAt": "2026-07-12T00:00:00.000Z" },
+  "resumes": { "remaining": 0, "limit": 1 },
+  "vacancyCreations": { "remaining": 2, "limit": 3, "resetsAt": "2026-08-01T00:00:00.000Z" },
+  "activeVacancies": { "remaining": 2, "limit": 3 }
+}
+```
+
+`vacancyCreations.remaining` включает `vacancyCredits` из пакетов. `resumes` считает статусы кроме `archived`/`rejected`; вакансии — `moderation`/`published`.
 
 ---
 
@@ -114,7 +138,7 @@ Query params:
 
 ### POST /companies
 
-Создать компанию. Требует авторизации.
+Создать компанию. Требует авторизации. Компания создаётся сразу в статусе `moderation`.
 
 Request:
 
@@ -132,11 +156,23 @@ Request:
 
 ### PUT /companies/:id
 
-Обновить. Только владелец.
+Обновить. Только владелец. Любое редактирование автоматически переводит компанию в `moderation`.
 
 ### DELETE /companies/:id
 
 Удалить. Только владелец. Только если нет активных вакансий.
+
+### POST /companies/:id/submit
+
+Повторно отправить на модерацию (для `rejected`). Статус → `moderation`.
+
+### GET /companies/my
+
+Мои компании (все статусы). Требует авторизации. Query: `page`, `pageSize`.
+
+### GET /companies/my/:id
+
+Моя компания по id (включая rejection-поля). Только владелец.
 
 ---
 
@@ -181,11 +217,11 @@ Response:
 
 ### POST /vacancies
 
-Создать вакансию. Требует авторизации. Тратит кредит/лимит при переходе в moderation.
+Создать вакансию. Требует авторизации. Вакансия создаётся сразу в статусе `moderation` — тратит кредит/лимит. Компания (`companyId`) должна быть `published` и принадлежать пользователю.
 
 ### PUT /vacancies/:id
 
-Обновить. Если статус `published` — переводит обратно в `draft`.
+Обновить. Любое редактирование автоматически переводит вакансию в `moderation`.
 
 ### DELETE /vacancies/:id
 
@@ -193,7 +229,7 @@ Response:
 
 ### POST /vacancies/:id/publish
 
-Подать на модерацию. Статус draft → moderation.
+Повторно отправить на модерацию (`draft`/`rejected`/`expired` → `moderation`). Тратит кредит/лимит.
 
 ### POST /vacancies/:id/boost
 
@@ -207,9 +243,13 @@ Response: `{ "success": true, "boostsRemaining": 4 }`
 
 ### GET /vacancies/my
 
-Мои вакансии (все статусы). Требует авторизации.
+Мои вакансии (все статусы, включая rejection-поля). Требует авторизации.
 
 Query: `status`, `page`, `pageSize`
+
+### GET /vacancies/my/:id
+
+Моя вакансия по id (включая rejection-поля). Только владелец.
 
 ---
 
@@ -236,11 +276,11 @@ Query params:
 
 ### POST /resumes
 
-Создать резюме.
+Создать резюме. Создаётся сразу в статусе `moderation`. Лимит резюме зависит от плана.
 
 ### PUT /resumes/:id
 
-Обновить. Только владелец.
+Обновить. Только владелец. Любое редактирование автоматически переводит резюме в `moderation`.
 
 ### DELETE /resumes/:id
 
@@ -248,7 +288,7 @@ Query params:
 
 ### POST /resumes/:id/publish
 
-Подать на модерацию.
+Повторно отправить на модерацию (`draft`/`rejected` → `moderation`).
 
 ### GET /resumes/my
 
@@ -263,6 +303,10 @@ Query params:
 Мои отклики (как кандидата). Требует авторизации.
 
 Query: `status`, `page`, `pageSize`
+
+### GET /applications/:id
+
+Деталь отклика. Доступ: кандидат (автор отклика) или владелец вакансии. Используется deep link `application_{documentId}` в Mini App.
 
 ### POST /applications
 
@@ -300,37 +344,6 @@ offer → hired | rejected
 
 ---
 
-## Подписки и платежи
-
-### GET /subscription-plans
-
-Список планов с ценами.
-
-### POST /payments/subscribe
-
-Инициировать покупку подписки.
-
-Request: `{ "planCode": "pro" }`
-Response: `{ "invoiceUrl": "https://t.me/invoice/..." }`
-
-### POST /payments/vacancy-pack
-
-Купить пакет вакансий.
-
-Request: `{ "packageId": 1 }`
-Response: `{ "invoiceUrl": "..." }`
-
-### POST /payments/apply-pack
-
-Request: `{ "packageId": 1 }`
-Response: `{ "invoiceUrl": "..." }`
-
-### POST /payments/webhook
-
-Telegram Bot webhook. Только для Bot API (не REST клиентов).
-
----
-
 ## Уведомления
 
 ### GET /notifications
@@ -346,22 +359,6 @@ Query: `isRead`, `page`, `pageSize`
 ### POST /notifications/read-all
 
 Отметить все как прочитанные.
-
----
-
-## Сохранённые поиски
-
-### GET /saved-searches
-
-Мои сохранённые поиски.
-
-### POST /saved-searches
-
-Request: `{ "name": "...", "type": "vacancy", "filters": { ...queryParams } }`
-
-### DELETE /saved-searches/:id
-
-Удалить.
 
 ---
 

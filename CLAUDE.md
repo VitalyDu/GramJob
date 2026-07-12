@@ -17,7 +17,7 @@
 
 ## Текущее состояние проекта
 
-**Фаза: Разработка. Sprint 1–7 завершены (слиты в main). Следующий: Sprint 8 — Moderation.**
+**Фаза: Production. Sprint 1–9 + Account & UX Batch завершены. Sprint 10 (SEO, Performance & Launch) почти завершён — продукт задеплоен: gramjob.com (frontend VPS) + api.gramjob.com (Strapi VPS). Остатки Sprint 10: Cloudflare R2, Sentry, UptimeRobot, PG backup, smoke tests.**
 
 Выполнено (Sprint 1):
 
@@ -244,7 +244,7 @@
 - Bug fix: `isVip` добавлен в `SAFE_RESPONSE_FIELDS` (`GET /users/me` теперь возвращает поле)
 - `contentTypes.d.ts`: добавлены `isVip` в PluginUsersPermissionsUser + Sprint 6 content types (SubscriptionPlan, VacancyPackage, ApplyPackage)
 
-Выполнено (Sprint 7 Backend — Notifications & Analytics, ветка `worktree-sprint7-backend`, ещё не слита):
+Выполнено (Sprint 7 Backend — Notifications & Analytics):
 
 - Content type: Notification (16 типов), сервис `sendNotification` (БД + Telegram sendMessage)
 - Telegram Bot команды, lifecycle hooks и cron tasks подключены к уведомлениям
@@ -253,7 +253,7 @@
 - GET /analytics/vacancies/:id, GET /analytics/resumes/:id (total + daily, только владелец)
 - Детали: `docs/sprint-plan.md` (Sprint 7 Backend — все чекбоксы отмечены)
 
-Выполнено (Sprint 7 Frontend — Notifications & Analytics, ветка `worktree-sprint7-frontend`):
+Выполнено (Sprint 7 Frontend — Notifications & Analytics):
 
 - `types/api.ts` — `NotificationType` (16 типов), `NotificationData`, `Notification`, `VacancyAnalyticsResponse`, `ResumeAnalyticsResponse` (+ daily/total записи)
 - `stores/NotificationStore.ts` — MobX стор: `fetchNotifications(isRead?, page)`, `fetchUnreadCount` (тихо игнорирует ошибки), `markRead`, `markAllRead`, `pageCount` (11 тестов)
@@ -345,7 +345,19 @@
 - Backend: `plugin::users-permissions.auth.changePassword` в seed-permissions; `updateProfile`/`changePassword` в AuthStore
 - Итого: 451 тест frontend, 271 тест backend, 0 ошибок TypeScript
 
-Текущий шаг — Account & UX Batch завершён. Следующий: Sprint 10 — SEO, Performance & Launch.
+Выполнено (Sprint 10 — SEO, Performance & Launch):
+
+- Metadata API (динамические title/description/OG), ISR (3600 списки / 300 карточки), sitemap.xml, robots.txt, next/image, next/font (Inter), bundle analysis, Lighthouse ≥ 90
+- Деплой в production: Strapi на VPS (Hiddence, PM2, Nginx + certbot, api.gramjob.com), Next.js на VPS (gramjob.com), Telegram webhook на production URL, автодеплой через GitHub Actions (SSH)
+- Не сделано: Cloudflare R2 (медиа пока в MinIO), Sentry, UptimeRobot, PostgreSQL backup, smoke tests
+
+Выполнено (Auto-Moderation Batch — 2026-07-10/11):
+
+- Авто-модерация: создание и любое редактирование вакансии/резюме/компании сразу переводит в `moderation` (кнопки «Отправить на модерацию» нет); `publishedTransitionsOnEdit*` утилиты удалены
+- Повторная отправка после rejected: vacancy/resume POST /publish, company POST /submit; `draft` остался в enum как legacy default
+- GET /users/me/limits + LimitsStore + real-time прогресс-бары лимитов плана на всех релевантных страницах (PlanLimitsCard и др.)
+
+Текущий шаг — Sprint 10 почти завершён (остатки: R2, Sentry, UptimeRobot, PG backup, smoke tests). Далее: Backlog (`docs/sprint-plan.md`).
 Планы: `docs/superpowers/plans/`
 
 ---
@@ -400,26 +412,32 @@ Strapi 5 (Headless CMS)
 
 ### Статусы вакансий
 
+Поле в БД — `moderationStatus` (имя `status` зарезервировано Strapi 5). `draft` остался в enum как legacy default, в пользовательском флоу не используется.
+
 ```
-Draft → Moderation → Published → Rejected
-                              → Expired (через 60 дней)
-                              → Archived (вручную)
+создание/редактирование → Moderation (автоматически)
+Moderation → Published | Rejected (модератор)
+Published → Expired (через 60 дней) | Archived (вручную)
+Rejected/Expired → Moderation («Отправить повторно», тратится кредит)
 ```
 
 - Срок публикации: **60 дней**
-- После истечения вакансию можно переопубликовать (тратятся кредиты)
 
 ### Статусы резюме
 
 ```
-Draft → Moderation → Published → Rejected
-                              → Archived (вручную)
+создание/редактирование → Moderation (автоматически)
+Moderation → Published | Rejected (модератор)
+Published → Archived (вручную)
+Rejected → Moderation («Отправить повторно»)
 ```
 
 ### Статусы компании
 
 ```
-Draft → Moderation → Published → Rejected
+создание/редактирование → Moderation (автоматически)
+Moderation → Published | Rejected (модератор)
+Rejected → Moderation (POST /companies/:id/submit)
 ```
 
 ### Статусы отклика
@@ -443,8 +461,8 @@ Applied → Viewed → InReview → Interview
 
 ### Модерация
 
-Обязательная для: вакансий, резюме, компаний.
-Проходит через Strapi Admin панель.
+Обязательная для: вакансий, резюме, компаний. Подача автоматическая (создание/редактирование → `moderation`).
+Решения — в Strapi Admin (Document Actions «Одобрить»/«Отклонить», страница «Модерация» со статистикой). Администраторы получают Telegram-уведомления о новых объектах в очереди (`ADMIN_TELEGRAM_CHAT_IDS`).
 
 ### Иерархия категорий
 
@@ -506,21 +524,23 @@ JWT, Telegram Signature Validation, Rate Limiting, CSRF Protection, RBAC, Audit 
 
 ## Индекс документации
 
-| Файл                                 | Содержание                                                   |
-| ------------------------------------ | ------------------------------------------------------------ |
-| `docs/business-logic.md`             | Полная бизнес-логика, все сущности, правила                  |
-| `docs/technical-specification.md`    | Tech stack, модели данных                                    |
-| `docs/database-schema.md`            | Схема БД: поля, типы, связи, индексы                         |
-| `docs/api-specification.md`          | REST API: все эндпоинты, параметры, ответы                   |
-| `docs/subscription-system.md`        | Подписки, кредиты, пакеты, платёжный флоу                    |
-| `docs/moderation-system.md`          | Воркфлоу модерации, статусы, правила                         |
-| `docs/telegram-bot-specification.md` | Bot-команды, Mini App экраны, уведомления                    |
-| `docs/development-guide.md`          | Setup, ENV, конвенции, тесты, деплой                         |
-| `docs/search-specification.md`       | Full-text search, фильтры, SQL, GIN-индексы                  |
-| `docs/notification-system.md`        | Архитектура уведомлений, retry, rate limits, шаблоны         |
-| `docs/seed-data.md`                  | Начальные данные: industries, specializations, языки, страны |
-| `docs/sprint-plan.md`                | План разработки по спринтам с чеклистами задач               |
-| `docs/roadmap.md`                    | Планируемые фичи (backlog)                                   |
+| Файл                                 | Содержание                                                    |
+| ------------------------------------ | ------------------------------------------------------------- |
+| `docs/business-logic.md`             | Полная бизнес-логика, все сущности, правила                   |
+| `docs/technical-specification.md`    | Tech stack, модели данных                                     |
+| `docs/database-schema.md`            | Схема БД: поля, типы, связи, индексы                          |
+| `docs/api-specification.md`          | REST API: все эндпоинты, параметры, ответы                    |
+| `docs/subscription-system.md`        | Подписки, кредиты, пакеты, платёжный флоу                     |
+| `docs/moderation-system.md`          | Воркфлоу модерации, статусы, правила                          |
+| `docs/telegram-bot-specification.md` | Bot-команды, Mini App экраны, уведомления                     |
+| `docs/development-guide.md`          | Setup, ENV, конвенции, тесты, деплой                          |
+| `docs/search-specification.md`       | Full-text search, фильтры, SQL, GIN-индексы                   |
+| `docs/notification-system.md`        | Архитектура уведомлений, retry, rate limits, шаблоны          |
+| `docs/seed-data.md`                  | Начальные данные: industries, specializations, языки, страны  |
+| `docs/sprint-plan.md`                | План разработки по спринтам с чеклистами задач                |
+| `docs/roadmap.md`                    | Планируемые фичи (backlog)                                    |
+| `docs/qa/`                           | QA-чеклисты и отчёты ручного тестирования                     |
+| `docs/archive/`                      | Отработанные ad-hoc отчёты (аудиты, баг-листы) — историческое |
 
 ---
 
