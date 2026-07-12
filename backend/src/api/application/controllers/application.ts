@@ -15,7 +15,9 @@ const APPLICATION_POPULATE = {
     },
   },
   resume: {
-    fields: ['documentId', 'title', 'firstName', 'lastName', 'moderationStatus'],
+    // contacts безопасны во всех эндпоинтах: резюме принадлежит кандидату
+    // отклика, а видят отклик только сам кандидат и владелец вакансии
+    fields: ['documentId', 'title', 'firstName', 'lastName', 'moderationStatus', 'contacts'],
     populate: { user: { fields: ['id'] } },
   },
   user: { fields: ['id', 'firstName', 'lastName'] },

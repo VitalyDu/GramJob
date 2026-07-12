@@ -47,6 +47,34 @@ describe('POST /api/companies/:id/submit', () => {
     expect(res.body.data.companySize).toBe('size_11_50')
   })
 
+  it('owner can edit a published company and it returns to moderation', async () => {
+    const user = await createTestUser(strapi)
+    const jwt = issueJwt(strapi, user.id as number)
+    const company = await createCompany(user.id as number, 'published')
+
+    const res = await request(strapi.server.httpServer)
+      .put(`/api/companies/${company.documentId}`)
+      .set('Authorization', `Bearer ${jwt}`)
+      .send({ city: 'Казань' })
+
+    expect(res.status).toBe(200)
+    expect(res.body.data.city).toBe('Казань')
+    expect(res.body.data.moderationStatus).toBe('moderation')
+  })
+
+  it('editing is blocked while the company is under moderation', async () => {
+    const user = await createTestUser(strapi)
+    const jwt = issueJwt(strapi, user.id as number)
+    const company = await createCompany(user.id as number, 'moderation')
+
+    const res = await request(strapi.server.httpServer)
+      .put(`/api/companies/${company.documentId}`)
+      .set('Authorization', `Bearer ${jwt}`)
+      .send({ city: 'Казань' })
+
+    expect(res.status).toBe(400)
+  })
+
   it('error message for non-submittable status mentions both draft and rejected', async () => {
     const user = await createTestUser(strapi)
     const jwt = issueJwt(strapi, user.id as number)

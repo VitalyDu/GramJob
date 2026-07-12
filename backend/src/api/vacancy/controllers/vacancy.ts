@@ -6,6 +6,7 @@ import {
   refundVacancyCredit,
 } from '../services/credit-service'
 import { getBlockedUserIds } from '../../block/services/block-filter'
+import { resolveOptionalUserId } from '../../../utils/optional-auth'
 import { toArray } from '../../../utils/query'
 import type vacancyServiceFactory from '../services/vacancy'
 
@@ -318,8 +319,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Block filter: hide vacancies from users the current user has blocked
       let blockedUserIds: number[] = []
-      if (ctx.state.user) {
-        blockedUserIds = await getBlockedUserIds(strapi, (ctx.state.user as { id: number }).id)
+      const viewerId = await resolveOptionalUserId(strapi, ctx)
+      if (viewerId) {
+        blockedUserIds = await getBlockedUserIds(strapi, viewerId)
       }
 
       const sortMap: Record<string, string> = {
@@ -332,10 +334,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Full-text search via raw SQL
       if (search) {
-        // Build SQL fragment to exclude blocked users (applied at SQL level to avoid page underfill)
+        // Build SQL fragment to exclude blocked users (applied at SQL level to avoid page underfill).
+        // Strapi 5 stores relations in link tables, so filter via vacancies_posted_by_lnk.
         const blockSql =
           blockedUserIds.length > 0
-            ? `AND posted_by_id NOT IN (${blockedUserIds.map(() => '?').join(',')})`
+            ? `AND id NOT IN (SELECT vacancy_id FROM vacancies_posted_by_lnk WHERE user_id IN (${blockedUserIds.map(() => '?').join(',')}))`
             : ''
         const blockParams = blockedUserIds.length > 0 ? blockedUserIds : []
 

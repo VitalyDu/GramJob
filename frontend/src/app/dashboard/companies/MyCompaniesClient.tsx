@@ -11,7 +11,12 @@ import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { hapticNotify } from '@/lib/telegram'
 import { StatusBadge } from '@/components/company/StatusBadge'
-import { COMPANY_SIZE_LABELS, canSubmitCompany, canDeleteCompany } from '@/lib/company-utils'
+import {
+  COMPANY_SIZE_LABELS,
+  canSubmitCompany,
+  canDeleteCompany,
+  canEditCompany,
+} from '@/lib/company-utils'
 import { getMediaUrl } from '@/lib/media'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/shared/PageHeader'
@@ -174,13 +179,17 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
                   },
                 ]
               : []),
-            {
-              id: 'edit',
-              icon: Pencil,
-              label: t('actions.edit'),
-              description: t('actions.editDesc'),
-              href: `/dashboard/companies/${activeCompany.documentId}/edit`,
-            },
+            ...(canEditCompany(activeCompany.moderationStatus)
+              ? [
+                  {
+                    id: 'edit',
+                    icon: Pencil,
+                    label: t('actions.edit'),
+                    description: t('actions.editDesc'),
+                    href: `/dashboard/companies/${activeCompany.documentId}/edit`,
+                  },
+                ]
+              : []),
             ...(canSubmitCompany(activeCompany.moderationStatus)
               ? [
                   {

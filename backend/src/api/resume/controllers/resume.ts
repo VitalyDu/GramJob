@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/strapi'
 import { canPublishResume, canEditResume, canArchiveResume } from '../services/resume-utils'
 import { checkIsMaxPlan } from '../policies/requires-max-plan'
+import { getBlockedUserIds } from '../../block/services/block-filter'
 import { toArray } from '../../../utils/query'
 import type resumeServiceFactory from '../services/resume'
 
@@ -82,6 +83,38 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ) {
         return ctx.badRequest(
           `employmentType must be a non-empty array with values from: ${VALID_EMPLOYMENT_TYPES.join(', ')}`
+        )
+      }
+
+      const fullUser = (await strapi.db.query('plugin::users-permissions.user').findOne({
+        where: { id: user.id },
+        select: ['id', 'subscriptionPlan'],
+      })) as { subscriptionPlan?: string } | null
+      const planDoc = (await (strapi.documents as any)(
+        'api::subscription-plan.subscription-plan'
+      ).findFirst({
+        filters: { code: { $eq: fullUser?.subscriptionPlan ?? 'free' } },
+        fields: ['resumesLimit'],
+      })) as { resumesLimit: number } | null
+      const resumesLimit = planDoc?.resumesLimit ?? 1
+
+      const resumesCount = (await (strapi.documents as any)('api::resume.resume').count({
+        filters: {
+          user: { id: { $eq: user.id } },
+          moderationStatus: { $notIn: ['archived', 'rejected'] },
+        },
+      })) as number
+
+      if (resumesCount >= resumesLimit) {
+        return ctx.send(
+          {
+            error: {
+              code: 'LIMIT_REACHED',
+              message: 'Resume limit reached',
+              details: { limit: resumesLimit, used: resumesCount },
+            },
+          },
+          403
         )
       }
 
@@ -168,8 +201,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         }
       }
 
+      // Block filter: hide resumes of users the current user has blocked
+      let blockedUserIds: number[] = []
+      if (ctx.state.user) {
+        blockedUserIds = await getBlockedUserIds(strapi, (ctx.state.user as { id: number }).id)
+      }
+
       const filters: Record<string, unknown> = { moderationStatus: { $eq: 'published' } }
 
+      if (blockedUserIds.length > 0) {
+        filters.user = { id: { $notIn: blockedUserIds } }
+      }
       if (jsonFilterIds !== null) filters.documentId = { $in: jsonFilterIds }
       if (country) filters.country = { $eq: country }
       if (city) filters.city = { $containsi: city }
@@ -235,17 +277,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       // Resume database is a Max/VIP feature, but employers can always view resumes
       // of candidates who applied to their vacancies (regardless of plan)
       if (!isOwner) {
-        const applicationResult = await strapi.db.connection.raw(
-          `SELECT a.id
-           FROM applications a
-           JOIN resumes r ON r.id = a.resume_id
-           JOIN vacancies v ON v.id = a.vacancy_id
-           WHERE r.document_id = ?
-             AND v.posted_by_id = ?
-           LIMIT 1`,
-          [id, requestUser.id]
-        )
-        const hasIncomingApplication = (applicationResult.rows?.length ?? 0) > 0
+        const incomingApplication = await strapi.db.query('api::application.application').findOne({
+          where: {
+            resume: { documentId: id },
+            vacancy: { postedBy: { id: requestUser.id } },
+          },
+          select: ['id'],
+        })
+        const hasIncomingApplication = Boolean(incomingApplication)
 
         if (!hasIncomingApplication) {
           const viewer = (await strapi.db.query('plugin::users-permissions.user').findOne({
@@ -283,20 +322,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         if (isOwner) {
           contacts = resume.contacts
         } else {
-          // Raw SQL is used here because Strapi 5 Document Service does not reliably
-          // support multi-level deep relation filters (resume→user→id, vacancy→postedBy→id)
-          const result = await strapi.db.connection.raw(
-            `SELECT a.id
-             FROM applications a
-             JOIN resumes r ON r.id = a.resume_id
-             JOIN vacancies v ON v.id = a.vacancy_id
-             WHERE r.user_id = ?
-               AND v.posted_by_id = ?
-               AND a.status IN ('in-review', 'interview', 'test-task', 'offer', 'hired')
-             LIMIT 1`,
-            [resumeOwnerId, requestUser.id]
-          )
-          if ((result.rows?.length ?? 0) > 0) contacts = (resume as any).contacts
+          // Бизнес-правило: работодатель видит контакты кандидата сразу при
+          // получении отклика (любой статус)
+          const revealingApplication = await strapi.db
+            .query('api::application.application')
+            .findOne({
+              where: {
+                user: { id: resumeOwnerId },
+                vacancy: { postedBy: { id: requestUser.id } },
+              },
+              select: ['id'],
+            })
+          if (revealingApplication) contacts = (resume as any).contacts
         }
       }
 

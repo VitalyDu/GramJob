@@ -2,6 +2,7 @@ import type { Core } from '@strapi/strapi'
 
 import { toSlug, canSubmit, canDelete } from '../services/company-utils'
 import { getBlockedUserIds } from '../../block/services/block-filter'
+import { resolveOptionalUserId } from '../../../utils/optional-auth'
 import type companyServiceFactory from '../services/company'
 
 type CompanyService = ReturnType<typeof companyServiceFactory>
@@ -108,8 +109,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Block filter: hide companies owned by blocked users
       let blockedUserIds: number[] = []
-      if (ctx.state.user) {
-        blockedUserIds = await getBlockedUserIds(strapi, (ctx.state.user as { id: number }).id)
+      const viewerId = await resolveOptionalUserId(strapi, ctx)
+      if (viewerId) {
+        blockedUserIds = await getBlockedUserIds(strapi, viewerId)
       }
 
       const filters: Record<string, unknown> = { moderationStatus: { $eq: 'published' } }
@@ -235,10 +237,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (!existing) return ctx.notFound('Company not found')
 
       const existingStatus = (existing as any).moderationStatus as string
-      if (existingStatus !== 'draft' && existingStatus !== 'rejected') {
-        return ctx.badRequest(
-          `Cannot edit company with status "${existingStatus}". Must be draft or rejected.`
-        )
+      if (existingStatus === 'moderation') {
+        return ctx.badRequest('Cannot edit company while it is under moderation.')
       }
 
       const updateData: Record<string, unknown> = {}
