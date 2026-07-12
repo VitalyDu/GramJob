@@ -43,6 +43,8 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
     needs: lint-and-typecheck
+    # Страховка от зависшего jest (незакрытые хендлы) — иначе джоб висит 6 часов
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -88,3 +90,10 @@ jobs:
           DATABASE_USERNAME: gramjob
           DATABASE_PASSWORD: secret
           NODE_ENV: test
+          # Strapi-секреты для тестовой среды (локально берутся из backend/.env)
+          APP_KEYS: ciTestKeyA,ciTestKeyB,ciTestKeyC,ciTestKeyD
+          API_TOKEN_SALT: ci-test-api-token-salt
+          ADMIN_JWT_SECRET: ci-test-admin-jwt-secret
+          TRANSFER_TOKEN_SALT: ci-test-transfer-token-salt
+          ENCRYPTION_KEY: ci-test-encryption-key
+          JWT_SECRET: ci-test-jwt-secret
