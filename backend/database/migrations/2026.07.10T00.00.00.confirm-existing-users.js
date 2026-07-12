@@ -6,6 +6,9 @@
 // новых незавершивших верификацию пользователей.
 module.exports = {
   async up(knex) {
+    // На свежей БД (тесты, новое окружение) миграции выполняются до создания
+    // схемы — таблицы ещё нет, подтверждать некого.
+    if (!(await knex.schema.hasTable('up_users'))) return
     await knex('up_users').where({ confirmed: false }).update({ confirmed: true })
   },
 }

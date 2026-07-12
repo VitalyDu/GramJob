@@ -22,7 +22,7 @@ async function createCompany(ownerId: number, status: string) {
       country: 'RU',
       city: 'Москва',
       companySize: 'size_11_50',
-      status,
+      moderationStatus: status,
       owner: ownerId,
     } as any,
   })
@@ -39,7 +39,7 @@ describe('POST /api/companies/:id/submit', () => {
       .set('Authorization', `Bearer ${jwt}`)
 
     expect(res.status).toBe(200)
-    expect(res.body.data.status).toBe('moderation')
+    expect(res.body.data.moderationStatus).toBe('moderation')
     for (const key of ['name', 'slug', 'country', 'city', 'companySize', 'createdAt']) {
       expect(res.body.data).toHaveProperty(key)
     }

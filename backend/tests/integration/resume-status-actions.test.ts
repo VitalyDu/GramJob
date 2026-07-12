@@ -23,14 +23,14 @@ async function createResume(userId: number, status: string) {
       city: 'Москва',
       desiredSalary: 3000,
       currency: 'USD',
-      workFormat: 'remote',
-      employmentType: 'full-time',
+      workFormat: ['remote'],
+      employmentType: ['full-time'],
       experienceYears: 5,
       skills: ['react', 'typescript'],
       languages: [{ lang: 'en', level: 'B2' }],
       views: 0,
       invitations: 0,
-      status,
+      moderationStatus: status,
       user: userId,
     } as any,
   })
@@ -61,12 +61,12 @@ describe('POST /api/resumes/:id/publish', () => {
       .set('Authorization', `Bearer ${jwt}`)
 
     expect(res.status).toBe(200)
-    expect(res.body.data.status).toBe('moderation')
+    expect(res.body.data.moderationStatus).toBe('moderation')
     for (const key of CARD_KEYS) {
       expect(res.body.data).toHaveProperty(key)
     }
     expect(res.body.data.firstName).toBe('Иван')
-    expect(res.body.data.workFormat).toBe('remote')
+    expect(res.body.data.workFormat).toEqual(['remote'])
   })
 })
 
@@ -81,7 +81,7 @@ describe('DELETE /api/resumes/:id (archive)', () => {
       .set('Authorization', `Bearer ${jwt}`)
 
     expect(res.status).toBe(200)
-    expect(res.body.data.status).toBe('archived')
+    expect(res.body.data.moderationStatus).toBe('archived')
     for (const key of CARD_KEYS) {
       expect(res.body.data).toHaveProperty(key)
     }
