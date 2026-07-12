@@ -15,7 +15,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const [blockList, total] = await Promise.all([
       (strapi.documents as any)('api::block.block').findMany({
         filters,
-        fields: ['documentId', 'targetType', 'targetId', 'createdAt'],
+        fields: ['documentId', 'targetType', 'targetId', 'targetName', 'createdAt'],
         start: (pageNum - 1) * pageSizeNum,
         limit: pageSizeNum,
         sort: 'createdAt:desc',
@@ -39,11 +39,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     if (!user) return ctx.unauthorized('Authentication required')
 
     const body = ctx.request.body as Record<string, unknown>
-    const { targetType, targetId } = body
+    const { targetType, targetId, targetName } = body
 
     if (!targetType || !targetId) return ctx.badRequest('targetType and targetId are required')
     if (!isValidTargetType(targetType as string)) {
-      return ctx.badRequest('targetType must be one of: employer, candidate')
+      return ctx.badRequest('targetType must be one of: employer, candidate, company')
     }
     if (typeof targetId !== 'number' && typeof targetId !== 'string') {
       return ctx.badRequest('targetId must be a number')
@@ -51,34 +51,38 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const targetIdNum = typeof targetId === 'string' ? parseInt(targetId, 10) : targetId
     if (isNaN(targetIdNum)) return ctx.badRequest('targetId must be a valid number')
 
-    // Prevent self-block
-    if (targetIdNum === user.id) {
+    // Prevent self-block for user-type targets
+    if (targetType !== 'company' && targetIdNum === user.id) {
       return ctx.badRequest('Cannot block yourself')
     }
 
-    // Enforce uniqueness: (user, targetId)
+    // Enforce uniqueness: (user, targetType, targetId)
     const existing = await (strapi.documents as any)('api::block.block').findFirst({
       filters: {
         user: { id: { $eq: user.id } },
+        targetType: { $eq: targetType as string },
         targetId: { $eq: targetIdNum },
       },
     })
     if (existing) {
       return ctx.send(
         {
-          error: { code: 'ALREADY_BLOCKED', message: 'This user is already blocked' },
+          error: { code: 'ALREADY_BLOCKED', message: 'This entity is already blocked' },
         },
         409
       )
     }
+
+    const nameToStore = typeof targetName === 'string' ? targetName.trim() : ''
 
     const block = await (strapi.documents as any)('api::block.block').create({
       data: {
         user: user.id,
         targetType: targetType as string,
         targetId: targetIdNum,
+        targetName: nameToStore,
       },
-      fields: ['documentId', 'targetType', 'targetId', 'createdAt'],
+      fields: ['documentId', 'targetType', 'targetId', 'targetName', 'createdAt'],
     })
 
     return ctx.send({ data: block }, 201)

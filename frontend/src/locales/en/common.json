@@ -200,7 +200,8 @@
     "email": "Email",
     "phone": "Phone",
     "contactsLocked": "Contacts are available after application approval",
-    "backToAll": "← All resumes"
+    "backToAll": "← All resumes",
+    "backToMy": "← My resumes"
   },
   "companyDetail": {
     "report": "Report",
@@ -469,7 +470,8 @@
       "colAction": "Action",
       "targetTypes": {
         "employer": "Employer",
-        "candidate": "Candidate"
+        "candidate": "Candidate",
+        "company": "Company"
       }
     },
     "notifications": {

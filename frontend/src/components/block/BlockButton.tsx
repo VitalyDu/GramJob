@@ -9,12 +9,14 @@ import type { BlockTargetType } from '@/types/api'
 interface Props {
   targetType: BlockTargetType
   targetId: number
+  targetName: string
   initialIsBlocked?: boolean
 }
 
 export const BlockButton = observer(function BlockButton({
   targetType,
   targetId,
+  targetName,
   initialIsBlocked = false,
 }: Props) {
   const { block: store, auth } = useStores()
@@ -22,12 +24,12 @@ export const BlockButton = observer(function BlockButton({
   const [isBlocked, setIsBlocked] = useState(initialIsBlocked)
 
   if (!auth.user) return null
-  if (auth.user.id === targetId) return null
+  if (targetType !== 'company' && auth.user.id === targetId) return null
 
   const handleBlock = async () => {
     if (isBlocked) return
     if (!window.confirm(t('block.confirm'))) return
-    await store.createBlock({ targetType, targetId })
+    await store.createBlock({ targetType, targetId, targetName })
     if (!store.error) {
       setIsBlocked(true)
       if (store.alreadyBlocked) {

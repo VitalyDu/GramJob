@@ -500,18 +500,20 @@ export interface FavoriteCreateInput {
 
 // --- Block ---
 
-export type BlockTargetType = 'employer' | 'candidate'
+export type BlockTargetType = 'employer' | 'candidate' | 'company'
 
 export interface Block {
   documentId: string
   targetType: BlockTargetType
   targetId: number
+  targetName: string
   createdAt: string
 }
 
 export interface BlockCreateInput {
   targetType: BlockTargetType
   targetId: number
+  targetName: string
 }
 
 // --- Report ---

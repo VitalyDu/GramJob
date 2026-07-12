@@ -200,7 +200,8 @@
     "email": "Email",
     "phone": "Телефон",
     "contactsLocked": "Контакты доступны после одобрения отклика",
-    "backToAll": "← Все резюме"
+    "backToAll": "← Все резюме",
+    "backToMy": "← Мои резюме"
   },
   "companyDetail": {
     "report": "Пожаловаться",
@@ -469,7 +470,8 @@
       "colAction": "Действие",
       "targetTypes": {
         "employer": "Работодатель",
-        "candidate": "Кандидат"
+        "candidate": "Кандидат",
+        "company": "Компания"
       }
     },
     "notifications": {

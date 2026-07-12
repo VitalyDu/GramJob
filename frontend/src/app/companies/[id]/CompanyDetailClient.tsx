@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { StatusBadge } from '@/components/company/StatusBadge'
 import { FavoriteButton } from '@/components/favorite/FavoriteButton'
+import { BlockButton } from '@/components/block/BlockButton'
 import { ReportDialog } from '@/components/report/ReportDialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -138,6 +139,13 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({
                   >
                     {t('companyDetail.report')}
                   </button>
+                  {company.owner?.id !== auth.user.id && (
+                    <BlockButton
+                      targetType="company"
+                      targetId={company.id}
+                      targetName={company.name}
+                    />
+                  )}
                 </div>
               )}
             </div>

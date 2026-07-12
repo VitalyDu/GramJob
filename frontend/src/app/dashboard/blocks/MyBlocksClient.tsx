@@ -77,7 +77,10 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
               {store.blocks.map((b) => (
                 <TableRow key={b.documentId}>
                   <TableCell className="font-medium">
-                    {t(`dashboard.blocks.targetTypes.${b.targetType}`)} #{b.targetId}
+                    <span className="text-xs text-muted-foreground mr-2">
+                      {t(`dashboard.blocks.targetTypes.${b.targetType}`)}
+                    </span>
+                    {b.targetName || `#${b.targetId}`}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {new Date(b.createdAt).toLocaleDateString('ru')}
@@ -109,9 +112,10 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
             >
               <div>
                 <p className="font-medium text-card-foreground">
-                  {t(`dashboard.blocks.targetTypes.${b.targetType}`)} #{b.targetId}
+                  {b.targetName || `#${b.targetId}`}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
+                  {t(`dashboard.blocks.targetTypes.${b.targetType}`)} &middot;{' '}
                   {t('dashboard.blocks.blockedAt')} {new Date(b.createdAt).toLocaleDateString('ru')}
                 </p>
               </div>

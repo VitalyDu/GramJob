@@ -28,6 +28,7 @@ const mockBlock = {
   documentId: 'blk123',
   targetType: 'employer' as const,
   targetId: 42,
+  targetName: 'John Doe',
   createdAt: '2026-01-01T00:00:00Z',
 }
 
@@ -72,10 +73,11 @@ describe('BlockStore', () => {
   describe('createBlock', () => {
     it('calls POST /blocks successfully', async () => {
       vi.mocked(api.post).mockResolvedValue({ data: mockBlock })
-      await store.createBlock({ targetType: 'employer', targetId: 42 })
+      await store.createBlock({ targetType: 'employer', targetId: 42, targetName: 'John Doe' })
       expect(vi.mocked(api.post)).toHaveBeenCalledWith('/blocks', {
         targetType: 'employer',
         targetId: 42,
+        targetName: 'John Doe',
       })
       expect(store.alreadyBlocked).toBe(false)
       expect(store.isLoading).toBe(false)
@@ -85,16 +87,16 @@ describe('BlockStore', () => {
       vi.mocked(api.post).mockRejectedValue(
         new ApiClientError(409, { error: { code: 'ALREADY_BLOCKED' } }, 'Already blocked')
       )
-      await store.createBlock({ targetType: 'employer', targetId: 42 })
+      await store.createBlock({ targetType: 'employer', targetId: 42, targetName: 'John Doe' })
       expect(store.alreadyBlocked).toBe(true)
       expect(store.error).toBeNull()
     })
 
     it('sets error and rethrows on other failure', async () => {
       vi.mocked(api.post).mockRejectedValue(new Error('Server error'))
-      await expect(store.createBlock({ targetType: 'employer', targetId: 42 })).rejects.toThrow(
-        'Server error'
-      )
+      await expect(
+        store.createBlock({ targetType: 'employer', targetId: 42, targetName: 'John Doe' })
+      ).rejects.toThrow('Server error')
       expect(store.error).toBe('Server error')
     })
   })

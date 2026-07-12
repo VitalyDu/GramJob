@@ -469,7 +469,9 @@ export interface ApiBlockBlock extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private
     publishedAt: Schema.Attribute.DateTime
     targetId: Schema.Attribute.Integer & Schema.Attribute.Required
-    targetType: Schema.Attribute.Enumeration<['employer', 'candidate']> & Schema.Attribute.Required
+    targetName: Schema.Attribute.String & Schema.Attribute.DefaultTo<''>
+    targetType: Schema.Attribute.Enumeration<['employer', 'candidate', 'company']> &
+      Schema.Attribute.Required
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
     user: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'> &

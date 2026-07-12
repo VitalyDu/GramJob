@@ -66,6 +66,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
   }
 
   const r = store.currentResume
+  const isOwner = auth.user != null && r.user?.id === auth.user.id
   const name = `${r.firstName} ${r.lastName}`
   const initials = `${r.firstName.charAt(0)}${r.lastName.charAt(0)}`.toUpperCase()
   const salarySymbol = r.currency
@@ -128,7 +129,13 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
                   >
                     {t('resumeDetail.report')}
                   </button>
-                  {r.user && <BlockButton targetType="candidate" targetId={r.user.id} />}
+                  {r.user && (
+                    <BlockButton
+                      targetType="candidate"
+                      targetId={r.user.id}
+                      targetName={`${r.user.firstName} ${r.user.lastName}`.trim()}
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -234,49 +241,55 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
       )}
 
       {/* Contacts */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('resumeDetail.contacts')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {r.contacts && (r.contacts.telegram || r.contacts.email || r.contacts.phone) ? (
-            <div className="space-y-1.5 text-sm text-foreground">
-              {r.contacts.telegram && (
-                <p>
-                  {t('resumeDetail.telegram')}:{' '}
-                  <a
-                    href={`https://t.me/${r.contacts.telegram.replace('@', '')}`}
-                    className="text-primary hover:underline"
-                  >
-                    {r.contacts.telegram}
-                  </a>
-                </p>
-              )}
-              {r.contacts.email && (
-                <p>
-                  {t('resumeDetail.email')}:{' '}
-                  <a href={`mailto:${r.contacts.email}`} className="text-primary hover:underline">
-                    {r.contacts.email}
-                  </a>
-                </p>
-              )}
-              {r.contacts.phone && (
-                <p>
-                  {t('resumeDetail.phone')}: {r.contacts.phone}
-                </p>
-              )}
-            </div>
-          ) : (
-            <Alert>
-              <AlertDescription>{t('resumeDetail.contactsLocked')}</AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
+      {(!isOwner ||
+        (r.contacts && (r.contacts.telegram || r.contacts.email || r.contacts.phone))) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('resumeDetail.contacts')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {r.contacts && (r.contacts.telegram || r.contacts.email || r.contacts.phone) ? (
+              <div className="space-y-1.5 text-sm text-foreground">
+                {r.contacts.telegram && (
+                  <p>
+                    {t('resumeDetail.telegram')}:{' '}
+                    <a
+                      href={`https://t.me/${r.contacts.telegram.replace('@', '')}`}
+                      className="text-primary hover:underline"
+                    >
+                      {r.contacts.telegram}
+                    </a>
+                  </p>
+                )}
+                {r.contacts.email && (
+                  <p>
+                    {t('resumeDetail.email')}:{' '}
+                    <a href={`mailto:${r.contacts.email}`} className="text-primary hover:underline">
+                      {r.contacts.email}
+                    </a>
+                  </p>
+                )}
+                {r.contacts.phone && (
+                  <p>
+                    {t('resumeDetail.phone')}: {r.contacts.phone}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <Alert>
+                <AlertDescription>{t('resumeDetail.contactsLocked')}</AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="border-t pt-4">
-        <Link href="/resumes" className="text-sm text-muted-foreground hover:text-foreground">
-          {t('resumeDetail.backToAll')}
+        <Link
+          href={isOwner ? '/dashboard/resumes' : '/resumes'}
+          className="text-sm text-muted-foreground hover:text-foreground"
+        >
+          {isOwner ? t('resumeDetail.backToMy') : t('resumeDetail.backToAll')}
         </Link>
       </div>
 

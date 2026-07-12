@@ -53,7 +53,11 @@ export class BlockStore {
       this.alreadyBlocked = false
     })
     try {
-      await api.post<{ data: Block }>('/blocks', input)
+      await api.post<{ data: Block }>('/blocks', {
+        targetType: input.targetType,
+        targetId: input.targetId,
+        targetName: input.targetName,
+      })
     } catch (e) {
       if (e instanceof ApiClientError) {
         const body = e.data as { error?: { code?: string } } | null

@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/strapi'
 
 import { toSlug, canSubmit, canDelete } from '../services/company-utils'
-import { getBlockedUserIds } from '../../block/services/block-filter'
+import { getBlockedIds } from '../../block/services/block-filter'
 import { resolveOptionalUserId } from '../../../utils/optional-auth'
 import type companyServiceFactory from '../services/company'
 
@@ -107,11 +107,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return ctx.badRequest(`companySize must be one of: ${VALID_COMPANY_SIZES.join(', ')}`)
       }
 
-      // Block filter: hide companies owned by blocked users
+      // Block filter: hide companies owned by blocked users or directly blocked companies
       let blockedUserIds: number[] = []
+      let blockedCompanyIds: number[] = []
       const viewerId = await resolveOptionalUserId(strapi, ctx)
       if (viewerId) {
-        blockedUserIds = await getBlockedUserIds(strapi, viewerId)
+        const blocked = await getBlockedIds(strapi, viewerId)
+        blockedUserIds = blocked.userIds
+        blockedCompanyIds = blocked.companyIds
       }
 
       const filters: Record<string, unknown> = { moderationStatus: { $eq: 'published' } }
@@ -124,6 +127,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (companySize) filters.companySize = { $eq: companySize }
       if (blockedUserIds.length > 0) {
         filters.owner = { id: { $notIn: blockedUserIds } }
+      }
+      if (blockedCompanyIds.length > 0) {
+        filters.id = { $notIn: blockedCompanyIds }
       }
 
       const [companies, total] = await Promise.all([

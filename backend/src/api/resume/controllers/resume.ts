@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/strapi'
 import { canPublishResume, canEditResume, canArchiveResume } from '../services/resume-utils'
 import { checkIsMaxPlan } from '../policies/requires-max-plan'
-import { getBlockedUserIds } from '../../block/services/block-filter'
+import { getBlockedIds } from '../../block/services/block-filter'
 import { toArray } from '../../../utils/query'
 import type resumeServiceFactory from '../services/resume'
 
@@ -204,7 +204,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       // Block filter: hide resumes of users the current user has blocked
       let blockedUserIds: number[] = []
       if (ctx.state.user) {
-        blockedUserIds = await getBlockedUserIds(strapi, (ctx.state.user as { id: number }).id)
+        const blocked = await getBlockedIds(strapi, (ctx.state.user as { id: number }).id)
+        blockedUserIds = blocked.userIds
       }
 
       const filters: Record<string, unknown> = { moderationStatus: { $eq: 'published' } }

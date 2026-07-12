@@ -20,12 +20,16 @@
     },
     "targetType": {
       "type": "enumeration",
-      "enum": ["employer", "candidate"],
+      "enum": ["employer", "candidate", "company"],
       "required": true
     },
     "targetId": {
       "type": "integer",
       "required": true
+    },
+    "targetName": {
+      "type": "string",
+      "default": ""
     }
   }
 }

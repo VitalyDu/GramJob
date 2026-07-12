@@ -5,7 +5,7 @@ import {
   checkAndConsumeBoost,
   refundVacancyCredit,
 } from '../services/credit-service'
-import { getBlockedUserIds } from '../../block/services/block-filter'
+import { getBlockedIds } from '../../block/services/block-filter'
 import { resolveOptionalUserId } from '../../../utils/optional-auth'
 import { toArray } from '../../../utils/query'
 import type vacancyServiceFactory from '../services/vacancy'
@@ -317,11 +317,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         }
       }
 
-      // Block filter: hide vacancies from users the current user has blocked
+      // Block filter: hide vacancies from blocked users/companies
       let blockedUserIds: number[] = []
+      let blockedCompanyIds: number[] = []
       const viewerId = await resolveOptionalUserId(strapi, ctx)
       if (viewerId) {
-        blockedUserIds = await getBlockedUserIds(strapi, viewerId)
+        const blocked = await getBlockedIds(strapi, viewerId)
+        blockedUserIds = blocked.userIds
+        blockedCompanyIds = blocked.companyIds
       }
 
       const sortMap: Record<string, string> = {
@@ -334,13 +337,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Full-text search via raw SQL
       if (search) {
-        // Build SQL fragment to exclude blocked users (applied at SQL level to avoid page underfill).
-        // Strapi 5 stores relations in link tables, so filter via vacancies_posted_by_lnk.
-        const blockSql =
+        // Build SQL fragments to exclude blocked users/companies at SQL level (avoids page underfill).
+        const userBlockSql =
           blockedUserIds.length > 0
             ? `AND id NOT IN (SELECT vacancy_id FROM vacancies_posted_by_lnk WHERE user_id IN (${blockedUserIds.map(() => '?').join(',')}))`
             : ''
-        const blockParams = blockedUserIds.length > 0 ? blockedUserIds : []
+        const companyBlockSql =
+          blockedCompanyIds.length > 0
+            ? `AND id NOT IN (SELECT vacancy_id FROM vacancies_company_lnk WHERE company_id IN (${blockedCompanyIds.map(() => '?').join(',')}))`
+            : ''
+        const blockSql = [userBlockSql, companyBlockSql].filter(Boolean).join(' ')
+        const blockParams = [...blockedUserIds, ...blockedCompanyIds]
 
         // Get all FTS-matching IDs (SQL handles status+expiresAt; no pagination here for accurate count)
         const { documentIds: allFtsIds } = await svc().searchByVector(
@@ -392,6 +399,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         if (topPlacement === 'true') baseFilters.topPlacement = { $eq: true }
         if (blockedUserIds.length > 0) {
           baseFilters.postedBy = { id: { $notIn: blockedUserIds } }
+        }
+        if (blockedCompanyIds.length > 0) {
+          baseFilters.company = { id: { $notIn: blockedCompanyIds } }
         }
 
         // Accurate total: counts only docs that pass all filters (including extra ones)
@@ -496,6 +506,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (topPlacement === 'true') filters.topPlacement = { $eq: true }
       if (blockedUserIds.length > 0) {
         filters.postedBy = { id: { $notIn: blockedUserIds } }
+      }
+      if (blockedCompanyIds.length > 0) {
+        filters.company = { id: { $notIn: blockedCompanyIds } }
       }
 
       const [vacancies, total] = await Promise.all([

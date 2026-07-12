@@ -205,7 +205,11 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span>
-                          <BlockButton targetType="employer" targetId={v.postedBy.id} />
+                          <BlockButton
+                            targetType="employer"
+                            targetId={v.postedBy.id}
+                            targetName={`${v.postedBy.firstName} ${v.postedBy.lastName}`.trim()}
+                          />
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>{t('vacancyDetail.blockEmployer')}</TooltipContent>
