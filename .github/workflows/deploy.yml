@@ -46,12 +46,75 @@ jobs:
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
     steps:
-      - name: Deploy to frontend VPS
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H ${{ secrets.FRONTEND_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Pull env from VPS
+        # NEXT_PUBLIC_* must be present at build time — fetch prod .env files
+        # from the VPS so we don't need to duplicate them into GitHub Secrets
+        run: |
+          scp -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no \
+            'root@${{ secrets.FRONTEND_HOST }}:/opt/gramjob/frontend/.env*' \
+            frontend/ 2>/dev/null || echo "No .env files found on VPS"
+          ls -la frontend/.env* 2>/dev/null || true
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        working-directory: frontend
+        run: pnpm build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+          NEXT_TELEMETRY_DISABLED: '1'
+
+      - name: Update code and deps on VPS
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.FRONTEND_HOST }}
           username: root
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          timeout: 900s
-          # Bump Node heap — Sentry webpack plugin adds noticeable memory pressure to `next build`
-          script: NODE_OPTIONS='--max-old-space-size=2048' bash /opt/gramjob/deploy-frontend.sh
+          timeout: 300s
+          script: |
+            set -e
+            cd /opt/gramjob
+            git fetch --depth=1 origin main
+            git reset --hard origin/main
+            pnpm install --frozen-lockfile --filter frontend
+
+      - name: Rsync build artifacts
+        run: |
+          rsync -az --delete -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no" \
+            frontend/.next/ \
+            root@${{ secrets.FRONTEND_HOST }}:/opt/gramjob/frontend/.next/
+          rsync -az -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no" \
+            frontend/public/ \
+            root@${{ secrets.FRONTEND_HOST }}:/opt/gramjob/frontend/public/
+
+      - name: Restart PM2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.FRONTEND_HOST }}
+          username: root
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          timeout: 120s
+          script: |
+            set -e
+            cd /opt/gramjob/frontend
+            pm2 restart gramjob-frontend --update-env || pm2 restart all --update-env
+            pm2 save
