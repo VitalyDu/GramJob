@@ -2,7 +2,6 @@ import type { Core } from '@strapi/strapi'
 
 const AUTHENTICATED_PERMISSIONS = [
   'plugin::users-permissions.user.me',
-  'plugin::users-permissions.user.update',
   'api::company.company.create',
   'api::company.company.findMine',
   'api::company.company.findMineById',
@@ -75,7 +74,6 @@ const PUBLIC_PERMISSIONS = [
   'api::subscription-plan.subscription-plan.find',
   'api::vacancy-package.vacancy-package.find',
   'api::apply-package.apply-package.find',
-  'api::payment.payment.handleWebhook',
 ]
 
 // Previously seeded permissions that must be revoked (renamed handlers, closed routes)
@@ -86,8 +84,15 @@ const REMOVED_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
     'api::saved-search.saved-search.findMine',
     'api::saved-search.saved-search.create',
     'api::saved-search.saved-search.remove',
+    // Plugin's stock PUT /users/:id has no ownership check — any authenticated
+    // user could update any user (password takeover, credit escalation)
+    'plugin::users-permissions.user.update',
   ],
-  public: ['api::resume.resume.findPublic', 'api::resume.resume.findOne'],
+  public: [
+    'api::resume.resume.findPublic',
+    'api::resume.resume.findOne',
+    'api::payment.payment.handleWebhook',
+  ],
 }
 
 async function removePermissions(

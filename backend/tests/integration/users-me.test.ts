@@ -98,3 +98,35 @@ describe('PUT /api/users/me', () => {
     expect([401, 403]).toContain(res.status)
   })
 })
+
+describe('PUT /api/users/:id (plugin stock route)', () => {
+  it('is forbidden for authenticated users — no account takeover of other users', async () => {
+    const attacker = await createTestUser(strapi)
+    const victim = await createTestUser(strapi, { subscriptionPlan: 'free' })
+    const jwt = issueJwt(strapi, attacker.id as number)
+
+    const res = await request(strapi.server.httpServer)
+      .put(`/api/users/${victim.id}`)
+      .set('Authorization', `Bearer ${jwt}`)
+      .send({ password: 'hacked-password', subscriptionPlan: 'max' })
+
+    expect([401, 403, 404, 405]).toContain(res.status)
+
+    const untouched = await strapi.db
+      .query('plugin::users-permissions.user')
+      .findOne({ where: { id: victim.id }, select: ['subscriptionPlan'] })
+    expect(untouched.subscriptionPlan).toBe('free')
+  })
+
+  it('is forbidden even for the user own numeric id (must use /users/me)', async () => {
+    const user = await createTestUser(strapi, { subscriptionPlan: 'free' })
+    const jwt = issueJwt(strapi, user.id as number)
+
+    const res = await request(strapi.server.httpServer)
+      .put(`/api/users/${user.id}`)
+      .set('Authorization', `Bearer ${jwt}`)
+      .send({ subscriptionPlan: 'max' })
+
+    expect([401, 403, 404, 405]).toContain(res.status)
+  })
+})
