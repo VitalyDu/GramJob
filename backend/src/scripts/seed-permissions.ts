@@ -74,6 +74,7 @@ const PUBLIC_PERMISSIONS = [
   'api::subscription-plan.subscription-plan.find',
   'api::vacancy-package.vacancy-package.find',
   'api::apply-package.apply-package.find',
+  'api::health.health.check',
 ]
 
 // Previously seeded permissions that must be revoked (renamed handlers, closed routes)
