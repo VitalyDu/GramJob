@@ -67,8 +67,6 @@ const sentryOptions = {
   ...(process.env.SENTRY_AUTH_TOKEN ? { authToken: process.env.SENTRY_AUTH_TOKEN } : {}),
   silent: !process.env.CI,
   telemetry: false,
-  disableLogger: true,
-  widenClientFileUpload: true,
   sourcemaps: {
     disable: !process.env.SENTRY_AUTH_TOKEN,
   },

@@ -52,5 +52,6 @@ jobs:
           host: ${{ secrets.FRONTEND_HOST }}
           username: root
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          timeout: 600s
-          script: bash /opt/gramjob/deploy-frontend.sh
+          timeout: 900s
+          # Bump Node heap — Sentry webpack plugin adds noticeable memory pressure to `next build`
+          script: NODE_OPTIONS='--max-old-space-size=2048' bash /opt/gramjob/deploy-frontend.sh
