@@ -48,7 +48,19 @@ jobs:
           username: root
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           timeout: 600s
-          script: bash /opt/gramjob/deploy-backend.sh
+          # Inline the whole flow — the VPS script previously skipped `strapi build`
+          # when admin/package.json didn't change, but new API controllers/routes
+          # also need to land in dist/, otherwise routes silently 404 in prod.
+          script: |
+            set -e
+            cd /opt/gramjob
+            git fetch --depth=1 origin main
+            git reset --hard origin/main
+            pnpm install --frozen-lockfile --filter backend
+            cd backend
+            pnpm build
+            pm2 restart gramjob-backend --update-env
+            pm2 save
 
   deploy-frontend:
     name: Deploy Frontend
