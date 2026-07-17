@@ -85,20 +85,12 @@ jobs:
             pnpm install --frozen-lockfile --filter backend
 
       - name: Rsync build artifacts
+        # dist/ already contains the server bundle AND the admin panel (dist/build/) —
+        # no separate rsync needed. .strapi/client has HMR runtime — only ship if built.
         run: |
           rsync -az --delete -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no" \
             backend/dist/ \
             root@${{ secrets.BACKEND_HOST }}:/opt/gramjob/backend/dist/
-          if [ -d backend/build ]; then
-            rsync -az --delete -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no" \
-              backend/build/ \
-              root@${{ secrets.BACKEND_HOST }}:/opt/gramjob/backend/build/
-          fi
-          if [ -d backend/.strapi ]; then
-            rsync -az --delete -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no" \
-              backend/.strapi/ \
-              root@${{ secrets.BACKEND_HOST }}:/opt/gramjob/backend/.strapi/
-          fi
 
       - name: Restart PM2
         uses: appleboy/ssh-action@v1
