@@ -41,25 +41,76 @@ jobs:
       (github.event_name == 'push' && needs.changes.outputs.backend == 'true') ||
       (github.event_name == 'workflow_dispatch' && (inputs.target == 'backend' || inputs.target == 'both'))
     steps:
-      - name: Deploy to backend VPS
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H ${{ secrets.BACKEND_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Pull env from VPS
+        run: |
+          scp -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no \
+            'root@${{ secrets.BACKEND_HOST }}:/opt/gramjob/backend/.env*' \
+            backend/ 2>/dev/null || echo "No .env files found on VPS"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        working-directory: backend
+        run: pnpm build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: Update code and deps on VPS
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.BACKEND_HOST }}
           username: root
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          timeout: 600s
-          # Inline the whole flow — the VPS script previously skipped `strapi build`
-          # when admin/package.json didn't change, but new API controllers/routes
-          # also need to land in dist/, otherwise routes silently 404 in prod.
+          timeout: 300s
           script: |
             set -e
             cd /opt/gramjob
             git fetch --depth=1 origin main
             git reset --hard origin/main
             pnpm install --frozen-lockfile --filter backend
-            cd backend
-            pnpm build
-            pm2 restart gramjob-backend --update-env
+
+      - name: Rsync build artifacts
+        run: |
+          rsync -az --delete -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no" \
+            backend/dist/ \
+            root@${{ secrets.BACKEND_HOST }}:/opt/gramjob/backend/dist/
+          if [ -d backend/build ]; then
+            rsync -az --delete -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no" \
+              backend/build/ \
+              root@${{ secrets.BACKEND_HOST }}:/opt/gramjob/backend/build/
+          fi
+          if [ -d backend/.strapi ]; then
+            rsync -az --delete -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no" \
+              backend/.strapi/ \
+              root@${{ secrets.BACKEND_HOST }}:/opt/gramjob/backend/.strapi/
+          fi
+
+      - name: Restart PM2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.BACKEND_HOST }}
+          username: root
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          timeout: 120s
+          script: |
+            set -e
+            cd /opt/gramjob/backend
+            pm2 restart gramjob-backend --update-env || pm2 restart all --update-env
             pm2 save
 
   deploy-frontend:
