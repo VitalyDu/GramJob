@@ -1,3 +1,4 @@
+import { initSentry, Sentry } from './sentry'
 import { seedIndustries } from './scripts/seed-industries'
 import { seedSubscriptionPlans } from './scripts/seed-subscription-plans'
 import { seedPackages } from './scripts/seed-packages'
@@ -54,6 +55,9 @@ async function setupVacancySearch(strapi: Core.Strapi) {
 
 export default {
   register({ strapi }: { strapi: Core.Strapi }) {
+    if (initSentry()) {
+      strapi.log.info('[sentry] initialized')
+    }
     registerModerationRoutes(strapi)
   },
 

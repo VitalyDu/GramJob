@@ -19,6 +19,7 @@
     "test:integration": "jest --config jest.integration.config.ts"
   },
   "dependencies": {
+    "@sentry/node": "^10.66.0",
     "@strapi/plugin-cloud": "5.48.1",
     "@strapi/plugin-users-permissions": "5.48.1",
     "@strapi/provider-email-nodemailer": "^5.50.1",

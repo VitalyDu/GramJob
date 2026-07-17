@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import { withSentryConfig } from '@sentry/nextjs'
 
 const securityHeaders = [
   { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
@@ -56,4 +57,21 @@ const withBundleAnalyzer =
     : (c: NextConfig) => c
 /* eslint-enable @typescript-eslint/no-require-imports */
 
-export default withBundleAnalyzer(nextConfig)
+const configured = withBundleAnalyzer(nextConfig)
+
+// Sentry wraps the config even without env vars — it only uploads sourcemaps
+// when SENTRY_AUTH_TOKEN is set, so local/CI builds without secrets are safe.
+const sentryOptions = {
+  ...(process.env.SENTRY_ORG ? { org: process.env.SENTRY_ORG } : {}),
+  ...(process.env.SENTRY_PROJECT ? { project: process.env.SENTRY_PROJECT } : {}),
+  ...(process.env.SENTRY_AUTH_TOKEN ? { authToken: process.env.SENTRY_AUTH_TOKEN } : {}),
+  silent: !process.env.CI,
+  telemetry: false,
+  disableLogger: true,
+  widenClientFileUpload: true,
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+  },
+}
+
+export default withSentryConfig(configured, sentryOptions)

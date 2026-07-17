@@ -15,6 +15,7 @@ export default ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Middlewar
   return [
     'strapi::logger',
     'strapi::errors',
+    'global::sentry-error',
     {
       name: 'strapi::security',
       config: {
