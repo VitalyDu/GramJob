@@ -12,5 +12,11 @@ export default {
       handler: 'analytics.resumeAnalytics',
       config: {},
     },
+    {
+      method: 'GET',
+      path: '/analytics/companies/:id',
+      handler: 'analytics.companyAnalytics',
+      config: {},
+    },
   ],
 }

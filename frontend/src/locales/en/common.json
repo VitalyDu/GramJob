@@ -511,6 +511,7 @@
     "analytics": {
       "vacancyTitle": "Vacancy analytics",
       "resumeTitle": "Resume analytics",
+      "companyTitle": "Company analytics",
       "from": "From",
       "to": "To",
       "noData": "No data",
@@ -521,7 +522,8 @@
         "uniqueViews": "Unique views",
         "applications": "Applications",
         "ctr": "CTR",
-        "invitations": "Invitations"
+        "invitations": "Invitations",
+        "publishedVacancies": "Active vacancies"
       },
       "series": {
         "views": "Views",

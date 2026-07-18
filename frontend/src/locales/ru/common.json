@@ -511,6 +511,7 @@
     "analytics": {
       "vacancyTitle": "Аналитика вакансии",
       "resumeTitle": "Аналитика резюме",
+      "companyTitle": "Аналитика компании",
       "from": "С",
       "to": "По",
       "noData": "Нет данных",
@@ -521,7 +522,8 @@
         "uniqueViews": "Уник. просмотры",
         "applications": "Отклики",
         "ctr": "CTR",
-        "invitations": "Приглашения"
+        "invitations": "Приглашения",
+        "publishedVacancies": "Активных вакансий"
       },
       "series": {
         "views": "Просмотры",

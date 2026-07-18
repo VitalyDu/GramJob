@@ -101,7 +101,15 @@ export async function refundVacancyCredit(strapi: Core.Strapi, userId: number): 
   )
 }
 
-export async function checkAndConsumeBoost(strapi: Core.Strapi, userId: number): Promise<number> {
+export type BoostConsumeResult = {
+  boostsRemaining: number
+  source: 'plan' | 'package'
+}
+
+export async function checkAndConsumeBoost(
+  strapi: Core.Strapi,
+  userId: number
+): Promise<BoostConsumeResult> {
   const user = (await strapi.db.query('plugin::users-permissions.user').findOne({
     where: { id: userId },
     select: ['id', 'subscriptionPlan'],
@@ -117,7 +125,9 @@ export async function checkAndConsumeBoost(strapi: Core.Strapi, userId: number):
     `UPDATE up_users SET boost_credits = boost_credits - 1 WHERE id = ? AND boost_credits > 0`,
     [userId]
   )) as { rowCount?: number }
-  if ((consumed.rowCount ?? 0) > 0) return Math.max(limit - used, 0)
+  if ((consumed.rowCount ?? 0) > 0) {
+    return { boostsRemaining: Math.max(limit - used, 0), source: 'package' }
+  }
 
   // 2. Daily plan limit
   if (used >= limit) {
@@ -128,5 +138,24 @@ export async function checkAndConsumeBoost(strapi: Core.Strapi, userId: number):
   }
 
   incrementBoostCount(userId)
-  return limit - used - 1
+  return { boostsRemaining: limit - used - 1, source: 'plan' }
+}
+
+export async function refundBoost(
+  strapi: Core.Strapi,
+  userId: number,
+  source: 'plan' | 'package'
+): Promise<void> {
+  if (source === 'package') {
+    await strapi.db.connection.raw(
+      `UPDATE up_users SET boost_credits = COALESCE(boost_credits, 0) + 1 WHERE id = ?`,
+      [userId]
+    )
+  } else {
+    // in-memory daily counter — decrement to «unconsume» the boost
+    const entry = (dailyBoosts.get(userId) as { count: number; date: string } | undefined) ?? null
+    if (entry && entry.date === todayUTC() && entry.count > 0) {
+      entry.count--
+    }
+  }
 }

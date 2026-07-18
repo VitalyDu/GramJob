@@ -35,6 +35,7 @@
         "vacancy_expired",
         "subscription_expiring",
         "subscription_expired",
+        "payment_completed",
         "limits_reached",
         "saved_search_match",
         "moderation_approved",

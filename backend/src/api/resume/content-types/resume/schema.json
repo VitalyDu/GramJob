@@ -87,6 +87,10 @@
       "type": "integer",
       "default": 0
     },
+    "uniqueViews": {
+      "type": "integer",
+      "default": 0
+    },
     "invitations": {
       "type": "integer",
       "default": 0

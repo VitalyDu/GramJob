@@ -68,11 +68,23 @@ export function getTelegramWebApp(): TelegramWebApp | null {
 export function parseStartParam(param: string | null | undefined): string | null {
   if (!param) return null
   if (param === 'subscription') return '/subscription'
-  const match = /^(vacancy|application)_([A-Za-z0-9]+)$/.exec(param)
+  if (param === 'vacancies' || param === 'resumes') return `/${param}`
+  const match = /^(vacancy|application|resume|company)_([A-Za-z0-9]+)$/.exec(param)
   const kind = match?.[1]
   const id = match?.[2]
   if (!kind || !id) return null
-  return kind === 'vacancy' ? `/vacancies/${id}` : `/dashboard/applications/${id}`
+  switch (kind) {
+    case 'vacancy':
+      return `/vacancies/${id}`
+    case 'application':
+      return `/dashboard/applications/${id}`
+    case 'resume':
+      return `/resumes/${id}`
+    case 'company':
+      return `/companies/${id}`
+    default:
+      return null
+  }
 }
 
 export function hapticImpact(

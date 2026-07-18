@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Building2, Eye, MoreVertical, Pencil, Plus, Send, Trash2 } from 'lucide-react'
+import { BarChart2, Building2, Eye, MoreVertical, Pencil, Plus, Send, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
@@ -187,6 +187,17 @@ export const MyCompaniesClient = observer(function MyCompaniesClient() {
                     label: t('actions.edit'),
                     description: t('actions.editDesc'),
                     href: `/dashboard/companies/${activeCompany.documentId}/edit`,
+                  },
+                ]
+              : []),
+            ...(activeCompany.moderationStatus === 'published'
+              ? [
+                  {
+                    id: 'analytics',
+                    icon: BarChart2,
+                    label: t('actions.analytics'),
+                    description: t('actions.analyticsDesc'),
+                    href: `/dashboard/companies/${activeCompany.documentId}/analytics`,
                   },
                 ]
               : []),

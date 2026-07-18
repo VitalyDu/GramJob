@@ -26,6 +26,7 @@ const NOTIFICATION_TITLES: Record<string, string> = {
   vacancy_expired: 'Вакансия истекла',
   subscription_expiring: 'Подписка истекает',
   subscription_expired: 'Подписка истекла',
+  payment_completed: 'Оплата успешна',
   limits_reached: 'Лимиты исчерпаны',
   saved_search_match: 'Новые результаты',
   moderation_approved: 'Публикация одобрена',

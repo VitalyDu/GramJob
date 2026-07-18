@@ -2,6 +2,7 @@ import type { Core } from '@strapi/strapi'
 import { answerPreCheckoutQuery, parseInvoicePayload } from '../services/telegram-bot'
 import { activateSubscription, addCredits } from '../services/subscription-service'
 import { handleBotCommand } from '../services/bot-commands'
+import { sendNotification } from '../../../services/notification.service'
 
 type TelegramUser = { id: number; first_name?: string }
 
@@ -123,9 +124,11 @@ async function handleSuccessfulPayment(
     return
   }
 
+  let notifyDetail: string | null = null
   try {
     if (data.type === 'subscription') {
       await activateSubscription(strapi, data.userId, data.planCode as any)
+      notifyDetail = `подписка ${data.planCode.toUpperCase()} активирована`
     } else if (data.type === 'vacancy_pack') {
       const pack = (await strapi.db.query('api::vacancy-package.vacancy-package').findOne({
         where: { id: data.packageId },
@@ -138,6 +141,9 @@ async function handleSuccessfulPayment(
       if (pack.boostCredits > 0) {
         await addCredits(strapi, data.userId, 'boost', pack.boostCredits)
       }
+      notifyDetail = `+${pack.vacancyCredits} вакансий${
+        pack.boostCredits > 0 ? `, +${pack.boostCredits} бустов` : ''
+      }`
     } else if (data.type === 'apply_pack') {
       const pack = (await strapi.db.query('api::apply-package.apply-package').findOne({
         where: { id: data.packageId },
@@ -147,22 +153,33 @@ async function handleSuccessfulPayment(
         throw new Error(`ApplyPackage id=${data.packageId} not found`)
       }
       await addCredits(strapi, data.userId, 'apply', pack.applyCredits)
+      notifyDetail = `+${pack.applyCredits} откликов`
     } else if (data.type === 'urgent') {
       await strapi.documents('api::vacancy.vacancy').update({
         documentId: data.vacancyDocumentId,
         data: { urgent: true } as any,
       })
+      notifyDetail = 'вакансия помечена как срочная 🔥'
     } else if (data.type === 'top_placement') {
       await strapi.documents('api::vacancy.vacancy').update({
         documentId: data.vacancyDocumentId,
         data: { topPlacement: true } as any,
       })
+      notifyDetail = 'вакансия закреплена в TOP 📌'
     }
 
     await strapi.db.query('api::payment.payment').update({
       where: { id: paymentRecord.id },
       data: { status: 'completed' },
     })
+
+    if (notifyDetail) {
+      void sendNotification(strapi, {
+        userId: data.userId,
+        type: 'payment_completed',
+        templateData: { detail: notifyDetail },
+      })
+    }
 
     strapi.log.info(
       `[payment] successful_payment processed: type=${data.type} userId=${data.userId} charge=${payment.telegram_payment_charge_id}`

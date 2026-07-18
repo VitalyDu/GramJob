@@ -18,6 +18,18 @@ function shouldNotifyViewer(resumeDocumentId: string, viewerId: number): boolean
   return true
 }
 
+// IP-tracker для uniqueViews (аналогично vacancy.viewedIPs)
+const viewedIPs = new Map<string, Set<string>>()
+
+function isUniqueViewIP(resumeDocumentId: string, ip: string): boolean {
+  return !(viewedIPs.get(resumeDocumentId)?.has(ip) ?? false)
+}
+
+function recordViewIP(resumeDocumentId: string, ip: string): void {
+  if (!viewedIPs.has(resumeDocumentId)) viewedIPs.set(resumeDocumentId, new Set())
+  viewedIPs.get(resumeDocumentId)!.add(ip)
+}
+
 type ResumeService = ReturnType<typeof resumeServiceFactory>
 
 const VALID_WORK_FORMATS = ['office', 'remote', 'hybrid', 'any'] as const
@@ -351,12 +363,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       // Owner's own views must not inflate the counter
+      const ip = ctx.request.ip ?? 'unknown'
       let newViews = resume.views ?? 0
+      let newUniqueViews = resume.uniqueViews ?? 0
       if (!isOwner) {
         newViews += 1
+        const unique = isUniqueViewIP(id, ip)
+        if (unique) newUniqueViews += 1
+        recordViewIP(id, ip)
+
         await (strapi.documents as any)('api::resume.resume').update({
           documentId: id,
-          data: { views: newViews },
+          data: { views: newViews, uniqueViews: newUniqueViews },
         })
 
         if (resumeOwnerId && shouldNotifyViewer(id, requestUser.id)) {
@@ -392,7 +410,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         }
       }
 
-      return ctx.send({ data: { ...resume, views: newViews, contacts } })
+      return ctx.send({
+        data: { ...resume, views: newViews, uniqueViews: newUniqueViews, contacts },
+      })
     },
 
     async update(ctx: any) {

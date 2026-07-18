@@ -94,4 +94,43 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       daily: records,
     })
   },
+
+  async companyAnalytics(ctx: any) {
+    const user = ctx.state.user as { id: number } | undefined
+    if (!user) return ctx.unauthorized('Authentication required')
+
+    const { id } = ctx.params as { id: string }
+
+    const company = (await (strapi.documents as any)('api::company.company').findOne({
+      documentId: id,
+      populate: { owner: { fields: ['id'] } },
+      fields: ['documentId', 'views', 'uniqueViews'],
+    })) as { views: number; uniqueViews: number; owner?: { id: number } } | null
+
+    if (!company) return ctx.notFound('Company not found')
+    if (company.owner?.id !== user.id) return ctx.forbidden('Not your company')
+
+    const [vacanciesCount, applicationsCount] = await Promise.all([
+      strapi.documents('api::vacancy.vacancy').count({
+        filters: {
+          company: { documentId: { $eq: id } },
+          moderationStatus: { $eq: 'published' },
+        },
+      }),
+      strapi.db.query('api::application.application').count({
+        where: {
+          vacancy: { company: { documentId: id } },
+        },
+      }),
+    ])
+
+    ctx.send({
+      total: {
+        views: company.views ?? 0,
+        uniqueViews: company.uniqueViews ?? 0,
+        vacanciesCount,
+        applicationsCount,
+      },
+    })
+  },
 })

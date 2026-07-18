@@ -5,6 +5,42 @@ import { getBlockedIds } from '../../block/services/block-filter'
 import { resolveOptionalUserId } from '../../../utils/optional-auth'
 import type companyServiceFactory from '../services/company'
 
+// IP-tracker для company.uniqueViews (аналогично vacancy/resume)
+const viewedCompanyIPs = new Map<string, Set<string>>()
+
+function isUniqueCompanyView(documentId: string, ip: string): boolean {
+  return !(viewedCompanyIPs.get(documentId)?.has(ip) ?? false)
+}
+
+function recordCompanyView(documentId: string, ip: string): void {
+  if (!viewedCompanyIPs.has(documentId)) viewedCompanyIPs.set(documentId, new Set())
+  viewedCompanyIPs.get(documentId)!.add(ip)
+}
+
+async function bumpCompanyViews(
+  strapi: Core.Strapi,
+  documentId: string,
+  ownerId: number | undefined,
+  viewerId: number | undefined,
+  ip: string,
+  currentViews: number,
+  currentUniqueViews: number
+): Promise<{ views: number; uniqueViews: number }> {
+  // Не считаем просмотры владельца компании
+  if (viewerId && viewerId === ownerId) {
+    return { views: currentViews, uniqueViews: currentUniqueViews }
+  }
+  const unique = isUniqueCompanyView(documentId, ip)
+  recordCompanyView(documentId, ip)
+  const newViews = currentViews + 1
+  const newUnique = unique ? currentUniqueViews + 1 : currentUniqueViews
+  await strapi.documents('api::company.company').update({
+    documentId,
+    data: { views: newViews, uniqueViews: newUnique } as any,
+  })
+  return { views: newViews, uniqueViews: newUnique }
+}
+
 type CompanyService = ReturnType<typeof companyServiceFactory>
 
 const VALID_COMPANY_SIZES = [
@@ -202,6 +238,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async findOne(ctx: any) {
       const { id } = ctx.params as { id: string }
+      const ip = ctx.request.ip ?? 'unknown'
+      const viewer = ctx.state.user as { id: number } | undefined
 
       const company = await strapi.documents('api::company.company').findFirst({
         filters: { documentId: { $eq: id }, moderationStatus: { $eq: 'published' } },
@@ -217,8 +255,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           'city',
           'companySize',
           'moderationStatus',
+          // views/uniqueViews добавлены в schema.json, но contentTypes.d.ts обновится
+          // при следующем dev-старте Strapi. as any до тех пор.
+          'views',
+          'uniqueViews',
           'createdAt',
-        ],
+        ] as any,
         populate: {
           logo: true,
           cover: true,
@@ -228,13 +270,29 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (!company) return ctx.notFound('Company not found')
 
+      const skipViewCount =
+        (ctx.query as Record<string, string> | undefined)?.skipViewCount === 'true'
+      const counters = skipViewCount
+        ? { views: (company as any).views ?? 0, uniqueViews: (company as any).uniqueViews ?? 0 }
+        : await bumpCompanyViews(
+            strapi,
+            id,
+            (company as any).owner?.id,
+            viewer?.id,
+            ip,
+            (company as any).views ?? 0,
+            (company as any).uniqueViews ?? 0
+          )
+
       const vacancies = await fetchCompanyRecentVacancies(strapi, id)
 
-      return ctx.send({ data: { ...company, vacancies } })
+      return ctx.send({ data: { ...company, ...counters, vacancies } })
     },
 
     async findBySlug(ctx: any) {
       const { slug } = ctx.params as { slug: string }
+      const ip = ctx.request.ip ?? 'unknown'
+      const viewer = ctx.state.user as { id: number } | undefined
 
       const company = await strapi.documents('api::company.company').findFirst({
         filters: {
@@ -253,8 +311,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           'city',
           'companySize',
           'moderationStatus',
+          'views',
+          'uniqueViews',
           'createdAt',
-        ],
+        ] as any,
         populate: {
           logo: true,
           cover: true,
@@ -264,9 +324,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (!company) return ctx.notFound('Company not found')
 
+      const skipViewCount =
+        (ctx.query as Record<string, string> | undefined)?.skipViewCount === 'true'
+      const counters = skipViewCount
+        ? { views: (company as any).views ?? 0, uniqueViews: (company as any).uniqueViews ?? 0 }
+        : await bumpCompanyViews(
+            strapi,
+            (company as any).documentId,
+            (company as any).owner?.id,
+            viewer?.id,
+            ip,
+            (company as any).views ?? 0,
+            (company as any).uniqueViews ?? 0
+          )
+
       const vacancies = await fetchCompanyRecentVacancies(strapi, (company as any).documentId)
 
-      return ctx.send({ data: { ...company, vacancies } })
+      return ctx.send({ data: { ...company, ...counters, vacancies } })
     },
 
     async update(ctx: any) {

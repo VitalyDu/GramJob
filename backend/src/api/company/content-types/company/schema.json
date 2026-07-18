@@ -69,6 +69,14 @@
       "default": "draft",
       "required": true
     },
+    "views": {
+      "type": "integer",
+      "default": 0
+    },
+    "uniqueViews": {
+      "type": "integer",
+      "default": 0
+    },
     "rejectionReason": {
       "type": "enumeration",
       "enum": [

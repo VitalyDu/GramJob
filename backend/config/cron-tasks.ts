@@ -317,9 +317,15 @@ export default {
         // --- Resume Analytics ---
         const resumes = (await (strapi.documents as any)('api::resume.resume').findMany({
           filters: { moderationStatus: { $in: ['published', 'archived'] } },
-          fields: ['documentId', 'views', 'invitations'],
+          fields: ['documentId', 'views', 'uniqueViews', 'invitations'],
           limit: 10000,
-        })) as Array<{ id: number; documentId: string; views: number; invitations: number }>
+        })) as Array<{
+          id: number
+          documentId: string
+          views: number
+          uniqueViews: number
+          invitations: number
+        }>
 
         for (const resume of resumes) {
           try {
@@ -334,16 +340,18 @@ export default {
               .query('api::resume-analytics.resume-analytics')
               .findMany({
                 where: { resume: resume.id },
-                select: ['views', 'invitations'],
-              })) as Array<{ views: number; invitations: number }>
+                select: ['views', 'uniqueViews', 'invitations'],
+              })) as Array<{ views: number; uniqueViews: number; invitations: number }>
 
             const prevViews = existing.reduce((s, r) => s + (r.views ?? 0), 0)
+            const prevUnique = existing.reduce((s, r) => s + (r.uniqueViews ?? 0), 0)
             const prevInv = existing.reduce((s, r) => s + (r.invitations ?? 0), 0)
 
             const deltaViews = computeDelta(resume.views ?? 0, prevViews)
+            const deltaUnique = computeDelta(resume.uniqueViews ?? 0, prevUnique)
             const deltaInv = computeDelta(resume.invitations ?? 0, prevInv)
 
-            if (deltaViews === 0 && deltaInv === 0) continue
+            if (deltaViews === 0 && deltaUnique === 0 && deltaInv === 0) continue
 
             await strapi.db.query('api::resume-analytics.resume-analytics').create({
               data: {
@@ -351,7 +359,7 @@ export default {
                 resume: resume.id,
                 date,
                 views: deltaViews,
-                uniqueViews: deltaViews,
+                uniqueViews: deltaUnique,
                 invitations: deltaInv,
               },
             })

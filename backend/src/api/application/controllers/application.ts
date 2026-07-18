@@ -204,13 +204,27 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     if (!user) return ctx.unauthorized('Authentication required')
 
     const { id } = ctx.params as { id: string }
-    const application = await (strapi.documents as any)('api::application.application').findOne({
+    let application = await (strapi.documents as any)('api::application.application').findOne({
       documentId: id,
       populate: APPLICATION_POPULATE as any,
     })
     if (!application) return ctx.notFound('Application not found')
     if (!canViewApplication(application, user.id)) {
       return ctx.forbidden('You do not have access to this application')
+    }
+
+    // Auto-transition applied → viewed при первом открытии работодателем
+    const isEmployer = application.vacancy?.postedBy?.id === user.id
+    if (isEmployer && application.status === 'applied') {
+      try {
+        application = await (strapi.documents as any)('api::application.application').update({
+          documentId: id,
+          data: { status: 'viewed' },
+          populate: APPLICATION_POPULATE as any,
+        })
+      } catch (err) {
+        strapi.log.warn(`[application] auto-transition applied→viewed failed for ${id}`, err)
+      }
     }
 
     ctx.body = { data: maskEmployerTelegram(application, user.id) }

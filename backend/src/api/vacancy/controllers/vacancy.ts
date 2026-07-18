@@ -4,6 +4,7 @@ import {
   checkAndConsumeVacancyCredit,
   checkAndConsumeBoost,
   refundVacancyCredit,
+  refundBoost,
 } from '../services/credit-service'
 import { getBlockedIds } from '../../block/services/block-filter'
 import { resolveOptionalUserId } from '../../../utils/optional-auth'
@@ -788,9 +789,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         )
       }
 
-      let boostsRemaining: number
+      let consumed: Awaited<ReturnType<typeof checkAndConsumeBoost>>
       try {
-        boostsRemaining = await checkAndConsumeBoost(strapi, user.id)
+        consumed = await checkAndConsumeBoost(strapi, user.id)
       } catch (err: any) {
         if (err?.code === 'LIMIT_REACHED') {
           notifyLimitReached(strapi, user.id, 'daily_boosts')
@@ -808,12 +809,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw err
       }
 
-      await strapi.documents('api::vacancy.vacancy').update({
-        documentId: id,
-        data: { boostedAt: new Date().toISOString() },
-      })
+      try {
+        await strapi.documents('api::vacancy.vacancy').update({
+          documentId: id,
+          data: { boostedAt: new Date().toISOString() },
+        })
+      } catch (updateErr) {
+        // Буст не должен «сгорать», если апдейт не прошёл
+        await refundBoost(strapi, user.id, consumed.source).catch(() => {})
+        throw updateErr
+      }
 
-      return ctx.send({ data: { success: true, boostsRemaining } })
+      return ctx.send({ data: { success: true, boostsRemaining: consumed.boostsRemaining } })
     },
 
     async archive(ctx: any) {

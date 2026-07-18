@@ -603,6 +603,7 @@ export type NotificationType =
   | 'vacancy_expired'
   | 'subscription_expiring'
   | 'subscription_expired'
+  | 'payment_completed'
   | 'limits_reached'
   | 'saved_search_match'
   | 'moderation_approved'
@@ -661,4 +662,15 @@ export interface ResumeAnalyticsTotal {
 export interface ResumeAnalyticsResponse {
   total: ResumeAnalyticsTotal
   daily: ResumeAnalyticsDailyRecord[]
+}
+
+export interface CompanyAnalyticsTotal {
+  views: number
+  uniqueViews: number
+  vacanciesCount: number
+  applicationsCount: number
+}
+
+export interface CompanyAnalyticsResponse {
+  total: CompanyAnalyticsTotal
 }

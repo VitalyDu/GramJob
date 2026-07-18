@@ -111,6 +111,7 @@ export type NotificationType =
   | 'vacancy_expired'
   | 'subscription_expiring'
   | 'subscription_expired'
+  | 'payment_completed'
   | 'limits_reached'
   | 'saved_search_match'
   | 'moderation_approved'
@@ -161,7 +162,14 @@ function buildDeepLink(type: string, data: Record<string, unknown>): string | nu
   if (data['vacancyId'] && type === 'invitation_to_apply') {
     return `vacancy_${data['vacancyId']}`
   }
-  if (['subscription_expiring', 'subscription_expired', 'limits_reached'].includes(type)) {
+  if (
+    [
+      'subscription_expiring',
+      'subscription_expired',
+      'limits_reached',
+      'payment_completed',
+    ].includes(type)
+  ) {
     return 'subscription'
   }
   if (type === 'saved_search_match') {
@@ -208,6 +216,7 @@ export function buildNotificationMessage(
     vacancy_expired: `🔴 Вакансия «${data['vacancyTitle'] ?? ''}» истекла. Опубликуйте заново`,
     subscription_expiring: `⚠️ Ваша подписка ${data['plan'] ?? ''} истекает через 7 дней`,
     subscription_expired: `🔴 Ваша подписка истекла. Продлите для продолжения работы`,
+    payment_completed: `✅ Оплата прошла: ${data['detail'] ?? 'покупка активирована'}`,
     limits_reached: `🚫 Исчерпан лимит ${data['limitType'] ?? ''}. Рассмотрите апгрейд`,
     saved_search_match: `🔔 ${data['count'] ?? 0} новых ${data['searchType'] === 'resume' ? 'резюме' : 'вакансий'} по вашему поиску`,
     moderation_approved: `✅ «${data['title'] ?? ''}» опубликовано после модерации`,
