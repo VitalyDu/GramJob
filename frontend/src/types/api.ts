@@ -127,6 +127,7 @@ export interface CompanyCreateInput {
   website?: string
   telegram?: string
   linkedin?: string
+  logo?: number | null
 }
 
 export type CompanyUpdateInput = Partial<CompanyCreateInput>
