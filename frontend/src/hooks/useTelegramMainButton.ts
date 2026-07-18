@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { getTelegramWebApp, isTelegramMiniApp } from '@/lib/telegram'
 
 interface MainButtonOptions {
@@ -25,16 +25,28 @@ export function useTelegramMainButton({
     setIsMiniApp(isTelegramMiniApp())
   }, [])
 
-  useEffect(() => {
+  // useLayoutEffect гарантирует, что cleanup (скрытие кнопки + событие tg-main-btn-hide)
+  // выполнится синхронно до отрисовки новой страницы. С useEffect cleanup запускается
+  // уже после paint — пользователь видел бы новую страницу без BottomNav на один кадр.
+  useLayoutEffect(() => {
     if (!isMiniApp || !visible) return
     const twa = getTelegramWebApp()
     if (!twa) return
-    const handler = () => onClickRef.current()
+    const handler = () => {
+      // Снимаем фокус с поля ввода — иначе после клика по нативной кнопке
+      // клавиатура считается открытой и BottomNav не появляется.
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur()
+      }
+      onClickRef.current()
+    }
     twa.MainButton.onClick(handler)
     twa.MainButton.show()
+    window.dispatchEvent(new CustomEvent('tg-main-btn-show'))
     return () => {
       twa.MainButton.offClick(handler)
       twa.MainButton.hide()
+      window.dispatchEvent(new CustomEvent('tg-main-btn-hide'))
     }
   }, [isMiniApp, visible])
 

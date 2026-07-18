@@ -16,9 +16,11 @@ type NavLink = {
 export function BottomNav({
   isMiniApp,
   isKeyboardOpen,
+  isMainButtonVisible,
 }: {
   isMiniApp: boolean
   isKeyboardOpen?: boolean
+  isMainButtonVisible?: boolean
 }) {
   const { t } = useTranslation('common')
   const pathname = usePathname()
@@ -103,7 +105,7 @@ export function BottomNav({
       className={cn(
         'fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80',
         'transition-transform duration-200',
-        isKeyboardOpen && 'translate-y-full',
+        (isKeyboardOpen || isMainButtonVisible) && 'translate-y-full',
         !isMiniApp && 'md:hidden'
       )}
     >

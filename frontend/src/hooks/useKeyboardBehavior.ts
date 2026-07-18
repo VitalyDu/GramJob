@@ -28,6 +28,7 @@ function isTextInputEl(el: Element): boolean {
  */
 export function useKeyboardBehavior() {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false)
+  const [isMainButtonVisible, setIsMainButtonVisible] = useState(false)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -45,14 +46,21 @@ export function useKeyboardBehavior() {
       })
     }
 
+    const onMainBtnShow = () => setIsMainButtonVisible(true)
+    const onMainBtnHide = () => setIsMainButtonVisible(false)
+
     document.addEventListener('focusin', onFocusIn)
     document.addEventListener('focusout', onFocusOut)
+    window.addEventListener('tg-main-btn-show', onMainBtnShow)
+    window.addEventListener('tg-main-btn-hide', onMainBtnHide)
 
     return () => {
       document.removeEventListener('focusin', onFocusIn)
       document.removeEventListener('focusout', onFocusOut)
+      window.removeEventListener('tg-main-btn-show', onMainBtnShow)
+      window.removeEventListener('tg-main-btn-hide', onMainBtnHide)
     }
   }, [])
 
-  return { isKeyboardOpen }
+  return { isKeyboardOpen, isMainButtonVisible }
 }

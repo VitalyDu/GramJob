@@ -94,10 +94,9 @@
 - Credit filter исправлен: считает только `moderation/published` вакансии в месячный лимит
 - Итого: 79 тестов, 0 ошибок TypeScript
 
-Известные MVP-ограничения Sprint 3 (запланированы к исправлению в Sprint 6):
+Известные MVP-ограничения Sprint 3:
 
-- Boost/views счётчики хранятся in-memory (сбрасываются при рестарте, не масштабируются)
-- Кредитный лимит без атомарных транзакций (race condition при высокой нагрузке)
+- Views/uniqueViews (`viewedIPs`, `notifiedViewers`) хранятся in-memory — сбрасываются при рестарте, инстансы не синхронизируются. **Boost-счётчик мигрирован в БД** — см. Audit fixes 2026-07-18.
 - FTS возвращает максимум первые 10 000 результатов по релевантности
 
 Выполнено (Sprint 3 Frontend, Tasks 1–15):
@@ -138,9 +137,9 @@
 - Application routes — GET/POST /applications, GET /vacancies/:id/applications, PATCH /applications/:id
 - Итого: 132 теста, 0 ошибок TypeScript
 
-Известные MVP-ограничения Sprint 4 (запланированы к исправлению в Sprint 6):
+Известные MVP-ограничения Sprint 4:
 
-- Апплай-кредиты хранятся in-memory (сбрасываются при рестарте, не масштабируются)
+- ~~Апплай-кредиты хранятся in-memory~~ — **мигрированы в up_users.daily_apply_count** (Audit fixes 2026-07-18).
 
 Выполнено (Sprint 4 Frontend Part 1 — Resumes):
 
@@ -357,6 +356,26 @@
 - Повторная отправка после rejected: vacancy/resume POST /publish, company POST /submit; `draft` остался в enum как legacy default
 - GET /users/me/limits + LimitsStore + real-time прогресс-бары лимитов плана на всех релевантных страницах (PlanLimitsCard и др.)
 
+Выполнено (Audit fixes 2026-07-18):
+
+- Полный проектный аудит: 749 тестов, ручные curl-проверки, найдено 11 багов (P0/P1/P2). Отчёт: `docs/audit/2026-07-18-project-audit.md`.
+- **P0.1**: в `seed-permissions.ts` добавлены `payment.urgent`, `payment.topPlacement`, `resume.invite`, `analytics.companyAnalytics` — эти endpoints раньше падали в 403.
+- **P0.2**: `application.create` теперь оборачивает ответ в `maskEmployerTelegram` — telegramId работодателя больше не утекает кандидату при `status=applied`.
+- **P1.3**: `favorite.create` и `block.create` защищены от race через `strapi.db.transaction` + `pg_advisory_xact_lock(hashtextextended(key, 0))`. UNIQUE через lnk-таблицу невозможен, поэтому сериализация на уровне транзакции.
+- **P1.4/P1.5**: новый `backend/src/utils/input-validation.ts` — `validateShortText` (≤200), `validateLongText` (≤20000), `validateSalaryRange` (≥0, from≤to), `validateHttpUrl` (`http:`/`https:` allowlist). Подключён в create/update контроллерах `vacancy`, `resume`, `company`. Раньше огромный title давал 500, отрицательные salary сохранялись, `javascript:`/`data:` схемы в URL проходили.
+- **P1.6**: `frontend/next.config.ts` — Content-Security-Policy с `frame-ancestors 'self' https://web.telegram.org https://k.telegram.org` (замена X-Frame-Options, Mini App работает), `object-src 'none'`, `form-action 'self'`. `script-src` разрешает `https://telegram.org` для `telegram-web-app.js`.
+- **P1.7**: `config/plugins.ts` — `upload.sizeLimit: 5 MB` + native `upload.security.allowedTypes: ['image/*']` (Strapi 5 читает magic bytes). Раньше .txt и 10 MB файлы принимались.
+- **P2.8**: суточные счётчики `daily_apply_count/date` и `daily_boost_count/date` добавлены в `up_users` через bootstrap-миграцию. Новый `backend/src/services/daily-limits.ts` (`tryConsumeDaily`, `refundDaily`, `getUsedToday`) — атомарный SQL `UPDATE ... WHERE (< limit) RETURNING new_count`, переживает рестарт и multi-instance. `credit-service` (boost) и `apply-credit-service` переведены; in-memory Map удалены.
+- **P2.9**: новый `backend/src/services/plan-limits.ts` (`getPlanLimits`, `FALLBACK_PLAN_LIMITS`) — единая точка правды для лимитов, читает из `subscription_plan` с 5-мин кэшем, fallback на константы. Админ может менять лимиты через Content Manager без деплоя.
+- **P2.10**: `setup-email-confirmation.ts` расширен — обновляет `email.reset_password.options.from` и `email.email_confirmation.options.from` из `EMAIL_FROM` / `EMAIL_FROM_NAME` env (дефолт `GramJob <noreply@gramjob.com>`); idempotent. Раньше письма шли от `no-reply@strapi.io`.
+- **P2.11**: block-фильтр применён в `resume.findOne`, `vacancy.findOne`, `company.findOne`/`findBySlug` — заблокированные сущности отдают 404 и по прямой ссылке, а не только в списках.
+- Тесты: backend 293 → 337 unit + 50 integration, frontend 456. Typecheck обеих сторон чистый.
+
+Не закрыто (backlog):
+
+- `viewedIPs`/`notifiedViewers` (unique views + one-shot resume_viewed) остались in-memory — требуется отдельная таблица `view_events` + фоновый агрегатор.
+- Race в `application.create` deduplication (5 параллельных POST одного пользователя на одну вакансию создают несколько строк) — тот же паттерн, что был исправлен для favorite/block.
+
 Текущий шаг — Sprint 10 почти завершён (остатки: R2, Sentry, UptimeRobot, PG backup, smoke tests). Далее: Backlog (`docs/sprint-plan.md`).
 Планы: `docs/superpowers/plans/`
 
@@ -540,6 +559,7 @@ JWT, Telegram Signature Validation, Rate Limiting, CSRF Protection, RBAC, Audit 
 | `docs/sprint-plan.md`                | План разработки по спринтам с чеклистами задач                |
 | `docs/roadmap.md`                    | Планируемые фичи (backlog)                                    |
 | `docs/qa/`                           | QA-чеклисты и отчёты ручного тестирования                     |
+| `docs/audit/`                        | Проектные аудиты с найденными багами и статусами исправлений  |
 | `docs/archive/`                      | Отработанные ad-hoc отчёты (аудиты, баг-листы) — историческое |
 
 ---

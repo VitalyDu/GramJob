@@ -13,15 +13,16 @@ import { getCountryName } from '@/lib/countries'
 
 interface Props {
   vacancy: Vacancy
+  hideLogo?: boolean
 }
 
-export function VacancyCard({ vacancy }: Props) {
+export function VacancyCard({ vacancy, hideLogo }: Props) {
   const { t, i18n } = useTranslation()
   const logoUrl = getMediaUrl(vacancy.company?.logo?.url)
   const salary = formatSalary(vacancy.salaryFrom, vacancy.salaryTo, vacancy.salaryCurrency)
 
   return (
-    <Link href={`/vacancies/${vacancy.documentId}`} className="group block">
+    <Link href={`/vacancies/${vacancy.documentId}`} className="group block min-w-0">
       <Card
         className={cn(
           'transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md',
@@ -29,21 +30,23 @@ export function VacancyCard({ vacancy }: Props) {
         )}
       >
         <CardContent className="flex items-start gap-4 p-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
-            {logoUrl ? (
-              <Image
-                src={logoUrl}
-                alt={vacancy.company?.name ?? ''}
-                width={48}
-                height={48}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <span className="text-lg font-bold text-muted-foreground">
-                {(vacancy.company?.name ?? '?').charAt(0).toUpperCase()}
-              </span>
-            )}
-          </div>
+          {!hideLogo && (
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
+              {logoUrl ? (
+                <Image
+                  src={logoUrl}
+                  alt={vacancy.company?.name ?? ''}
+                  width={48}
+                  height={48}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-lg font-bold text-muted-foreground">
+                  {(vacancy.company?.name ?? '?').charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+          )}
 
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">

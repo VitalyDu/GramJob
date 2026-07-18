@@ -177,10 +177,10 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({
               </Link>
             </Button>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-hidden">
             <div className="grid gap-3 lg:grid-cols-2">
               {company.vacancies.map((v) => (
-                <VacancyCard key={v.documentId} vacancy={v} />
+                <VacancyCard key={v.documentId} vacancy={v} hideLogo />
               ))}
             </div>
           </CardContent>

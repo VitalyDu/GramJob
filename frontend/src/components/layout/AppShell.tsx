@@ -16,7 +16,7 @@ const ROOT_PATHS = new Set(['/', '/companies', '/vacancies', '/dashboard'])
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { isMiniApp } = useTelegramInit()
-  const { isKeyboardOpen } = useKeyboardBehavior()
+  const { isKeyboardOpen, isMainButtonVisible } = useKeyboardBehavior()
   const pathname = usePathname()
   const router = useRouter()
   const isHome = pathname === '/'
@@ -50,7 +50,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           {children}
         </div>
       </main>
-      <BottomNav isMiniApp={isMiniApp} isKeyboardOpen={isKeyboardOpen} />
+      <BottomNav
+        isMiniApp={isMiniApp}
+        isKeyboardOpen={isKeyboardOpen}
+        isMainButtonVisible={isMainButtonVisible}
+      />
       <StartParamRouter />
       <ModerationToastWatcher />
       <Toaster position="top-center" richColors closeButton />
