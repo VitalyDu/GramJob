@@ -1,13 +1,15 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm, Controller, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Building2, Link, MapPin } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import type { CompanyCreateInput, CompanySizeEnum } from '@/types/api'
+import { getMediaUrl } from '@/lib/media'
+import { LogoUploader } from '@/components/company/LogoUploader'
+import type { CompanyCreateInput, CompanySizeEnum, StrapiMedia } from '@/types/api'
 import { COMPANY_SIZE_LABELS } from '@/lib/company-utils'
 
 const COMPANY_SIZE_VALUES = Object.keys(COMPANY_SIZE_LABELS) as [
@@ -66,6 +68,7 @@ function EnumPills<T extends string>({
 }
 
 // Static schema for type inference only
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _baseSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional().default(''),
@@ -75,6 +78,7 @@ const _baseSchema = z.object({
   website: z.string().url().or(z.literal('')).optional().default(''),
   telegram: z.string().optional().default(''),
   linkedin: z.string().url().or(z.literal('')).optional().default(''),
+  logo: z.number().int().positive().nullable().default(null),
 })
 
 type FormData = z.infer<typeof _baseSchema>
@@ -82,11 +86,16 @@ type FormData = z.infer<typeof _baseSchema>
 interface Props {
   onSubmit: (data: FormData, e?: React.BaseSyntheticEvent) => void | Promise<void>
   defaultValues?: Partial<CompanyCreateInput>
+  defaultLogo?: StrapiMedia | null
   isLoading?: boolean
 }
 
-export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
+export function CompanyForm({ onSubmit, defaultValues, defaultLogo, isLoading }: Props) {
   const { t } = useTranslation()
+
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(
+    defaultLogo ? getMediaUrl(defaultLogo.url) : null
+  )
 
   const schema = useMemo(
     () =>
@@ -109,6 +118,7 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
           .or(z.literal(''))
           .optional()
           .default(''),
+        logo: z.number().int().positive().nullable().default(null),
       }),
     [t]
   )
@@ -130,6 +140,7 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
       website: defaultValues?.website ?? '',
       telegram: defaultValues?.telegram ?? '',
       linkedin: defaultValues?.linkedin ?? '',
+      logo: defaultLogo?.id ?? null,
     },
   })
 
@@ -155,6 +166,22 @@ export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <Field>
+            <FieldLabel>{t('forms.company.logoLabel')}</FieldLabel>
+            <LogoUploader
+              currentLogoUrl={logoPreviewUrl}
+              onUploadComplete={({ id, url }) => {
+                setValue('logo', id)
+                setLogoPreviewUrl(url)
+              }}
+              onRemove={() => {
+                setValue('logo', null)
+                setLogoPreviewUrl(null)
+              }}
+              {...(isLoading ? { disabled: true } : {})}
+            />
+          </Field>
+
           <Field>
             <FieldLabel htmlFor="name">{t('forms.company.nameLabel')} *</FieldLabel>
             <Input
