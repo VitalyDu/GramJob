@@ -43,8 +43,10 @@ describe('buildNotificationMessage', () => {
 })
 
 describe('APPLICATION_STATUS_TO_NOTIFICATION', () => {
-  it('in-review → application_approved', () => {
-    expect(APPLICATION_STATUS_TO_NOTIFICATION['in-review']).toBe('application_approved')
+  it('in-review → application_in_review', () => {
+    // «Изучают» (in-review) — не то же самое, что «одобрен». application_approved
+    // зарезервирован под будущее раскрытие контактов на interview.
+    expect(APPLICATION_STATUS_TO_NOTIFICATION['in-review']).toBe('application_in_review')
   })
 
   it('rejected → application_rejected', () => {

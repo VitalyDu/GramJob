@@ -100,7 +100,10 @@ async function handleSuccessfulPayment(
         telegramChargeId: payment.telegram_payment_charge_id,
         payloadType: data.type,
         planCode: data.type === 'subscription' ? data.planCode : null,
-        packageId: data.type === 'subscription' ? null : data.packageId,
+        packageId:
+          data.type === 'vacancy_pack' || data.type === 'apply_pack' ? data.packageId : null,
+        vacancyDocumentId:
+          data.type === 'urgent' || data.type === 'top_placement' ? data.vacancyDocumentId : null,
         user: data.userId,
         starsAmount: payment.total_amount,
         status: 'processing',
@@ -144,6 +147,16 @@ async function handleSuccessfulPayment(
         throw new Error(`ApplyPackage id=${data.packageId} not found`)
       }
       await addCredits(strapi, data.userId, 'apply', pack.applyCredits)
+    } else if (data.type === 'urgent') {
+      await strapi.documents('api::vacancy.vacancy').update({
+        documentId: data.vacancyDocumentId,
+        data: { urgent: true } as any,
+      })
+    } else if (data.type === 'top_placement') {
+      await strapi.documents('api::vacancy.vacancy').update({
+        documentId: data.vacancyDocumentId,
+        data: { topPlacement: true } as any,
+      })
     }
 
     await strapi.db.query('api::payment.payment').update({

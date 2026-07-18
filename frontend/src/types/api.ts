@@ -103,6 +103,8 @@ export interface Company {
   logo?: StrapiMedia | null
   cover?: StrapiMedia | null
   owner?: CompanyOwner | null
+  // До 5 последних опубликованных вакансий этой компании (публичный findOne/findBySlug)
+  vacancies?: Vacancy[]
   createdAt: string
 }
 
@@ -392,7 +394,18 @@ export interface ApplicationVacancyRef {
     documentId: string
     name: string
     slug: string
+    telegram?: string | null
   } | null
+  // telegramId + name работодателя раскрываются кандидату только при статусе interview+
+  postedBy?:
+    | { id: number }
+    | {
+        id: number
+        firstName?: string | null
+        lastName?: string | null
+        telegramId?: string | null
+      }
+    | null
 }
 
 export interface ApplicationResumeRef {
@@ -576,12 +589,14 @@ export interface UserLimits {
 
 export type NotificationType =
   | 'new_application'
+  | 'application_in_review'
   | 'application_approved'
   | 'application_rejected'
   | 'interview_invitation'
   | 'test_task'
   | 'offer_received'
   | 'resume_viewed'
+  | 'invitation_to_apply'
   | 'vacancy_viewed'
   | 'vacancy_expiring_soon'
   | 'vacancy_expired'

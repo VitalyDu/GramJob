@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import Link from 'next/link'
-import { Lock } from 'lucide-react'
+import { Lock, Send } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { ResumeStatusBadge } from '@/components/resume/ResumeStatusBadge'
+import { InviteDialog } from '@/components/resume/InviteDialog'
 import { FavoriteButton } from '@/components/favorite/FavoriteButton'
 import { ReportDialog } from '@/components/report/ReportDialog'
 import { BlockButton } from '@/components/block/BlockButton'
@@ -28,6 +29,7 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
   const { resume: store, auth } = useStores()
   const { t, i18n } = useTranslation()
   const [reportOpen, setReportOpen] = useState(false)
+  const [inviteOpen, setInviteOpen] = useState(false)
 
   useEffect(() => {
     void store.fetchResumeById(id)
@@ -67,6 +69,10 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
 
   const r = store.currentResume
   const isOwner = auth.user != null && r.user?.id === auth.user.id
+  // Max/VIP-подписка = доступ к базе резюме = право пригласить кандидата
+  const canInvite =
+    auth.user != null &&
+    (auth.user.subscriptionPlan === 'max' || auth.user.subscriptionPlan === 'vip')
   const name = `${r.firstName} ${r.lastName}`
   const initials = `${r.firstName.charAt(0)}${r.lastName.charAt(0)}`.toUpperCase()
   const salarySymbol = r.currency
@@ -123,6 +129,12 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
               {auth.user && (
                 <div className="mt-3 flex flex-wrap items-center gap-3">
                   <FavoriteButton type="resume" targetId={id} />
+                  {!isOwner && canInvite && (
+                    <Button size="sm" variant="outline" onClick={() => setInviteOpen(true)}>
+                      <Send className="mr-1.5 h-3.5 w-3.5" />
+                      {t('resumeDetail.invite')}
+                    </Button>
+                  )}
                   <button
                     onClick={() => setReportOpen(true)}
                     className="text-sm text-muted-foreground hover:text-destructive"
@@ -298,6 +310,13 @@ export const ResumeDetailClient = observer(function ResumeDetailClient({ id }: P
         targetId={id}
         isOpen={reportOpen}
         onClose={() => setReportOpen(false)}
+      />
+
+      <InviteDialog
+        isOpen={inviteOpen}
+        resumeId={id}
+        candidateName={name}
+        onClose={() => setInviteOpen(false)}
       />
     </div>
   )

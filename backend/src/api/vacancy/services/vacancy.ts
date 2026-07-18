@@ -103,7 +103,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
          AND expires_at > NOW()
          AND search_vector @@ ${tsQuery}
          ${extraFilters}
-       ORDER BY ts_rank(search_vector, ${tsQuery}) DESC, top_placement DESC, boosted_at DESC NULLS LAST, created_at DESC
+       ORDER BY ts_rank(search_vector, ${tsQuery}) DESC, highlighted DESC, top_placement DESC, boosted_at DESC NULLS LAST, created_at DESC
        LIMIT ? OFFSET ?`,
       // Bindings follow placeholder order: WHERE tsquery → extraFilters → ORDER BY tsquery
       [searchQuery, ...extraParams, searchQuery, limit, offset]

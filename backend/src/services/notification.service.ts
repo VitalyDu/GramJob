@@ -13,12 +13,14 @@ export interface NotificationPayload {
 
 const NOTIFICATION_TITLES: Record<string, string> = {
   new_application: 'Новый отклик',
+  application_in_review: 'Отклик изучают',
   application_approved: 'Отклик одобрен',
   application_rejected: 'Отклик отклонён',
   interview_invitation: 'Приглашение на интервью',
   test_task: 'Тестовое задание',
   offer_received: 'Получен оффер',
   resume_viewed: 'Резюме просмотрено',
+  invitation_to_apply: 'Приглашение откликнуться',
   vacancy_viewed: 'Просмотры вакансии',
   vacancy_expiring_soon: 'Вакансия истекает',
   vacancy_expired: 'Вакансия истекла',
@@ -78,6 +80,7 @@ export function buildNotificationData(
   if (
     templateData['applicationId'] &&
     [
+      'application_in_review',
       'application_approved',
       'application_rejected',
       'interview_invitation',
@@ -86,6 +89,9 @@ export function buildNotificationData(
     ].includes(type)
   ) {
     return { entityType: 'application', entityId: templateData['applicationId'] as string }
+  }
+  if (templateData['vacancyId'] && type === 'invitation_to_apply') {
+    return { entityType: 'vacancy', entityId: templateData['vacancyId'] as string }
   }
   if (
     templateData['resumeId'] &&

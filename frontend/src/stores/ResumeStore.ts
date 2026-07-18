@@ -223,4 +223,12 @@ export class ResumeStore {
   clearAccessDenied(): void {
     this.accessDenied = false
   }
+
+  // Employer invites candidate to apply to one of their own vacancies.
+  // Throws ApiClientError with status 403 (SUBSCRIPTION_REQUIRED) or 409 (ALREADY_INVITED).
+  async inviteCandidate(resumeId: string, vacancyId: string): Promise<void> {
+    await api.post<{ data: { success: boolean } }>(`/resumes/${resumeId}/invite`, {
+      vacancyId,
+    })
+  }
 }

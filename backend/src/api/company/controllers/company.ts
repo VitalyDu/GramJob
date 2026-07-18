@@ -15,6 +15,42 @@ const VALID_COMPANY_SIZES = [
   'size_500_plus',
 ] as const
 
+const COMPANY_VACANCY_CARD_FIELDS = [
+  'documentId',
+  'title',
+  'country',
+  'city',
+  'workFormat',
+  'employmentType',
+  'seniority',
+  'salaryFrom',
+  'salaryTo',
+  'salaryCurrency',
+  'urgent',
+  'topPlacement',
+  'highlighted',
+  'sourceType',
+  'moderationStatus',
+  'createdAt',
+] as const
+
+async function fetchCompanyRecentVacancies(strapi: Core.Strapi, companyDocumentId: string) {
+  return strapi.documents('api::vacancy.vacancy').findMany({
+    filters: {
+      company: { documentId: { $eq: companyDocumentId } },
+      moderationStatus: { $eq: 'published' },
+      expiresAt: { $gt: new Date().toISOString() },
+    },
+    fields: COMPANY_VACANCY_CARD_FIELDS as any,
+    populate: {
+      industry: { fields: ['documentId', 'slug', 'name'] },
+      specialization: { fields: ['documentId', 'slug', 'name'] },
+    },
+    sort: 'createdAt:desc' as any,
+    limit: 5,
+  })
+}
+
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const svc = () => strapi.service('api::company.company') as unknown as CompanyService
 
@@ -192,7 +228,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (!company) return ctx.notFound('Company not found')
 
-      return ctx.send({ data: company })
+      const vacancies = await fetchCompanyRecentVacancies(strapi, id)
+
+      return ctx.send({ data: { ...company, vacancies } })
     },
 
     async findBySlug(ctx: any) {
@@ -226,7 +264,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (!company) return ctx.notFound('Company not found')
 
-      return ctx.send({ data: company })
+      const vacancies = await fetchCompanyRecentVacancies(strapi, (company as any).documentId)
+
+      return ctx.send({ data: { ...company, vacancies } })
     },
 
     async update(ctx: any) {

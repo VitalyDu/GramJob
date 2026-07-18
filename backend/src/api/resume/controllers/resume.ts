@@ -3,7 +3,20 @@ import { canPublishResume, canEditResume, canArchiveResume } from '../services/r
 import { checkIsMaxPlan } from '../policies/requires-max-plan'
 import { getBlockedIds } from '../../block/services/block-filter'
 import { toArray } from '../../../utils/query'
+import { sendNotification } from '../../../services/notification.service'
+import { notifyLimitReached } from '../../../services/limit-notify'
 import type resumeServiceFactory from '../services/resume'
+
+// Один resume_viewed на пару (резюме, зритель) до рестарта — чтобы не спамить владельца
+const notifiedViewers = new Map<string, Set<number>>()
+
+function shouldNotifyViewer(resumeDocumentId: string, viewerId: number): boolean {
+  const set = notifiedViewers.get(resumeDocumentId)
+  if (set?.has(viewerId)) return false
+  if (!set) notifiedViewers.set(resumeDocumentId, new Set([viewerId]))
+  else set.add(viewerId)
+  return true
+}
 
 type ResumeService = ReturnType<typeof resumeServiceFactory>
 
@@ -106,6 +119,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       })) as number
 
       if (resumesCount >= resumesLimit) {
+        notifyLimitReached(strapi, user.id, 'resumes')
         return ctx.send(
           {
             error: {
@@ -176,23 +190,47 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         country,
         city,
         experienceYears,
+        salaryTo,
+        currency,
         page = '1',
         pageSize = '20',
       } = rawQuery as Record<string, string>
 
       const workFormats = toArray(rawQuery.workFormat)
       const employmentTypes = toArray(rawQuery.employmentType)
+      const skills = toArray(rawQuery.skills)
+      const languages = toArray(rawQuery.languages)
 
       const pageNum = Math.max(1, parseInt(page, 10) || 1)
       const pageSizeNum = Math.min(50, Math.max(1, parseInt(pageSize, 10) || 20))
 
-      // Pre-query JSON array filters
+      // Pre-query JSON array filters: workFormat/employmentType/skills — простые строки,
+      // languages — массив объектов [{lang, level}] → отдельный запрос
       let jsonFilterIds: string[] | null = null
-      if (workFormats.length > 0 || employmentTypes.length > 0) {
+      if (workFormats.length > 0 || employmentTypes.length > 0 || skills.length > 0) {
         jsonFilterIds = await svc().getIdsByJsonArrayFilters({
           ...(workFormats.length > 0 ? { workFormat: workFormats } : {}),
           ...(employmentTypes.length > 0 ? { employmentType: employmentTypes } : {}),
+          ...(skills.length > 0 ? { skills } : {}),
         })
+        if (jsonFilterIds.length === 0) {
+          return ctx.send({
+            data: [],
+            meta: { total: 0, page: pageNum, pageSize: pageSizeNum, pageCount: 0 },
+          })
+        }
+      }
+
+      if (languages.length > 0) {
+        const langIds = await svc().getIdsByLanguageObjects(languages)
+        if (langIds.length === 0) {
+          return ctx.send({
+            data: [],
+            meta: { total: 0, page: pageNum, pageSize: pageSizeNum, pageCount: 0 },
+          })
+        }
+        jsonFilterIds =
+          jsonFilterIds === null ? langIds : jsonFilterIds.filter((id) => new Set(langIds).has(id))
         if (jsonFilterIds.length === 0) {
           return ctx.send({
             data: [],
@@ -220,6 +258,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const years = parseInt(experienceYears, 10)
         if (!isNaN(years)) filters.experienceYears = { $lte: years }
       }
+      if (salaryTo) {
+        const salary = parseInt(salaryTo, 10)
+        if (!isNaN(salary)) filters.desiredSalary = { $lte: salary }
+      }
+      if (currency) filters.currency = { $eq: currency }
       if (search) {
         filters.$or = [
           { title: { $containsi: search } },
@@ -315,6 +358,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           documentId: id,
           data: { views: newViews },
         })
+
+        if (resumeOwnerId && shouldNotifyViewer(id, requestUser.id)) {
+          void sendNotification(strapi, {
+            userId: resumeOwnerId,
+            type: 'resume_viewed',
+            templateData: {
+              resumeTitle: resume.title ?? '',
+              resumeId: id,
+            },
+          })
+        }
       }
 
       let contacts: unknown = null
@@ -448,6 +502,103 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       })
 
       return ctx.send({ data: updated })
+    },
+
+    async invite(ctx: any) {
+      const user = ctx.state.user as { id: number } | undefined
+      if (!user) return ctx.unauthorized('Authentication required')
+
+      const viewer = (await strapi.db.query('plugin::users-permissions.user').findOne({
+        where: { id: user.id },
+        select: ['id', 'subscriptionPlan'],
+      })) as { subscriptionPlan: string } | null
+      if (!viewer || !checkIsMaxPlan(viewer)) {
+        return ctx.send(
+          {
+            error: {
+              code: 'SUBSCRIPTION_REQUIRED',
+              message: 'Max subscription plan required to invite candidates',
+            },
+          },
+          403
+        )
+      }
+
+      const { id } = ctx.params as { id: string }
+      const body = ctx.request.body as { vacancyId?: string }
+      if (!body.vacancyId) return ctx.badRequest('vacancyId is required')
+
+      const resume = await (strapi.documents as any)('api::resume.resume').findOne({
+        documentId: id,
+        fields: ['documentId', 'title', 'moderationStatus', 'invitations'],
+        populate: { user: { fields: ['id'] } },
+      })
+      if (!resume || resume.moderationStatus !== 'published') {
+        return ctx.notFound('Resume not found')
+      }
+      const resumeOwnerId = resume.user?.id as number | undefined
+      if (!resumeOwnerId) return ctx.badRequest('Resume has no owner')
+      if (resumeOwnerId === user.id) {
+        return ctx.badRequest('Cannot invite yourself')
+      }
+
+      const vacancy = await strapi.documents('api::vacancy.vacancy').findOne({
+        documentId: body.vacancyId,
+        fields: ['documentId', 'title', 'moderationStatus'],
+        populate: {
+          postedBy: { fields: ['id'] },
+          company: { fields: ['name'] },
+        },
+      })
+      if (!vacancy) return ctx.notFound('Vacancy not found')
+      if ((vacancy as any).postedBy?.id !== user.id) {
+        return ctx.forbidden('You do not own this vacancy')
+      }
+      if ((vacancy as any).moderationStatus !== 'published') {
+        return ctx.badRequest('Vacancy must be published to invite candidates')
+      }
+
+      // Дедуп: одна и та же вакансия не должна приглашать того же кандидата дважды.
+      // Ищем уже созданное invitation_to_apply в уведомлениях получателя.
+      const dedupCheck = (await strapi.db.connection.raw(
+        `SELECT n.id FROM notifications n
+         INNER JOIN notifications_user_lnk lnk ON lnk.notification_id = n.id
+         WHERE lnk.user_id = ?
+           AND n.type = 'invitation_to_apply'
+           AND n.data::jsonb @> ?::jsonb
+         LIMIT 1`,
+        [resumeOwnerId, JSON.stringify({ entityId: body.vacancyId })]
+      )) as { rows: unknown[] }
+      if (dedupCheck.rows.length > 0) {
+        return ctx.send(
+          {
+            error: {
+              code: 'ALREADY_INVITED',
+              message: 'Candidate has already been invited to this vacancy',
+            },
+          },
+          409
+        )
+      }
+
+      // Инкрементируем счётчик приглашений на резюме (для аналитики)
+      await strapi.db.connection.raw(
+        `UPDATE resumes SET invitations = COALESCE(invitations, 0) + 1 WHERE document_id = ?`,
+        [id]
+      )
+
+      const companyName = (vacancy as any).company?.name as string | undefined
+      await sendNotification(strapi, {
+        userId: resumeOwnerId,
+        type: 'invitation_to_apply',
+        templateData: {
+          vacancyTitle: (vacancy as any).title ?? '',
+          vacancyId: body.vacancyId,
+          companyName: companyName ?? '',
+        },
+      })
+
+      return ctx.send({ data: { success: true } })
     },
 
     async findMine(ctx: any) {

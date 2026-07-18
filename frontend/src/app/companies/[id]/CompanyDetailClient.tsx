@@ -11,6 +11,7 @@ import { StatusBadge } from '@/components/company/StatusBadge'
 import { FavoriteButton } from '@/components/favorite/FavoriteButton'
 import { BlockButton } from '@/components/block/BlockButton'
 import { ReportDialog } from '@/components/report/ReportDialog'
+import { VacancyCard } from '@/components/vacancy/VacancyCard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -161,6 +162,27 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({
           </CardHeader>
           <CardContent>
             <p className="whitespace-pre-wrap text-sm text-foreground">{company.description}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Recent vacancies */}
+      {company.vacancies && company.vacancies.length > 0 && (
+        <Card>
+          <CardHeader className="flex-row items-center justify-between space-y-0">
+            <CardTitle>{t('companyDetail.vacancies')}</CardTitle>
+            <Button asChild variant="ghost" size="sm">
+              <Link href={`/vacancies?company=${company.documentId}`}>
+                {t('companyDetail.allVacancies')}
+              </Link>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 lg:grid-cols-2">
+              {company.vacancies.map((v) => (
+                <VacancyCard key={v.documentId} vacancy={v} />
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}

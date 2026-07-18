@@ -12,11 +12,12 @@
     "telegramChargeId": { "type": "string", "required": true, "unique": true },
     "payloadType": {
       "type": "enumeration",
-      "enum": ["subscription", "vacancy_pack", "apply_pack"],
+      "enum": ["subscription", "vacancy_pack", "apply_pack", "urgent", "top_placement"],
       "required": true
     },
     "planCode": { "type": "string" },
     "packageId": { "type": "integer" },
+    "vacancyDocumentId": { "type": "string" },
     "user": {
       "type": "relation",
       "relation": "manyToOne",

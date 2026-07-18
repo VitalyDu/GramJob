@@ -18,5 +18,17 @@ export default {
       handler: 'payment.applyPack',
       config: {},
     },
+    {
+      method: 'POST',
+      path: '/payments/urgent',
+      handler: 'payment.urgent',
+      config: {},
+    },
+    {
+      method: 'POST',
+      path: '/payments/top-placement',
+      handler: 'payment.topPlacement',
+      config: {},
+    },
   ],
 }

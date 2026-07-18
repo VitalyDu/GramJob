@@ -5,13 +5,17 @@ import {
   refundApplyCredit,
   type ConsumedApplySource,
 } from '../services/apply-credit-service'
+import { notifyLimitReached } from '../../../services/limit-notify'
 
 const APPLICATION_POPULATE = {
   vacancy: {
     fields: ['documentId', 'title', 'moderationStatus', 'sourceType'],
     populate: {
-      company: { fields: ['documentId', 'name', 'slug'] },
-      postedBy: { fields: ['id'] },
+      company: { fields: ['documentId', 'name', 'slug', 'telegram'] },
+      // telegramId + name постящего работодателя — раскрываются кандидату только
+      // при статусе interview+ (см. attachEmployerContacts ниже). Для employer-эндпоинтов
+      // это его же данные, не проблема.
+      postedBy: { fields: ['id', 'firstName', 'lastName', 'telegramId'] },
     },
   },
   resume: {
@@ -22,6 +26,33 @@ const APPLICATION_POPULATE = {
   },
   user: { fields: ['id', 'firstName', 'lastName'] },
 } as const
+
+// Спека §8: «После одобрения отклика кандидат получает контакты, Telegram работодателя».
+// Раскрываем telegramId постящего пользователя, начиная со статуса interview
+// (первое действие работодателя, требующее реального контакта с кандидатом).
+const CONTACTS_REVEALING_STATUSES = new Set(['interview', 'test-task', 'offer', 'hired'])
+
+function maskEmployerTelegram(application: any, viewerId: number | undefined): any {
+  if (!application) return application
+  const isCandidate = application.user?.id === viewerId
+  const isEmployer = application.vacancy?.postedBy?.id === viewerId
+  const status = application.status as string | undefined
+  // Employer видит собственные данные и без маски. Candidate — только на interview+.
+  if (isEmployer) return application
+  if (isCandidate && status && CONTACTS_REVEALING_STATUSES.has(status)) return application
+
+  const postedBy = application.vacancy?.postedBy
+  if (postedBy) {
+    return {
+      ...application,
+      vacancy: {
+        ...application.vacancy,
+        postedBy: { id: postedBy.id },
+      },
+    }
+  }
+  return application
+}
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async create(ctx: any) {
@@ -85,6 +116,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       consumedSource = await checkAndConsumeApplyCredit(strapi, user.id)
     } catch (err: any) {
       if (err?.code === 'LIMIT_REACHED') {
+        notifyLimitReached(strapi, user.id, 'daily_applications')
         return ctx.send(
           {
             error: {
@@ -157,7 +189,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     ])
 
     return ctx.send({
-      data: applications,
+      data: applications.map((a: any) => maskEmployerTelegram(a, user.id)),
       meta: {
         total,
         page: pageNum,
@@ -181,7 +213,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       return ctx.forbidden('You do not have access to this application')
     }
 
-    ctx.body = { data: application }
+    ctx.body = { data: maskEmployerTelegram(application, user.id) }
   },
 
   async findByVacancy(ctx: any) {
@@ -222,7 +254,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     ])
 
     return ctx.send({
-      data: applications,
+      data: applications.map((a: any) => maskEmployerTelegram(a, user.id)),
       meta: {
         total,
         page: pageNum,
@@ -265,6 +297,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       populate: APPLICATION_POPULATE as any,
     })
 
-    return ctx.send({ data: updated })
+    return ctx.send({ data: maskEmployerTelegram(updated, user.id) })
   },
 })

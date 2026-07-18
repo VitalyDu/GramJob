@@ -1,5 +1,9 @@
 import type { Core } from '@strapi/strapi'
-import { createInvoiceLink } from '../services/telegram-bot'
+import {
+  createInvoiceLink,
+  URGENT_PRICE_STARS,
+  TOP_PLACEMENT_PRICE_STARS,
+} from '../services/telegram-bot'
 
 type UserWithPlan = {
   id: number
@@ -66,6 +70,74 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       description: `${pack.vacancyCredits} вакансий + ${pack.boostCredits} буст-кредитов`,
       payload: { type: 'vacancy_pack', packageId: pack.id, userId: user.id },
       starsAmount: pack.starsPrice,
+    })
+
+    ctx.body = { invoiceUrl }
+  },
+
+  async urgent(ctx: any) {
+    const user = ctx.state.user as UserWithPlan
+    const { vacancyId } = ctx.request.body as { vacancyId?: string }
+
+    if (!vacancyId || typeof vacancyId !== 'string') {
+      return ctx.badRequest('vacancyId (string) is required')
+    }
+
+    const vacancy = await strapi.documents('api::vacancy.vacancy').findOne({
+      documentId: vacancyId,
+      fields: ['documentId', 'title', 'moderationStatus', 'urgent'],
+      populate: { postedBy: { fields: ['id'] } },
+    })
+    if (!vacancy) return ctx.notFound('Vacancy not found')
+    if ((vacancy as any).postedBy?.id !== user.id) {
+      return ctx.forbidden('You do not own this vacancy')
+    }
+    if ((vacancy as any).moderationStatus !== 'published') {
+      return ctx.badRequest('Vacancy must be published')
+    }
+    if ((vacancy as any).urgent) {
+      return ctx.badRequest('Vacancy is already marked as urgent')
+    }
+
+    const invoiceUrl = await createInvoiceLink({
+      title: `GramJob Urgent: ${(vacancy as any).title}`,
+      description: 'Пометить вакансию как срочную (🔥 Urgent)',
+      payload: { type: 'urgent', vacancyDocumentId: vacancyId, userId: user.id },
+      starsAmount: URGENT_PRICE_STARS,
+    })
+
+    ctx.body = { invoiceUrl }
+  },
+
+  async topPlacement(ctx: any) {
+    const user = ctx.state.user as UserWithPlan
+    const { vacancyId } = ctx.request.body as { vacancyId?: string }
+
+    if (!vacancyId || typeof vacancyId !== 'string') {
+      return ctx.badRequest('vacancyId (string) is required')
+    }
+
+    const vacancy = await strapi.documents('api::vacancy.vacancy').findOne({
+      documentId: vacancyId,
+      fields: ['documentId', 'title', 'moderationStatus', 'topPlacement'],
+      populate: { postedBy: { fields: ['id'] } },
+    })
+    if (!vacancy) return ctx.notFound('Vacancy not found')
+    if ((vacancy as any).postedBy?.id !== user.id) {
+      return ctx.forbidden('You do not own this vacancy')
+    }
+    if ((vacancy as any).moderationStatus !== 'published') {
+      return ctx.badRequest('Vacancy must be published')
+    }
+    if ((vacancy as any).topPlacement) {
+      return ctx.badRequest('Vacancy already has TOP placement')
+    }
+
+    const invoiceUrl = await createInvoiceLink({
+      title: `GramJob TOP: ${(vacancy as any).title}`,
+      description: 'Закрепить вакансию в TOP выдачи',
+      payload: { type: 'top_placement', vacancyDocumentId: vacancyId, userId: user.id },
+      starsAmount: TOP_PLACEMENT_PRICE_STARS,
     })
 
     ctx.body = { invoiceUrl }

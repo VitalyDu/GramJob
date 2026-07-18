@@ -11,7 +11,7 @@ export default {
 
         const expired = await (strapi.documents as any)('api::vacancy.vacancy').findMany({
           filters: {
-            status: { $eq: 'published' },
+            moderationStatus: { $eq: 'published' },
             expiresAt: { $lt: now },
           },
           fields: ['documentId', 'title'],
@@ -26,7 +26,7 @@ export default {
         for (const vacancy of expired) {
           await (strapi.documents as any)('api::vacancy.vacancy').update({
             documentId: vacancy.documentId,
-            data: { status: 'expired' },
+            data: { moderationStatus: 'expired' },
           })
 
           const posterId = (vacancy as any).postedBy?.id
@@ -128,7 +128,7 @@ export default {
           'api::vacancy.vacancy'
         ).findMany({
           filters: {
-            status: { $eq: 'published' },
+            moderationStatus: { $eq: 'published' },
             expiresAt: {
               $gt: twoDaysFromNow.toISOString(),
               $lte: threeDaysFromNow.toISOString(),
@@ -259,7 +259,7 @@ export default {
       try {
         // --- Vacancy Analytics ---
         const vacancies = (await (strapi.documents as any)('api::vacancy.vacancy').findMany({
-          filters: { status: { $in: ['published', 'expired', 'archived'] } },
+          filters: { moderationStatus: { $in: ['published', 'expired', 'archived'] } },
           fields: ['documentId', 'views', 'uniqueViews', 'applicationsCount'],
           limit: 10000,
         })) as Array<{
@@ -316,7 +316,7 @@ export default {
 
         // --- Resume Analytics ---
         const resumes = (await (strapi.documents as any)('api::resume.resume').findMany({
-          filters: { status: { $in: ['published', 'archived'] } },
+          filters: { moderationStatus: { $in: ['published', 'archived'] } },
           fields: ['documentId', 'views', 'invitations'],
           limit: 10000,
         })) as Array<{ id: number; documentId: string; views: number; invitations: number }>

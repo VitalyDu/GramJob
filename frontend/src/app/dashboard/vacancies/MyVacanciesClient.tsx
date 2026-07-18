@@ -8,8 +8,10 @@ import {
   BarChart2,
   Briefcase,
   Eye,
+  Flame,
   MoreVertical,
   Pencil,
+  Pin,
   Plus,
   Send,
   Users,
@@ -19,7 +21,9 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
+import { useTelegramPayment } from '@/hooks/useTelegramPayment'
 import { hapticNotify } from '@/lib/telegram'
+import { VACANCY_UPGRADE_PRICES } from '@/stores/PaymentStore'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
 import { UpsellModal } from '@/components/vacancy/UpsellModal'
 import { UsageLimitBar } from '@/components/shared/UsageLimitBar'
@@ -41,7 +45,8 @@ import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 
 export const MyVacanciesClient = observer(function MyVacanciesClient() {
   const { t } = useTranslation()
-  const { vacancy: store, auth, limits } = useStores()
+  const { vacancy: store, payment, auth, limits } = useStores()
+  const { openInvoice } = useTelegramPayment()
   useRequireAuth()
 
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -68,6 +73,30 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
   const handleArchive = (id: string) => {
     if (!window.confirm(t('dashboard.vacancies.confirmArchive'))) return
     void store.archiveVacancy(id)
+  }
+
+  const handleMakeUrgent = async (id: string) => {
+    try {
+      const url = await payment.buyUrgent(id)
+      openInvoice(url, () => {
+        toast.success(t('dashboard.vacancies.urgentActivated'))
+        void store.fetchMyVacancies(store.page)
+      })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('shared.errorDefault'))
+    }
+  }
+
+  const handleMakeTop = async (id: string) => {
+    try {
+      const url = await payment.buyTopPlacement(id)
+      openInvoice(url, () => {
+        toast.success(t('dashboard.vacancies.topActivated'))
+        void store.fetchMyVacancies(store.page)
+      })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('shared.errorDefault'))
+    }
   }
 
   const handlePageChange = (page: number) => {
@@ -248,6 +277,30 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                     description: t('actions.boostDesc'),
                     onClick: () => handleBoost(activeVacancy.documentId),
                     disabled: store.isLoading,
+                  },
+                ]
+              : []),
+            ...(activeVacancy.moderationStatus === 'published' && !activeVacancy.urgent
+              ? [
+                  {
+                    id: 'urgent',
+                    icon: Flame,
+                    label: t('actions.makeUrgent', { price: VACANCY_UPGRADE_PRICES.urgent }),
+                    description: t('actions.makeUrgentDesc'),
+                    onClick: () => void handleMakeUrgent(activeVacancy.documentId),
+                    disabled: payment.isLoading,
+                  },
+                ]
+              : []),
+            ...(activeVacancy.moderationStatus === 'published' && !activeVacancy.topPlacement
+              ? [
+                  {
+                    id: 'top',
+                    icon: Pin,
+                    label: t('actions.makeTop', { price: VACANCY_UPGRADE_PRICES.top_placement }),
+                    description: t('actions.makeTopDesc'),
+                    onClick: () => void handleMakeTop(activeVacancy.documentId),
+                    disabled: payment.isLoading,
                   },
                 ]
               : []),

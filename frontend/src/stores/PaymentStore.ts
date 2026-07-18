@@ -136,7 +136,53 @@ export class PaymentStore {
     }
   }
 
+  async buyUrgent(vacancyId: string): Promise<string> {
+    runInAction(() => {
+      this.isLoading = true
+      this.error = null
+    })
+    try {
+      const res = await api.post<{ invoiceUrl: string }>('/payments/urgent', { vacancyId })
+      return res.invoiceUrl
+    } catch (e) {
+      runInAction(() => {
+        this.error = e instanceof Error ? e.message : 'Failed to create invoice'
+      })
+      throw e
+    } finally {
+      runInAction(() => {
+        this.isLoading = false
+      })
+    }
+  }
+
+  async buyTopPlacement(vacancyId: string): Promise<string> {
+    runInAction(() => {
+      this.isLoading = true
+      this.error = null
+    })
+    try {
+      const res = await api.post<{ invoiceUrl: string }>('/payments/top-placement', { vacancyId })
+      return res.invoiceUrl
+    } catch (e) {
+      runInAction(() => {
+        this.error = e instanceof Error ? e.message : 'Failed to create invoice'
+      })
+      throw e
+    } finally {
+      runInAction(() => {
+        this.isLoading = false
+      })
+    }
+  }
+
   clearError(): void {
     this.error = null
   }
 }
+
+// Одноразовые апгрейды вакансий — цены синхронизированы с backend telegram-bot.ts
+export const VACANCY_UPGRADE_PRICES = {
+  urgent: 99,
+  top_placement: 199,
+} as const

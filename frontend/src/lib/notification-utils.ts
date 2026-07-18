@@ -9,8 +9,10 @@ import {
   Eye,
   FileText,
   Gift,
+  Inbox,
   Mail,
   Megaphone,
+  Send,
   XCircle,
   type LucideIcon,
 } from 'lucide-react'
@@ -18,12 +20,14 @@ import type { NotificationType } from '@/types/api'
 
 export const NOTIFICATION_TYPE_ICONS: Partial<Record<NotificationType, LucideIcon>> = {
   new_application: Mail,
+  application_in_review: Inbox,
   application_approved: CheckCircle2,
   application_rejected: XCircle,
   interview_invitation: Calendar,
   test_task: FileText,
   offer_received: Gift,
   resume_viewed: Eye,
+  invitation_to_apply: Send,
   vacancy_viewed: Eye,
   vacancy_expiring_soon: Clock,
   vacancy_expired: AlertCircle,

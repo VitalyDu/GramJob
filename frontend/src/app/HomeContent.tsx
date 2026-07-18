@@ -11,9 +11,10 @@ import type { Vacancy } from '@/types/api'
 
 interface Props {
   latest: Vacancy[]
+  recommended?: Vacancy[]
 }
 
-export function HomeContent({ latest }: Props) {
+export function HomeContent({ latest, recommended = [] }: Props) {
   const { t } = useTranslation()
 
   return (
@@ -56,6 +57,28 @@ export function HomeContent({ latest }: Props) {
           </div>
         </div>
       </section>
+
+      {/* Recommended (VIP highlighted) vacancies */}
+      {recommended.length > 0 && (
+        <section>
+          <div className="mb-4 flex items-start justify-between">
+            <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
+              {t('home.recommendedVacancies')}
+            </h2>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/vacancies?highlighted=true">
+                {t('home.allVacancies')}
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+          <div className="grid gap-3 lg:grid-cols-2">
+            {recommended.map((v) => (
+              <VacancyCard key={v.documentId} vacancy={v} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Latest vacancies */}
       {latest.length > 0 && (

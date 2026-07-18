@@ -8,6 +8,7 @@ import {
 import { getBlockedIds } from '../../block/services/block-filter'
 import { resolveOptionalUserId } from '../../../utils/optional-auth'
 import { toArray } from '../../../utils/query'
+import { notifyLimitReached } from '../../../services/limit-notify'
 import type vacancyServiceFactory from '../services/vacancy'
 
 type VacancyService = ReturnType<typeof vacancyServiceFactory>
@@ -170,6 +171,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         creditSource = result.source
       } catch (err: any) {
         if (err?.code === 'LIMIT_REACHED') {
+          notifyLimitReached(strapi, user.id, 'monthly_vacancies')
           return ctx.send(
             {
               error: {
@@ -250,6 +252,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         await checkAndConsumeVacancyCredit(strapi, user.id)
       } catch (err: any) {
         if (err?.code === 'LIMIT_REACHED') {
+          notifyLimitReached(strapi, user.id, 'monthly_vacancies')
           return ctx.send(
             {
               error: {
@@ -285,9 +288,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         salaryFrom,
         salaryTo,
         salaryCurrency,
+        experienceYears,
         sourceType,
         urgent,
         topPlacement,
+        highlighted,
         sort = 'relevance',
         page = '1',
         pageSize = '20',
@@ -296,18 +301,28 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const workFormats = toArray(rawQuery.workFormat)
       const employmentTypes = toArray(rawQuery.employmentType)
       const seniorities = toArray(rawQuery.seniority)
+      const skills = toArray(rawQuery.skills)
+      const languages = toArray(rawQuery.languages)
 
       const pageNum = Math.max(1, parseInt(page, 10) || 1)
       const pageSizeNum = Math.min(50, Math.max(1, parseInt(pageSize, 10) || 20))
       const offset = (pageNum - 1) * pageSizeNum
 
-      // Pre-query JSON array filters (workFormat/employmentType/seniority are JSON arrays)
+      // Pre-query JSON array filters (workFormat/employmentType/seniority/skills/languages are JSON string arrays)
       let jsonFilterIds: string[] | null = null
-      if (workFormats.length > 0 || employmentTypes.length > 0 || seniorities.length > 0) {
+      if (
+        workFormats.length > 0 ||
+        employmentTypes.length > 0 ||
+        seniorities.length > 0 ||
+        skills.length > 0 ||
+        languages.length > 0
+      ) {
         jsonFilterIds = await svc().getIdsByJsonArrayFilters({
           ...(workFormats.length > 0 ? { workFormat: workFormats } : {}),
           ...(employmentTypes.length > 0 ? { employmentType: employmentTypes } : {}),
           ...(seniorities.length > 0 ? { seniority: seniorities } : {}),
+          ...(skills.length > 0 ? { skills } : {}),
+          ...(languages.length > 0 ? { languages } : {}),
         })
         if (jsonFilterIds.length === 0) {
           return ctx.send({
@@ -331,7 +346,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         newest: 'createdAt:desc',
         salary_asc: 'salaryFrom:asc',
         salary_desc: 'salaryFrom:desc',
-        relevance: 'topPlacement:desc,boostedAt:desc,createdAt:desc',
+        // VIP-вакансии (highlighted=true через beforeCreate) идут выше при равных факторах
+        relevance: 'highlighted:desc,topPlacement:desc,boostedAt:desc,createdAt:desc',
       }
       const strapiSort = sortMap[sort] ?? sortMap.relevance
 
@@ -397,6 +413,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         if (sourceType) baseFilters.sourceType = { $eq: sourceType }
         if (urgent === 'true') baseFilters.urgent = { $eq: true }
         if (topPlacement === 'true') baseFilters.topPlacement = { $eq: true }
+        if (highlighted === 'true') baseFilters.highlighted = { $eq: true }
+        if (experienceYears) {
+          const years = parseInt(experienceYears, 10)
+          if (!isNaN(years)) baseFilters.experienceYears = { $lte: years }
+        }
         if (blockedUserIds.length > 0) {
           baseFilters.postedBy = { id: { $notIn: blockedUserIds } }
         }
@@ -504,6 +525,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (sourceType) filters.sourceType = { $eq: sourceType }
       if (urgent === 'true') filters.urgent = { $eq: true }
       if (topPlacement === 'true') filters.topPlacement = { $eq: true }
+      if (highlighted === 'true') filters.highlighted = { $eq: true }
+      if (experienceYears) {
+        const years = parseInt(experienceYears, 10)
+        if (!isNaN(years)) filters.experienceYears = { $lte: years }
+      }
       if (blockedUserIds.length > 0) {
         filters.postedBy = { id: { $notIn: blockedUserIds } }
       }
@@ -767,6 +793,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         boostsRemaining = await checkAndConsumeBoost(strapi, user.id)
       } catch (err: any) {
         if (err?.code === 'LIMIT_REACHED') {
+          notifyLimitReached(strapi, user.id, 'daily_boosts')
           return ctx.send(
             {
               error: {

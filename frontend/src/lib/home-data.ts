@@ -56,3 +56,11 @@ export async function getLatestVacancies(limit: number): Promise<Vacancy[]> {
   )
   return res?.data?.map(normalizeVacancy) ?? []
 }
+
+// VIP-вакансии для блока «Рекомендуем» (highlighted=true ставится в beforeCreate только VIP-авторам)
+export async function getRecommendedVacancies(limit: number): Promise<Vacancy[]> {
+  const res = await fetchJson<{ data: unknown[] }>(
+    `/vacancies?page=1&pageSize=${limit}&highlighted=true&sort=relevance`
+  )
+  return res?.data?.map(normalizeVacancy) ?? []
+}

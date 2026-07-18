@@ -56,6 +56,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return (result.rows as { document_id: string }[]).map((r) => r.document_id)
   },
 
+  // Resume.languages хранится как [{ lang, level }], поэтому нужен отдельный запрос,
+  // проверяющий наличие языкового кода в поле `lang` каждого элемента.
+  async getIdsByLanguageObjects(langCodes: string[]): Promise<string[]> {
+    if (langCodes.length === 0) return []
+    const conditions: string[] = []
+    const params: unknown[] = []
+    for (const code of langCodes) {
+      conditions.push(`languages::jsonb @> ?::jsonb`)
+      params.push(JSON.stringify([{ lang: code }]))
+    }
+    const sql = `SELECT document_id FROM resumes WHERE ${conditions.join(' AND ')} LIMIT 10000`
+    const result = await (strapi.db.connection as any).raw(sql, params)
+    return (result.rows as { document_id: string }[]).map((r) => r.document_id)
+  },
+
   async createResume(userId: number, input: CreateResumeInput) {
     return (strapi.documents as any)('api::resume.resume').create({
       data: {

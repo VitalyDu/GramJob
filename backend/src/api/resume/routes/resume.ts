@@ -33,6 +33,15 @@ export default {
       config: {},
     },
 
+    // Employer (Max/VIP) invites the candidate to apply to one of their vacancies.
+    // Plan check + ownership done in controller.
+    {
+      method: 'POST',
+      path: '/resumes/:id/invite',
+      handler: 'resume.invite',
+      config: {},
+    },
+
     // Owner-only via policy
     {
       method: 'POST',

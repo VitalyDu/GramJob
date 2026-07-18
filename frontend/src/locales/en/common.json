@@ -200,12 +200,30 @@
     "email": "Email",
     "phone": "Phone",
     "contactsLocked": "Contacts are available after application approval",
+    "invite": "Invite to apply",
     "backToAll": "← All resumes",
     "backToMy": "← My resumes"
+  },
+  "invite": {
+    "title": "Invite candidate",
+    "subtitle": "Inviting: {{name}}",
+    "vacancy": "Vacancy",
+    "selectVacancy": "Choose a vacancy",
+    "submit": "Send invitation",
+    "sending": "Sending...",
+    "success": "Invitation sent. The candidate will be notified.",
+    "alreadyInvited": "You have already invited this candidate to the selected vacancy.",
+    "noPublishedVacancies": "You have no published vacancies.",
+    "goToVacancies": "Go to my vacancies",
+    "fetchError": "Failed to load your vacancies.",
+    "error": "Failed to send invitation.",
+    "subscriptionRequired": "A Max or VIP subscription is required to invite candidates."
   },
   "companyDetail": {
     "report": "Report",
     "about": "About company",
+    "vacancies": "Open vacancies",
+    "allVacancies": "All vacancies",
     "backToAll": "← All companies",
     "notFound": "Company not found"
   },
@@ -216,6 +234,7 @@
     "heroSubtitle": "International job and resume board. Find opportunities, build your future.",
     "findJob": "Find a job",
     "postVacancy": "Post a vacancy",
+    "recommendedVacancies": "Recommended",
     "latestVacancies": "Latest vacancies",
     "allVacancies": "All vacancies",
     "howItWorks": "How it works",
@@ -387,7 +406,9 @@
       "newTitle": "New vacancy",
       "editTitle": "Edit vacancy",
       "created": "Vacancy submitted for review",
-      "updated": "Changes saved — vacancy submitted for review"
+      "updated": "Changes saved — vacancy submitted for review",
+      "urgentActivated": "Vacancy marked as urgent",
+      "topActivated": "Vacancy pinned to TOP"
     },
     "resumes": {
       "title": "My resumes",
@@ -442,7 +463,8 @@
       "title": "Application details",
       "vacancy": "Vacancy",
       "resume": "Resume",
-      "coverLetter": "Cover letter"
+      "coverLetter": "Cover letter",
+      "employerContacts": "Employer contacts"
     },
     "favorites": {
       "title": "Favorites",
@@ -843,6 +865,10 @@
     "toModerationDesc": "Submit for review",
     "boost": "↑ Boost",
     "boostDesc": "Promote in search results",
+    "makeUrgent": "🔥 Urgent ({{price}} ⭐)",
+    "makeUrgentDesc": "Mark as Urgent",
+    "makeTop": "📌 TOP ({{price}} ⭐)",
+    "makeTopDesc": "Pin to the top of the search results",
     "archive": "Archive",
     "archiveDesc": "Hide and unpublish",
     "delete": "Delete",

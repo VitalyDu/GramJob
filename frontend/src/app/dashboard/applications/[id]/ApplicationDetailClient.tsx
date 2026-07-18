@@ -75,6 +75,41 @@ export const ApplicationDetailClient = observer(function ApplicationDetailClient
         </CardContent>
       </Card>
 
+      {(() => {
+        const postedBy = app.vacancy.postedBy as
+          | { firstName?: string | null; lastName?: string | null; telegramId?: string | null }
+          | null
+          | undefined
+        const revealed =
+          postedBy && (postedBy.telegramId || postedBy.firstName || postedBy.lastName)
+        if (!revealed) return null
+        return (
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-xs font-medium text-muted-foreground">
+                {t('dashboard.applicationDetail.employerContacts')}
+              </p>
+              <p className="mt-1 text-sm">
+                {[postedBy?.firstName, postedBy?.lastName].filter(Boolean).join(' ')}
+              </p>
+              {postedBy?.telegramId && (
+                <a
+                  href={`https://t.me/${postedBy.telegramId.startsWith('@') ? postedBy.telegramId.slice(1) : postedBy.telegramId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-block text-sm text-primary hover:underline"
+                >
+                  Telegram:{' '}
+                  {postedBy.telegramId.startsWith('@')
+                    ? postedBy.telegramId
+                    : `@${postedBy.telegramId}`}
+                </a>
+              )}
+            </CardContent>
+          </Card>
+        )
+      })()}
+
       <Card>
         <CardContent className="pt-6">
           <p className="text-xs font-medium text-muted-foreground">

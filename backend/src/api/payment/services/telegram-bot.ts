@@ -2,6 +2,12 @@ export type InvoicePayload =
   | { type: 'subscription'; planCode: string; userId: number }
   | { type: 'vacancy_pack'; packageId: number; userId: number }
   | { type: 'apply_pack'; packageId: number; userId: number }
+  | { type: 'urgent'; vacancyDocumentId: string; userId: number }
+  | { type: 'top_placement'; vacancyDocumentId: string; userId: number }
+
+// Одноразовые апгрейды вакансии — фиксированные цены в Stars.
+export const URGENT_PRICE_STARS = 99
+export const TOP_PLACEMENT_PRICE_STARS = 199
 
 export function buildTelegramApiUrl(token: string, method: string): string {
   return `https://api.telegram.org/bot${token}/${method}`
@@ -92,12 +98,14 @@ export async function setWebhook(url: string, secretToken?: string): Promise<voi
 
 export type NotificationType =
   | 'new_application'
+  | 'application_in_review'
   | 'application_approved'
   | 'application_rejected'
   | 'interview_invitation'
   | 'test_task'
   | 'offer_received'
   | 'resume_viewed'
+  | 'invitation_to_apply'
   | 'vacancy_viewed'
   | 'vacancy_expiring_soon'
   | 'vacancy_expired'
@@ -119,7 +127,9 @@ export interface TelegramMessage {
 }
 
 export const APPLICATION_STATUS_TO_NOTIFICATION: Record<string, NotificationType | undefined> = {
-  'in-review': 'application_approved',
+  // in-review = «работодатель изучает» — не то же самое, что одобрено.
+  // application_approved зарезервирован под будущее раскрытие контактов на interview.
+  'in-review': 'application_in_review',
   rejected: 'application_rejected',
   interview: 'interview_invitation',
   'test-task': 'test_task',
@@ -138,6 +148,7 @@ function buildDeepLink(type: string, data: Record<string, unknown>): string | nu
   if (
     data['applicationId'] &&
     [
+      'application_in_review',
       'application_approved',
       'application_rejected',
       'interview_invitation',
@@ -146,6 +157,9 @@ function buildDeepLink(type: string, data: Record<string, unknown>): string | nu
     ].includes(type)
   ) {
     return `application_${data['applicationId']}`
+  }
+  if (data['vacancyId'] && type === 'invitation_to_apply') {
+    return `vacancy_${data['vacancyId']}`
   }
   if (['subscription_expiring', 'subscription_expired', 'limits_reached'].includes(type)) {
     return 'subscription'
@@ -156,13 +170,19 @@ function buildDeepLink(type: string, data: Record<string, unknown>): string | nu
   if (data['entityId'] && ['moderation_approved', 'moderation_rejected'].includes(type)) {
     return `${data['entityType']}_${data['entityId']}`
   }
+  if (data['resumeId'] && type === 'resume_viewed') {
+    return `resume_${data['resumeId']}`
+  }
   return null
 }
 
 const BUTTON_TEXTS: Partial<Record<NotificationType, string>> = {
   new_application: '👤 Посмотреть отклик',
+  application_in_review: '📋 Открыть отклик',
   application_approved: '✅ Открыть контакты',
   offer_received: '🎉 Посмотреть оффер',
+  resume_viewed: '👁 Открыть резюме',
+  invitation_to_apply: '📨 Открыть вакансию',
   subscription_expiring: '💳 Продлить подписку',
   subscription_expired: '💳 Обновить подписку',
   saved_search_match: '🔍 Посмотреть результаты',
@@ -175,12 +195,14 @@ export function buildNotificationMessage(
 ): TelegramMessage {
   const templates: Record<string, string> = {
     new_application: `📩 Новый отклик на «${data['vacancyTitle'] ?? ''}» от ${data['candidateName'] ?? 'кандидата'}`,
+    application_in_review: `📋 Ваш отклик на «${data['vacancyTitle'] ?? ''}» изучают`,
     application_approved: `✅ Ваш отклик на «${data['vacancyTitle'] ?? ''}» одобрен! Теперь доступны контакты работодателя`,
     application_rejected: `❌ Отклик на «${data['vacancyTitle'] ?? ''}» отклонён`,
     interview_invitation: `📅 Вас приглашают на интервью по вакансии «${data['vacancyTitle'] ?? ''}»`,
     test_task: `📝 Вам отправили тестовое задание по вакансии «${data['vacancyTitle'] ?? ''}»`,
     offer_received: `🎉 Вам сделали оффер по вакансии «${data['vacancyTitle'] ?? ''}»!`,
     resume_viewed: `👁 Ваше резюме «${data['resumeTitle'] ?? ''}» просмотрел работодатель`,
+    invitation_to_apply: `📨 Работодатель ${data['companyName'] ?? ''} приглашает вас откликнуться на вакансию «${data['vacancyTitle'] ?? ''}»`,
     vacancy_viewed: `👁 Вашу вакансию «${data['vacancyTitle'] ?? ''}» просмотрели ${data['views'] ?? 0} раз за вчера`,
     vacancy_expiring_soon: `⏰ Вакансия «${data['vacancyTitle'] ?? ''}» истекает через 3 дня. Продлите публикацию`,
     vacancy_expired: `🔴 Вакансия «${data['vacancyTitle'] ?? ''}» истекла. Опубликуйте заново`,
