@@ -5,11 +5,13 @@
 
 import { isAllowedAvatarUrl } from '../../services/avatar-utils'
 import { getAppliesUsedToday } from '../../api/application/services/apply-credit-service'
+import { stripNullStringFieldsFromBody } from './normalize-user-body'
 
 const SAFE_RESPONSE_FIELDS = [
   'id',
   'email',
   'telegramId',
+  'telegramUsername',
   'firstName',
   'lastName',
   'avatar',
@@ -71,6 +73,26 @@ export default (plugin: any) => {
       return originalRegister(ctx)
     }
     return controller
+  }
+
+  // Strip null email/username/password before Content Manager admin update runs its Yup validator
+  // (contentmanageruser.update calls validateUpdateUserBody, which rejects null strings).
+  // Telegram-only users have email=null; admin edits must not fail on that.
+  if (plugin.controllers.contentmanageruser?.update) {
+    const originalCMUUpdate = plugin.controllers.contentmanageruser.update
+    plugin.controllers.contentmanageruser.update = async (ctx: any) => {
+      stripNullStringFieldsFromBody(ctx.request?.body)
+      return originalCMUUpdate(ctx)
+    }
+  }
+
+  // Same guard for the content-api PUT /users/:id path (plugin.controllers.user.update).
+  if (plugin.controllers.user?.update) {
+    const originalUserUpdate = plugin.controllers.user.update
+    plugin.controllers.user.update = async (ctx: any) => {
+      stripNullStringFieldsFromBody(ctx.request?.body)
+      return originalUserUpdate(ctx)
+    }
   }
 
   // Override GET /users/me — ensure custom fields are returned and sensitive ones stripped

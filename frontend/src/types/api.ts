@@ -2,6 +2,7 @@ export interface User {
   id: number
   email: string
   telegramId: string | null
+  telegramUsername: string | null
   firstName: string
   lastName: string
   avatar: string | null

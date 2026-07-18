@@ -85,8 +85,6 @@ interface Props {
   isLoading?: boolean
 }
 
-const SIZE_OPTIONS = Object.entries(COMPANY_SIZE_LABELS) as Array<[CompanySizeEnum, string]>
-
 export function CompanyForm({ onSubmit, defaultValues, isLoading }: Props) {
   const { t } = useTranslation()
 

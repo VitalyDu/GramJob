@@ -5,11 +5,13 @@ import {
   parseInitData,
   type TelegramUser,
 } from '../services/telegram-validation'
+import { computeTelegramUsernameUpdate } from '../services/telegram-user-sync'
 
 const SAFE_USER_FIELDS = [
   'id',
   'email',
   'telegramId',
+  'telegramUsername',
   'firstName',
   'lastName',
   'avatar',
@@ -70,6 +72,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       user = await strapi.db.query('plugin::users-permissions.user').create({
         data: {
           telegramId,
+          telegramUsername: telegramUser.username ?? null,
           firstName: telegramUser.first_name,
           lastName: telegramUser.last_name ?? null,
           username: `tg_${telegramId}`,
@@ -84,6 +87,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         },
         select: [...SAFE_USER_FIELDS],
       })
+    } else {
+      const change = computeTelegramUsernameUpdate(user.telegramUsername, telegramUser.username)
+      if (change.needsUpdate) {
+        user = await strapi.db.query('plugin::users-permissions.user').update({
+          where: { id: user.id },
+          data: { telegramUsername: change.value },
+          select: [...SAFE_USER_FIELDS],
+        })
+      }
     }
 
     const jwt = strapi.plugin('users-permissions').service('jwt').issue({ id: user.id })

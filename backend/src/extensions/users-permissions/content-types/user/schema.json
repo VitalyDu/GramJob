@@ -57,6 +57,9 @@
       "type": "string",
       "unique": true
     },
+    "telegramUsername": {
+      "type": "string"
+    },
     "firstName": {
       "type": "string"
     },

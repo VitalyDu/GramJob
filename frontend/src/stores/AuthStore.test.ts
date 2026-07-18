@@ -39,6 +39,7 @@ const mockUser = {
   id: 1,
   email: 'test@test.com',
   telegramId: null,
+  telegramUsername: null,
   firstName: 'Test',
   lastName: 'User',
   avatar: null,

@@ -1487,6 +1487,7 @@ export interface PluginUsersPermissionsUser extends Struct.CollectionTypeSchema 
       Schema.Attribute.DefaultTo<'free'>
     telegramId: Schema.Attribute.String & Schema.Attribute.Unique
     telegramNotificationsEnabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>
+    telegramUsername: Schema.Attribute.String
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
     username: Schema.Attribute.String &

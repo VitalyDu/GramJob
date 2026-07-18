@@ -114,8 +114,6 @@ export const DashboardClient = observer(function DashboardClient() {
 
   if (!auth.isAuthenticated || !auth.user) return null
 
-  const user = auth.user
-
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-3">

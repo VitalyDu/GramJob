@@ -1,4 +1,4 @@
-import { initSentry, Sentry } from './sentry'
+import { initSentry } from './sentry'
 import { seedIndustries } from './scripts/seed-industries'
 import { seedSubscriptionPlans } from './scripts/seed-subscription-plans'
 import { seedPackages } from './scripts/seed-packages'
@@ -47,7 +47,7 @@ async function setupVacancySearch(strapi: Core.Strapi) {
       UPDATE vacancies SET boosted_at = created_at WHERE boosted_at IS NULL;
     `)
     strapi.log.info('[vacancy] Full-text search indexes ensured')
-  } catch (err) {
+  } catch {
     // Table may not exist on very first boot before content types sync
     strapi.log.warn('[vacancy] search index setup skipped (will retry on next boot)')
   }

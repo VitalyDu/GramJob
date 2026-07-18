@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
   RESUME_WORK_FORMAT_LABELS,
-  RESUME_EMPLOYMENT_TYPE_LABELS,
   canPublishResume,
   canEditResume,
   canArchiveResume,

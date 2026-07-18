@@ -343,7 +343,7 @@
 - Редизайн «Мой кабинет»: компонент `SubscriptionBanner` (free/pro), компактная сетка 2 колонки, убраны дублирующие секции (Избранное, Уведомления, Подписка, Профиль)
 - Страница «Настройки» (`/dashboard/profile`): layout с `SettingsNav`, `AvatarUploader`, `ProfileSettingsForm`, `TelegramNotificationsToggle`, `ChangePasswordForm`, route `/dashboard/profile/security`
 - Backend: `plugin::users-permissions.auth.changePassword` в seed-permissions; `updateProfile`/`changePassword` в AuthStore
-- Итого: 451 тест frontend, 271 тест backend, 0 ошибок TypeScript
+- Итого: 449 тест frontend, 276 тест backend, 0 ошибок TypeScript
 
 Выполнено (Sprint 10 — SEO, Performance & Launch):
 
