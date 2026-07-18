@@ -129,6 +129,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         if (err) return ctx.badRequest(err)
       }
 
+      const logoId = body.logo
+      if (logoId !== undefined && logoId !== null) {
+        if (typeof logoId !== 'number' || !Number.isInteger(logoId) || logoId <= 0) {
+          return ctx.badRequest('logo must be a positive integer file ID')
+        }
+      }
+
       const company = await svc().createCompany(user.id, {
         name: name as string,
         description: description as string,
@@ -138,7 +145,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         website: body.website as string | undefined,
         telegram: body.telegram as string | undefined,
         linkedin: body.linkedin as string | undefined,
-        logo: body.logo as number | undefined,
+        ...(logoId !== undefined && logoId !== null ? { logo: logoId as number } : {}),
       })
 
       return ctx.send({ data: company }, 201)
@@ -421,9 +428,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         'website',
         'telegram',
         'linkedin',
+        'logo',
       ]
       for (const field of allowedFields) {
         if (field in body) updateData[field] = body[field]
+      }
+
+      if ('logo' in updateData) {
+        const logoVal = updateData.logo
+        if (
+          logoVal !== null &&
+          (typeof logoVal !== 'number' ||
+            !Number.isInteger(logoVal as number) ||
+            (logoVal as number) <= 0)
+        ) {
+          return ctx.badRequest('logo must be a positive integer file ID or null')
+        }
       }
 
       if (Object.keys(updateData).length === 0) {
