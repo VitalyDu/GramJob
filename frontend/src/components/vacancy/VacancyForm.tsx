@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import {
@@ -117,7 +116,6 @@ const _baseSchema = z.object({
     (v) => (v === '' || v === undefined ? undefined : Number(v)),
     z.number().int().nonnegative().optional()
   ),
-  urgent: z.boolean().default(false),
 })
 
 type FormData = z.infer<typeof _baseSchema>
@@ -169,7 +167,6 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
           (v) => (v === '' || v === undefined ? undefined : Number(v)),
           z.number().int().nonnegative().optional()
         ),
-        urgent: z.boolean().default(false),
       }),
     [t]
   )
@@ -205,7 +202,6 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
       ...(defaultValues?.experienceYears !== undefined
         ? { experienceYears: defaultValues.experienceYears }
         : {}),
-      urgent: defaultValues?.urgent ?? false,
     },
   })
 
@@ -252,7 +248,6 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
       description: data.description,
       responsibilities: data.responsibilities,
       requirements: data.requirements,
-      urgent: data.urgent,
       ...(data.companyId ? { companyId: data.companyId } : {}),
       ...(data.city ? { city: data.city } : {}),
       ...(data.salaryFrom !== undefined ? { salaryFrom: data.salaryFrom } : {}),
@@ -576,29 +571,15 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
             />
           </Field>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field>
-              <FieldLabel htmlFor="experienceYears">
-                {t('forms.vacancy.experienceLabel')}
-              </FieldLabel>
-              <Input
-                id="experienceYears"
-                type="number"
-                {...register('experienceYears')}
-                placeholder="3"
-              />
-            </Field>
-            <Field orientation="horizontal" className="items-end pb-0.5">
-              <Controller
-                control={control}
-                name="urgent"
-                render={({ field }) => (
-                  <Switch id="urgent" checked={field.value} onCheckedChange={field.onChange} />
-                )}
-              />
-              <FieldLabel htmlFor="urgent">{t('forms.vacancy.urgentLabel')}</FieldLabel>
-            </Field>
-          </div>
+          <Field>
+            <FieldLabel htmlFor="experienceYears">{t('forms.vacancy.experienceLabel')}</FieldLabel>
+            <Input
+              id="experienceYears"
+              type="number"
+              {...register('experienceYears')}
+              placeholder="3"
+            />
+          </Field>
         </CardContent>
       </Card>
 

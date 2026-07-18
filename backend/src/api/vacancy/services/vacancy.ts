@@ -23,7 +23,6 @@ type CreateVacancyInput = {
   sourceType?: 'internal' | 'external'
   sourceName?: string
   sourceUrl?: string
-  urgent?: boolean
   companyId?: string
 }
 
@@ -52,7 +51,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         sourceType: (input.sourceType ?? 'internal') as 'internal' | 'external',
         sourceName: input.sourceName,
         sourceUrl: input.sourceUrl,
-        urgent: input.urgent ?? false,
+        // urgent/topPlacement выключены при создании — платные апгрейды через /payments/urgent и /payments/top-placement
+        urgent: false,
         highlighted: false,
         topPlacement: false,
         views: 0,

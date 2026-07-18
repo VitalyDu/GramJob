@@ -60,7 +60,6 @@ export const EditVacancyClient = observer(function EditVacancyClient({ id }: Pro
     description: v.description ?? '',
     responsibilities: v.responsibilities ?? '',
     requirements: v.requirements ?? '',
-    urgent: v.urgent,
     ...(v.company?.documentId ? { companyId: v.company.documentId } : {}),
     ...(v.city ? { city: v.city } : {}),
     ...(v.salaryFrom != null ? { salaryFrom: v.salaryFrom } : {}),

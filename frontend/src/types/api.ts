@@ -260,7 +260,6 @@ export interface VacancyCreateInput {
   skills?: string[]
   languages?: string[]
   experienceYears?: number
-  urgent?: boolean
   companyId?: string
 }
 

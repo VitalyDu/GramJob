@@ -211,7 +211,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           sourceType: (body.sourceType as 'internal' | 'external') ?? 'internal',
           sourceName: body.sourceName as string | undefined,
           sourceUrl: body.sourceUrl as string | undefined,
-          urgent: body.urgent as boolean | undefined,
+          // urgent — платная фича, ставится только через POST /payments/urgent
           companyId: body.companyId as string | undefined,
         })
       } catch (createErr: any) {
@@ -637,7 +637,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         'skills',
         'languages',
         'experienceYears',
-        'urgent',
+        // urgent намеренно не в allowlist: платная опция через POST /payments/urgent
       ]
 
       const updateData: Record<string, unknown> = {}
