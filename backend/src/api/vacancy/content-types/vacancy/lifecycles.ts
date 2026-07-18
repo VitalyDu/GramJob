@@ -40,7 +40,7 @@ async function findPreviousStatus(
 
 function sanitizeJsonFields(data: Record<string, unknown>) {
   for (const field of ['skills', 'languages']) {
-    if (data[field] === '' || data[field] === undefined) {
+    if (field in data && (data[field] === '' || data[field] === undefined)) {
       data[field] = null
     }
   }
