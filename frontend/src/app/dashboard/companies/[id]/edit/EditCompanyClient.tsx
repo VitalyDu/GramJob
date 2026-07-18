@@ -78,6 +78,7 @@ export const EditCompanyClient = observer(function EditCompanyClient({ id }: Pro
       <CompanyForm
         onSubmit={handleSubmit}
         isLoading={store.isLoading}
+        defaultLogo={company.logo ?? null}
         defaultValues={{
           name: company.name,
           country: company.country,
