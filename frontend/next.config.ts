@@ -16,7 +16,7 @@ const cspDirectives = [
   "img-src 'self' data: blob: https: http:",
   "font-src 'self' data:",
   "connect-src 'self' https: http:",
-  "frame-src 'self' https://telegram.org",
+  "frame-src 'self' https://telegram.org https://oauth.telegram.org",
   "frame-ancestors 'self' https://web.telegram.org https://k.telegram.org",
   "form-action 'self'",
   "base-uri 'self'",
