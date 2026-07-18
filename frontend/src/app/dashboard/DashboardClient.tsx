@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 import {
@@ -17,6 +16,7 @@ import {
 } from 'lucide-react'
 import { useStores } from '@/stores/StoreProvider'
 import { useIsDesktop } from '@/hooks/useIsDesktop'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
@@ -24,7 +24,7 @@ import { SubscriptionBanner } from '@/components/subscription/SubscriptionBanner
 import { PlanLimitsCard } from '@/components/subscription/PlanLimitsCard'
 
 export const DashboardClient = observer(function DashboardClient() {
-  const router = useRouter()
+  useRequireAuth()
   const { auth } = useStores()
   const { t } = useTranslation()
   const [createOpen, setCreateOpen] = useState(false)
@@ -108,11 +108,7 @@ export const DashboardClient = observer(function DashboardClient() {
     },
   ]
 
-  useEffect(() => {
-    if (!auth.isAuthenticated) router.replace('/login')
-  }, [auth.isAuthenticated, router])
-
-  if (!auth.isAuthenticated || !auth.user) return null
+  if (auth.isInitializing || !auth.isAuthenticated || !auth.user) return null
 
   return (
     <div className="space-y-6">
