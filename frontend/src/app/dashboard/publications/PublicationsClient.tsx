@@ -87,7 +87,7 @@ export const PublicationsClient = observer(function PublicationsClient() {
       {vacancy.myVacancies.length > 0 && (
         <Card>
           <CardHeader className="border-b pb-4">
-            <div className="flex items-start justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-y-2">
               <CardTitle className="flex items-center gap-2">
                 {t('publications.vacancies')}
                 <Badge variant="secondary">{vacancy.myVacancies.length}</Badge>
@@ -127,7 +127,7 @@ export const PublicationsClient = observer(function PublicationsClient() {
       {resume.myResumes.length > 0 && (
         <Card>
           <CardHeader className="border-b pb-4">
-            <div className="flex items-start justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-y-2">
               <CardTitle className="flex items-center gap-2">
                 {t('publications.resumes')}
                 <Badge variant="secondary">{resume.myResumes.length}</Badge>
@@ -167,7 +167,7 @@ export const PublicationsClient = observer(function PublicationsClient() {
       {company.myCompanies.length > 0 && (
         <Card>
           <CardHeader className="border-b pb-4">
-            <div className="flex items-start justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-y-2">
               <CardTitle className="flex items-center gap-2">
                 {t('publications.companies')}
                 <Badge variant="secondary">{company.myCompanies.length}</Badge>

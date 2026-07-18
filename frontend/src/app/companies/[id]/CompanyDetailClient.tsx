@@ -169,7 +169,7 @@ export const CompanyDetailClient = observer(function CompanyDetailClient({
       {/* Recent vacancies */}
       {company.vacancies && company.vacancies.length > 0 && (
         <Card>
-          <CardHeader className="flex-row items-center justify-between space-y-0">
+          <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-y-2">
             <CardTitle>{t('companyDetail.vacancies')}</CardTitle>
             <Button asChild variant="ghost" size="sm">
               <Link href={`/vacancies?company=${company.documentId}`}>
