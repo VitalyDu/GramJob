@@ -81,7 +81,8 @@
     "close": "Закрыть",
     "send": "Отправить",
     "sending": "Отправка...",
-    "optional": "(необязательно)"
+    "optional": "(необязательно)",
+    "delete": "Удалить"
   },
   "vacancies": {
     "description": "Найдите работу мечты в Telegram-экосистеме",
@@ -595,6 +596,10 @@
       "namePlaceholder": "Название компании",
       "descriptionLabel": "Описание",
       "descriptionPlaceholder": "Расскажите о компании",
+      "logoLabel": "Логотип",
+      "logoUpload": "Загрузить логотип",
+      "logoChange": "Заменить",
+      "logoUploadError": "Ошибка загрузки изображения",
       "websiteLabel": "Сайт",
       "telegramLabel": "Telegram",
       "linkedinLabel": "LinkedIn",

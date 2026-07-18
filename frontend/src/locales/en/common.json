@@ -81,7 +81,8 @@
     "close": "Close",
     "send": "Send",
     "sending": "Sending...",
-    "optional": "(optional)"
+    "optional": "(optional)",
+    "delete": "Delete"
   },
   "vacancies": {
     "description": "Find your dream job in the Telegram ecosystem",
@@ -595,6 +596,10 @@
       "namePlaceholder": "Company name",
       "descriptionLabel": "Description",
       "descriptionPlaceholder": "Tell us about the company",
+      "logoLabel": "Logo",
+      "logoUpload": "Upload logo",
+      "logoChange": "Change",
+      "logoUploadError": "Image upload error",
       "websiteLabel": "Website",
       "telegramLabel": "Telegram",
       "linkedinLabel": "LinkedIn",
