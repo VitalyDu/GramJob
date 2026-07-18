@@ -203,24 +203,30 @@ export default (plugin: any) => {
     })) as number
     const resumesRemaining = Math.max(plan.resumesLimit - resumesCount, 0)
 
+    // `limit = used + remaining` invariant: total capacity reflects plan + currently owned credits.
+    // Guarantees used ≤ limit at all times, even after credits get topped up mid-period.
     ctx.body = {
       applications: {
+        used: applyUsedToday,
         remaining: applyRemaining,
-        limit: plan.applicationsPerDay,
+        limit: applyUsedToday + applyRemaining,
         resetsAt: applyResetsAt,
       },
       resumes: {
+        used: resumesCount,
         remaining: resumesRemaining,
-        limit: plan.resumesLimit,
+        limit: resumesCount + resumesRemaining,
       },
       vacancyCreations: {
+        used: createdThisMonth,
         remaining: vacancyCreationsRemaining,
-        limit: plan.vacanciesPerMonth,
+        limit: createdThisMonth + vacancyCreationsRemaining,
         resetsAt: vacancyCreationsResetsAt,
       },
       activeVacancies: {
+        used: activeVacanciesCount,
         remaining: activeVacanciesRemaining,
-        limit: plan.activeVacanciesLimit,
+        limit: activeVacanciesCount + activeVacanciesRemaining,
       },
     }
   }

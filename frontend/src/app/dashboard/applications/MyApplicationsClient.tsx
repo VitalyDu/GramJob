@@ -45,7 +45,7 @@ export const MyApplicationsClient = observer(function MyApplicationsClient() {
           <CardContent className="pt-6">
             <UsageLimitBar
               label={t('limits.applications.label')}
-              remaining={limits.data.applications.remaining}
+              used={limits.data.applications.used}
               limit={limits.data.applications.limit}
               resetsAt={limits.data.applications.resetsAt}
             />

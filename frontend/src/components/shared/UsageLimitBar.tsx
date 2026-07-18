@@ -5,17 +5,18 @@ import { useTranslation } from 'react-i18next'
 
 interface Props {
   label: string
-  remaining: number
+  used: number
   limit: number
   resetsAt?: string
 }
 
-function getColorClass(remaining: number, limit: number): string {
-  if (limit <= 0) return 'bg-green-500'
-  const pct = remaining / limit
-  if (pct >= 0.5) return 'bg-green-500'
-  if (pct >= 0.2) return 'bg-yellow-400'
-  return 'bg-red-500'
+// used/limit fill: 0–50 % жёлтый, 50–80 % оранжевый, 80–100 % красный
+export function getUsageColorClass(used: number, limit: number): string {
+  if (limit <= 0) return 'bg-yellow-400'
+  const pct = used / limit
+  if (pct >= 0.8) return 'bg-red-500'
+  if (pct >= 0.5) return 'bg-orange-500'
+  return 'bg-yellow-400'
 }
 
 function formatTimeUntil(isoDate: string, lang: string): string {
@@ -38,7 +39,7 @@ function formatTimeUntil(isoDate: string, lang: string): string {
   return m > 0 ? `${h} ч ${m} мин` : `${h} ч`
 }
 
-export function UsageLimitBar({ label, remaining, limit, resetsAt }: Props) {
+export function UsageLimitBar({ label, used, limit, resetsAt }: Props) {
   const { t, i18n } = useTranslation()
   const [timeUntil, setTimeUntil] = useState<string | null>(null)
 
@@ -53,15 +54,15 @@ export function UsageLimitBar({ label, remaining, limit, resetsAt }: Props) {
     return () => clearInterval(id)
   }, [resetsAt, i18n.language])
 
-  const pct = limit > 0 ? Math.min(remaining / limit, 1) * 100 : 100
-  const colorClass = getColorClass(remaining, limit)
+  const pct = limit > 0 ? Math.min(used / limit, 1) * 100 : 0
+  const colorClass = getUsageColorClass(used, limit)
 
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium text-card-foreground">{label}</span>
         <span className="tabular-nums text-muted-foreground">
-          {remaining} / {limit}
+          {used} / {limit}
         </span>
       </div>
       <div

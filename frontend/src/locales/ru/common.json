@@ -756,16 +756,16 @@
   "limits": {
     "resetsIn": "Обновится через {{time}}",
     "applications": {
-      "label": "Остаток откликов"
+      "label": "Отклики"
     },
     "resumes": {
-      "label": "Остаток резюме"
+      "label": "Резюме"
     },
     "vacancyCreations": {
-      "label": "Остаток вакансий за месяц"
+      "label": "Вакансий в месяц"
     },
     "activeVacancies": {
-      "label": "Остаток активных вакансий"
+      "label": "Активных вакансий"
     }
   },
   "shared": {

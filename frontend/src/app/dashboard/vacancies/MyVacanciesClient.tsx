@@ -132,13 +132,13 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
           <CardContent className="space-y-5 pt-6">
             <UsageLimitBar
               label={t('limits.vacancyCreations.label')}
-              remaining={limits.data.vacancyCreations.remaining}
+              used={limits.data.vacancyCreations.used}
               limit={limits.data.vacancyCreations.limit}
               resetsAt={limits.data.vacancyCreations.resetsAt}
             />
             <UsageLimitBar
               label={t('limits.activeVacancies.label')}
-              remaining={limits.data.activeVacancies.remaining}
+              used={limits.data.activeVacancies.used}
               limit={limits.data.activeVacancies.limit}
             />
           </CardContent>

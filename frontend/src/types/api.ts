@@ -580,10 +580,10 @@ export interface ApplyPackage {
 // --- User Limits ---
 
 export interface UserLimits {
-  applications: { remaining: number; limit: number; resetsAt: string }
-  resumes: { remaining: number; limit: number }
-  vacancyCreations: { remaining: number; limit: number; resetsAt: string }
-  activeVacancies: { remaining: number; limit: number }
+  applications: { used: number; remaining: number; limit: number; resetsAt: string }
+  resumes: { used: number; remaining: number; limit: number }
+  vacancyCreations: { used: number; remaining: number; limit: number; resetsAt: string }
+  activeVacancies: { used: number; remaining: number; limit: number }
 }
 
 // --- Notifications ---

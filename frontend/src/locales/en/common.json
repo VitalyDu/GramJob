@@ -756,16 +756,16 @@
   "limits": {
     "resetsIn": "Resets in {{time}}",
     "applications": {
-      "label": "Applications remaining"
+      "label": "Applications"
     },
     "resumes": {
-      "label": "Resumes remaining"
+      "label": "Resumes"
     },
     "vacancyCreations": {
-      "label": "Vacancies remaining this month"
+      "label": "Vacancies this month"
     },
     "activeVacancies": {
-      "label": "Active vacancies remaining"
+      "label": "Active vacancies"
     }
   },
   "shared": {

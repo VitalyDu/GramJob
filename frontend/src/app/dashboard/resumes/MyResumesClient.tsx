@@ -79,7 +79,7 @@ export const MyResumesClient = observer(function MyResumesClient() {
           <CardContent className="pt-6">
             <UsageLimitBar
               label={t('limits.resumes.label')}
-              remaining={limits.data.resumes.remaining}
+              used={limits.data.resumes.used}
               limit={limits.data.resumes.limit}
             />
           </CardContent>

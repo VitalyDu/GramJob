@@ -25,24 +25,24 @@ export const PlanLimitsCard = observer(function PlanLimitsCard() {
       <CardContent className="space-y-5 pt-6">
         <UsageLimitBar
           label={t('limits.applications.label')}
-          remaining={applications.remaining}
+          used={applications.used}
           limit={applications.limit}
           resetsAt={applications.resetsAt}
         />
         <UsageLimitBar
           label={t('limits.resumes.label')}
-          remaining={resumes.remaining}
+          used={resumes.used}
           limit={resumes.limit}
         />
         <UsageLimitBar
           label={t('limits.vacancyCreations.label')}
-          remaining={vacancyCreations.remaining}
+          used={vacancyCreations.used}
           limit={vacancyCreations.limit}
           resetsAt={vacancyCreations.resetsAt}
         />
         <UsageLimitBar
           label={t('limits.activeVacancies.label')}
-          remaining={activeVacancies.remaining}
+          used={activeVacancies.used}
           limit={activeVacancies.limit}
         />
       </CardContent>
