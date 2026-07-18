@@ -10,6 +10,7 @@ type CreateCompanyInput = {
   website?: string
   telegram?: string
   linkedin?: string
+  logo?: number
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
@@ -35,6 +36,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         slug,
         moderationStatus: 'moderation',
         owner: ownerId,
+        ...(input.logo !== undefined ? { logo: input.logo } : {}),
       },
     })
   },

@@ -138,6 +138,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         website: body.website as string | undefined,
         telegram: body.telegram as string | undefined,
         linkedin: body.linkedin as string | undefined,
+        logo: body.logo as number | undefined,
       })
 
       return ctx.send({ data: company }, 201)
