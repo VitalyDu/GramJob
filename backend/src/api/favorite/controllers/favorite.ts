@@ -141,15 +141,37 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       return ctx.badRequest('type must be one of: vacancy, resume, company')
     }
 
-    // Enforce uniqueness: (user, type, targetId)
-    const existing = await (strapi.documents as any)('api::favorite.favorite').findFirst({
-      filters: {
-        user: { id: { $eq: user.id } },
-        type: { $eq: type as string },
-        targetId: { $eq: targetId as string },
-      },
+    // Уникальность (user, type, targetId) на API-уровне через advisory-lock:
+    // linking-таблица Strapi 5 не позволяет наложить обычный UNIQUE, поэтому
+    // параллельные create-запросы сериализуются pg_advisory_xact_lock по ключу.
+    const lockKey = `favorite:${user.id}:${type as string}:${targetId as string}`
+
+    const result = await strapi.db.transaction(async ({ trx }: { trx: any }) => {
+      await trx.raw('SELECT pg_advisory_xact_lock(hashtextextended(?::text, 0))', [lockKey])
+
+      const existing = await (strapi.documents as any)('api::favorite.favorite').findFirst({
+        filters: {
+          user: { id: { $eq: user.id } },
+          type: { $eq: type as string },
+          targetId: { $eq: targetId as string },
+        },
+      })
+      if (existing) {
+        return { alreadyExists: true as const }
+      }
+
+      const favorite = await (strapi.documents as any)('api::favorite.favorite').create({
+        data: {
+          user: user.id,
+          type: type as string,
+          targetId: targetId as string,
+        },
+        fields: ['documentId', 'type', 'targetId', 'createdAt'],
+      })
+      return { favorite }
     })
-    if (existing) {
+
+    if ('alreadyExists' in result) {
       return ctx.send(
         {
           error: { code: 'ALREADY_FAVORITED', message: 'Already in favorites' },
@@ -158,16 +180,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       )
     }
 
-    const favorite = await (strapi.documents as any)('api::favorite.favorite').create({
-      data: {
-        user: user.id,
-        type: type as string,
-        targetId: targetId as string,
-      },
-      fields: ['documentId', 'type', 'targetId', 'createdAt'],
-    })
-
-    return ctx.send({ data: favorite }, 201)
+    return ctx.send({ data: result.favorite }, 201)
   },
 
   async remove(ctx: any) {

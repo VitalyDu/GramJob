@@ -3,6 +3,11 @@ import type { Core } from '@strapi/strapi'
 import { toSlug, canSubmit, canDelete } from '../services/company-utils'
 import { getBlockedIds } from '../../block/services/block-filter'
 import { resolveOptionalUserId } from '../../../utils/optional-auth'
+import {
+  validateShortText,
+  validateLongText,
+  validateHttpUrl,
+} from '../../../utils/input-validation'
 import type companyServiceFactory from '../services/company'
 
 // IP-tracker для company.uniqueViews (аналогично vacancy/resume)
@@ -104,6 +109,24 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (!VALID_COMPANY_SIZES.includes(companySize as (typeof VALID_COMPANY_SIZES)[number])) {
         return ctx.badRequest(`companySize must be one of: ${VALID_COMPANY_SIZES.join(', ')}`)
+      }
+
+      for (const [field, val] of [
+        ['name', name],
+        ['country', country],
+        ['city', body.city],
+        ['telegram', body.telegram],
+      ] as const) {
+        if (val !== undefined && val !== null && val !== '') {
+          const err = validateShortText(field, val)
+          if (err) return ctx.badRequest(err)
+        }
+      }
+      const descErr = validateLongText('description', description)
+      if (descErr) return ctx.badRequest(descErr)
+      for (const field of ['website', 'linkedin'] as const) {
+        const err = validateHttpUrl(field, body[field])
+        if (err) return ctx.badRequest(err)
       }
 
       const company = await svc().createCompany(user.id, {
@@ -270,6 +293,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (!company) return ctx.notFound('Company not found')
 
+      // Block-фильтр: viewer заблокировал компанию или её владельца → 404.
+      if (viewer && viewer.id !== (company as any).owner?.id) {
+        const { userIds, companyIds } = await getBlockedIds(strapi, viewer.id)
+        const ownerId = (company as any).owner?.id as number | undefined
+        const numericCompanyId = (company as any).id as number | undefined
+        if (
+          (ownerId && userIds.includes(ownerId)) ||
+          (numericCompanyId && companyIds.includes(numericCompanyId))
+        ) {
+          return ctx.notFound('Company not found')
+        }
+      }
+
       const skipViewCount =
         (ctx.query as Record<string, string> | undefined)?.skipViewCount === 'true'
       const counters = skipViewCount
@@ -323,6 +359,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       })
 
       if (!company) return ctx.notFound('Company not found')
+
+      // Block-фильтр (см. findOne)
+      if (viewer && viewer.id !== (company as any).owner?.id) {
+        const { userIds, companyIds } = await getBlockedIds(strapi, viewer.id)
+        const ownerId = (company as any).owner?.id as number | undefined
+        const numericCompanyId = (company as any).id as number | undefined
+        if (
+          (ownerId && userIds.includes(ownerId)) ||
+          (numericCompanyId && companyIds.includes(numericCompanyId))
+        ) {
+          return ctx.notFound('Company not found')
+        }
+      }
 
       const skipViewCount =
         (ctx.query as Record<string, string> | undefined)?.skipViewCount === 'true'
@@ -394,6 +443,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           )
         ) {
           return ctx.badRequest(`companySize must be one of: ${VALID_COMPANY_SIZES.join(', ')}`)
+        }
+      }
+
+      for (const field of ['name', 'country', 'city', 'telegram'] as const) {
+        if (field in updateData) {
+          const err = validateShortText(field, updateData[field])
+          if (err) return ctx.badRequest(err)
+        }
+      }
+      if ('description' in updateData) {
+        const err = validateLongText('description', updateData.description)
+        if (err) return ctx.badRequest(err)
+      }
+      for (const field of ['website', 'linkedin'] as const) {
+        if (field in updateData) {
+          const err = validateHttpUrl(field, updateData[field])
+          if (err) return ctx.badRequest(err)
         }
       }
 

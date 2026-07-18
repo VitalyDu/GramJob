@@ -5,6 +5,11 @@ import { getBlockedIds } from '../../block/services/block-filter'
 import { toArray } from '../../../utils/query'
 import { sendNotification } from '../../../services/notification.service'
 import { notifyLimitReached } from '../../../services/limit-notify'
+import {
+  validateShortText,
+  validateLongText,
+  validateSalaryRange,
+} from '../../../utils/input-validation'
 import type resumeServiceFactory from '../services/resume'
 
 // Один resume_viewed на пару (резюме, зритель) до рестарта — чтобы не спамить владельца
@@ -91,6 +96,25 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           'title, firstName, lastName, country, workFormat, employmentType are required'
         )
       }
+
+      for (const [field, val] of [
+        ['title', title],
+        ['firstName', firstName],
+        ['lastName', lastName],
+        ['country', country],
+        ['city', body.city],
+      ] as const) {
+        if (val !== undefined && val !== null && val !== '') {
+          const err = validateShortText(field, val)
+          if (err) return ctx.badRequest(err)
+        }
+      }
+      if (body.about !== undefined && body.about !== null) {
+        const err = validateLongText('about', body.about)
+        if (err) return ctx.badRequest(err)
+      }
+      const salaryErr = validateSalaryRange(body.desiredSalary, body.desiredSalary)
+      if (salaryErr) return ctx.badRequest(salaryErr)
 
       if (
         !Array.isArray(workFormat) ||
@@ -330,6 +354,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return ctx.notFound('Resume not found')
       }
 
+      // Block-фильтр: если viewer заблокировал автора резюме — прикидываемся 404
+      // (иначе через прямую ссылку можно обходить фильтр /resumes list).
+      if (!isOwner && resumeOwnerId) {
+        const { userIds } = await getBlockedIds(strapi, requestUser.id)
+        if (userIds.includes(resumeOwnerId)) {
+          return ctx.notFound('Resume not found')
+        }
+      }
+
       // Resume database is a Max/VIP feature, but employers can always view resumes
       // of candidates who applied to their vacancies (regardless of plan)
       if (!isOwner) {
@@ -459,6 +492,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (Object.keys(updateData).length === 0) {
         return ctx.badRequest('No updatable fields provided.')
+      }
+
+      for (const field of ['title', 'firstName', 'lastName', 'country', 'city'] as const) {
+        if (field in updateData) {
+          const err = validateShortText(field, updateData[field])
+          if (err) return ctx.badRequest(err)
+        }
+      }
+      if ('about' in updateData) {
+        const err = validateLongText('about', updateData.about)
+        if (err) return ctx.badRequest(err)
+      }
+      if ('desiredSalary' in updateData) {
+        const err = validateSalaryRange(updateData.desiredSalary, updateData.desiredSalary)
+        if (err) return ctx.badRequest(err)
       }
 
       if ('workFormat' in updateData) {

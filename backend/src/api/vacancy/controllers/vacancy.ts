@@ -10,6 +10,12 @@ import { getBlockedIds } from '../../block/services/block-filter'
 import { resolveOptionalUserId } from '../../../utils/optional-auth'
 import { toArray } from '../../../utils/query'
 import { notifyLimitReached } from '../../../services/limit-notify'
+import {
+  validateShortText,
+  validateLongText,
+  validateHttpUrl,
+  validateSalaryRange,
+} from '../../../utils/input-validation'
 import type vacancyServiceFactory from '../services/vacancy'
 
 type VacancyService = ReturnType<typeof vacancyServiceFactory>
@@ -123,6 +129,33 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           'title, industryId, specializationId, employmentType, workFormat, seniority, country, description, responsibilities, requirements are required'
         )
       }
+
+      for (const [field, val] of [
+        ['title', title],
+        ['country', country],
+        ['city', body.city],
+        ['sourceName', body.sourceName],
+      ] as const) {
+        if (val !== undefined && val !== null && val !== '') {
+          const err = validateShortText(field, val)
+          if (err) return ctx.badRequest(err)
+        }
+      }
+      for (const [field, val] of [
+        ['description', description],
+        ['responsibilities', responsibilities],
+        ['requirements', requirements],
+        ['conditions', body.conditions],
+      ] as const) {
+        if (val !== undefined && val !== null) {
+          const err = validateLongText(field, val)
+          if (err) return ctx.badRequest(err)
+        }
+      }
+      const sourceUrlErr = validateHttpUrl('sourceUrl', body.sourceUrl)
+      if (sourceUrlErr) return ctx.badRequest(sourceUrlErr)
+      const salaryErr = validateSalaryRange(body.salaryFrom, body.salaryTo)
+      if (salaryErr) return ctx.badRequest(salaryErr)
 
       if (
         !Array.isArray(workFormat) ||
@@ -577,6 +610,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (!vacancy) return ctx.notFound('Vacancy not found')
 
+      // Block-фильтр: если viewer заблокировал employer/company — 404 (как и в списке).
+      const viewerId = await resolveOptionalUserId(strapi, ctx)
+      if (viewerId) {
+        const posterId = (vacancy as any).postedBy?.id as number | undefined
+        const companyId = (vacancy as any).company?.id as number | undefined
+        if (viewerId !== posterId) {
+          const { userIds, companyIds } = await getBlockedIds(strapi, viewerId)
+          if (
+            (posterId && userIds.includes(posterId)) ||
+            (companyId && companyIds.includes(companyId))
+          ) {
+            return ctx.notFound('Vacancy not found')
+          }
+        }
+      }
+
       // Server-side fetches (e.g. generateMetadata for SEO) must not inflate view counters
       if ((ctx.query as Record<string, string>).skipViewCount === 'true') {
         return ctx.send({ data: vacancy })
@@ -643,6 +692,31 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const updateData: Record<string, unknown> = {}
       for (const field of allowedFields) {
         if (field in body) updateData[field] = body[field]
+      }
+
+      for (const field of ['title', 'country', 'city'] as const) {
+        if (field in updateData) {
+          const err = validateShortText(field, updateData[field])
+          if (err) return ctx.badRequest(err)
+        }
+      }
+      for (const field of [
+        'description',
+        'responsibilities',
+        'requirements',
+        'conditions',
+      ] as const) {
+        if (field in updateData) {
+          const err = validateLongText(field, updateData[field])
+          if (err) return ctx.badRequest(err)
+        }
+      }
+      if ('salaryFrom' in updateData || 'salaryTo' in updateData) {
+        const salaryErr = validateSalaryRange(
+          'salaryFrom' in updateData ? updateData.salaryFrom : undefined,
+          'salaryTo' in updateData ? updateData.salaryTo : undefined
+        )
+        if (salaryErr) return ctx.badRequest(salaryErr)
       }
 
       if ('workFormat' in updateData) {

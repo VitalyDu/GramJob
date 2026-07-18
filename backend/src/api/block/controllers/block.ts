@@ -56,15 +56,37 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       return ctx.badRequest('Cannot block yourself')
     }
 
-    // Enforce uniqueness: (user, targetType, targetId)
-    const existing = await (strapi.documents as any)('api::block.block').findFirst({
-      filters: {
-        user: { id: { $eq: user.id } },
-        targetType: { $eq: targetType as string },
-        targetId: { $eq: targetIdNum },
-      },
+    const nameToStore = typeof targetName === 'string' ? targetName.trim() : ''
+
+    // Уникальность (user, targetType, targetId) через advisory-lock:
+    // см. комментарий в favorite.controller.
+    const lockKey = `block:${user.id}:${targetType as string}:${targetIdNum}`
+
+    const result = await strapi.db.transaction(async ({ trx }: { trx: any }) => {
+      await trx.raw('SELECT pg_advisory_xact_lock(hashtextextended(?::text, 0))', [lockKey])
+
+      const existing = await (strapi.documents as any)('api::block.block').findFirst({
+        filters: {
+          user: { id: { $eq: user.id } },
+          targetType: { $eq: targetType as string },
+          targetId: { $eq: targetIdNum },
+        },
+      })
+      if (existing) return { alreadyExists: true as const }
+
+      const block = await (strapi.documents as any)('api::block.block').create({
+        data: {
+          user: user.id,
+          targetType: targetType as string,
+          targetId: targetIdNum,
+          targetName: nameToStore,
+        },
+        fields: ['documentId', 'targetType', 'targetId', 'targetName', 'createdAt'],
+      })
+      return { block }
     })
-    if (existing) {
+
+    if ('alreadyExists' in result) {
       return ctx.send(
         {
           error: { code: 'ALREADY_BLOCKED', message: 'This entity is already blocked' },
@@ -73,19 +95,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       )
     }
 
-    const nameToStore = typeof targetName === 'string' ? targetName.trim() : ''
-
-    const block = await (strapi.documents as any)('api::block.block').create({
-      data: {
-        user: user.id,
-        targetType: targetType as string,
-        targetId: targetIdNum,
-        targetName: nameToStore,
-      },
-      fields: ['documentId', 'targetType', 'targetId', 'targetName', 'createdAt'],
-    })
-
-    return ctx.send({ data: block }, 201)
+    return ctx.send({ data: result.block }, 201)
   },
 
   async remove(ctx: any) {

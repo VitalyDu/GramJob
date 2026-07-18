@@ -162,7 +162,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       )
     }
 
-    return ctx.send({ data: application }, 201)
+    return ctx.send({ data: maskEmployerTelegram(application, user.id) }, 201)
   },
 
   async findMine(ctx: any) {
