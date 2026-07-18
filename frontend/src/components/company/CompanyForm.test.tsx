@@ -8,21 +8,24 @@ vi.mock('@/components/company/LogoUploader', () => ({
     currentLogoUrl,
     onUploadComplete,
     onRemove,
+    disabled,
   }: {
     currentLogoUrl: string | null
     onUploadComplete: (r: { id: number; url: string }) => void
     onRemove: () => void
+    disabled?: boolean
   }) => (
     <div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {currentLogoUrl && <img src={currentLogoUrl} alt="Logo preview" />}
       <button
         type="button"
+        disabled={disabled}
         onClick={() => onUploadComplete({ id: 99, url: 'https://example.com/logo.png' })}
       >
         Симулировать загрузку
       </button>
-      <button type="button" onClick={onRemove}>
+      <button type="button" disabled={disabled} onClick={onRemove}>
         Удалить лого
       </button>
     </div>
