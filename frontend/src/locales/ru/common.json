@@ -177,7 +177,7 @@
     "conditions": "Условия",
     "skills": "Навыки",
     "languages": "Языки",
-    "experienceYears": "Опыт: {{count}} {{count, plural, one {год} few {года} other {лет}}}",
+    "experienceYears": "Опыт: {{count}} лет",
     "backToAll": "← Все вакансии",
     "notFound": "Не удалось загрузить вакансию",
     "share": "Поделиться",

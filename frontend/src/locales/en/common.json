@@ -177,7 +177,7 @@
     "conditions": "Conditions",
     "skills": "Skills",
     "languages": "Languages",
-    "experienceYears": "Experience: {{count}} {{count, plural, one {year} other {years}}}",
+    "experienceYears": "Experience: {{count}} years",
     "backToAll": "← All vacancies",
     "notFound": "Failed to load vacancy",
     "share": "Share",
