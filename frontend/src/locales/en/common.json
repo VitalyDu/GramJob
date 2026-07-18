@@ -718,12 +718,6 @@
       "close": "Close",
       "vacanciesPerMonth": "{{count}} vacancies/month",
       "upgrade": "Upgrade plan"
-    },
-    "usage": {
-      "vacanciesMonth": "Vacancies this month",
-      "applyToday": "Applications today",
-      "resumes": "Resumes",
-      "resetsIn": "Resets in {{time}}"
     }
   },
   "salary": {

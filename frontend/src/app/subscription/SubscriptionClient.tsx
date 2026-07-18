@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { useStores } from '@/stores/StoreProvider'
 import { SubscriptionBadge } from '@/components/subscription/SubscriptionBadge'
 import { SubscriptionPlanCard } from '@/components/subscription/SubscriptionPlanCard'
-import { PlanUsageCard } from '@/components/subscription/PlanUsageCard'
+import { PlanLimitsCard } from '@/components/subscription/PlanLimitsCard'
 import { PackageCard } from '@/components/subscription/PackageCard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -17,7 +17,7 @@ import { useTelegramPayment } from '@/hooks/useTelegramPayment'
 
 export const SubscriptionClient = observer(function SubscriptionClient() {
   const { t } = useTranslation()
-  const { auth, payment, resume } = useStores()
+  const { auth, payment } = useStores()
   const { openInvoice } = useTelegramPayment()
   const router = useRouter()
 
@@ -32,8 +32,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
     void payment.fetchPlans()
     void payment.fetchVacancyPackages()
     void payment.fetchApplyPackages()
-    if (user) void resume.fetchMyResumes()
-  }, [payment, resume, user])
+  }, [payment])
 
   const handleBuyPlan = async (planCode: string) => {
     if (!user) {
@@ -121,15 +120,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
       {/* Использование плана */}
       {user ? (
         <section>
-          <PlanUsageCard
-            user={user}
-            plan={
-              payment.plans.find((p) => p.code === user.subscriptionPlan) ??
-              payment.plans.find((p) => p.code === 'free') ??
-              null
-            }
-            resumeTotal={resume.total}
-          />
+          <PlanLimitsCard />
         </section>
       ) : (
         <section>

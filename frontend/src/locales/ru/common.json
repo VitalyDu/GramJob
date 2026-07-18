@@ -718,12 +718,6 @@
       "close": "Закрыть",
       "vacanciesPerMonth": "{{count}} вакансий/мес",
       "upgrade": "Улучшить тариф"
-    },
-    "usage": {
-      "vacanciesMonth": "Вакансии в этом месяце",
-      "applyToday": "Отклики сегодня",
-      "resumes": "Резюме",
-      "resetsIn": "Обновится через {{time}}"
     }
   },
   "salary": {
