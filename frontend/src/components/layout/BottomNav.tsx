@@ -1,17 +1,17 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { usePathname } from 'next/navigation'
-import { Briefcase, Building2, FileText, LayoutDashboard, MessageSquare } from 'lucide-react'
+import { Briefcase, Building2, FileText, Home, LayoutDashboard, MessageSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type NavLink = {
   href: string
   label: string
+  icon: typeof Briefcase
   isActive: (pathname: string) => boolean
-} & ({ icon: typeof Briefcase; imageSrc?: never } | { imageSrc: string; icon?: never })
+}
 
 export function BottomNav({
   isMiniApp,
@@ -62,7 +62,7 @@ export function BottomNav({
 
   const gramJobLink: NavLink = {
     href: '/',
-    imageSrc: '/gramjob-icon.png',
+    icon: Home,
     label: 'GramJob',
     isActive: (p) => p === '/',
   }
@@ -117,8 +117,7 @@ export function BottomNav({
       >
         {links.map((link) => {
           const active = link.isActive(pathname)
-          const Icon = 'icon' in link ? link.icon : null
-          const imageSrc = 'imageSrc' in link ? link.imageSrc : null
+          const Icon = link.icon
           return (
             <Link
               key={link.href}
@@ -129,17 +128,7 @@ export function BottomNav({
                 active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              {imageSrc ? (
-                <Image
-                  src={imageSrc}
-                  alt={link.label}
-                  width={22}
-                  height={22}
-                  className={cn('rounded-sm', !active && 'opacity-60')}
-                />
-              ) : Icon ? (
-                <Icon size={22} strokeWidth={active ? 2.4 : 2} />
-              ) : null}
+              <Icon size={22} strokeWidth={active ? 2.4 : 2} />
               <span>{link.label}</span>
             </Link>
           )
