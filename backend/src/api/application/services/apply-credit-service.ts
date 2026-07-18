@@ -1,14 +1,21 @@
 import type { Core } from '@strapi/strapi'
+import { getPlanLimits, FALLBACK_PLAN_LIMITS } from '../../../services/plan-limits'
+import { tryConsumeDaily, refundDaily, getUsedToday } from '../../../services/daily-limits'
 
+/**
+ * Обратная совместимость: `APPLY_PLAN_LIMITS` теперь дублирует
+ * fallback-значения из plan-limits.ts. Реальный источник — БД (см. getPlanLimits).
+ */
 export const APPLY_PLAN_LIMITS = {
-  free: { applicationsPerDay: 3 },
-  pro: { applicationsPerDay: 10 },
-  max: { applicationsPerDay: 50 },
-  vip: { applicationsPerDay: 50 },
+  free: { applicationsPerDay: FALLBACK_PLAN_LIMITS.free!.applicationsPerDay },
+  pro: { applicationsPerDay: FALLBACK_PLAN_LIMITS.pro!.applicationsPerDay },
+  max: { applicationsPerDay: FALLBACK_PLAN_LIMITS.max!.applicationsPerDay },
+  vip: { applicationsPerDay: FALLBACK_PLAN_LIMITS.vip!.applicationsPerDay },
 } as const
 
 type PlanCode = keyof typeof APPLY_PLAN_LIMITS
 
+/** Синхронный fallback-lookup (для тестов и legacy). Runtime использует БД. */
 export function getApplyLimitForPlan(plan: string): number {
   return (
     APPLY_PLAN_LIMITS[plan as PlanCode]?.applicationsPerDay ??
@@ -16,34 +23,13 @@ export function getApplyLimitForPlan(plan: string): number {
   )
 }
 
-// In-memory daily apply tracker (resets on restart — sufficient for MVP, replaced in Sprint 6)
-const dailyApplies = new Map<number, { count: number; date: string }>()
-
 function todayUTC(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-export function getAppliesUsedToday(userId: number): number {
-  const entry = dailyApplies.get(userId)
-  if (!entry || entry.date !== todayUTC()) return 0
-  return entry.count
-}
-
-export function incrementApplyCount(userId: number): void {
-  const today = todayUTC()
-  const entry = dailyApplies.get(userId)
-  if (!entry || entry.date !== today) {
-    dailyApplies.set(userId, { count: 1, date: today })
-  } else {
-    entry.count++
-  }
-}
-
-export function decrementApplyCount(userId: number): void {
-  const entry = dailyApplies.get(userId)
-  if (entry && entry.date === todayUTC() && entry.count > 0) {
-    entry.count--
-  }
+/** DB-backed: сколько откликов пользователь уже потратил сегодня. */
+export async function getAppliesUsedToday(strapi: Core.Strapi, userId: number): Promise<number> {
+  return getUsedToday(strapi, 'apply', userId)
 }
 
 type UserWithPlan = {
@@ -64,7 +50,7 @@ export async function refundApplyCredit(
       [userId]
     )
   } else {
-    decrementApplyCount(userId)
+    await refundDaily(strapi, 'apply', userId)
   }
 }
 
@@ -87,18 +73,18 @@ export async function checkAndConsumeApplyCredit(
   )) as { rowCount?: number }
   if ((consumed.rowCount ?? 0) > 0) return 'credit'
 
-  // 2. Check plan daily limit
-  const limit = getApplyLimitForPlan(user.subscriptionPlan)
-  const used = getAppliesUsedToday(userId)
+  // 2. Check plan daily limit — атомарный INC when under limit, null when reached
+  const planLimits = await getPlanLimits(strapi, user.subscriptionPlan)
+  const limit = planLimits.applicationsPerDay
 
-  if (used >= limit) {
+  const newCount = await tryConsumeDaily(strapi, 'apply', userId, limit)
+  if (newCount === null) {
+    const used = await getUsedToday(strapi, 'apply', userId)
     const resetAt = `${todayUTC()}T23:59:59Z`
     throw Object.assign(new Error('LIMIT_REACHED'), {
       code: 'LIMIT_REACHED',
       details: { limit, used, resetAt },
     })
   }
-
-  incrementApplyCount(userId)
   return 'plan'
 }

@@ -529,8 +529,10 @@ export interface ApiCompanyCompany extends Struct.CollectionTypeSchema {
     >
     slug: Schema.Attribute.String & Schema.Attribute.Required & Schema.Attribute.Unique
     telegram: Schema.Attribute.String
+    uniqueViews: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
+    views: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
     website: Schema.Attribute.String
   }
 }
@@ -659,17 +661,20 @@ export interface ApiNotificationNotification extends Struct.CollectionTypeSchema
     type: Schema.Attribute.Enumeration<
       [
         'new_application',
+        'application_in_review',
         'application_approved',
         'application_rejected',
         'interview_invitation',
         'test_task',
         'offer_received',
         'resume_viewed',
+        'invitation_to_apply',
         'vacancy_viewed',
         'vacancy_expiring_soon',
         'vacancy_expired',
         'subscription_expiring',
         'subscription_expired',
+        'payment_completed',
         'limits_reached',
         'saved_search_match',
         'moderation_approved',
@@ -701,7 +706,9 @@ export interface ApiPaymentPayment extends Struct.CollectionTypeSchema {
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::payment.payment'> &
       Schema.Attribute.Private
     packageId: Schema.Attribute.Integer
-    payloadType: Schema.Attribute.Enumeration<['subscription', 'vacancy_pack', 'apply_pack']> &
+    payloadType: Schema.Attribute.Enumeration<
+      ['subscription', 'vacancy_pack', 'apply_pack', 'urgent', 'top_placement']
+    > &
       Schema.Attribute.Required
     planCode: Schema.Attribute.String
     publishedAt: Schema.Attribute.DateTime
@@ -713,6 +720,7 @@ export interface ApiPaymentPayment extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
     user: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'>
+    vacancyDocumentId: Schema.Attribute.String
   }
 }
 
@@ -832,6 +840,7 @@ export interface ApiResumeResume extends Struct.CollectionTypeSchema {
     >
     skills: Schema.Attribute.JSON
     title: Schema.Attribute.String & Schema.Attribute.Required
+    uniqueViews: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
     user: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'> &

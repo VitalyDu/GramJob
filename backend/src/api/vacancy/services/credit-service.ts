@@ -1,43 +1,60 @@
 import type { Core } from '@strapi/strapi'
+import { getPlanLimits, FALLBACK_PLAN_LIMITS, type PlanLimits } from '../../../services/plan-limits'
+import { tryConsumeDaily, refundDaily, getUsedToday } from '../../../services/daily-limits'
 
+/**
+ * Обратная совместимость: `PLAN_LIMITS` продолжает существовать в форме
+ * `{vacanciesPerMonth, boostsPerDay}` для тестов и legacy-импортёров, но
+ * реальный источник значений — БД (см. plan-limits.ts).
+ */
 export const PLAN_LIMITS = {
-  free: { vacanciesPerMonth: 3, boostsPerDay: 3 },
-  pro: { vacanciesPerMonth: 10, boostsPerDay: 10 },
-  max: { vacanciesPerMonth: 50, boostsPerDay: 50 },
-  vip: { vacanciesPerMonth: 50, boostsPerDay: 50 },
+  free: {
+    vacanciesPerMonth: FALLBACK_PLAN_LIMITS.free!.vacanciesPerMonth,
+    boostsPerDay: FALLBACK_PLAN_LIMITS.free!.vacancyBoostsPerDay,
+  },
+  pro: {
+    vacanciesPerMonth: FALLBACK_PLAN_LIMITS.pro!.vacanciesPerMonth,
+    boostsPerDay: FALLBACK_PLAN_LIMITS.pro!.vacancyBoostsPerDay,
+  },
+  max: {
+    vacanciesPerMonth: FALLBACK_PLAN_LIMITS.max!.vacanciesPerMonth,
+    boostsPerDay: FALLBACK_PLAN_LIMITS.max!.vacancyBoostsPerDay,
+  },
+  vip: {
+    vacanciesPerMonth: FALLBACK_PLAN_LIMITS.vip!.vacanciesPerMonth,
+    boostsPerDay: FALLBACK_PLAN_LIMITS.vip!.vacancyBoostsPerDay,
+  },
 } as const
 
-type PlanCode = keyof typeof PLAN_LIMITS
-
+/**
+ * Синхронный fallback-только lookup для мест, где нет доступа к strapi
+ * (например, старых юнит-тестов). Реальный вызов из runtime использует
+ * `getVacancyLimitAsync` / `getBoostsLimitAsync`.
+ */
 export function getLimitForPlan(plan: string): number {
-  return PLAN_LIMITS[plan as PlanCode]?.vacanciesPerMonth ?? PLAN_LIMITS.free.vacanciesPerMonth
+  return (
+    PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS]?.vacanciesPerMonth ??
+    PLAN_LIMITS.free.vacanciesPerMonth
+  )
 }
 
 export function getBoostsLimitForPlan(plan: string): number {
-  return PLAN_LIMITS[plan as PlanCode]?.boostsPerDay ?? PLAN_LIMITS.free.boostsPerDay
+  return (
+    PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS]?.boostsPerDay ?? PLAN_LIMITS.free.boostsPerDay
+  )
 }
 
-// In-memory daily boost tracker (resets on restart — sufficient for MVP, replaced in Sprint 6)
-const dailyBoosts = new Map<number, { count: number; date: string }>()
+async function loadLimits(strapi: Core.Strapi, plan: string): Promise<PlanLimits> {
+  return getPlanLimits(strapi, plan)
+}
 
 function todayUTC(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-export function getBoostsUsedToday(userId: number): number {
-  const entry = dailyBoosts.get(userId)
-  if (!entry || entry.date !== todayUTC()) return 0
-  return entry.count
-}
-
-export function incrementBoostCount(userId: number): void {
-  const today = todayUTC()
-  const entry = dailyBoosts.get(userId)
-  if (!entry || entry.date !== today) {
-    dailyBoosts.set(userId, { count: 1, date: today })
-  } else {
-    entry.count++
-  }
+/** DB-backed replacement — сохранён для обратной совместимости API. */
+export async function getBoostsUsedToday(strapi: Core.Strapi, userId: number): Promise<number> {
+  return getUsedToday(strapi, 'boost', userId)
 }
 
 type UserWithPlan = {
@@ -78,7 +95,8 @@ export async function checkAndConsumeVacancyCredit(
     },
   })
 
-  const limit = getLimitForPlan(user.subscriptionPlan)
+  const planLimits = await loadLimits(strapi, user.subscriptionPlan)
+  const limit = planLimits.vacanciesPerMonth
 
   if (usedThisMonth >= limit) {
     const resetAt = new Date()
@@ -117,8 +135,8 @@ export async function checkAndConsumeBoost(
 
   if (!user) throw new Error('User not found')
 
-  const limit = getBoostsLimitForPlan(user.subscriptionPlan)
-  const used = getBoostsUsedToday(userId)
+  const planLimits = await loadLimits(strapi, user.subscriptionPlan)
+  const limit = planLimits.vacancyBoostsPerDay
 
   // 1. Package boost credits take priority over the daily plan limit (atomic decrement)
   const consumed = (await strapi.db.connection.raw(
@@ -126,19 +144,20 @@ export async function checkAndConsumeBoost(
     [userId]
   )) as { rowCount?: number }
   if ((consumed.rowCount ?? 0) > 0) {
+    const used = await getUsedToday(strapi, 'boost', userId)
     return { boostsRemaining: Math.max(limit - used, 0), source: 'package' }
   }
 
-  // 2. Daily plan limit
-  if (used >= limit) {
+  // 2. Daily plan limit — атомарный INC при still-under-limit
+  const newCount = await tryConsumeDaily(strapi, 'boost', userId, limit)
+  if (newCount === null) {
+    const used = await getUsedToday(strapi, 'boost', userId)
     throw Object.assign(new Error('LIMIT_REACHED'), {
       code: 'LIMIT_REACHED',
       details: { limit, used, resetAt: `${todayUTC()}T23:59:59Z` },
     })
   }
-
-  incrementBoostCount(userId)
-  return { boostsRemaining: limit - used - 1, source: 'plan' }
+  return { boostsRemaining: Math.max(limit - newCount, 0), source: 'plan' }
 }
 
 export async function refundBoost(
@@ -152,10 +171,6 @@ export async function refundBoost(
       [userId]
     )
   } else {
-    // in-memory daily counter — decrement to «unconsume» the boost
-    const entry = (dailyBoosts.get(userId) as { count: number; date: string } | undefined) ?? null
-    if (entry && entry.date === todayUTC() && entry.count > 0) {
-      entry.count--
-    }
+    await refundDaily(strapi, 'boost', userId)
   }
 }

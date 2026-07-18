@@ -53,6 +53,24 @@ async function setupVacancySearch(strapi: Core.Strapi) {
   }
 }
 
+async function setupDailyLimitCounters(strapi: Core.Strapi) {
+  // Персистентные суточные счётчики для apply/boost — вместо in-memory Map,
+  // которая сбрасывается при рестарте и не работает в multi-instance деплое.
+  // См. §3.8 в docs/audit/2026-07-18-project-audit.md.
+  try {
+    await strapi.db.connection.raw(`
+      ALTER TABLE up_users
+        ADD COLUMN IF NOT EXISTS daily_apply_count integer NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS daily_apply_date date,
+        ADD COLUMN IF NOT EXISTS daily_boost_count integer NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS daily_boost_date date;
+    `)
+    strapi.log.info('[limits] Daily counter columns ensured on up_users')
+  } catch (err) {
+    strapi.log.warn('[limits] Failed to ensure daily counter columns', err)
+  }
+}
+
 export default {
   register({ strapi }: { strapi: Core.Strapi }) {
     if (initSentry()) {
@@ -64,6 +82,7 @@ export default {
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
     await seedIndustries(strapi)
     await setupVacancySearch(strapi)
+    await setupDailyLimitCounters(strapi)
     await seedSubscriptionPlans(strapi)
     await seedPackages(strapi)
     await seedPermissions(strapi)

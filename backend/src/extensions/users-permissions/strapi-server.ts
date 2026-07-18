@@ -162,7 +162,7 @@ export default (plugin: any) => {
     const plan = planDoc ?? FREE_PLAN_LIMITS
 
     // ── Applications ───────────────────────────────────────────────────────────
-    const applyUsedToday = getAppliesUsedToday(userId)
+    const applyUsedToday = await getAppliesUsedToday(strapi, userId)
     const applyRemaining = Math.max(plan.applicationsPerDay - applyUsedToday, 0) + user.applyCredits
     const todayStr = new Date().toISOString().slice(0, 10)
     const applyResetsAt = `${todayStr}T23:59:59Z`
