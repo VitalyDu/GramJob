@@ -304,6 +304,35 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({
         </Card>
       )}
 
+      {/* Языки */}
+      {v.languages && v.languages.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <h2 className="mb-3 text-base font-semibold text-card-foreground">
+              {t('vacancyDetail.languages')}
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {v.languages.map((lang) => (
+                <Badge key={lang} variant="secondary">
+                  {lang}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Опыт */}
+      {v.experienceYears != null && (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-foreground">
+              {t('vacancyDetail.experienceYears', { count: v.experienceYears })}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="border-t pt-4">
         <Link href="/vacancies" className="text-sm text-muted-foreground hover:text-foreground">
           {t('vacancyDetail.backToAll')}
