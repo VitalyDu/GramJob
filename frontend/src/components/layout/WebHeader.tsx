@@ -73,6 +73,19 @@ export const WebHeader = observer(function WebHeader() {
                 {t('nav.myResumes')}
               </Link>
             )}
+            {auth.isAuthenticated && (
+              <Link
+                href="/dashboard/applications"
+                className={cn(
+                  'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                  pathname.startsWith('/dashboard/applications')
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                )}
+              >
+                {t('nav.myApplications')}
+              </Link>
+            )}
             {auth.isAuthenticated &&
               (auth.user?.subscriptionPlan === 'max' || auth.user?.subscriptionPlan === 'vip') && (
                 <Link
