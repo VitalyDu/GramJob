@@ -578,11 +578,10 @@
       "conditionsLabel": "Conditions",
       "conditionsPlaceholder": "- Health insurance, remote work...",
       "skillsLabel": "Skills (comma-separated)",
-      "languagesLabel": "Languages (comma-separated)",
+      "languagesLabel": "Languages",
       "experienceLabel": "Experience (years)",
       "submitCreate": "Submit for review",
       "submitEdit": "Save and submit for review",
-      "languagesPlaceholder": "Russian, English",
       "saving": "Saving..."
     },
     "company": {
@@ -760,6 +759,17 @@
     "notFound": "Not found",
     "notSpecified": "— Not specified"
   },
+  "languageSelect": {
+    "placeholder": "Select language",
+    "searchPlaceholder": "Search language...",
+    "notFound": "Language not found",
+    "notSpecified": "— Not specified"
+  },
+  "languagesMultiSelect": {
+    "placeholder": "Select languages",
+    "searchPlaceholder": "Search language...",
+    "notFound": "Language not found"
+  },
   "limits": {
     "resetsIn": "Resets in {{time}}",
     "applications": {
@@ -816,6 +826,15 @@
       "remote": "Remote",
       "hybrid": "Hybrid",
       "any": "Any"
+    },
+    "languageLevel": {
+      "A1": "A1 — Beginner",
+      "A2": "A2 — Elementary",
+      "B1": "B1 — Intermediate",
+      "B2": "B2 — Upper Intermediate",
+      "C1": "C1 — Advanced",
+      "C2": "C2 — Mastery",
+      "Native": "Native"
     },
     "vacancyStatus": {
       "draft": "Draft",

@@ -578,11 +578,10 @@
       "conditionsLabel": "Условия",
       "conditionsPlaceholder": "- ДМС, удалёнка...",
       "skillsLabel": "Навыки (через запятую)",
-      "languagesLabel": "Языки (через запятую)",
+      "languagesLabel": "Языки",
       "experienceLabel": "Опыт (лет)",
       "submitCreate": "Отправить на модерацию",
       "submitEdit": "Сохранить и отправить на модерацию",
-      "languagesPlaceholder": "Русский, English",
       "saving": "Сохранение..."
     },
     "company": {
@@ -760,6 +759,17 @@
     "notFound": "Не найдено",
     "notSpecified": "— Не указан"
   },
+  "languageSelect": {
+    "placeholder": "Выберите язык",
+    "searchPlaceholder": "Поиск языка...",
+    "notFound": "Язык не найден",
+    "notSpecified": "— Не указан"
+  },
+  "languagesMultiSelect": {
+    "placeholder": "Выберите языки",
+    "searchPlaceholder": "Поиск языка...",
+    "notFound": "Язык не найден"
+  },
   "limits": {
     "resetsIn": "Обновится через {{time}}",
     "applications": {
@@ -816,6 +826,15 @@
       "remote": "Удалённо",
       "hybrid": "Гибрид",
       "any": "Любой"
+    },
+    "languageLevel": {
+      "A1": "A1 — Начальный",
+      "A2": "A2 — Элементарный",
+      "B1": "B1 — Средний",
+      "B2": "B2 — Выше среднего",
+      "C1": "C1 — Продвинутый",
+      "C2": "C2 — Свободное владение",
+      "Native": "Родной"
     },
     "vacancyStatus": {
       "draft": "Черновик",
