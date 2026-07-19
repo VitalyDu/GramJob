@@ -98,6 +98,7 @@ export const EditResumeClient = observer(function EditResumeClient({ id }: Props
             languages: r.languages ?? undefined,
           } as Partial<import('@/types/api').ResumeCreateInput>
         }
+        defaultAvatar={r.avatar ?? null}
         isLoading={store.isLoading}
         onSubmit={handleSubmit}
       />
