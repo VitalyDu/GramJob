@@ -665,6 +665,10 @@
       "telegramLabel": "Telegram",
       "emailLabel": "Email",
       "phoneLabel": "Phone",
+      "photoLabel": "Photo",
+      "photoUpload": "Upload photo",
+      "photoChange": "Change",
+      "photoUploadError": "Photo upload error",
       "save": "Save",
       "saving": "Saving..."
     }
