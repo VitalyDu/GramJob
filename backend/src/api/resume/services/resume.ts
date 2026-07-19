@@ -36,6 +36,7 @@ type CreateResumeInput = {
     endDate?: string
     current?: boolean
   }>
+  avatar?: number
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
@@ -94,6 +95,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         views: 0,
         invitations: 0,
         moderationStatus: 'moderation',
+        ...(input.avatar !== undefined ? { avatar: input.avatar } : {}),
       },
     })
   },
