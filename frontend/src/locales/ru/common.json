@@ -658,7 +658,6 @@
       "currentlyStudying": "Учусь сейчас",
       "addLanguage": "+ Добавить",
       "languageLabel": "Язык",
-      "languagePlaceholder": "Английский",
       "languageLevelLabel": "Уровень",
       "languageLevelPlaceholder": "B2",
       "telegramLabel": "Telegram",
@@ -768,7 +767,8 @@
   "languagesMultiSelect": {
     "placeholder": "Выберите языки",
     "searchPlaceholder": "Поиск языка...",
-    "notFound": "Язык не найден"
+    "notFound": "Язык не найден",
+    "removeLabel": "Убрать {{name}}"
   },
   "limits": {
     "resetsIn": "Обновится через {{time}}",

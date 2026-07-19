@@ -85,7 +85,9 @@ export function LanguagesMultiSelect({
                     onChange(value.filter((c) => c !== code))
                   }}
                   className="rounded-sm opacity-70 hover:opacity-100"
-                  aria-label={`Убрать ${getLanguageName(code, i18n.language)}`}
+                  aria-label={t('languagesMultiSelect.removeLabel', {
+                    name: getLanguageName(code, i18n.language),
+                  })}
                 >
                   <X className="h-3 w-3" />
                 </button>
