@@ -370,6 +370,7 @@ export interface ResumeCreateInput {
   contacts?: { telegram?: string; email?: string; phone?: string }
   workExperience?: WorkExperience[]
   education?: Education[]
+  avatar?: number | null
 }
 
 export type ResumeUpdateInput = Partial<ResumeCreateInput>
