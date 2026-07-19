@@ -508,6 +508,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           'moderationStatus',
           'createdAt',
         ],
+        populate: { logo: true },
       })
 
       return ctx.send({ data: updated })
