@@ -37,7 +37,14 @@ import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { RESUME_WORK_FORMAT_VALUES, RESUME_EMPLOYMENT_TYPE_VALUES } from '@/lib/resume-utils'
 import { CountrySelect } from '@/components/ui/country-select'
 import { CitySelect } from '@/components/ui/city-select'
-import type { ResumeCreateInput, ResumeWorkFormatEnum, EmploymentTypeEnum } from '@/types/api'
+import type {
+  ResumeCreateInput,
+  ResumeWorkFormatEnum,
+  EmploymentTypeEnum,
+  StrapiMedia,
+} from '@/types/api'
+import { getMediaUrl } from '@/lib/media'
+import { ResumePhotoUploader } from '@/components/resume/ResumePhotoUploader'
 import { useTelegramMainButton } from '@/hooks/useTelegramMainButton'
 import { scrollToFirstFormError } from '@/lib/form-utils'
 
@@ -195,19 +202,25 @@ const _baseSchema = z.object({
   workExperience: z.array(_baseWorkExperienceSchema).default([]),
   education: z.array(_baseEducationSchema).default([]),
   languages: z.array(_baseLanguageSchema).default([]),
+  avatar: z.number().int().positive().nullable().default(null),
 })
 
 type FormData = z.infer<typeof _baseSchema>
 
 interface Props {
   defaultValues?: Partial<ResumeCreateInput>
+  defaultAvatar?: StrapiMedia | null
   isLoading?: boolean
   onSubmit: (data: ResumeCreateInput) => void | Promise<void>
 }
 
-export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
+export function ResumeForm({ defaultValues, defaultAvatar, isLoading, onSubmit }: Props) {
   const { t, i18n } = useTranslation()
   const dateLocale = i18n.language === 'en' ? enUS : ru
+
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(
+    defaultAvatar ? (getMediaUrl(defaultAvatar.url) ?? null) : null
+  )
 
   const workExperienceSchema = useMemo(
     () =>
@@ -264,6 +277,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
         workExperience: z.array(workExperienceSchema).default([]),
         education: z.array(educationSchema).default([]),
         languages: z.array(_baseLanguageSchema).default([]),
+        avatar: z.number().int().positive().nullable().default(null),
       }),
     [t, workExperienceSchema, educationSchema]
   )
@@ -317,6 +331,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
         lang: l.lang,
         level: l.level,
       })),
+      avatar: defaultAvatar?.id ?? null,
     },
   })
 
@@ -387,6 +402,7 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
         current: e.current,
       })),
       ...(filledLanguages.length > 0 ? { languages: filledLanguages } : {}),
+      avatar: data.avatar,
     } as ResumeCreateInput
     void onSubmit(payload)
   }
@@ -410,6 +426,21 @@ export function ResumeForm({ defaultValues, isLoading, onSubmit }: Props) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <Field>
+            <FieldLabel>{t('forms.resume.photoLabel')}</FieldLabel>
+            <ResumePhotoUploader
+              currentPhotoUrl={avatarPreviewUrl}
+              onUploadComplete={({ id, url }) => {
+                setValue('avatar', id)
+                setAvatarPreviewUrl(url)
+              }}
+              onRemove={() => {
+                setValue('avatar', null)
+                setAvatarPreviewUrl(null)
+              }}
+              {...(isLoading ? { disabled: true } : {})}
+            />
+          </Field>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field>
               <FieldLabel htmlFor="firstName">{t('forms.resume.firstNameLabel')} *</FieldLabel>
