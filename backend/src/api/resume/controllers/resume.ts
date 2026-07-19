@@ -116,6 +116,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const salaryErr = validateSalaryRange(body.desiredSalary, body.desiredSalary)
       if (salaryErr) return ctx.badRequest(salaryErr)
 
+      const avatarId = body.avatar
+      if (avatarId !== undefined && avatarId !== null) {
+        if (typeof avatarId !== 'number' || !Number.isInteger(avatarId) || avatarId <= 0) {
+          return ctx.badRequest('avatar must be a positive integer file ID')
+        }
+      }
+
       if (
         !Array.isArray(workFormat) ||
         (workFormat as any[]).length === 0 ||
@@ -185,6 +192,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         contacts: body.contacts as any,
         workExperience: body.workExperience as any,
         education: body.education as any,
+        ...(typeof avatarId === 'number' && avatarId > 0 ? { avatar: avatarId } : {}),
       })
 
       return ctx.send({ data: resume }, 201)
@@ -483,6 +491,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         'contacts',
         'workExperience',
         'education',
+        'avatar',
       ]
 
       const updateData: Record<string, unknown> = {}
@@ -492,6 +501,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (Object.keys(updateData).length === 0) {
         return ctx.badRequest('No updatable fields provided.')
+      }
+
+      if ('avatar' in updateData) {
+        const avatarVal = updateData.avatar
+        if (
+          avatarVal !== null &&
+          (typeof avatarVal !== 'number' ||
+            !Number.isInteger(avatarVal as number) ||
+            (avatarVal as number) <= 0)
+        ) {
+          return ctx.badRequest('avatar must be a positive integer file ID or null')
+        }
       }
 
       for (const field of ['title', 'firstName', 'lastName', 'country', 'city'] as const) {
