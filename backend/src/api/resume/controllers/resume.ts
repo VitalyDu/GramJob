@@ -408,8 +408,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       let newViews = resume.views ?? 0
       let newUniqueViews = resume.uniqueViews ?? 0
       if (!isOwner) {
-        newViews += 1
         const unique = isUniqueViewIP(id, ip)
+        if (unique) newViews += 1
         if (unique) newUniqueViews += 1
         recordViewIP(id, ip)
 

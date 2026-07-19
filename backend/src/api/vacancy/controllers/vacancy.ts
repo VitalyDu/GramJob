@@ -640,7 +640,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const unique = isUniqueView(id, ip)
       recordView(id, ip)
 
-      const newViews = (vacancy.views ?? 0) + 1
+      const newViews = unique ? (vacancy.views ?? 0) + 1 : (vacancy.views ?? 0)
       const newUniqueViews = unique ? (vacancy.uniqueViews ?? 0) + 1 : (vacancy.uniqueViews ?? 0)
 
       await strapi.documents('api::vacancy.vacancy').update({
