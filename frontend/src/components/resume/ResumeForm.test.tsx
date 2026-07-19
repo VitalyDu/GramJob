@@ -34,6 +34,12 @@ vi.mock('@/components/resume/ResumePhotoUploader', () => ({
   ),
 }))
 
+vi.mock('@/components/ui/language-select', () => ({
+  LanguageSelect: ({ value, onChange }: { value: string; onChange: (code: string) => void }) => (
+    <input data-testid="language-select" value={value} onChange={(e) => onChange(e.target.value)} />
+  ),
+}))
+
 const baseDefaults: Partial<ResumeCreateInput> = {
   title: 'Senior Frontend Developer',
   firstName: 'Иван',
@@ -43,31 +49,30 @@ const baseDefaults: Partial<ResumeCreateInput> = {
   employmentType: ['full-time'],
 }
 
-describe('ResumeForm — languages (BUG-11)', () => {
-  it('отображает языки из defaultValues', () => {
+describe('ResumeForm — languages', () => {
+  it('отображает lang из defaultValues через mock-input', () => {
     render(
       <ResumeForm
         defaultValues={{
           ...baseDefaults,
-          languages: [{ lang: 'Английский', level: 'B2' }],
+          languages: [{ lang: 'en', level: 'B2' }],
         }}
         onSubmit={vi.fn()}
       />
     )
-
-    expect(screen.getByDisplayValue('Английский')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('B2')).toBeInTheDocument()
+    const langInputs = screen.getAllByTestId('language-select')
+    expect(langInputs[0]).toHaveValue('en')
   })
 
-  it('передаёт languages в payload при submit', async () => {
+  it('передаёт languages с ISO-кодами в payload при submit', async () => {
     const onSubmit = vi.fn()
     render(
       <ResumeForm
         defaultValues={{
           ...baseDefaults,
           languages: [
-            { lang: 'Английский', level: 'B2' },
-            { lang: 'Немецкий', level: 'A1' },
+            { lang: 'en', level: 'B2' },
+            { lang: 'de', level: 'A1' },
           ],
         }}
         onSubmit={onSubmit}
@@ -79,12 +84,12 @@ describe('ResumeForm — languages (BUG-11)', () => {
     await waitFor(() => expect(onSubmit).toHaveBeenCalled())
     const payload = onSubmit.mock.calls[0]![0] as ResumeCreateInput
     expect(payload.languages).toEqual([
-      { lang: 'Английский', level: 'B2' },
-      { lang: 'Немецкий', level: 'A1' },
+      { lang: 'en', level: 'B2' },
+      { lang: 'de', level: 'A1' },
     ])
   })
 
-  it('не отправляет languages, если строки пустые', async () => {
+  it('не отправляет languages если lang пустой', async () => {
     const onSubmit = vi.fn()
     render(<ResumeForm defaultValues={baseDefaults} onSubmit={onSubmit} />)
 

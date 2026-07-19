@@ -37,6 +37,7 @@ import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { RESUME_WORK_FORMAT_VALUES, RESUME_EMPLOYMENT_TYPE_VALUES } from '@/lib/resume-utils'
 import { CountrySelect } from '@/components/ui/country-select'
 import { CitySelect } from '@/components/ui/city-select'
+import { LanguageSelect } from '@/components/ui/language-select'
 import type {
   ResumeCreateInput,
   ResumeWorkFormatEnum,
@@ -862,19 +863,36 @@ export function ResumeForm({ defaultValues, defaultAvatar, isLoading, onSubmit }
         </CardHeader>
         <CardContent className="space-y-3">
           {langFields.map((field, index) => (
-            <div key={field.id} className="flex items-end gap-3">
+            <div key={field.id} className="flex items-end gap-2">
               <Field className="flex-1">
                 <FieldLabel>{t('forms.resume.languageLabel')}</FieldLabel>
-                <Input
-                  {...register(`languages.${index}.lang`)}
-                  placeholder={t('forms.resume.languagePlaceholder')}
+                <Controller
+                  control={control}
+                  name={`languages.${index}.lang`}
+                  render={({ field: f }) => (
+                    <LanguageSelect value={f.value} onChange={f.onChange} />
+                  )}
                 />
               </Field>
-              <Field className="flex-1">
+              <Field className="w-[160px] shrink-0">
                 <FieldLabel>{t('forms.resume.languageLevelLabel')}</FieldLabel>
-                <Input
-                  {...register(`languages.${index}.level`)}
-                  placeholder={t('forms.resume.languageLevelPlaceholder')}
+                <Controller
+                  control={control}
+                  name={`languages.${index}.level`}
+                  render={({ field: f }) => (
+                    <Select value={f.value} onValueChange={f.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={t('forms.resume.languageLevelPlaceholder')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'Native'] as const).map((level) => (
+                          <SelectItem key={level} value={level}>
+                            {t(`enums.languageLevel.${level}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
               </Field>
               <Button
