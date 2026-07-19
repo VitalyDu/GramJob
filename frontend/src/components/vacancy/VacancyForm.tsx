@@ -22,6 +22,7 @@ import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { WORK_FORMAT_VALUES, EMPLOYMENT_TYPE_VALUES, SENIORITY_VALUES } from '@/lib/vacancy-utils'
 import { CountrySelect } from '@/components/ui/country-select'
 import { CitySelect } from '@/components/ui/city-select'
+import { LanguagesMultiSelect } from '@/components/ui/languages-multi-select'
 import type {
   VacancyCreateInput,
   Industry,
@@ -111,7 +112,7 @@ const _baseSchema = z.object({
   requirements: z.string().min(1),
   conditions: z.string().optional().default(''),
   skills: z.string().optional().default(''),
-  languages: z.string().optional().default(''),
+  languages: z.array(z.string()).optional().default([]),
   experienceYears: z.preprocess(
     (v) => (v === '' || v === undefined ? undefined : Number(v)),
     z.number().int().nonnegative().optional()
@@ -162,7 +163,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
         requirements: z.string().min(1, t('forms.vacancy.requirementsRequired')),
         conditions: z.string().optional().default(''),
         skills: z.string().optional().default(''),
-        languages: z.string().optional().default(''),
+        languages: z.array(z.string()).optional().default([]),
         experienceYears: z.preprocess(
           (v) => (v === '' || v === undefined ? undefined : Number(v)),
           z.number().int().nonnegative().optional()
@@ -198,7 +199,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
       requirements: defaultValues?.requirements ?? '',
       conditions: defaultValues?.conditions ?? '',
       skills: defaultValues?.skills?.join(', ') ?? '',
-      languages: defaultValues?.languages?.join(', ') ?? '',
+      languages: defaultValues?.languages ?? [],
       ...(defaultValues?.experienceYears !== undefined
         ? { experienceYears: defaultValues.experienceYears }
         : {}),
@@ -230,12 +231,6 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
           .map((s) => s.trim())
           .filter(Boolean)
       : undefined
-    const languages = data.languages
-      ? data.languages
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : undefined
 
     const input: VacancyCreateInput = {
       title: data.title,
@@ -255,7 +250,7 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
       ...(data.salaryCurrency ? { salaryCurrency: data.salaryCurrency } : {}),
       ...(data.conditions ? { conditions: data.conditions } : {}),
       ...(skills?.length ? { skills } : {}),
-      ...(languages?.length ? { languages } : {}),
+      ...(data.languages?.length ? { languages: data.languages } : {}),
       ...(data.experienceYears !== undefined ? { experienceYears: data.experienceYears } : {}),
     }
     void onSubmit(input)
@@ -563,11 +558,13 @@ export function VacancyForm({ myCompanies, defaultValues, isLoading, onSubmit }:
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="languages">{t('forms.vacancy.languagesLabel')}</FieldLabel>
-            <Input
-              id="languages"
-              {...register('languages')}
-              placeholder={t('forms.vacancy.languagesPlaceholder')}
+            <FieldLabel>{t('forms.vacancy.languagesLabel')}</FieldLabel>
+            <Controller
+              control={control}
+              name="languages"
+              render={({ field }) => (
+                <LanguagesMultiSelect value={field.value ?? []} onChange={field.onChange} />
+              )}
             />
           </Field>
 
