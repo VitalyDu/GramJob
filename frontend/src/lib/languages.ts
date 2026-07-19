@@ -93,7 +93,11 @@ function buildDisplayNames(locale: string): Intl.DisplayNames {
 
 export function getLanguageName(code: string, locale = 'ru'): string {
   if (!code) return code
-  return buildDisplayNames(locale).of(code) ?? code
+  try {
+    return buildDisplayNames(locale).of(code) ?? code
+  } catch {
+    return code
+  }
 }
 
 export function getLanguagesList(locale = 'ru'): { code: string; name: string }[] {
