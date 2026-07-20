@@ -35,22 +35,29 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
     void payment.fetchApplyPackages()
   }, [payment])
 
+  // Card-level spinner clears as soon as the dialog transitions out of loading
+  // (or when it closes) — see the useEffect below.
+  useEffect(() => {
+    if (pay.state !== 'loading') {
+      setBuyingPlan(null)
+      setBuyingVacancyPack(null)
+      setBuyingApplyPack(null)
+    }
+  }, [pay.state, pay.open])
+
+  const onPaid = async () => {
+    await auth.fetchMe()
+    setShowRefreshHint(false)
+  }
+
   const handleBuyPlan = (planCode: string) => {
     if (!user) {
       router.push('/login')
       return
     }
     setBuyingPlan(planCode)
-    setShowRefreshHint(false)
-    pay.start(
-      () => payment.subscribeToPlan(planCode),
-      async () => {
-        await auth.fetchMe()
-        setShowRefreshHint(false)
-      }
-    )
-    setBuyingPlan(null)
     setShowRefreshHint(true)
+    pay.start(() => payment.subscribeToPlan(planCode), onPaid)
   }
 
   const handleBuyVacancyPack = (packageId: number) => {
@@ -59,16 +66,8 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
       return
     }
     setBuyingVacancyPack(packageId)
-    setShowRefreshHint(false)
-    pay.start(
-      () => payment.buyVacancyPack(packageId),
-      async () => {
-        await auth.fetchMe()
-        setShowRefreshHint(false)
-      }
-    )
-    setBuyingVacancyPack(null)
     setShowRefreshHint(true)
+    pay.start(() => payment.buyVacancyPack(packageId), onPaid)
   }
 
   const handleBuyApplyPack = (packageId: number) => {
@@ -77,16 +76,8 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
       return
     }
     setBuyingApplyPack(packageId)
-    setShowRefreshHint(false)
-    pay.start(
-      () => payment.buyApplyPack(packageId),
-      async () => {
-        await auth.fetchMe()
-        setShowRefreshHint(false)
-      }
-    )
-    setBuyingApplyPack(null)
     setShowRefreshHint(true)
+    pay.start(() => payment.buyApplyPack(packageId), onPaid)
   }
 
   const PLAN_ORDER = ['free', 'pro', 'max', 'vip']
