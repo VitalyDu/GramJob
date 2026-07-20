@@ -69,4 +69,25 @@ describe('useTelegramPaymentDialog', () => {
     })
     expect(result.current.open).toBe(false)
   })
+
+  it('retry() re-runs the last createInvoice with the same onPaid', async () => {
+    const createInvoice = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('first fail'))
+      .mockResolvedValueOnce('https://t.me/$second')
+    const onPaid = vi.fn()
+    const { result } = renderHook(() => useTelegramPaymentDialog())
+
+    act(() => {
+      result.current.start(createInvoice, onPaid)
+    })
+    await waitFor(() => expect(result.current.state).toBe('error'))
+
+    act(() => {
+      result.current.retry()
+    })
+    await waitFor(() => expect(result.current.state).toBe('ready'))
+    expect(result.current.invoiceUrl).toBe('https://t.me/$second')
+    expect(createInvoice).toHaveBeenCalledTimes(2)
+  })
 })

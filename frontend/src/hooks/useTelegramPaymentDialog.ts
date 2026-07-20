@@ -1,14 +1,14 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { getTelegramWebApp, hapticNotify } from '@/lib/telegram'
 import { isTelegramMiniApp } from './useTelegramPayment'
 
-type InternalState = 'idle' | 'loading' | 'ready' | 'error'
+export type TelegramPaymentDialogPublicState = 'loading' | 'ready' | 'error'
 
 export interface UseTelegramPaymentDialogResult {
   open: boolean
-  state: Exclude<InternalState, 'idle'>
+  state: TelegramPaymentDialogPublicState
   invoiceUrl: string | undefined
   errorMessage: string | undefined
   start: (createInvoice: () => Promise<string>, onPaid?: () => void) => void
@@ -16,20 +16,22 @@ export interface UseTelegramPaymentDialogResult {
   close: () => void
 }
 
+interface LastArgs {
+  createInvoice: () => Promise<string>
+  onPaid?: () => void
+}
+
 export function useTelegramPaymentDialog(): UseTelegramPaymentDialogResult {
   const [open, setOpen] = useState(false)
-  const [state, setState] = useState<InternalState>('idle')
+  const [state, setState] = useState<TelegramPaymentDialogPublicState>('loading')
   const [invoiceUrl, setInvoiceUrl] = useState<string | undefined>(undefined)
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
-  const [lastArgs, setLastArgs] = useState<{
-    createInvoice: () => Promise<string>
-    onPaid?: () => void
-  } | null>(null)
+  const lastArgsRef = useRef<LastArgs | null>(null)
 
   const run = useCallback(async (createInvoice: () => Promise<string>, onPaid?: () => void) => {
     const inMiniApp = isTelegramMiniApp()
 
-    setLastArgs({ createInvoice, ...(onPaid ? { onPaid } : {}) })
+    lastArgsRef.current = { createInvoice, ...(onPaid ? { onPaid } : {}) }
     setErrorMessage(undefined)
 
     if (!inMiniApp) {
@@ -54,7 +56,6 @@ export function useTelegramPaymentDialog(): UseTelegramPaymentDialogResult {
           }
         })
         setOpen(false)
-        setState('idle')
       } else {
         setState('ready')
       }
@@ -75,19 +76,20 @@ export function useTelegramPaymentDialog(): UseTelegramPaymentDialogResult {
   )
 
   const retry = useCallback(() => {
-    if (lastArgs) void run(lastArgs.createInvoice, lastArgs.onPaid)
-  }, [lastArgs, run])
+    const args = lastArgsRef.current
+    if (args) void run(args.createInvoice, args.onPaid)
+  }, [run])
 
   const close = useCallback(() => {
     setOpen(false)
-    setState('idle')
+    setState('loading')
     setInvoiceUrl(undefined)
     setErrorMessage(undefined)
   }, [])
 
   return {
     open,
-    state: state === 'idle' ? 'loading' : state,
+    state,
     invoiceUrl,
     errorMessage,
     start,
