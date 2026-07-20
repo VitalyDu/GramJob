@@ -39,8 +39,8 @@ describe('canEditResume', () => {
     expect(canEditResume('published')).toBe(true)
   })
 
-  it('blocks edit for moderation', () => {
-    expect(canEditResume('moderation')).toBe(false)
+  it('allows edit for moderation (keeps under review while applying edits)', () => {
+    expect(canEditResume('moderation')).toBe(true)
   })
 
   it('blocks edit for archived', () => {

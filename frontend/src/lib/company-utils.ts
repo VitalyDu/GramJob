@@ -20,8 +20,8 @@ export function canSubmitCompany(status: CompanyStatusEnum): boolean {
   return status === 'draft' || status === 'rejected'
 }
 
-export function canEditCompany(status: CompanyStatusEnum): boolean {
-  return status !== 'moderation'
+export function canEditCompany(_status: CompanyStatusEnum): boolean {
+  return true
 }
 
 export function canDeleteCompany(status: CompanyStatusEnum): boolean {

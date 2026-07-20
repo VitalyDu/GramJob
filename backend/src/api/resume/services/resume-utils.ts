@@ -3,7 +3,7 @@ export function canPublishResume(status: string): boolean {
 }
 
 export function canEditResume(status: string): boolean {
-  return status === 'draft' || status === 'rejected' || status === 'published'
+  return ['draft', 'rejected', 'published', 'moderation'].includes(status)
 }
 
 export function canArchiveResume(status: string): boolean {

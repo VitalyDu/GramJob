@@ -413,11 +413,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       })
       if (!existing) return ctx.notFound('Company not found')
 
-      const existingStatus = (existing as any).moderationStatus as string
-      if (existingStatus === 'moderation') {
-        return ctx.badRequest('Cannot edit company while it is under moderation.')
-      }
-
       const updateData: Record<string, unknown> = {}
       const allowedFields = [
         'name',
