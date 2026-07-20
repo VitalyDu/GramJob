@@ -46,6 +46,9 @@ export interface TelegramWebApp {
   setHeaderColor: (color: string) => void
   setBackgroundColor: (color: string) => void
   openInvoice: (url: string, callback?: (status: string) => void) => void
+  isVersionAtLeast?: (version: string) => boolean
+  version?: string
+  platform?: string
   onEvent: (eventType: string, cb: () => void) => void
   offEvent: (eventType: string, cb: () => void) => void
 }
@@ -58,6 +61,21 @@ declare global {
 
 export function isTelegramMiniApp(): boolean {
   return typeof window !== 'undefined' && !!window.Telegram?.WebApp?.initData
+}
+
+/**
+ * True only when we're in a real Mini App AND the host client supports the
+ * WebApp.openInvoice method (Bot API 6.1+). On a plain browser the SDK still
+ * exposes openInvoice as a stub, but calling it just logs "not supported in
+ * version 6.0" and no invoice appears — we must fall back to the web dialog.
+ */
+export function canOpenInvoiceNative(): boolean {
+  if (typeof window === 'undefined') return false
+  const webApp = window.Telegram?.WebApp
+  if (!webApp?.initData) return false
+  if (typeof webApp.openInvoice !== 'function') return false
+  if (typeof webApp.isVersionAtLeast === 'function' && !webApp.isVersionAtLeast('6.1')) return false
+  return true
 }
 
 export function getTelegramWebApp(): TelegramWebApp | null {
