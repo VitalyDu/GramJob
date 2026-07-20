@@ -62,7 +62,7 @@ describe('POST /api/companies/:id/submit', () => {
     expect(res.body.data.moderationStatus).toBe('moderation')
   })
 
-  it('editing is blocked while the company is under moderation', async () => {
+  it('owner can edit a company that is already under moderation (stays in moderation)', async () => {
     const user = await createTestUser(strapi)
     const jwt = issueJwt(strapi, user.id as number)
     const company = await createCompany(user.id as number, 'moderation')
@@ -72,7 +72,9 @@ describe('POST /api/companies/:id/submit', () => {
       .set('Authorization', `Bearer ${jwt}`)
       .send({ city: 'Казань' })
 
-    expect(res.status).toBe(400)
+    expect(res.status).toBe(200)
+    expect(res.body.data.city).toBe('Казань')
+    expect(res.body.data.moderationStatus).toBe('moderation')
   })
 
   it('error message for non-submittable status mentions both draft and rejected', async () => {
