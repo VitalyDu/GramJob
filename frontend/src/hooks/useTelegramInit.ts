@@ -14,6 +14,8 @@ export function useTelegramInit() {
     setIsMiniApp(isMA)
     if (!isMA) return
 
+    document.documentElement.classList.add('mini-app')
+
     const app = getTelegramWebApp()!
     setTwa(app)
     app.ready()

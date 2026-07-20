@@ -144,6 +144,22 @@
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
   }
+
+  /* Telegram Mini App — hide all scrollbars; WebView handles scroll natively */
+  .mini-app {
+    overflow-y: auto;
+    scrollbar-gutter: auto;
+  }
+
+  .mini-app,
+  .mini-app * {
+    scrollbar-width: none;
+  }
+
+  .mini-app::-webkit-scrollbar,
+  .mini-app *::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @utility bg-brand-gradient {
