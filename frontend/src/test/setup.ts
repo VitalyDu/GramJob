@@ -7,6 +7,45 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
   disconnect: vi.fn(),
 }))
 
+// jsdom lacks Pointer Capture APIs — vaul (Drawer) calls them on user events.
+if (typeof Element !== 'undefined') {
+  if (!Element.prototype.setPointerCapture) {
+    Element.prototype.setPointerCapture = vi.fn()
+  }
+  if (!Element.prototype.releasePointerCapture) {
+    Element.prototype.releasePointerCapture = vi.fn()
+  }
+  if (!Element.prototype.hasPointerCapture) {
+    Element.prototype.hasPointerCapture = vi.fn(() => false)
+  }
+}
+
+// vaul reads navigator.userAgent for platform detection; jsdom provides one,
+// but some code paths access it via `window.navigator.userAgentData` — guard with a stub.
+if (typeof navigator !== 'undefined' && !('userAgentData' in navigator)) {
+  Object.defineProperty(navigator, 'userAgentData', {
+    value: { platform: 'Unknown', mobile: false, brands: [] },
+    configurable: true,
+  })
+}
+
+// vaul reads element.style.transform via getComputedStyle and does
+// transform.match(/^matrix3d\(...\)$/) — jsdom returns undefined, which crashes.
+// Return a neutral identity matrix so the regex resolves to null and vaul falls through.
+if (typeof window !== 'undefined') {
+  const originalGetComputedStyle = window.getComputedStyle
+  window.getComputedStyle = ((elt: Element, pseudoElt?: string | null) => {
+    const style = originalGetComputedStyle.call(window, elt, pseudoElt ?? null)
+    if (!style.transform) {
+      Object.defineProperty(style, 'transform', {
+        value: 'none',
+        configurable: true,
+      })
+    }
+    return style
+  }) as typeof window.getComputedStyle
+}
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({
