@@ -940,5 +940,19 @@
         "system": "Системная"
       }
     }
+  },
+  "telegramPayment": {
+    "title": "Оплата через Telegram",
+    "descriptionMiniApp": "Подтвердите оплату в Telegram",
+    "descriptionWeb": "Нажмите кнопку, чтобы открыть Telegram и оплатить звёздами",
+    "openInTelegram": "Открыть в Telegram",
+    "orScanQr": "Или отсканируйте QR-код мобильным Telegram",
+    "afterPayment": "После оплаты вернитесь сюда и нажмите «Обновить статус»",
+    "loading": "Готовим счёт…",
+    "errorTitle": "Не удалось создать счёт",
+    "errorRetry": "Попробовать снова",
+    "close": "Закрыть",
+    "copyLink": "Скопировать ссылку",
+    "copied": "Скопировано"
   }
 }
