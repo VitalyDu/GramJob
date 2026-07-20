@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import QRCode from 'qrcode'
 import {
@@ -36,6 +36,7 @@ export function TelegramPaymentDialog({
   const { t } = useTranslation()
   const [qrSvg, setQrSvg] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (state !== 'ready' || !invoiceUrl) {
@@ -55,11 +56,22 @@ export function TelegramPaymentDialog({
     }
   }, [state, invoiceUrl])
 
+  useEffect(
+    () => () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
+    },
+    []
+  )
+
   const handleCopy = async () => {
     if (!invoiceUrl) return
-    await navigator.clipboard.writeText(invoiceUrl)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      await navigator.clipboard.writeText(invoiceUrl)
+      setCopied(true)
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // clipboard unavailable (HTTP context or permission denied) — no-op is acceptable
+    }
   }
 
   return (
@@ -67,9 +79,9 @@ export function TelegramPaymentDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{t('telegramPayment.title')}</DialogTitle>
-          <DialogDescription>
-            {state === 'ready' ? t('telegramPayment.descriptionWeb') : ''}
-          </DialogDescription>
+          {state === 'ready' && (
+            <DialogDescription>{t('telegramPayment.descriptionWeb')}</DialogDescription>
+          )}
         </DialogHeader>
 
         {state === 'loading' && (
@@ -93,6 +105,7 @@ export function TelegramPaymentDialog({
             {qrSvg && (
               <div className="flex flex-col items-center gap-2">
                 <p className="text-xs text-muted-foreground">{t('telegramPayment.orScanQr')}</p>
+                {/* QR scanners require a white background regardless of app theme */}
                 <div
                   className="rounded-md bg-white p-2"
                   dangerouslySetInnerHTML={{
