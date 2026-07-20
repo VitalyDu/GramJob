@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/drawer'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
+import { useIsDesktop } from '@/hooks/useIsDesktop'
 
 export type TelegramPaymentDialogState = 'loading' | 'ready' | 'error'
 
@@ -34,6 +35,7 @@ export function TelegramPaymentDialog({
   onOpenChange,
 }: TelegramPaymentDialogProps) {
   const { t } = useTranslation()
+  const isDesktop = useIsDesktop()
   const [qrSvg, setQrSvg] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -75,8 +77,8 @@ export function TelegramPaymentDialog({
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="sm:max-w-md sm:mx-auto">
+    <Drawer open={open} onOpenChange={onOpenChange} direction={isDesktop ? 'right' : 'left'}>
+      <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{t('telegramPayment.title')}</DrawerTitle>
           {state === 'ready' && (
