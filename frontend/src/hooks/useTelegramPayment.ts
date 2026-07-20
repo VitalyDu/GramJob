@@ -2,21 +2,27 @@
 
 import { getTelegramWebApp, hapticNotify } from '@/lib/telegram'
 
-export function useTelegramPayment() {
-  const openInvoice = (url: string, onPaid?: () => void): void => {
-    const webApp = getTelegramWebApp()
+export function isTelegramMiniApp(): boolean {
+  const webApp = getTelegramWebApp()
+  return typeof webApp?.openInvoice === 'function'
+}
 
-    if (webApp?.openInvoice) {
-      webApp.openInvoice(url, (status: string) => {
-        if (status === 'paid' && onPaid) {
-          hapticNotify('success')
-          onPaid()
-        }
-      })
-    } else {
-      window.open(url, '_blank')
+export function useTelegramPayment() {
+  const openInvoiceInMiniApp = (url: string, onPaid?: () => void): void => {
+    const webApp = getTelegramWebApp()
+    if (!webApp?.openInvoice) {
+      throw new Error('openInvoiceInMiniApp called outside Telegram Mini App')
     }
+    webApp.openInvoice(url, (status: string) => {
+      if (status === 'paid' && onPaid) {
+        hapticNotify('success')
+        onPaid()
+      }
+    })
   }
 
-  return { openInvoice }
+  return {
+    openInvoiceInMiniApp,
+    isMiniApp: isTelegramMiniApp(),
+  }
 }

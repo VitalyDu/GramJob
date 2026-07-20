@@ -36,8 +36,10 @@ describe('canEditResume', () => {
     expect(canEditResume('rejected')).toBe(true)
     expect(canEditResume('published')).toBe(true)
   })
-  it('запрещает из moderation и archived', () => {
-    expect(canEditResume('moderation')).toBe(false)
+  it('разрешает из moderation (правки применяются, сущность остаётся на проверке)', () => {
+    expect(canEditResume('moderation')).toBe(true)
+  })
+  it('запрещает из archived', () => {
     expect(canEditResume('archived')).toBe(false)
   })
 })

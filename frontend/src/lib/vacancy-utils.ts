@@ -71,7 +71,7 @@ export function canArchiveVacancy(status: VacancyStatusEnum): boolean {
 }
 
 export function canEditVacancy(status: VacancyStatusEnum): boolean {
-  return status === 'draft' || status === 'rejected' || status === 'published'
+  return ['draft', 'rejected', 'published', 'moderation'].includes(status)
 }
 
 export function canDeleteVacancy(status: VacancyStatusEnum): boolean {

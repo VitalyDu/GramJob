@@ -96,8 +96,8 @@ describe('canEdit', () => {
     expect(canEdit('published')).toBe(true)
   })
 
-  it('blocks edit for moderation', () => {
-    expect(canEdit('moderation')).toBe(false)
+  it('allows edit for moderation (keeps under review while applying edits)', () => {
+    expect(canEdit('moderation')).toBe(true)
   })
 
   it('blocks edit for expired', () => {

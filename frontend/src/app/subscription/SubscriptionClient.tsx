@@ -13,12 +13,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { canUpgradeToPlan } from '@/lib/subscription-utils'
-import { useTelegramPayment } from '@/hooks/useTelegramPayment'
+import { useTelegramPaymentDialog } from '@/hooks/useTelegramPaymentDialog'
+import { TelegramPaymentDialog } from '@/components/payment/TelegramPaymentDialog'
 
 export const SubscriptionClient = observer(function SubscriptionClient() {
   const { t } = useTranslation()
   const { auth, payment } = useStores()
-  const { openInvoice } = useTelegramPayment()
+  const pay = useTelegramPaymentDialog()
   const router = useRouter()
 
   const [buyingPlan, setBuyingPlan] = useState<string | null>(null)
@@ -34,67 +35,49 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
     void payment.fetchApplyPackages()
   }, [payment])
 
-  const handleBuyPlan = async (planCode: string) => {
+  // Card-level spinner clears as soon as the dialog transitions out of loading
+  // (or when it closes) — see the useEffect below.
+  useEffect(() => {
+    if (pay.state !== 'loading') {
+      setBuyingPlan(null)
+      setBuyingVacancyPack(null)
+      setBuyingApplyPack(null)
+    }
+  }, [pay.state, pay.open])
+
+  const onPaid = async () => {
+    await auth.fetchMe()
+    setShowRefreshHint(false)
+  }
+
+  const handleBuyPlan = (planCode: string) => {
     if (!user) {
       router.push('/login')
       return
     }
     setBuyingPlan(planCode)
-    setShowRefreshHint(false)
-    try {
-      const url = await payment.subscribeToPlan(planCode)
-      openInvoice(url, async () => {
-        await auth.fetchMe()
-        setShowRefreshHint(false)
-      })
-      setShowRefreshHint(true)
-    } catch {
-      // error displayed via payment.error
-    } finally {
-      setBuyingPlan(null)
-    }
+    setShowRefreshHint(true)
+    pay.start(() => payment.subscribeToPlan(planCode), onPaid)
   }
 
-  const handleBuyVacancyPack = async (packageId: number) => {
+  const handleBuyVacancyPack = (packageId: number) => {
     if (!user) {
       router.push('/login')
       return
     }
     setBuyingVacancyPack(packageId)
-    setShowRefreshHint(false)
-    try {
-      const url = await payment.buyVacancyPack(packageId)
-      openInvoice(url, async () => {
-        await auth.fetchMe()
-        setShowRefreshHint(false)
-      })
-      setShowRefreshHint(true)
-    } catch {
-      // error displayed via payment.error
-    } finally {
-      setBuyingVacancyPack(null)
-    }
+    setShowRefreshHint(true)
+    pay.start(() => payment.buyVacancyPack(packageId), onPaid)
   }
 
-  const handleBuyApplyPack = async (packageId: number) => {
+  const handleBuyApplyPack = (packageId: number) => {
     if (!user) {
       router.push('/login')
       return
     }
     setBuyingApplyPack(packageId)
-    setShowRefreshHint(false)
-    try {
-      const url = await payment.buyApplyPack(packageId)
-      openInvoice(url, async () => {
-        await auth.fetchMe()
-        setShowRefreshHint(false)
-      })
-      setShowRefreshHint(true)
-    } catch {
-      // error displayed via payment.error
-    } finally {
-      setBuyingApplyPack(null)
-    }
+    setShowRefreshHint(true)
+    pay.start(() => payment.buyApplyPack(packageId), onPaid)
   }
 
   const PLAN_ORDER = ['free', 'pro', 'max', 'vip']
@@ -236,6 +219,17 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
       <p className="pb-4 text-center text-xs text-muted-foreground">
         {t('subscription.disclaimer')}
       </p>
+
+      <TelegramPaymentDialog
+        open={pay.open}
+        state={pay.state}
+        {...(pay.invoiceUrl ? { invoiceUrl: pay.invoiceUrl } : {})}
+        {...(pay.errorMessage ? { errorMessage: pay.errorMessage } : {})}
+        onRetry={pay.retry}
+        onOpenChange={(v) => {
+          if (!v) pay.close()
+        }}
+      />
     </div>
   )
 })

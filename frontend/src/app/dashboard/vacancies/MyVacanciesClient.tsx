@@ -21,7 +21,8 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
-import { useTelegramPayment } from '@/hooks/useTelegramPayment'
+import { useTelegramPaymentDialog } from '@/hooks/useTelegramPaymentDialog'
+import { TelegramPaymentDialog } from '@/components/payment/TelegramPaymentDialog'
 import { hapticNotify } from '@/lib/telegram'
 import { VACANCY_UPGRADE_PRICES } from '@/stores/PaymentStore'
 import { VacancyStatusBadge } from '@/components/vacancy/VacancyStatusBadge'
@@ -46,7 +47,7 @@ import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 export const MyVacanciesClient = observer(function MyVacanciesClient() {
   const { t } = useTranslation()
   const { vacancy: store, payment, auth, limits } = useStores()
-  const { openInvoice } = useTelegramPayment()
+  const pay = useTelegramPaymentDialog()
   useRequireAuth()
 
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -57,6 +58,13 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
     void store.fetchMyVacancies()
     void limits.fetchLimits()
   }, [store, limits])
+
+  // In Mini App mode the dialog does not open, so surface payment errors as a toast.
+  useEffect(() => {
+    if (pay.errorMessage && !pay.open) {
+      toast.error(pay.errorMessage)
+    }
+  }, [pay.errorMessage, pay.open])
 
   const handlePublish = async (id: string) => {
     await store.publishVacancy(id)
@@ -75,28 +83,24 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
     void store.archiveVacancy(id)
   }
 
-  const handleMakeUrgent = async (id: string) => {
-    try {
-      const url = await payment.buyUrgent(id)
-      openInvoice(url, () => {
+  const handleMakeUrgent = (id: string) => {
+    pay.start(
+      () => payment.buyUrgent(id),
+      () => {
         toast.success(t('dashboard.vacancies.urgentActivated'))
         void store.fetchMyVacancies(store.page)
-      })
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('shared.errorDefault'))
-    }
+      }
+    )
   }
 
-  const handleMakeTop = async (id: string) => {
-    try {
-      const url = await payment.buyTopPlacement(id)
-      openInvoice(url, () => {
+  const handleMakeTop = (id: string) => {
+    pay.start(
+      () => payment.buyTopPlacement(id),
+      () => {
         toast.success(t('dashboard.vacancies.topActivated'))
         void store.fetchMyVacancies(store.page)
-      })
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('shared.errorDefault'))
-    }
+      }
+    )
   }
 
   const handlePageChange = (page: number) => {
@@ -287,7 +291,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                     icon: Flame,
                     label: t('actions.makeUrgent', { price: VACANCY_UPGRADE_PRICES.urgent }),
                     description: t('actions.makeUrgentDesc'),
-                    onClick: () => void handleMakeUrgent(activeVacancy.documentId),
+                    onClick: () => handleMakeUrgent(activeVacancy.documentId),
                     disabled: payment.isLoading,
                   },
                 ]
@@ -299,7 +303,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                     icon: Pin,
                     label: t('actions.makeTop', { price: VACANCY_UPGRADE_PRICES.top_placement }),
                     description: t('actions.makeTopDesc'),
-                    onClick: () => void handleMakeTop(activeVacancy.documentId),
+                    onClick: () => handleMakeTop(activeVacancy.documentId),
                     disabled: payment.isLoading,
                   },
                 ]
@@ -325,6 +329,17 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
         page={store.page}
         pageCount={store.pageCount}
         onPageChange={handlePageChange}
+      />
+
+      <TelegramPaymentDialog
+        open={pay.open}
+        state={pay.state}
+        {...(pay.invoiceUrl ? { invoiceUrl: pay.invoiceUrl } : {})}
+        {...(pay.errorMessage ? { errorMessage: pay.errorMessage } : {})}
+        onRetry={pay.retry}
+        onOpenChange={(v) => {
+          if (!v) pay.close()
+        }}
       />
     </div>
   )

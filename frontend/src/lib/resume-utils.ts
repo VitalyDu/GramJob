@@ -42,7 +42,7 @@ export function canPublishResume(status: ResumeStatusEnum): boolean {
 }
 
 export function canEditResume(status: ResumeStatusEnum): boolean {
-  return status === 'draft' || status === 'rejected' || status === 'published'
+  return ['draft', 'rejected', 'published', 'moderation'].includes(status)
 }
 
 export function canArchiveResume(status: ResumeStatusEnum): boolean {

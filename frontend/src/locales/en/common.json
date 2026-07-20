@@ -940,5 +940,19 @@
         "system": "System"
       }
     }
+  },
+  "telegramPayment": {
+    "title": "Pay with Telegram",
+    "descriptionMiniApp": "Confirm payment inside Telegram",
+    "descriptionWeb": "Click the button to open Telegram and pay with Stars",
+    "openInTelegram": "Open in Telegram",
+    "orScanQr": "Or scan the QR code with mobile Telegram",
+    "afterPayment": "After paying, return here and press \"Refresh status\"",
+    "loading": "Preparing invoice…",
+    "errorTitle": "Failed to create invoice",
+    "errorRetry": "Try again",
+    "close": "Close",
+    "copyLink": "Copy link",
+    "copied": "Copied"
   }
 }
