@@ -59,6 +59,13 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
     void limits.fetchLimits()
   }, [store, limits])
 
+  // In Mini App mode the dialog does not open, so surface payment errors as a toast.
+  useEffect(() => {
+    if (pay.errorMessage && !pay.open) {
+      toast.error(pay.errorMessage)
+    }
+  }, [pay.errorMessage, pay.open])
+
   const handlePublish = async (id: string) => {
     await store.publishVacancy(id)
     if (!store.error && !store.limitReached) {
