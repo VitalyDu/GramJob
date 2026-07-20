@@ -38,7 +38,11 @@ describe('useTelegramPaymentDialog', () => {
 
   it('opens native invoice in Mini App mode and does not show dialog', async () => {
     const openInvoice = vi.fn()
-    ;(window as any).Telegram = { WebApp: { openInvoice } }
+    // Real Mini App context requires initData to be populated; the invoice
+    // method itself was added in Bot API 6.1, so isVersionAtLeast must agree.
+    ;(window as any).Telegram = {
+      WebApp: { openInvoice, initData: 'mock-init', isVersionAtLeast: () => true },
+    }
 
     const createInvoice = vi.fn().mockResolvedValue('https://t.me/$xyz')
     const onPaid = vi.fn()
@@ -55,6 +59,25 @@ describe('useTelegramPaymentDialog', () => {
     const cb = openInvoice.mock.calls[0]![1]
     act(() => cb('paid'))
     expect(onPaid).toHaveBeenCalledOnce()
+  })
+
+  it('falls back to web dialog when in Mini App but Bot API version < 6.1', async () => {
+    const openInvoice = vi.fn()
+    ;(window as any).Telegram = {
+      WebApp: { openInvoice, initData: 'mock-init', isVersionAtLeast: () => false },
+    }
+
+    const createInvoice = vi.fn().mockResolvedValue('https://t.me/$old')
+    const { result } = renderHook(() => useTelegramPaymentDialog())
+
+    act(() => {
+      result.current.start(createInvoice)
+    })
+    expect(result.current.open).toBe(true)
+    expect(result.current.state).toBe('loading')
+
+    await waitFor(() => expect(result.current.state).toBe('ready'))
+    expect(openInvoice).not.toHaveBeenCalled()
   })
 
   it('close() resets state', async () => {

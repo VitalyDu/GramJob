@@ -1,8 +1,7 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
-import { getTelegramWebApp, hapticNotify } from '@/lib/telegram'
-import { isTelegramMiniApp } from './useTelegramPayment'
+import { canOpenInvoiceNative, getTelegramWebApp, hapticNotify } from '@/lib/telegram'
 
 export type TelegramPaymentDialogPublicState = 'loading' | 'ready' | 'error'
 
@@ -29,7 +28,7 @@ export function useTelegramPaymentDialog(): UseTelegramPaymentDialogResult {
   const lastArgsRef = useRef<LastArgs | null>(null)
 
   const run = useCallback(async (createInvoice: () => Promise<string>, onPaid?: () => void) => {
-    const inMiniApp = isTelegramMiniApp()
+    const inMiniApp = canOpenInvoiceNative()
 
     lastArgsRef.current = { createInvoice, ...(onPaid ? { onPaid } : {}) }
     setErrorMessage(undefined)
