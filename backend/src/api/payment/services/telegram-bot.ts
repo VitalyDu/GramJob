@@ -1,9 +1,5 @@
-export type InvoicePayload =
-  | { type: 'subscription'; planCode: string; userId: number }
-  | { type: 'vacancy_pack'; packageId: number; userId: number }
-  | { type: 'apply_pack'; packageId: number; userId: number }
-  | { type: 'urgent'; vacancyDocumentId: string; userId: number }
-  | { type: 'top_placement'; vacancyDocumentId: string; userId: number }
+export type { PaymentIntentPayload as InvoicePayload } from './payment-types'
+import type { PaymentIntentPayload } from './payment-types'
 
 // Одноразовые апгрейды вакансии — фиксированные цены в Stars.
 export const URGENT_PRICE_STARS = 99
@@ -13,12 +9,12 @@ export function buildTelegramApiUrl(token: string, method: string): string {
   return `https://api.telegram.org/bot${token}/${method}`
 }
 
-export function buildInvoicePayload(data: InvoicePayload): string {
+export function buildInvoicePayload(data: PaymentIntentPayload): string {
   return JSON.stringify(data)
 }
 
-export function parseInvoicePayload(raw: string): InvoicePayload {
-  const parsed = JSON.parse(raw) as InvoicePayload
+export function parseInvoicePayload(raw: string): PaymentIntentPayload {
+  const parsed = JSON.parse(raw) as PaymentIntentPayload
   if (!parsed.type || !parsed.userId) {
     throw new Error('Invalid invoice payload: missing type or userId')
   }
@@ -64,7 +60,7 @@ export function escapeHtml(value: unknown): string {
 export async function createInvoiceLink(params: {
   title: string
   description: string
-  payload: InvoicePayload
+  payload: PaymentIntentPayload
   starsAmount: number
 }): Promise<string> {
   return telegramCall<string>('createInvoiceLink', {

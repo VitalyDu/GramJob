@@ -6,6 +6,7 @@ import { StoreProvider } from '@/stores/StoreProvider'
 import { I18nProvider } from '@/components/I18nProvider'
 import { AppShell } from '@/components/layout/AppShell'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
+import { TonConnectProvider } from '@/providers/TonConnectProvider'
 import { SITE_URL } from '@/lib/site'
 
 const inter = Inter({
@@ -40,7 +41,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           <I18nProvider>
             <StoreProvider>
-              <AppShell>{children}</AppShell>
+              <TonConnectProvider>
+                <AppShell>{children}</AppShell>
+              </TonConnectProvider>
             </StoreProvider>
           </I18nProvider>
         </ThemeProvider>

@@ -1,8 +1,73 @@
 import type { Core } from '@strapi/strapi'
 import { sendNotification } from '../src/services/notification.service'
 import { computeDelta, yesterdayUTC } from '../src/services/analytics.service'
+import { confirmIntent } from '../src/api/payment/services/ton-payment'
 
 export default {
+  // Every 5 minutes: poll Tonapi.io for unconfirmed TON payment intents
+  tonPayPoller: {
+    task: async ({ strapi }: { strapi: Core.Strapi }) => {
+      const merchantAddress = process.env.TON_MERCHANT_ADDRESS
+      if (!merchantAddress) return
+
+      const pending = (await strapi.db.query('api::payment.payment').findMany({
+        where: {
+          provider: 'ton',
+          status: 'processing',
+          createdAt: { $lt: new Date(Date.now() - 60_000) },
+        },
+        limit: 50,
+      })) as Array<{ id: number; intentId: string; usdtAmount: number }>
+
+      if (pending.length === 0) return
+
+      try {
+        const tonapiKey = process.env.TONAPI_KEY
+        const url = `https://tonapi.io/v2/blockchain/accounts/${merchantAddress}/transactions?limit=100`
+        const headers: Record<string, string> = { Accept: 'application/json' }
+        if (tonapiKey) headers['Authorization'] = `Bearer ${tonapiKey}`
+
+        const res = await fetch(url, { headers })
+        if (!res.ok) {
+          strapi.log.warn(`[ton-poller] Tonapi returned ${res.status}`)
+          return
+        }
+
+        const data = (await res.json()) as { transactions?: any[] }
+        if (!data.transactions?.length) return
+
+        for (const payment of pending) {
+          try {
+            for (const tx of data.transactions) {
+              const comment = tx.in_msg?.decoded_body?.comment as string | undefined
+              if (comment !== payment.intentId) continue
+
+              const txHash = tx.hash as string | undefined
+              const rawAmount = tx.in_msg?.decoded_body?.amount as string | undefined
+              if (!txHash) continue
+
+              const usdtNano = rawAmount
+                ? BigInt(rawAmount)
+                : BigInt(Math.round(payment.usdtAmount * 10 ** 6))
+
+              await confirmIntent(strapi as any, {
+                intentId: payment.intentId,
+                tonTxHash: txHash,
+                usdtNanoReceived: usdtNano,
+              })
+              break
+            }
+          } catch (err) {
+            strapi.log.warn(`[ton-poller] intent=${payment.intentId} error:`, err)
+          }
+        }
+      } catch (err) {
+        strapi.log.error('[ton-poller] Failed to fetch Tonapi transactions', err)
+      }
+    },
+    options: { rule: '*/5 * * * *', tz: 'UTC' },
+  },
+
   // Every hour at minute 0: expire vacancies
   expireVacancies: {
     task: async ({ strapi }: { strapi: Core.Strapi }) => {

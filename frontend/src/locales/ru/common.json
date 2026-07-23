@@ -954,5 +954,15 @@
     "close": "Закрыть",
     "copyLink": "Скопировать ссылку",
     "copied": "Скопировано"
+  },
+  "tonPayment": {
+    "payWithUsdt": "Оплатить USDT (TON) — {{amount}}",
+    "statusTitle": "Оплата USDT",
+    "creating": "Готовим транзакцию…",
+    "awaiting_signature": "Подпишите в кошельке TON",
+    "awaiting_confirmation": "Ожидаем подтверждения в блокчейне…",
+    "success": "Оплата подтверждена! ✅",
+    "errorGeneric": "Не удалось провести оплату",
+    "close": "Закрыть"
   }
 }

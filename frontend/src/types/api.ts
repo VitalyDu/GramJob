@@ -675,3 +675,28 @@ export interface CompanyAnalyticsTotal {
 export interface CompanyAnalyticsResponse {
   total: CompanyAnalyticsTotal
 }
+
+export type TonPaymentKind =
+  | 'subscription'
+  | 'vacancy_pack'
+  | 'apply_pack'
+  | 'urgent'
+  | 'top_placement'
+
+export type TonPaymentIntentStatus = 'processing' | 'completed' | 'failed'
+
+export interface TonPaymentIntentResponse {
+  intentId: string
+  txParams: {
+    validUntil: number
+    messages: Array<{ address: string; amount: string; payload?: string }>
+    usdtNanoAmount: string
+    merchantAddress: string
+    usdtMaster: string
+  }
+}
+
+export interface TonIntentStatusResponse {
+  status: TonPaymentIntentStatus
+  tonTxHash: string | null
+}
