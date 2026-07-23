@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { Bell } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { dateLocale } from '@/lib/date-utils'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Button } from '@/components/ui/button'
@@ -22,7 +23,7 @@ import {
 type TabValue = 'all' | 'unread' | 'read'
 
 export const NotificationsClient = observer(function NotificationsClient() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { notification: store } = useStores()
   const isAuthenticated = useRequireAuth()
   const [activeTab, setActiveTab] = useState<TabValue>('all')
@@ -119,7 +120,7 @@ export const NotificationsClient = observer(function NotificationsClient() {
                           {stripLeadingEmoji(n.body)}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {new Date(n.createdAt).toLocaleString('ru-RU', {
+                          {new Date(n.createdAt).toLocaleString(dateLocale(i18n.language), {
                             day: 'numeric',
                             month: 'short',
                             hour: '2-digit',

@@ -26,6 +26,14 @@ const mockStore = {
     error: null,
     fetchLimits: vi.fn(),
   },
+  payment: {
+    plans: [],
+    isLoading: false,
+    error: null,
+    fetchPlans: vi.fn(),
+    buyUrgent: vi.fn(),
+    buyTopPlacement: vi.fn(),
+  },
 }
 
 vi.mock('@/stores/StoreProvider', () => ({

@@ -45,6 +45,14 @@ export function validateHttpUrl(field: string, value: unknown): string | null {
   return null
 }
 
+/** Проверка одиночной зарплаты (desiredSalary в резюме): неотрицательная. */
+export function validateSingleSalary(value: unknown): string | null {
+  if (value === undefined || value === null) return null
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 'desiredSalary must be a number'
+  if (value < 0) return 'desiredSalary must be non-negative'
+  return null
+}
+
 /** Проверка зарплатной вилки: неотрицательная, from <= to. */
 export function validateSalaryRange(salaryFrom: unknown, salaryTo: unknown): string | null {
   const from = salaryFrom

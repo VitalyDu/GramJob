@@ -51,6 +51,19 @@ const CARD_KEYS = [
 ]
 
 describe('POST /api/resumes/:id/publish', () => {
+  it('returns 403 if requester does not own the resume', async () => {
+    const owner = await createTestUser(strapi)
+    const stranger = await createTestUser(strapi)
+    const strangerJwt = issueJwt(strapi, stranger.id as number)
+    const resume = await createResume(owner.id as number, 'draft')
+
+    const res = await request(strapi.server.httpServer)
+      .post(`/api/resumes/${resume.documentId}/publish`)
+      .set('Authorization', `Bearer ${strangerJwt}`)
+
+    expect(res.status).toBe(403)
+  })
+
   it('returns full owner card fields so the dashboard card stays intact', async () => {
     const user = await createTestUser(strapi)
     const jwt = issueJwt(strapi, user.id as number)
@@ -71,6 +84,19 @@ describe('POST /api/resumes/:id/publish', () => {
 })
 
 describe('DELETE /api/resumes/:id (archive)', () => {
+  it('returns 403 if requester does not own the resume', async () => {
+    const owner = await createTestUser(strapi)
+    const stranger = await createTestUser(strapi)
+    const strangerJwt = issueJwt(strapi, stranger.id as number)
+    const resume = await createResume(owner.id as number, 'published')
+
+    const res = await request(strapi.server.httpServer)
+      .delete(`/api/resumes/${resume.documentId}`)
+      .set('Authorization', `Bearer ${strangerJwt}`)
+
+    expect(res.status).toBe(403)
+  })
+
   it('returns full owner card fields so the dashboard card stays intact', async () => {
     const user = await createTestUser(strapi)
     const jwt = issueJwt(strapi, user.id as number)

@@ -155,17 +155,40 @@ async function handleSuccessfulPayment(
       await addCredits(strapi, data.userId, 'apply', pack.applyCredits)
       notifyDetail = `+${pack.applyCredits} откликов`
     } else if (data.type === 'urgent') {
-      await strapi.documents('api::vacancy.vacancy').update({
+      const vac = await strapi.documents('api::vacancy.vacancy').findOne({
         documentId: data.vacancyDocumentId,
-        data: { urgent: true } as any,
+        fields: ['documentId', 'moderationStatus'] as any,
       })
-      notifyDetail = 'вакансия помечена как срочная 🔥'
+      if ((vac as any)?.moderationStatus !== 'published') {
+        strapi.log.warn(
+          `[payment] urgent: vacancy ${data.vacancyDocumentId} is no longer published (status=${(vac as any)?.moderationStatus}), skipping`
+        )
+        // Stars are non-refundable — record as completed but skip the feature
+        notifyDetail = null
+      } else {
+        await strapi.documents('api::vacancy.vacancy').update({
+          documentId: data.vacancyDocumentId,
+          data: { urgent: true } as any,
+        })
+        notifyDetail = 'вакансия помечена как срочная 🔥'
+      }
     } else if (data.type === 'top_placement') {
-      await strapi.documents('api::vacancy.vacancy').update({
+      const vac = await strapi.documents('api::vacancy.vacancy').findOne({
         documentId: data.vacancyDocumentId,
-        data: { topPlacement: true } as any,
+        fields: ['documentId', 'moderationStatus'] as any,
       })
-      notifyDetail = 'вакансия закреплена в TOP 📌'
+      if ((vac as any)?.moderationStatus !== 'published') {
+        strapi.log.warn(
+          `[payment] top_placement: vacancy ${data.vacancyDocumentId} is no longer published, skipping`
+        )
+        notifyDetail = null
+      } else {
+        await strapi.documents('api::vacancy.vacancy').update({
+          documentId: data.vacancyDocumentId,
+          data: { topPlacement: true } as any,
+        })
+        notifyDetail = 'вакансия закреплена в TOP 📌'
+      }
     }
 
     await strapi.db.query('api::payment.payment').update({

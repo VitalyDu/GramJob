@@ -23,3 +23,10 @@ export function canViewApplication(application: ApplicationAccessView, userId: n
   if (application.vacancy?.postedBy?.id === userId) return true
   return false
 }
+
+export function isSelfApplication(
+  vacancyOwnerId: number | undefined,
+  applicantId: number
+): boolean {
+  return vacancyOwnerId !== undefined && vacancyOwnerId === applicantId
+}

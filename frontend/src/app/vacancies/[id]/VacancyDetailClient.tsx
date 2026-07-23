@@ -85,6 +85,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({
   const salary = formatSalary(v.salaryFrom, v.salaryTo, v.salaryCurrency)
   const isInternal = v.sourceType === 'internal'
   const isPublished = v.moderationStatus === 'published'
+  const isOwnVacancy = auth.user?.id !== undefined && v.postedBy?.id === auth.user.id
   const logoUrl = getMediaUrl(v.company?.logo?.url)
 
   return (
@@ -170,7 +171,7 @@ export const VacancyDetailClient = observer(function VacancyDetailClient({
 
           {/* Кнопки действий */}
           <div className="mt-5 flex flex-wrap items-center gap-3">
-            {isPublished && isInternal && auth.user && (
+            {isPublished && isInternal && auth.user && !isOwnVacancy && (
               <Button size="lg" onClick={() => setApplyOpen(true)}>
                 {t('vacancyDetail.apply')}
               </Button>

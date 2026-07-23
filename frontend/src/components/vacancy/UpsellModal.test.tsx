@@ -29,8 +29,38 @@ describe('UpsellModal', () => {
     expect(onClose).toHaveBeenCalledOnce()
   })
 
-  it('отображает варианты апгрейда', () => {
-    render(<UpsellModal isOpen={true} onClose={vi.fn()} />)
+  it('отображает варианты апгрейда из переданных планов', () => {
+    const plans = [
+      {
+        id: 1,
+        code: 'pro' as const,
+        name: 'Pro',
+        vacanciesPerMonth: 10,
+        starsPrice: 299,
+        durationDays: 30,
+        activeVacanciesLimit: 10,
+        vacancyBoostsPerDay: 10,
+        resumesLimit: 5,
+        applicationsPerDay: 10,
+        resumeDatabaseAccess: false,
+        documentId: 'pro',
+      },
+      {
+        id: 2,
+        code: 'max' as const,
+        name: 'Max',
+        vacanciesPerMonth: 50,
+        starsPrice: 999,
+        durationDays: 30,
+        activeVacanciesLimit: 50,
+        vacancyBoostsPerDay: 50,
+        resumesLimit: 20,
+        applicationsPerDay: 50,
+        resumeDatabaseAccess: true,
+        documentId: 'max',
+      },
+    ]
+    render(<UpsellModal isOpen={true} onClose={vi.fn()} plans={plans} />)
     expect(screen.getByText('Pro')).toBeDefined()
     expect(screen.getByText('Max')).toBeDefined()
   })

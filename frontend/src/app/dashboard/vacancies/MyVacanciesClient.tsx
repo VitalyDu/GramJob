@@ -18,6 +18,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { dateLocale } from '@/lib/date-utils'
 import { toast } from 'sonner'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
@@ -45,7 +46,7 @@ import {
 import { RejectionNotice } from '@/components/moderation/RejectionNotice'
 
 export const MyVacanciesClient = observer(function MyVacanciesClient() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { vacancy: store, payment, auth, limits } = useStores()
   const pay = useTelegramPaymentDialog()
   useRequireAuth()
@@ -58,6 +59,12 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
     void store.fetchMyVacancies()
     void limits.fetchLimits()
   }, [store, limits])
+
+  useEffect(() => {
+    if (store.limitReached) {
+      void payment.fetchPlans()
+    }
+  }, [store.limitReached, payment])
 
   // In Mini App mode the dialog does not open, so surface payment errors as a toast.
   useEffect(() => {
@@ -111,7 +118,11 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
 
   return (
     <div className="space-y-6">
-      <UpsellModal isOpen={store.limitReached} onClose={() => store.clearLimitReached()} />
+      <UpsellModal
+        isOpen={store.limitReached}
+        onClose={() => store.clearLimitReached()}
+        plans={payment.plans}
+      />
 
       <PageHeader
         title={t('dashboard.vacancies.title')}
@@ -201,7 +212,7 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
               {v.expiresAt && (
                 <span>
                   {t('dashboard.vacancies.expires')}{' '}
-                  {new Date(v.expiresAt).toLocaleDateString('ru', {
+                  {new Date(v.expiresAt).toLocaleDateString(dateLocale(i18n.language), {
                     day: 'numeric',
                     month: 'short',
                   })}

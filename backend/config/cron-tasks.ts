@@ -62,7 +62,7 @@ export default {
             subscriptionPlan: { $notIn: ['free'] },
             subscriptionExpiresAt: { $lte: now },
           },
-          select: ['id', 'subscriptionPlan'],
+          select: ['id', 'subscriptionPlan', 'isVip'],
           limit: 1000,
         })
 
@@ -70,11 +70,25 @@ export default {
 
         strapi.log.info(`[cron] Expiring ${expiredUsers.length} user subscriptions`)
 
-        for (const user of expiredUsers) {
+        for (const user of expiredUsers as Array<{
+          id: number
+          subscriptionPlan: string
+          isVip?: boolean
+        }>) {
           await strapi.db.query('plugin::users-permissions.user').update({
             where: { id: user.id },
             data: { subscriptionPlan: 'free', subscriptionExpiresAt: null, isVip: false },
           })
+
+          // VIP users had their vacancies highlighted — remove the highlight on expiry
+          if (user.isVip) {
+            await strapi.db.connection.raw(
+              `UPDATE vacancies SET highlighted = false WHERE posted_by_id = ? AND highlighted = true`,
+              [user.id]
+            )
+            strapi.log.info(`[cron] User ${user.id} VIP expired: vacancies un-highlighted`)
+          }
+
           strapi.log.info(`[cron] User ${user.id} plan=${user.subscriptionPlan} → free (expired)`)
 
           await sendNotification(strapi, {

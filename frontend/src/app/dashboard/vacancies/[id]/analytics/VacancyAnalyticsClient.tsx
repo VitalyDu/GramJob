@@ -13,6 +13,7 @@ import {
   Legend,
 } from 'recharts'
 import { useTranslation } from 'react-i18next'
+import { dateLocale } from '@/lib/date-utils'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -39,7 +40,7 @@ interface Props {
 export const VacancyAnalyticsClient = observer(function VacancyAnalyticsClient({
   vacancyId,
 }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { analytics: store } = useStores()
   const isAuthenticated = useRequireAuth()
   const [from, setFrom] = useState(defaultFrom())
@@ -141,13 +142,16 @@ export const VacancyAnalyticsClient = observer(function VacancyAnalyticsClient({
                   dataKey="date"
                   tick={{ fontSize: 11 }}
                   tickFormatter={(v: string) =>
-                    new Date(v).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
+                    new Date(v).toLocaleDateString(dateLocale(i18n.language), {
+                      day: 'numeric',
+                      month: 'short',
+                    })
                   }
                 />
                 <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                 <Tooltip
                   labelFormatter={(v) =>
-                    new Date(String(v)).toLocaleDateString('ru-RU', {
+                    new Date(String(v)).toLocaleDateString(dateLocale(i18n.language), {
                       day: 'numeric',
                       month: 'long',
                       year: 'numeric',

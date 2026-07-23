@@ -1,18 +1,17 @@
 import { useTranslation } from 'react-i18next'
+import type { SubscriptionPlan } from '@/types/api'
 
 interface Props {
   isOpen: boolean
   onClose: () => void
+  plans?: SubscriptionPlan[]
 }
 
-const PLANS = [
-  { name: 'Pro', vacancies: 10, price: '299 Stars' },
-  { name: 'Max', vacancies: 50, price: '999 Stars' },
-]
-
-export function UpsellModal({ isOpen, onClose }: Props) {
+export function UpsellModal({ isOpen, onClose, plans = [] }: Props) {
   const { t } = useTranslation()
   if (!isOpen) return null
+
+  const upsellPlans = plans.filter((p) => p.code === 'pro' || p.code === 'max')
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -33,17 +32,23 @@ export function UpsellModal({ isOpen, onClose }: Props) {
 
         <p className="mb-6 text-sm text-muted-foreground">{t('subscription.upsell.body')}</p>
 
-        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {PLANS.map((plan) => (
-            <div key={plan.name} className="rounded-xl border border-border p-4 text-center">
-              <p className="text-base font-bold text-card-foreground">{plan.name}</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t('subscription.upsell.vacanciesPerMonth', { count: plan.vacancies })}
-              </p>
-              <p className="mt-2 text-sm font-medium text-indigo-600">{plan.price}</p>
-            </div>
-          ))}
-        </div>
+        {upsellPlans.length > 0 && (
+          <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {upsellPlans.map((plan) => (
+              <div key={plan.code} className="rounded-xl border border-border p-4 text-center">
+                <p className="text-base font-bold text-card-foreground">{plan.name}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t('subscription.upsell.vacanciesPerMonth', { count: plan.vacanciesPerMonth })}
+                </p>
+                <p className="mt-2 text-sm font-medium text-indigo-600">
+                  {plan.starsPrice != null
+                    ? `${plan.starsPrice} ★`
+                    : t('subscription.starsPrice.free')}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
 
         <a
           href="/subscription"

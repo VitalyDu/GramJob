@@ -272,8 +272,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const vacancy = await strapi.documents('api::vacancy.vacancy').findOne({
         documentId: id,
         fields: ['documentId', 'moderationStatus'],
+        populate: { postedBy: { fields: ['id'] } } as any,
       })
       if (!vacancy) return ctx.notFound('Vacancy not found')
+      if ((vacancy as any).postedBy?.id !== user.id)
+        return ctx.forbidden('You do not own this vacancy')
 
       const status = (vacancy as any).moderationStatus as string
       if (!canPublish(status)) {
@@ -282,8 +285,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         )
       }
 
+      let creditSource: { source: 'plan' | 'package' }
       try {
-        await checkAndConsumeVacancyCredit(strapi, user.id)
+        creditSource = await checkAndConsumeVacancyCredit(strapi, user.id)
       } catch (err: any) {
         if (err?.code === 'LIMIT_REACHED') {
           notifyLimitReached(strapi, user.id, 'monthly_vacancies')
@@ -301,12 +305,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw err
       }
 
-      const updated = await strapi.documents('api::vacancy.vacancy').update({
-        documentId: id,
-        data: { moderationStatus: 'moderation' } as any,
-        fields: VACANCY_CARD_FIELDS as any,
-        populate: VACANCY_POPULATE as any,
-      })
+      let updated: unknown
+      try {
+        updated = await strapi.documents('api::vacancy.vacancy').update({
+          documentId: id,
+          data: { moderationStatus: 'moderation' } as any,
+          fields: VACANCY_CARD_FIELDS as any,
+          populate: VACANCY_POPULATE as any,
+        })
+      } catch (err) {
+        if (creditSource.source === 'package') {
+          await refundVacancyCredit(strapi, user.id).catch(() => {})
+        }
+        throw err
+      }
 
       return ctx.send({ data: updated })
     },

@@ -316,5 +316,16 @@ describe('VacancyStore', () => {
       await expect(store.boostVacancy('vac123')).rejects.toThrow('Boost failed')
       expect(store.error).toBe('Boost failed')
     })
+
+    it('устанавливает limitReached при LIMIT_REACHED и не выбрасывает', async () => {
+      vi.mocked(api.post).mockRejectedValueOnce(
+        new ApiClientError(403, { error: { code: 'LIMIT_REACHED' } }, 'Limit reached')
+      )
+
+      await store.boostVacancy('vac123')
+
+      expect(store.limitReached).toBe(true)
+      expect(store.error).toBeNull()
+    })
   })
 })

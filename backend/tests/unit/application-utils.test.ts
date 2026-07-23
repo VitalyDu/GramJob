@@ -2,6 +2,7 @@ import {
   canTransitionTo,
   STATUS_TRANSITIONS,
   canViewApplication,
+  isSelfApplication,
 } from '../../src/api/application/services/application-utils'
 
 describe('STATUS_TRANSITIONS', () => {
@@ -116,5 +117,19 @@ describe('canViewApplication', () => {
   it('отсутствующие связи не дают доступ', () => {
     expect(canViewApplication({ user: null, vacancy: null }, 7)).toBe(false)
     expect(canViewApplication({}, 7)).toBe(false)
+  })
+})
+
+describe('isSelfApplication', () => {
+  it('возвращает true когда владелец вакансии откликается на свою же вакансию', () => {
+    expect(isSelfApplication(42, 42)).toBe(true)
+  })
+
+  it('возвращает false когда другой пользователь откликается', () => {
+    expect(isSelfApplication(42, 99)).toBe(false)
+  })
+
+  it('возвращает false когда владелец вакансии неизвестен', () => {
+    expect(isSelfApplication(undefined, 99)).toBe(false)
   })
 })

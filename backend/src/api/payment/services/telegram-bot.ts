@@ -116,6 +116,7 @@ export type NotificationType =
   | 'saved_search_match'
   | 'moderation_approved'
   | 'moderation_rejected'
+  | 'hired_notification'
 
 export interface TelegramMessageOptions {
   parse_mode?: 'HTML' | 'Markdown'
@@ -135,6 +136,7 @@ export const APPLICATION_STATUS_TO_NOTIFICATION: Record<string, NotificationType
   interview: 'interview_invitation',
   'test-task': 'test_task',
   offer: 'offer_received',
+  hired: 'hired_notification',
 }
 
 const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME ?? 'gramjob_bot'
@@ -155,6 +157,7 @@ function buildDeepLink(type: string, data: Record<string, unknown>): string | nu
       'interview_invitation',
       'test_task',
       'offer_received',
+      'hired_notification',
     ].includes(type)
   ) {
     return `application_${data['applicationId']}`
@@ -189,6 +192,7 @@ const BUTTON_TEXTS: Partial<Record<NotificationType, string>> = {
   application_in_review: '📋 Открыть отклик',
   application_approved: '✅ Открыть контакты',
   offer_received: '🎉 Посмотреть оффер',
+  hired_notification: '🎊 Открыть отклик',
   resume_viewed: '👁 Открыть резюме',
   invitation_to_apply: '📨 Открыть вакансию',
   subscription_expiring: '💳 Продлить подписку',
@@ -221,6 +225,7 @@ export function buildNotificationMessage(
     saved_search_match: `🔔 ${data['count'] ?? 0} новых ${data['searchType'] === 'resume' ? 'резюме' : 'вакансий'} по вашему поиску`,
     moderation_approved: `✅ «${data['title'] ?? ''}» опубликовано после модерации`,
     moderation_rejected: `❌ «${data['title'] ?? ''}» отклонено. Причина: ${data['reason'] ?? 'см. детали'}`,
+    hired_notification: `🎊 Поздравляем! Вы приняты на работу по вакансии «${data['vacancyTitle'] ?? ''}»`,
   }
 
   const text = templates[type] ?? `📢 Уведомление: ${type}`

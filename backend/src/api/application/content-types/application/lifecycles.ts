@@ -11,9 +11,34 @@ type ApplicationAfterEvent = {
     user?: { id?: number }
   }
   params: { data?: Record<string, unknown> }
+  state?: Record<string, unknown>
 }
 
+type ApplicationBeforeUpdateEvent = {
+  params: {
+    data?: Record<string, unknown>
+    where?: Record<string, unknown>
+  }
+  state: Record<string, unknown>
+}
+
+// Статусы, при которых контакты работодателя раскрываются кандидату
+const CONTACTS_REVEALING_STATUSES = new Set(['interview', 'test-task', 'offer', 'hired'])
+
 export default {
+  async beforeUpdate(event: ApplicationBeforeUpdateEvent) {
+    const newStatus = event.params.data?.['status'] as string | undefined
+    if (!newStatus || !CONTACTS_REVEALING_STATUSES.has(newStatus)) return
+
+    // Capture previous status to detect first entry into contacts-revealing zone
+    const where = event.params.where
+    if (!where || Object.keys(where).length === 0) return
+    const previous = (await (globalThis.strapi.db as any)
+      .query('api::application.application')
+      .findOne({ where, select: ['status'] })) as { status?: string } | null
+    event.state['previousStatus'] = previous?.status ?? null
+  },
+
   async afterCreate(event: ApplicationAfterEvent) {
     const s = globalThis.strapi as Core.Strapi
     s.log.info(`[application] New application ${event.result.documentId} created`)
@@ -73,13 +98,30 @@ export default {
 
       if (!application?.user?.id) return
 
+      const templateData = {
+        vacancyTitle: application.vacancy?.title ?? '',
+        applicationId: event.result.documentId ?? '',
+      }
+
+      // Раскрываем контакты работодателя при ПЕРВОМ входе в revealing-зону.
+      // Если предыдущий статус уже был revealing (например interview→offer),
+      // кандидат уже видит контакты — повторное уведомление не нужно.
+      const previousStatus = event.state?.['previousStatus'] as string | undefined
+      const isFirstReveal =
+        CONTACTS_REVEALING_STATUSES.has(newStatus) &&
+        !CONTACTS_REVEALING_STATUSES.has(previousStatus ?? '')
+      if (isFirstReveal) {
+        await sendNotification(s, {
+          userId: application.user.id,
+          type: 'application_approved',
+          templateData,
+        })
+      }
+
       await sendNotification(s, {
         userId: application.user.id,
         type: notificationType,
-        templateData: {
-          vacancyTitle: application.vacancy?.title ?? '',
-          applicationId: event.result.documentId ?? '',
-        },
+        templateData,
       })
     } catch (err) {
       s.log.error('[application] Failed to send status-change notification', err)

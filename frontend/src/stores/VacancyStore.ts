@@ -297,6 +297,15 @@ export class VacancyStore {
         this.boostsRemaining = res.data.boostsRemaining
       })
     } catch (e) {
+      if (e instanceof ApiClientError) {
+        const body = e.data as { error?: { code?: string } } | null
+        if (body?.error?.code === 'LIMIT_REACHED') {
+          runInAction(() => {
+            this.limitReached = true
+          })
+          return
+        }
+      }
       runInAction(() => {
         this.error = e instanceof Error ? e.message : 'Failed to boost vacancy'
       })

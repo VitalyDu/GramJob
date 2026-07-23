@@ -1,5 +1,9 @@
 import type { Core } from '@strapi/strapi'
-import { canTransitionTo, canViewApplication } from '../services/application-utils'
+import {
+  canTransitionTo,
+  canViewApplication,
+  isSelfApplication,
+} from '../services/application-utils'
 import {
   checkAndConsumeApplyCredit,
   refundApplyCredit,
@@ -79,6 +83,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     if (vacancy.sourceType === 'external') {
       return ctx.badRequest('Cannot apply to external vacancies through this endpoint')
     }
+    if (isSelfApplication(vacancy.postedBy?.id, user.id)) {
+      return ctx.forbidden('Cannot apply to your own vacancy')
+    }
 
     // Validate resume ownership and published status
     const resume = await (strapi.documents as any)('api::resume.resume').findOne({
@@ -94,14 +101,27 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       return ctx.badRequest('Resume must be published to apply')
     }
 
-    // Enforce one application per vacancy per user
-    const existing = await (strapi.documents as any)('api::application.application').findFirst({
-      filters: {
-        vacancy: { documentId: { $eq: vacancyId as string } },
-        user: { id: { $eq: user.id } },
-      },
+    // Enforce one application per vacancy per user — advisory lock предотвращает race condition
+    // при параллельных запросах (аналогично favorite.create / block.create).
+    const lockKey = `application:${user.id}:${vacancyId as string}`
+
+    let consumedSource: ConsumedApplySource
+    let application: unknown
+
+    const txResult = await strapi.db.transaction(async ({ trx }: { trx: any }) => {
+      await trx.raw('SELECT pg_advisory_xact_lock(hashtextextended(?::text, 0))', [lockKey])
+
+      const existing = await (strapi.documents as any)('api::application.application').findFirst({
+        filters: {
+          vacancy: { documentId: { $eq: vacancyId as string } },
+          user: { id: { $eq: user.id } },
+        },
+      })
+      if (existing) return { alreadyApplied: true as const }
+      return { alreadyApplied: false as const }
     })
-    if (existing) {
+
+    if (txResult.alreadyApplied) {
       return ctx.send(
         {
           error: { code: 'ALREADY_APPLIED', message: 'You have already applied to this vacancy' },
@@ -111,7 +131,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }
 
     // Check and consume apply credit
-    let consumedSource: ConsumedApplySource
     try {
       consumedSource = await checkAndConsumeApplyCredit(strapi, user.id)
     } catch (err: any) {
@@ -131,7 +150,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       throw err
     }
 
-    let application: unknown
     try {
       application = await (strapi.documents as any)('api::application.application').create({
         data: {

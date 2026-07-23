@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
+import { dateLocale } from '@/lib/date-utils'
 import type { Application, ApplicationStatusEnum } from '@/types/api'
 import { ApplicationStatusBadge } from './ApplicationStatusBadge'
 
@@ -27,7 +28,7 @@ export function ApplicationCard({
   onStatusChange,
   isLoading,
 }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const nextStatuses = STATUS_TRANSITIONS[app.status] ?? []
 
   const cardContent = (
@@ -56,7 +57,7 @@ export function ApplicationCard({
           <div className="mt-2 flex items-center gap-2">
             <ApplicationStatusBadge status={app.status} />
             <span className="text-xs text-muted-foreground">
-              {new Date(app.createdAt).toLocaleDateString('ru', {
+              {new Date(app.createdAt).toLocaleDateString(dateLocale(i18n.language), {
                 day: 'numeric',
                 month: 'short',
                 year: 'numeric',

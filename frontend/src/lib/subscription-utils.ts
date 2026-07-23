@@ -27,7 +27,7 @@ export function formatStarsPrice(price: number | null): string {
 
 export function canUpgradeToPlan(currentPlan: string, targetPlan: string): boolean {
   if (targetPlan === 'free') return false
-  if (targetPlan === 'vip') return currentPlan === 'max' || currentPlan === 'vip'
+  if (targetPlan === 'vip') return currentPlan === 'max'
   return true
 }
 

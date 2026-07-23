@@ -9,6 +9,7 @@ import {
   validateShortText,
   validateLongText,
   validateSalaryRange,
+  validateSingleSalary,
 } from '../../../utils/input-validation'
 import type resumeServiceFactory from '../services/resume'
 
@@ -113,7 +114,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const err = validateLongText('about', body.about)
         if (err) return ctx.badRequest(err)
       }
-      const salaryErr = validateSalaryRange(body.desiredSalary, body.desiredSalary)
+      const salaryErr = validateSingleSalary(body.desiredSalary)
       if (salaryErr) return ctx.badRequest(salaryErr)
 
       const avatarId = body.avatar
@@ -207,8 +208,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const resume = await (strapi.documents as any)('api::resume.resume').findOne({
         documentId: id,
         fields: ['documentId', 'moderationStatus'],
+        populate: { user: { fields: ['id'] } },
       })
       if (!resume) return ctx.notFound('Resume not found')
+      if ((resume.user as any)?.id !== user.id) return ctx.forbidden('You do not own this resume')
 
       const status = resume.moderationStatus as string
       if (!canPublishResume(status)) {
@@ -526,7 +529,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         if (err) return ctx.badRequest(err)
       }
       if ('desiredSalary' in updateData) {
-        const err = validateSalaryRange(updateData.desiredSalary, updateData.desiredSalary)
+        const err = validateSingleSalary(updateData.desiredSalary)
         if (err) return ctx.badRequest(err)
       }
 
@@ -576,8 +579,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const resume = await (strapi.documents as any)('api::resume.resume').findOne({
         documentId: id,
         fields: ['documentId', 'moderationStatus'],
+        populate: { user: { fields: ['id'] } },
       })
       if (!resume) return ctx.notFound('Resume not found')
+      if ((resume.user as any)?.id !== user.id) return ctx.forbidden('You do not own this resume')
 
       if (!canArchiveResume(resume.moderationStatus as string)) {
         return ctx.badRequest(`Cannot archive resume with status "${resume.moderationStatus}".`)

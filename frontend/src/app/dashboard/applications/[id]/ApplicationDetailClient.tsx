@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
+import { dateLocale } from '@/lib/date-utils'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { ApplicationStatusBadge } from '@/components/application/ApplicationStatusBadge'
@@ -19,7 +20,7 @@ interface Props {
 export const ApplicationDetailClient = observer(function ApplicationDetailClient({
   documentId,
 }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { application: store } = useStores()
   const isAuthenticated = useRequireAuth()
 
@@ -52,7 +53,7 @@ export const ApplicationDetailClient = observer(function ApplicationDetailClient
       <div className="flex items-center gap-2">
         <ApplicationStatusBadge status={app.status} />
         <span className="text-xs text-muted-foreground">
-          {new Date(app.createdAt).toLocaleDateString('ru', {
+          {new Date(app.createdAt).toLocaleDateString(dateLocale(i18n.language), {
             day: 'numeric',
             month: 'long',
             year: 'numeric',

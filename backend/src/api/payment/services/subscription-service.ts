@@ -39,8 +39,11 @@ export function resolveSubscriptionStart(
   currentExpiresAt: string | null | undefined,
   now: Date = new Date()
 ): Date {
-  // Renewal of the same plan extends the remaining period instead of resetting it
-  if (currentPlan === planCode && currentExpiresAt) {
+  // Renewal of the same plan extends the remaining period instead of resetting it.
+  // VIP upgrade from Max also extends from Max expiry so users don't lose paid days.
+  const isRenewal = currentPlan === planCode
+  const isVipFromMax = planCode === 'vip' && (currentPlan === 'max' || currentPlan === 'vip')
+  if ((isRenewal || isVipFromMax) && currentExpiresAt) {
     const currentExpiry = new Date(currentExpiresAt)
     if (currentExpiry > now) return currentExpiry
   }
@@ -75,6 +78,20 @@ export async function activateSubscription(
     where: { id: userId },
     data: updateData,
   })
+
+  // VIP: ретроактивно выделяем все опубликованные/на модерации вакансии пользователя.
+  // Новые вакансии получают highlighted=true через lifecycle beforeCreate,
+  // но уже существующие при апгрейде остались бы не выделены без этого UPDATE.
+  if (planCode === 'vip') {
+    await strapi.db.connection.raw(
+      `UPDATE vacancies SET highlighted = true
+       WHERE posted_by_id = ?
+         AND moderation_status IN ('published', 'moderation')
+         AND highlighted = false`,
+      [userId]
+    )
+    strapi.log.info(`[subscription] User ${userId} VIP upgrade: existing vacancies highlighted`)
+  }
 
   strapi.log.info(
     `[subscription] User ${userId} activated plan=${planCode}, expiresAt=${expiresAt}`

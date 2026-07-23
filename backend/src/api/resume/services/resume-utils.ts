@@ -7,5 +7,5 @@ export function canEditResume(status: string): boolean {
 }
 
 export function canArchiveResume(status: string): boolean {
-  return ['draft', 'published', 'rejected'].includes(status)
+  return ['draft', 'moderation', 'published', 'rejected'].includes(status)
 }

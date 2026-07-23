@@ -56,9 +56,9 @@ describe('canUpgradeToPlan', () => {
     expect(canUpgradeToPlan('vip', 'max')).toBe(true)
   })
 
-  it('vip требует активный max или vip', () => {
+  it('vip требует активный max (но не повторную покупку vip→vip)', () => {
     expect(canUpgradeToPlan('max', 'vip')).toBe(true)
-    expect(canUpgradeToPlan('vip', 'vip')).toBe(true)
+    expect(canUpgradeToPlan('vip', 'vip')).toBe(false)
     expect(canUpgradeToPlan('pro', 'vip')).toBe(false)
     expect(canUpgradeToPlan('free', 'vip')).toBe(false)
   })

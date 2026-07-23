@@ -61,8 +61,8 @@ describe('canArchiveResume', () => {
     expect(canArchiveResume('rejected')).toBe(true)
   })
 
-  it('blocks archive for moderation', () => {
-    expect(canArchiveResume('moderation')).toBe(false)
+  it('allows archive for moderation (пользователь должен иметь возможность отозвать резюме пока оно на проверке)', () => {
+    expect(canArchiveResume('moderation')).toBe(true)
   })
 
   it('blocks archive for already archived', () => {

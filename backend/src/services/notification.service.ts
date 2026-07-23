@@ -31,6 +31,7 @@ const NOTIFICATION_TITLES: Record<string, string> = {
   saved_search_match: 'Новые результаты',
   moderation_approved: 'Публикация одобрена',
   moderation_rejected: 'Публикация отклонена',
+  hired_notification: 'Поздравляем с оффером!',
 }
 
 const ENTITY_TYPE_LABELS: Record<string, string> = {

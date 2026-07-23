@@ -4,6 +4,7 @@ import {
   PLAN_LIMITS,
   checkAndConsumeVacancyCredit,
   refundVacancyCredit,
+  checkAndConsumeBoost,
 } from '../../src/api/vacancy/services/credit-service'
 
 describe('getLimitForPlan', () => {
@@ -62,6 +63,7 @@ function makeMockStrapi({
   vacancyCount?: number
 }) {
   const rawSql = jest.fn().mockResolvedValue({ rowCount: rawRowCount })
+  const countMock = jest.fn().mockResolvedValue(vacancyCount)
   return {
     db: {
       query: jest.fn().mockReturnValue({
@@ -70,9 +72,10 @@ function makeMockStrapi({
       connection: { raw: rawSql },
     },
     documents: jest.fn().mockReturnValue({
-      count: jest.fn().mockResolvedValue(vacancyCount),
+      count: countMock,
     }),
     _rawSql: rawSql,
+    _countMock: countMock,
   } as any
 }
 
@@ -109,6 +112,63 @@ describe('checkAndConsumeVacancyCredit', () => {
       code: 'LIMIT_REACHED',
       details: { limit: 10, used: 10 },
     })
+  })
+
+  it('не фильтрует по createdAt — все активные вакансии (любого месяца) считаются против лимита', async () => {
+    // H1+M1: vacancies from previous months must count against the active limit
+    const strapi = makeMockStrapi({ subscriptionPlan: 'free', rawRowCount: 0, vacancyCount: 0 })
+    await checkAndConsumeVacancyCredit(strapi, 1)
+    const [countOptions] = strapi._countMock.mock.calls[0]
+    expect(countOptions?.filters?.createdAt).toBeUndefined()
+  })
+})
+
+describe('checkAndConsumeBoost — package users', () => {
+  function makeMockBoostStrapi({
+    subscriptionPlan = 'free',
+    packageBoostRowCount = 0,
+    remainingBoostCredits = 0,
+    dailyUsed = 0,
+    dailyLimit = 3,
+  }: {
+    subscriptionPlan?: string
+    packageBoostRowCount?: number
+    remainingBoostCredits?: number
+    dailyUsed?: number
+    dailyLimit?: number
+  }) {
+    const rawSql = jest.fn()
+    rawSql
+      .mockResolvedValueOnce({
+        rowCount: packageBoostRowCount,
+        rows: [{ boost_credits: remainingBoostCredits }],
+      })
+      .mockResolvedValue({ rows: [{ new_count: dailyUsed + 1 }] })
+
+    return {
+      db: {
+        query: jest.fn().mockReturnValue({
+          findOne: jest.fn().mockResolvedValue({ subscriptionPlan }),
+        }),
+        connection: { raw: rawSql },
+      },
+      documents: jest.fn().mockReturnValue({
+        count: jest.fn().mockResolvedValue(dailyUsed),
+      }),
+      _rawSql: rawSql,
+    } as any
+  }
+
+  it('возвращает оставшиеся boost_credits из пакета (не limit - dailyUsed) когда source=package', async () => {
+    // M6: package user has 5 boost_credits; after consuming 1, remaining should be 4 (not plan daily limit)
+    const strapi = makeMockBoostStrapi({
+      subscriptionPlan: 'free',
+      packageBoostRowCount: 1,
+      remainingBoostCredits: 4,
+    })
+    const result = await checkAndConsumeBoost(strapi, 1)
+    expect(result.source).toBe('package')
+    expect(result.boostsRemaining).toBe(4)
   })
 })
 

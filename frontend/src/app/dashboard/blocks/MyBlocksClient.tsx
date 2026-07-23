@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { ShieldOff } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { dateLocale } from '@/lib/date-utils'
 import { useStores } from '@/stores/StoreProvider'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Button } from '@/components/ui/button'
@@ -22,7 +23,7 @@ import { ErrorState } from '@/components/shared/ErrorState'
 import { PaginationBar } from '@/components/shared/PaginationBar'
 
 export const MyBlocksClient = observer(function MyBlocksClient() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { block: store } = useStores()
   const isAuthenticated = useRequireAuth()
 
@@ -83,7 +84,7 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
                     {b.targetName || `#${b.targetId}`}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {new Date(b.createdAt).toLocaleDateString('ru')}
+                    {new Date(b.createdAt).toLocaleDateString(dateLocale(i18n.language))}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
@@ -116,7 +117,8 @@ export const MyBlocksClient = observer(function MyBlocksClient() {
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {t(`dashboard.blocks.targetTypes.${b.targetType}`)} &middot;{' '}
-                  {t('dashboard.blocks.blockedAt')} {new Date(b.createdAt).toLocaleDateString('ru')}
+                  {t('dashboard.blocks.blockedAt')}{' '}
+                  {new Date(b.createdAt).toLocaleDateString(dateLocale(i18n.language))}
                 </p>
               </div>
               <Button

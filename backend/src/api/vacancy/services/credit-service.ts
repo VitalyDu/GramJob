@@ -82,30 +82,25 @@ export async function checkAndConsumeVacancyCredit(
   )) as { rowCount?: number }
   if ((consumed.rowCount ?? 0) > 0) return { source: 'package' }
 
-  // 2. Check plan monthly limit
-  const monthStart = new Date()
-  monthStart.setUTCDate(1)
-  monthStart.setUTCHours(0, 0, 0, 0)
-
-  const usedThisMonth = await strapi.documents('api::vacancy.vacancy').count({
+  // 2. Check active vacancies limit (moderation + published, any age).
+  // Не фильтруем по createdAt: вакансии из прошлых месяцев, отправленные повторно,
+  // должны считаться против лимита активных — иначе старые rejected/expired вакансии
+  // позволяют обходить ограничение (M1), а сам лимит activeVacanciesLimit никогда
+  // не применяется (H1).
+  const activeCount = await strapi.documents('api::vacancy.vacancy').count({
     filters: {
       postedBy: { id: { $eq: userId } },
       moderationStatus: { $in: ['moderation', 'published'] },
-      createdAt: { $gte: monthStart.toISOString() },
     },
   })
 
   const planLimits = await loadLimits(strapi, user.subscriptionPlan)
-  const limit = planLimits.vacanciesPerMonth
+  const limit = planLimits.activeVacanciesLimit
 
-  if (usedThisMonth >= limit) {
-    const resetAt = new Date()
-    resetAt.setUTCMonth(resetAt.getUTCMonth() + 1, 1)
-    resetAt.setUTCHours(0, 0, 0, 0)
-
+  if (activeCount >= limit) {
     throw Object.assign(new Error('LIMIT_REACHED'), {
       code: 'LIMIT_REACHED',
-      details: { limit, used: usedThisMonth, resetAt: resetAt.toISOString() },
+      details: { limit, used: activeCount },
     })
   }
 
@@ -138,14 +133,15 @@ export async function checkAndConsumeBoost(
   const planLimits = await loadLimits(strapi, user.subscriptionPlan)
   const limit = planLimits.vacancyBoostsPerDay
 
-  // 1. Package boost credits take priority over the daily plan limit (atomic decrement)
+  // 1. Package boost credits take priority over the daily plan limit (atomic decrement).
+  // RETURNING boost_credits даёт точный остаток пакета без лишнего SELECT.
   const consumed = (await strapi.db.connection.raw(
-    `UPDATE up_users SET boost_credits = boost_credits - 1 WHERE id = ? AND boost_credits > 0`,
+    `UPDATE up_users SET boost_credits = boost_credits - 1 WHERE id = ? AND boost_credits > 0 RETURNING boost_credits`,
     [userId]
-  )) as { rowCount?: number }
+  )) as { rowCount?: number; rows?: Array<{ boost_credits: number }> }
   if ((consumed.rowCount ?? 0) > 0) {
-    const used = await getUsedToday(strapi, 'boost', userId)
-    return { boostsRemaining: Math.max(limit - used, 0), source: 'package' }
+    const remaining = consumed.rows?.[0]?.boost_credits ?? 0
+    return { boostsRemaining: remaining, source: 'package' }
   }
 
   // 2. Daily plan limit — атомарный INC при still-under-limit

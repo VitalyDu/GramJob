@@ -3,6 +3,7 @@ import {
   validateLongText,
   validateHttpUrl,
   validateSalaryRange,
+  validateSingleSalary,
   SHORT_TEXT_MAX_LENGTH,
   LONG_TEXT_MAX_LENGTH,
 } from '../../src/utils/input-validation'
@@ -119,5 +120,31 @@ describe('validateSalaryRange', () => {
 
   it('rejects string type', () => {
     expect(validateSalaryRange('1000' as unknown as number, 100)).toContain('must be a number')
+  })
+})
+
+describe('validateSingleSalary', () => {
+  it('принимает undefined (поле не заполнено)', () => {
+    expect(validateSingleSalary(undefined)).toBeNull()
+  })
+
+  it('принимает положительное значение', () => {
+    expect(validateSingleSalary(50000)).toBeNull()
+  })
+
+  it('принимает 0', () => {
+    expect(validateSingleSalary(0)).toBeNull()
+  })
+
+  it('отклоняет отрицательное значение', () => {
+    expect(validateSingleSalary(-1)).toContain('non-negative')
+  })
+
+  it('отклоняет NaN', () => {
+    expect(validateSingleSalary(Number.NaN)).toContain('must be a number')
+  })
+
+  it('отклоняет нечисловой тип', () => {
+    expect(validateSingleSalary('5000' as unknown as number)).toContain('must be a number')
   })
 })

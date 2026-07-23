@@ -75,6 +75,29 @@ async function createCompany(ownerId: number, status: string) {
   })
 }
 
+describe('POST /api/vacancies/:id/publish — ownership', () => {
+  it('returns 403 if requester does not own the vacancy', async () => {
+    const owner = await createTestUser(strapi)
+    const stranger = await createTestUser(strapi)
+    const strangerJwt = issueJwt(strapi, stranger.id as number)
+    const { industryA, specA } = await getTwoIndustries()
+    const vacancy = await createVacancy(
+      owner.id as number,
+      industryA.documentId,
+      specA.documentId,
+      {
+        moderationStatus: 'rejected',
+      }
+    )
+
+    const res = await request(strapi.server.httpServer)
+      .post(`/api/vacancies/${vacancy.documentId}/publish`)
+      .set('Authorization', `Bearer ${strangerJwt}`)
+
+    expect(res.status).toBe(403)
+  })
+})
+
 describe('PUT /api/vacancies/:id — industry/specialization/company', () => {
   it('applies new industryId and specializationId', async () => {
     const user = await createTestUser(strapi)
