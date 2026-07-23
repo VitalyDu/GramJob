@@ -2,6 +2,11 @@
 
 module.exports = {
   async up(knex) {
+    // Fresh install: Strapi schema sync will create the table with all columns already
+    // defined in schema.json — nothing to migrate.
+    const hasTable = await knex.schema.hasTable('payments')
+    if (!hasTable) return
+
     // Make telegram_charge_id nullable for TON payments (no telegram charge)
     const hasChargeIdColumn = await knex.schema.hasColumn('payments', 'telegram_charge_id')
     if (hasChargeIdColumn) {
