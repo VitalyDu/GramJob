@@ -46,6 +46,8 @@ const AUTHENTICATED_PERMISSIONS = [
   'api::payment.payment.applyPack',
   'api::payment.payment.urgent',
   'api::payment.payment.topPlacement',
+  'api::payment.ton-payment.createIntent',
+  'api::payment.ton-payment.getIntentStatus',
   'api::notification.notification.findMine',
   'api::notification.notification.markRead',
   'api::notification.notification.markAllRead',

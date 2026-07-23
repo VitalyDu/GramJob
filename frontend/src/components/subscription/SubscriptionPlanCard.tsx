@@ -3,6 +3,7 @@ import { getPlanBadgeClasses } from '@/lib/subscription-utils'
 import type { SubscriptionPlan } from '@/types/api'
 import { Button } from '@/components/ui/button'
 import { StarsPrice } from '@/components/subscription/StarsPrice'
+import { TonPaymentButton } from '@/components/payment/TonPaymentButton'
 
 interface Props {
   plan: SubscriptionPlan
@@ -10,9 +11,17 @@ interface Props {
   canBuy: boolean
   isBuying: boolean
   onBuy: (planCode: string) => void
+  onSuccess?: () => void | Promise<void>
 }
 
-export function SubscriptionPlanCard({ plan, currentPlan, canBuy, isBuying, onBuy }: Props) {
+export function SubscriptionPlanCard({
+  plan,
+  currentPlan,
+  canBuy,
+  isBuying,
+  onBuy,
+  onSuccess,
+}: Props) {
   const { t } = useTranslation()
   const isActive = plan.code === currentPlan
   const badgeClasses = getPlanBadgeClasses(plan.code)
@@ -74,22 +83,33 @@ export function SubscriptionPlanCard({ plan, currentPlan, canBuy, isBuying, onBu
       )}
 
       {plan.code !== 'free' && (
-        <Button
-          size="sm"
-          className="w-full"
-          disabled={isActive || !canBuy || isBuying}
-          onClick={() => {
-            if (!isActive && canBuy) onBuy(plan.code)
-          }}
-        >
-          {isBuying
-            ? t('subscription.planCard.creating')
-            : isActive
-              ? t('subscription.planCard.active')
-              : canBuy
-                ? t('subscription.planCard.buy')
-                : t('subscription.planCard.unavailable')}
-        </Button>
+        <>
+          <Button
+            size="sm"
+            className="w-full"
+            disabled={isActive || !canBuy || isBuying}
+            onClick={() => {
+              if (!isActive && canBuy) onBuy(plan.code)
+            }}
+          >
+            {isBuying
+              ? t('subscription.planCard.creating')
+              : isActive
+                ? t('subscription.planCard.active')
+                : canBuy
+                  ? t('subscription.planCard.buy')
+                  : t('subscription.planCard.unavailable')}
+          </Button>
+          {plan.starsPrice != null && plan.starsPrice > 0 && canBuy && !isActive && (
+            <TonPaymentButton
+              starsPrice={plan.starsPrice}
+              kind="subscription"
+              planCode={plan.code}
+              className="w-full"
+              {...(onSuccess !== undefined ? { onSuccess } : {})}
+            />
+          )}
+        </>
       )}
 
       {plan.code === 'vip' && !canBuy && (

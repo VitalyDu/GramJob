@@ -30,5 +30,23 @@ export default {
       handler: 'payment.topPlacement',
       config: {},
     },
+    {
+      method: 'POST',
+      path: '/payments/ton/intent',
+      handler: 'ton-payment.createIntent',
+      config: { policies: [], auth: { strategies: ['users-permissions'] } },
+    },
+    {
+      method: 'GET',
+      path: '/payments/ton/intent/:intentId',
+      handler: 'ton-payment.getIntentStatus',
+      config: { policies: [], auth: { strategies: ['users-permissions'] } },
+    },
+    {
+      method: 'POST',
+      path: '/payments/ton/webhook',
+      handler: 'ton-payment.webhook',
+      config: { auth: false },
+    },
   ],
 }

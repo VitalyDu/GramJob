@@ -2,12 +2,14 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import type { VacancyPackage, ApplyPackage } from '@/types/api'
 import { StarsPrice } from '@/components/subscription/StarsPrice'
+import { TonPaymentButton } from '@/components/payment/TonPaymentButton'
 
 interface VacancyPackageCardProps {
   type: 'vacancy'
   pkg: VacancyPackage
   isBuying: boolean
   onBuy: (packageId: number) => void
+  onSuccess?: () => void | Promise<void>
 }
 
 interface ApplyPackageCardProps {
@@ -15,13 +17,14 @@ interface ApplyPackageCardProps {
   pkg: ApplyPackage
   isBuying: boolean
   onBuy: (packageId: number) => void
+  onSuccess?: () => void | Promise<void>
 }
 
 type Props = VacancyPackageCardProps | ApplyPackageCardProps
 
 export function PackageCard(props: Props) {
   const { t } = useTranslation()
-  const { pkg, isBuying, onBuy } = props
+  const { pkg, isBuying, onBuy, onSuccess } = props
 
   const details =
     props.type === 'vacancy'
@@ -49,6 +52,13 @@ export function PackageCard(props: Props) {
       <Button size="sm" className="w-full" disabled={isBuying} onClick={() => onBuy(pkg.id)}>
         {isBuying ? t('subscription.packageCard.creating') : t('subscription.packageCard.buy')}
       </Button>
+      <TonPaymentButton
+        starsPrice={pkg.starsPrice}
+        kind={props.type === 'vacancy' ? 'vacancy_pack' : 'apply_pack'}
+        packageId={pkg.id}
+        className="w-full"
+        {...(onSuccess !== undefined ? { onSuccess } : {})}
+      />
     </div>
   )
 }

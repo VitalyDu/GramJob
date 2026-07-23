@@ -168,6 +168,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
                   canBuy={canUpgradeToPlan(currentPlan, plan.code)}
                   isBuying={buyingPlan === plan.code}
                   onBuy={handleBuyPlan}
+                  onSuccess={onPaid}
                 />
               )
             })}
@@ -189,6 +190,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
                 pkg={pkg}
                 isBuying={buyingVacancyPack === pkg.id}
                 onBuy={handleBuyVacancyPack}
+                onSuccess={onPaid}
               />
             ))}
           </div>
@@ -209,6 +211,7 @@ export const SubscriptionClient = observer(function SubscriptionClient() {
                 pkg={pkg}
                 isBuying={buyingApplyPack === pkg.id}
                 onBuy={handleBuyApplyPack}
+                onSuccess={onPaid}
               />
             ))}
           </div>

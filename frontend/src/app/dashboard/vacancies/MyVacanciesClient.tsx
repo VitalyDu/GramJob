@@ -44,6 +44,7 @@ import {
   canEditVacancy,
 } from '@/lib/vacancy-utils'
 import { RejectionNotice } from '@/components/moderation/RejectionNotice'
+import { TonPaymentButton } from '@/components/payment/TonPaymentButton'
 
 export const MyVacanciesClient = observer(function MyVacanciesClient() {
   const { t, i18n } = useTranslation()
@@ -219,6 +220,26 @@ export const MyVacanciesClient = observer(function MyVacanciesClient() {
                 </span>
               )}
             </div>
+            {v.moderationStatus === 'published' && (!v.urgent || !v.topPlacement) && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {!v.urgent && (
+                  <TonPaymentButton
+                    starsPrice={VACANCY_UPGRADE_PRICES.urgent}
+                    kind="urgent"
+                    vacancyId={v.documentId}
+                    onSuccess={() => void store.fetchMyVacancies(store.page)}
+                  />
+                )}
+                {!v.topPlacement && (
+                  <TonPaymentButton
+                    starsPrice={VACANCY_UPGRADE_PRICES.top_placement}
+                    kind="top_placement"
+                    vacancyId={v.documentId}
+                    onSuccess={() => void store.fetchMyVacancies(store.page)}
+                  />
+                )}
+              </div>
+            )}
             {v.moderationStatus === 'rejected' && (
               <RejectionNotice
                 {...(v.rejectionReason != null ? { reason: v.rejectionReason } : {})}

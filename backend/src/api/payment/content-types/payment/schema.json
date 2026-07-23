@@ -9,7 +9,16 @@
   "options": { "draftAndPublish": false },
   "pluginOptions": {},
   "attributes": {
-    "telegramChargeId": { "type": "string", "required": true, "unique": true },
+    "telegramChargeId": { "type": "string", "unique": true },
+    "provider": {
+      "type": "enumeration",
+      "enum": ["telegram", "ton"],
+      "required": true,
+      "default": "telegram"
+    },
+    "tonTxHash": { "type": "string", "unique": true },
+    "intentId": { "type": "string", "unique": true },
+    "usdtAmount": { "type": "float" },
     "payloadType": {
       "type": "enumeration",
       "enum": ["subscription", "vacancy_pack", "apply_pack", "urgent", "top_placement"],

@@ -954,5 +954,15 @@
     "close": "Close",
     "copyLink": "Copy link",
     "copied": "Copied"
+  },
+  "tonPayment": {
+    "payWithUsdt": "Pay USDT (TON) — {{amount}}",
+    "statusTitle": "USDT Payment",
+    "creating": "Preparing transaction…",
+    "awaiting_signature": "Sign in your TON wallet",
+    "awaiting_confirmation": "Waiting for blockchain confirmation…",
+    "success": "Payment confirmed! ✅",
+    "errorGeneric": "Payment failed",
+    "close": "Close"
   }
 }

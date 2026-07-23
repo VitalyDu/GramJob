@@ -9,6 +9,7 @@ import { PaymentStore } from './PaymentStore'
 import { NotificationStore } from './NotificationStore'
 import { AnalyticsStore } from './AnalyticsStore'
 import { LimitsStore } from './LimitsStore'
+import { TonPaymentStore } from './TonPaymentStore'
 
 export class RootStore {
   auth: AuthStore
@@ -22,6 +23,7 @@ export class RootStore {
   notification: NotificationStore
   analytics: AnalyticsStore
   limits: LimitsStore
+  tonPayment: TonPaymentStore
 
   constructor() {
     this.auth = new AuthStore()
@@ -35,6 +37,7 @@ export class RootStore {
     this.notification = new NotificationStore()
     this.analytics = new AnalyticsStore()
     this.limits = new LimitsStore()
+    this.tonPayment = new TonPaymentStore()
   }
 }
 

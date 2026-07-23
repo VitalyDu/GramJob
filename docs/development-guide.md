@@ -140,6 +140,13 @@ EMAIL_FROM=noreply@gramjob.com
 # App
 FRONTEND_URL=http://localhost:3000
 NODE_ENV=development
+
+# TON / USDT Payments
+TON_NETWORK=testnet                # mainnet или testnet
+TON_MERCHANT_ADDRESS=              # TON-адрес кошелька мерчанта
+TON_PAY_WEBHOOK_SECRET=            # HMAC-SHA256 секрет для вебхука
+TON_USDT_MASTER_TESTNET=           # Jetton Master в testnet (mainnet вшит)
+TONAPI_KEY=                        # Tonapi.io ключ для polling (опционально)
 ```
 
 ### Frontend (Next.js)
@@ -150,6 +157,10 @@ NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 NEXT_PUBLIC_BOT_USERNAME=gramjob_bot
 NEXT_PUBLIC_MINI_APP_URL=https://t.me/gramjob_bot/app
+
+# TON Connect (USDT платежи)
+NEXT_PUBLIC_TONCONNECT_MANIFEST_URL=https://gramjob.com/tonconnect-manifest.json
+NEXT_PUBLIC_TONAPI_KEY=            # Tonapi.io ключ для wallet lookup (опционально)
 ```
 
 ---
@@ -306,6 +317,73 @@ pnpm e2e
 - [ ] Подача отклика
 - [ ] Смена статуса отклика работодателем
 - [ ] Покупка подписки (Telegram Stars тест-режим)
+- [ ] Покупка подписки через USDT/TON (testnet)
+
+---
+
+## TON / USDT Payments
+
+GramJob поддерживает оплату в USDT-on-TON через TON Connect как альтернативу Telegram Stars.
+
+### Архитектура
+
+```
+Frontend (TonPaymentButton)
+  → useTonPayment hook
+    → POST /api/payments/ton/intent          (создать intent, получить txParams)
+    → Tonapi.io                              (получить Jetton wallet адрес пользователя)
+    → TonConnect sendTransaction             (пользователь подписывает jetton transfer)
+    → pollIntentStatus                       (ждёт webhook или cron подтверждения)
+  ← Backend (подтверждение → активация)
+```
+
+### Курс конвертации
+
+`1 Telegram Star = $0.013 USDT`. Цена в звёздах умножается на курс для получения суммы в USDT. Курс задан константой `STARS_TO_USDT_RATE` в `backend/src/api/payment/services/ton-payment.ts` и `frontend/src/lib/ton.ts`.
+
+### Локальная настройка (testnet)
+
+1. Установить переменные в `backend/.env`:
+
+   ```bash
+   TON_NETWORK=testnet
+   TON_MERCHANT_ADDRESS=<ваш testnet TON кошелёк>
+   TON_PAY_WEBHOOK_SECRET=<случайная строка>
+   TON_USDT_MASTER_TESTNET=<адрес testnet USDT Jetton Master>
+   ```
+
+2. Установить переменные в `frontend/.env.local`:
+
+   ```bash
+   NEXT_PUBLIC_TONCONNECT_MANIFEST_URL=http://localhost:3000/tonconnect-manifest.json
+   ```
+
+3. Для тестирования переводов USDT использовать [Testnet Tonkeeper](https://testnet.tonkeeper.com) или [TON testnet faucet](https://t.me/testgiver_ton_bot).
+
+### Подтверждение транзакции
+
+Транзакция подтверждается двумя способами (оба ведут к одному `confirmIntent`):
+
+- **Webhook** (`POST /api/payments/ton/webhook`) — TON Pay провайдер присылает уведомление о получении USDT. Проверяется HMAC-SHA256 сигнатурой (`x-signature` заголовок).
+- **Cron poller** — каждые 5 минут `tonPayPoller` запрашивает Tonapi.io по всем `processing` интентам и подтверждает завершённые транзакции. Служит fallback при недоступности webhook.
+
+### Production setup
+
+1. Установить `TON_NETWORK=mainnet` — адрес USDT Jetton Master для mainnet вшит в код (`EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs`).
+2. Настроить TON Pay провайдер → указать URL webhook: `https://api.gramjob.com/api/payments/ton/webhook` и секрет из `TON_PAY_WEBHOOK_SECRET`.
+3. Обновить `frontend/public/tonconnect-manifest.json` — проверить `url`, `name`, `iconUrl`.
+4. Получить API-ключ Tonapi.io на [tonconsole.com](https://tonconsole.com) и задать `TONAPI_KEY` / `NEXT_PUBLIC_TONAPI_KEY`.
+
+### Схема базы данных (payment)
+
+Новые поля в таблице `payments` (миграция `2026-07-20-add-ton-fields-to-payments.js`):
+
+| Поле         | Тип             | Описание                         |
+| ------------ | --------------- | -------------------------------- |
+| `provider`   | enum            | `telegram` (default) или `ton`   |
+| `intentId`   | string (unique) | `gj-<uuid>` идентификатор intent |
+| `usdtAmount` | double          | Сумма в USDT (6 decimal)         |
+| `tonTxHash`  | string (unique) | Хэш TON транзакции               |
 
 ---
 
